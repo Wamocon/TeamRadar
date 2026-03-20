@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  font-size: 17px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+@media (max-width: 640px) {
+  html { font-size: 15px; }
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Theme-Variablen ─────────────────────────────────────────── */
+:root {
+  --bg-base:    #070b14;
+  --bg-surface: #111827;
+  --bg-input:   #0f1729;
+  --text-base:  #ffffff;
+  --text-muted: rgba(255,255,255,0.3);
+  --border:     rgba(255,255,255,0.1);
+  --glow-1:     rgba(59,130,246,0.055);
+  --glow-2:     rgba(20,184,166,0.03);
+  --dot-grid:   rgba(255,255,255,0.022);
+}
+
+html:not(.dark) {
+  --bg-base:    #f4f4f6;
+  --bg-surface: #ffffff;
+  --bg-input:   #ffffff;
+  --text-base:  #18181b;
+  --text-muted: rgba(0,0,0,0.4);
+  --border:     rgba(0,0,0,0.12);
+  --glow-1:     rgba(59,130,246,0.04);
+  --glow-2:     rgba(20,184,166,0.02);
+  --dot-grid:   rgba(0,0,0,0.04);
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg-base);
+  color: var(--text-base);
+  transition: background 0.25s ease, color 0.25s ease;
+  background-image:
+    radial-gradient(ellipse 1400px 900px at -10% -10%, var(--glow-1) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 400px at 110% 110%, var(--glow-2) 0%, transparent 60%);
+}
+
+.main-content {
+  background-image: radial-gradient(var(--dot-grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Input & Select – theme-aware */
+input, select, textarea {
+  background: var(--bg-input) !important;
+  color: var(--text-base) !important;
+  border-color: var(--border) !important;
+}
+input::placeholder {
+  color: var(--text-muted) !important;
+}
+select option {
+  background: var(--bg-input);
+  color: var(--text-base);
+}
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(59,130,246,0.6) !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1) !important;
+}
+
+/* ── Light-Mode Overrides ─────────────────────────────────────── */
+html:not(.dark) .main-content {
+  color: #1e293b;
+}
+
+html:not(.dark) [class*="bg-[#111827]"],
+html:not(.dark) [class*="bg-[#0f1729]"],
+html:not(.dark) [class*="bg-[#070b14]"],
+html:not(.dark) [class*="bg-[#0a0f1a]"] {
+  background-color: #f7f8fa !important;
+}
+
+/* ── Cards ────────────────────────────────────────────────────── */
+.card-shimmer {
+  background: var(--bg-surface);
+  transition: all 0.2s ease;
+}
+html:not(.dark) .card-shimmer {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.09) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+}
+html:not(.dark) .card-shimmer:hover {
+  border-color: rgba(59,130,246,0.2) !important;
+  box-shadow: 0 6px 20px rgba(59,130,246,0.06), 0 2px 6px rgba(0,0,0,0.06) !important;
+}
+
+/* Light-mode containers */
+html:not(.dark) .main-content .rounded-xl.border,
+html:not(.dark) .main-content .rounded-2xl.border,
+html:not(.dark) .main-content .rounded-md.border,
+html:not(.dark) .main-content .rounded-lg.border {
+  background: #ffffff !important;
+  border-color: rgba(0,0,0,0.09) !important;
+}
+
+/* Semantic color boxes keep their colors */
+html:not(.dark) .main-content [class*="bg-green-"],
+html:not(.dark) .main-content [class*="bg-red-"],
+html:not(.dark) .main-content [class*="bg-amber-"],
+html:not(.dark) .main-content [class*="bg-blue-"],
+html:not(.dark) .main-content [class*="bg-violet-"],
+html:not(.dark) .main-content [class*="bg-pink-"] {
+  /* keep original colors */
+}
+
+/* ── Pulse animation for status dots ──────────────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

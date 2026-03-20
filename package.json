@@ -10,7 +10,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "seed:supabase": "npx tsx scripts/seed-supabase.ts"
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run lint && npm run typecheck && npm run test",
+    "seed:supabase": "npx tsx scripts/seed-supabase.ts",
+    "prepare": "node scripts/install-hooks.js"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

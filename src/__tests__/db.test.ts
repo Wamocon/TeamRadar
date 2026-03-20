@@ -185,4 +185,75 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(mockFrom).toHaveBeenCalledWith('teams');
     expect(mockDelete).toHaveBeenCalled();
   });
+
+  it('dbUpdateAvailability ruft from("availabilities").update auf', async () => {
+    const entry: Availability = {
+      id: 'a1', memberId: 'm1', status: 'meeting', date: '2026-03-20',
+      startTime: '10:00', endTime: '11:00', note: 'Daily',
+    };
+    await dbUpdateAvailability(entry);
+    expect(mockFrom).toHaveBeenCalledWith('availabilities');
+    expect(mockUpdate).toHaveBeenCalled();
+  });
+
+  it('loadAllData gibt Daten zurück wenn Supabase konfiguriert', async () => {
+    const data = await loadAllData();
+    expect(data).not.toBeNull();
+    expect(data).toHaveProperty('members');
+    expect(data).toHaveProperty('availabilities');
+    expect(data).toHaveProperty('teams');
+    expect(Array.isArray(data!.members)).toBe(true);
+  });
+
+  it('loadAllData gibt null wenn kein User eingeloggt', async () => {
+    mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+    const data = await loadAllData();
+    expect(data).toBeNull();
+  });
+});
+
+describe('DB: Guard-Checks weitere Funktionen (ohne Supabase)', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = '';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
+    vi.clearAllMocks();
+  });
+
+  it('dbUpdateMember tut nichts ohne Supabase-Config', async () => {
+    const member: Member = {
+      id: '1', name: 'Test', email: 'a@b.de', role: 'Dev',
+      department: 'Eng', createdAt: '2025-01-01',
+    };
+    await dbUpdateMember(member);
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it('dbDeleteMember tut nichts ohne Supabase-Config', async () => {
+    await dbDeleteMember('m1');
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it('dbUpdateAvailability tut nichts ohne Supabase-Config', async () => {
+    const entry: Availability = {
+      id: '1', memberId: 'm1', status: 'available', date: '2025-01-01',
+    };
+    await dbUpdateAvailability(entry);
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it('dbDeleteAvailability tut nichts ohne Supabase-Config', async () => {
+    await dbDeleteAvailability('a1');
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it('dbUpdateTeam tut nichts ohne Supabase-Config', async () => {
+    const team: Team = { id: '1', name: 'Test', memberIds: [] };
+    await dbUpdateTeam(team);
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it('dbDeleteTeam tut nichts ohne Supabase-Config', async () => {
+    await dbDeleteTeam('t1');
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
 });

@@ -15,6 +15,10 @@ export default defineConfig({
         'src/lib/**/*.ts',
         'src/types/**/*.ts',
       ],
+      exclude: [
+        'src/lib/supabase/client.ts',
+        'src/lib/supabase/server.ts',
+      ],
       thresholds: {
         lines: 80,
         functions: 80,

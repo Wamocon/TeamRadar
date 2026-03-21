@@ -8,26 +8,34 @@ import {
   Users,
   CalendarDays,
   FolderKanban,
+  Briefcase,
   Settings,
   X,
   Sun,
   Moon,
   UserPlus,
+  BarChart3,
+  AlertTriangle,
+  FileDown,
+  CalendarRange,
 } from 'lucide-react';
-import { STATUS_CONFIG } from '@/types';
+import { STATUS_CONFIG, PROJECT_TYPE_CONFIG } from '@/types';
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const members = useAppStore((s) => s.members);
   const availabilities = useAppStore((s) => s.availabilities);
   const teams = useAppStore((s) => s.teams);
+  const projects = useAppStore((s) => s.projects);
   const getMemberStatus = useAppStore((s) => s.getMemberStatus);
+  const getAlerts = useAppStore((s) => s.getAlerts);
   const { theme, setTheme } = useTheme();
 
   const today = new Date().toISOString().slice(0, 10);
   const availableCount = members.filter((m) => getMemberStatus(m.id, today) === 'available').length;
   const busyCount = members.filter((m) => ['busy', 'meeting'].includes(getMemberStatus(m.id, today))).length;
   const absentCount = members.filter((m) => ['vacation', 'sick'].includes(getMemberStatus(m.id, today))).length;
+  const alertCount = getAlerts().filter((a) => a.severity === 'error').length;
 
   const navItems = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
@@ -35,6 +43,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     { href: '/members/new', icon: UserPlus, label: 'Neu anlegen', exact: true },
     { href: '/calendar', icon: CalendarDays, label: 'Kalender', exact: true },
     { href: '/teams', icon: FolderKanban, label: 'Teams', exact: false },
+    { href: '/projects', icon: Briefcase, label: 'Projekte', exact: false },
+    { href: '/utilization', icon: BarChart3, label: 'Auslastung', exact: true },
+    { href: '/year', icon: CalendarRange, label: 'Jahresübersicht', exact: true },
+    { href: '/alerts', icon: AlertTriangle, label: 'Alerts', exact: true, badge: alertCount > 0 ? alertCount : undefined },
+    { href: '/reports', icon: FileDown, label: 'Reports', exact: true },
   ];
 
   return (
@@ -75,6 +88,16 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     {members.length}
                   </span>
                 )}
+                {item.href === '/projects' && projects.length > 0 && (
+                  <span className="ml-auto text-[9px] font-bold bg-black/5 dark:bg-white/8 text-gray-400 dark:text-white/35 px-1.5 py-0.5 rounded-full">
+                    {projects.length}
+                  </span>
+                )}
+                {'badge' in item && item.badge && (
+                  <span className="ml-auto text-[9px] font-bold bg-red-500/15 text-red-500 px-1.5 py-0.5 rounded-full">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -83,29 +106,64 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         {/* Stats */}
         {members.length > 0 && (
           <div
-            className="mx-3 mt-1 rounded-xl border border-black/[0.06] dark:border-white/[0.06] p-3"
-            style={{ background: theme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.03)' }}
+            className="mx-3 mt-1 rounded-xl border p-3"
+            style={{ borderColor: 'var(--border)', background: theme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}
           >
-            <div className="text-[9px] font-bold uppercase tracking-widest mb-2.5 text-black/30 dark:text-white/20">
+            <div className="text-[9px] font-bold uppercase tracking-widest mb-3 text-black/30 dark:text-white/20">
               Heute
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <div className="text-lg font-black leading-none text-gray-800 dark:text-white">{members.length}</div>
-                <div className="text-[9px] mt-0.5 text-gray-400 dark:text-white/30">Gesamt</div>
-              </div>
-              <div>
-                <div className="text-lg font-black leading-none text-green-500">{availableCount}</div>
-                <div className="text-[9px] mt-0.5 text-gray-400 dark:text-white/30">Verfügbar</div>
-              </div>
-              <div>
-                <div className="text-lg font-black leading-none text-amber-400">{busyCount}</div>
-                <div className="text-[9px] mt-0.5 text-gray-400 dark:text-white/30">Beschäftigt</div>
-              </div>
-              <div>
-                <div className="text-lg font-black leading-none text-violet-400">{absentCount}</div>
-                <div className="text-[9px] mt-0.5 text-gray-400 dark:text-white/30">Abwesend</div>
-              </div>
+            <div className="space-y-2.5">
+              {[
+                { label: 'Verfügbar', value: availableCount, total: members.length, color: '#22c55e' },
+                { label: 'Beschäftigt', value: busyCount, total: members.length, color: '#f59e0b' },
+                { label: 'Abwesend', value: absentCount, total: members.length, color: '#8b5cf6' },
+              ].map((stat) => (
+                <div key={stat.label}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] dark:text-white/40 text-gray-500">{stat.label}</span>
+                    <span className="text-[10px] font-bold" style={{ color: stat.color }}>{stat.value}</span>
+                  </div>
+                  <div className="h-1 rounded-full bg-black/[0.04] dark:bg-white/[0.04]">
+                    <div className="progress-bar h-full rounded-full" style={{ width: `${stat.total > 0 ? (stat.value / stat.total) * 100 : 0}%`, background: stat.color }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Projects */}
+        {projects.filter((p) => p.status !== 'completed').length > 0 && (
+          <div className="p-3 mt-1">
+            <div className="text-[9px] font-bold uppercase tracking-widest px-2 pb-1.5 flex items-center gap-2 text-black/30 dark:text-white/20">
+              <Briefcase size={10} className="opacity-50" />
+              Projekte
+            </div>
+            <div className="flex flex-col gap-0.5">
+              {projects.filter((p) => p.status !== 'completed').map((p) => {
+                const active = pathname === `/projects/${p.id}`;
+                const dotColor = PROJECT_TYPE_CONFIG[p.type].color;
+                return (
+                  <Link
+                    key={p.id}
+                    href="/projects"
+                    onClick={onNavigate}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg no-underline transition-all group ${
+                      active
+                        ? 'bg-black/[0.05] dark:bg-white/[0.06]'
+                        : 'hover:bg-black/[0.04] dark:hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dotColor }} />
+                    <span className="text-[11px] text-gray-400 group-hover:text-gray-600 dark:text-white/40 dark:group-hover:text-white/65 transition-colors truncate">
+                      {p.name}
+                    </span>
+                    <span className="ml-auto text-[10px] font-bold shrink-0" style={{ color: dotColor, opacity: 0.7 }}>
+                      {p.memberIds.length}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
@@ -198,16 +256,17 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const { theme } = useTheme();
-  const sidebarBgDesktop = theme === 'dark' ? 'rgba(8,10,20,0.85)' : '#f9f9fb';
-  const sidebarBgMobile = theme === 'dark' ? 'rgba(8,10,20,0.98)' : '#ffffff';
 
   return (
     <>
       {/* Desktop */}
       <aside
-        className="hidden md:flex flex-col w-52 shrink-0 border-r border-white/[0.06] dark:border-white/[0.06]"
-        style={{ background: sidebarBgDesktop }}
-      >
+        className="hidden md:flex flex-col w-56 shrink-0 border-r sidebar-scroll"
+        style={{
+          background: theme === 'dark' ? 'rgba(8,10,20,0.9)' : 'rgba(248,250,252,0.95)',
+          borderColor: 'var(--border)',
+          backdropFilter: 'blur(12px)',
+        }}>
         <SidebarContent />
       </aside>
 
@@ -217,8 +276,10 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
           <div className="fixed inset-0 bg-black/60 z-40 md:hidden" onClick={onClose} />
           <aside
             className="fixed inset-y-0 left-0 z-50 flex flex-col w-72 md:hidden"
-            style={{ background: sidebarBgMobile }}
-          >
+            style={{
+              background: theme === 'dark' ? 'rgba(8,10,20,0.98)' : '#ffffff',
+              backdropFilter: 'blur(16px)',
+            }}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-black/[0.07] dark:border-white/[0.06] shrink-0">
               <span className="text-[9px] font-bold text-black/30 dark:text-white/30 uppercase tracking-widest">
                 Navigation

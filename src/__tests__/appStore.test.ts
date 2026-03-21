@@ -18,6 +18,9 @@ vi.mock('@/lib/supabase/db', () => ({
   dbAddTeam: vi.fn(),
   dbUpdateTeam: vi.fn(),
   dbDeleteTeam: vi.fn(),
+  dbAddProject: vi.fn(),
+  dbUpdateProject: vi.fn(),
+  dbDeleteProject: vi.fn(),
 }));
 
 // Store vor jedem Test zurücksetzen
@@ -26,6 +29,8 @@ beforeEach(() => {
     members: [],
     availabilities: [],
     teams: [],
+    projects: [],
+    allocations: [],
     userProfile: null,
   });
 });
@@ -105,6 +110,17 @@ describe('Store: Mitarbeiter', () => {
 
     useAppStore.getState().deleteMember(member.id);
     expect(useAppStore.getState().teams[0].memberIds).not.toContain(member.id);
+  });
+
+  it('deleteMember: entfernt Member-ID aus Projekten', () => {
+    const member = useAppStore.getState().addMember(memberData);
+    useAppStore.getState().addProject({
+      name: 'Testprojekt', type: 'internal', status: 'active', memberIds: [member.id],
+    });
+    expect(useAppStore.getState().projects[0].memberIds).toContain(member.id);
+
+    useAppStore.getState().deleteMember(member.id);
+    expect(useAppStore.getState().projects[0].memberIds).not.toContain(member.id);
   });
 });
 
@@ -329,6 +345,374 @@ describe('Store: hasMinRole', () => {
    SEED-DATEN LADEN
    ═══════════════════════════════════════════════════════════════ */
 
+describe('Store: Projekte', () => {
+  const projectData = {
+    name: 'Cloud-Migration',
+    type: 'external' as const,
+    status: 'active' as const,
+    client: 'BMW AG',
+    description: 'Testprojekt',
+    memberIds: ['m1', 'm2'],
+    startDate: '2026-01-01',
+    endDate: '2026-06-30',
+  };
+
+  it('addProject: erstellt ein neues Projekt mit ID und Timestamp', () => {
+    const project = useAppStore.getState().addProject(projectData);
+
+    expect(project.id).toBeTruthy();
+    expect(project.name).toBe('Cloud-Migration');
+    expect(project.type).toBe('external');
+    expect(project.client).toBe('BMW AG');
+    expect(project.createdAt).toBeTruthy();
+    expect(useAppStore.getState().projects).toHaveLength(1);
+  });
+
+  it('addProject: internes Projekt ohne Kunde', () => {
+    const project = useAppStore.getState().addProject({
+      name: 'Interne Tools', type: 'internal', status: 'planned', memberIds: [],
+    });
+
+    expect(project.type).toBe('internal');
+    expect(project.client).toBeUndefined();
+  });
+
+  it('updateProject: aktualisiert Projektdaten', () => {
+    const project = useAppStore.getState().addProject(projectData);
+    useAppStore.getState().updateProject(project.id, { name: 'Neuer Name', status: 'completed' });
+
+    const updated = useAppStore.getState().projects.find((p) => p.id === project.id);
+    expect(updated!.name).toBe('Neuer Name');
+    expect(updated!.status).toBe('completed');
+    expect(updated!.client).toBe('BMW AG'); // unverändert
+  });
+
+  it('deleteProject: entfernt Projekt', () => {
+    const project = useAppStore.getState().addProject(projectData);
+    expect(useAppStore.getState().projects).toHaveLength(1);
+
+    useAppStore.getState().deleteProject(project.id);
+    expect(useAppStore.getState().projects).toHaveLength(0);
+  });
+
+  it('deleteProject: entfernt nur das richtige Projekt', () => {
+    const p1 = useAppStore.getState().addProject(projectData);
+    const p2 = useAppStore.getState().addProject({ ...projectData, name: 'Projekt B' });
+
+    useAppStore.getState().deleteProject(p1.id);
+    expect(useAppStore.getState().projects).toHaveLength(1);
+    expect(useAppStore.getState().projects[0].id).toBe(p2.id);
+  });
+
+  it('getMemberProjects: gibt aktive Projekte eines Mitglieds zurück', () => {
+    useAppStore.getState().addProject({
+      name: 'Aktiv', type: 'external', status: 'active', memberIds: ['m1'],
+    });
+    useAppStore.getState().addProject({
+      name: 'Abgeschlossen', type: 'internal', status: 'completed', memberIds: ['m1'],
+    });
+    useAppStore.getState().addProject({
+      name: 'Anderes', type: 'external', status: 'active', memberIds: ['m2'],
+    });
+
+    const result = useAppStore.getState().getMemberProjects('m1');
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe('Aktiv');
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   ALLOCATIONS CRUD
+   ═══════════════════════════════════════════════════════════════ */
+
+describe('Store: Allocations', () => {
+  const allocData = {
+    memberId: 'm1',
+    projectId: 'p1',
+    percentage: 60,
+    startDate: '2026-01-15',
+    endDate: '2026-06-30',
+  };
+
+  it('addAllocation: erstellt eine neue Zuweisung mit ID', () => {
+    const alloc = useAppStore.getState().addAllocation(allocData);
+
+    expect(alloc.id).toBeTruthy();
+    expect(alloc.memberId).toBe('m1');
+    expect(alloc.projectId).toBe('p1');
+    expect(alloc.percentage).toBe(60);
+    expect(useAppStore.getState().allocations).toHaveLength(1);
+  });
+
+  it('addAllocation: mehrere Zuweisungen für denselben Mitarbeiter', () => {
+    useAppStore.getState().addAllocation(allocData);
+    useAppStore.getState().addAllocation({ ...allocData, projectId: 'p2', percentage: 40 });
+
+    expect(useAppStore.getState().allocations).toHaveLength(2);
+  });
+
+  it('updateAllocation: aktualisiert Prozentsatz', () => {
+    const alloc = useAppStore.getState().addAllocation(allocData);
+    useAppStore.getState().updateAllocation(alloc.id, { percentage: 80 });
+
+    const updated = useAppStore.getState().allocations.find((a) => a.id === alloc.id);
+    expect(updated!.percentage).toBe(80);
+    expect(updated!.projectId).toBe('p1'); // unverändert
+  });
+
+  it('deleteAllocation: entfernt Zuweisung', () => {
+    const alloc = useAppStore.getState().addAllocation(allocData);
+    expect(useAppStore.getState().allocations).toHaveLength(1);
+
+    useAppStore.getState().deleteAllocation(alloc.id);
+    expect(useAppStore.getState().allocations).toHaveLength(0);
+  });
+
+  it('deleteAllocation: entfernt nur die richtige Zuweisung', () => {
+    const a1 = useAppStore.getState().addAllocation(allocData);
+    const a2 = useAppStore.getState().addAllocation({ ...allocData, projectId: 'p2' });
+
+    useAppStore.getState().deleteAllocation(a1.id);
+    expect(useAppStore.getState().allocations).toHaveLength(1);
+    expect(useAppStore.getState().allocations[0].id).toBe(a2.id);
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILIZATION (Auslastung)
+   ═══════════════════════════════════════════════════════════════ */
+
+describe('Store: getMemberUtilization', () => {
+  const testDate = '2026-03-15';
+
+  it('gibt 0 zurück wenn keine Zuweisungen', () => {
+    expect(useAppStore.getState().getMemberUtilization('m1', testDate)).toBe(0);
+  });
+
+  it('gibt korrekten Prozentsatz für eine Zuweisung', () => {
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p1', percentage: 60,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+
+    expect(useAppStore.getState().getMemberUtilization('m1', testDate)).toBe(60);
+  });
+
+  it('summiert mehrere Zuweisungen', () => {
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p1', percentage: 60,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p2', percentage: 50,
+      startDate: '2026-02-01', endDate: '2026-05-31',
+    });
+
+    expect(useAppStore.getState().getMemberUtilization('m1', testDate)).toBe(110);
+  });
+
+  it('berücksichtigt nur Zuweisungen in der Zeitspanne', () => {
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p1', percentage: 80,
+      startDate: '2026-01-01', endDate: '2026-02-28',
+    });
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p2', percentage: 50,
+      startDate: '2026-03-01', endDate: '2026-06-30',
+    });
+
+    // testDate = 2026-03-15 → nur p2 aktiv
+    expect(useAppStore.getState().getMemberUtilization('m1', testDate)).toBe(50);
+  });
+
+  it('verschiedene Mitarbeiter haben unabhängige Auslastung', () => {
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p1', percentage: 100,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+    useAppStore.getState().addAllocation({
+      memberId: 'm2', projectId: 'p1', percentage: 30,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+
+    expect(useAppStore.getState().getMemberUtilization('m1', testDate)).toBe(100);
+    expect(useAppStore.getState().getMemberUtilization('m2', testDate)).toBe(30);
+  });
+
+  it('filtert nach projectType "external"', () => {
+    // Setup: ein internes und ein externes Projekt
+    useAppStore.setState({
+      projects: [
+        { id: 'p-int', name: 'Intern', type: 'internal', status: 'active', memberIds: ['m1'], createdAt: '2026-01-01' },
+        { id: 'p-ext', name: 'Extern', type: 'external', status: 'active', memberIds: ['m1'], client: 'Kunde AG', createdAt: '2026-01-01' },
+      ],
+    });
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p-int', percentage: 40,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p-ext', percentage: 60,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+
+    // Gesamt: 100 / Nur extern: 60 / Nur intern: 40
+    expect(useAppStore.getState().getMemberUtilization('m1', testDate)).toBe(100);
+    expect(useAppStore.getState().getMemberUtilization('m1', testDate, 'external')).toBe(60);
+    expect(useAppStore.getState().getMemberUtilization('m1', testDate, 'internal')).toBe(40);
+  });
+
+  it('projectType-Filter gibt 0 wenn kein Projekt dieses Typs', () => {
+    useAppStore.setState({
+      projects: [
+        { id: 'p-int', name: 'Intern', type: 'internal', status: 'active', memberIds: [], createdAt: '2026-01-01' },
+      ],
+    });
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p-int', percentage: 80,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+
+    expect(useAppStore.getState().getMemberUtilization('m1', testDate, 'external')).toBe(0);
+    expect(useAppStore.getState().getMemberUtilization('m1', testDate, 'internal')).toBe(80);
+  });
+});
+
+describe('Store: getMemberAllocations', () => {
+  it('gibt nur aktive Zuweisungen zurück', () => {
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p1', percentage: 60,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p2', percentage: 40,
+      startDate: '2025-01-01', endDate: '2025-12-31', // vergangen
+    });
+
+    const result = useAppStore.getState().getMemberAllocations('m1', '2026-03-15');
+    expect(result).toHaveLength(1);
+    expect(result[0].projectId).toBe('p1');
+  });
+
+  it('filtert nach projectType', () => {
+    useAppStore.setState({
+      projects: [
+        { id: 'p-int', name: 'Intern', type: 'internal', status: 'active', memberIds: ['m1'], createdAt: '2026-01-01' },
+        { id: 'p-ext', name: 'Extern', type: 'external', status: 'active', memberIds: ['m1'], client: 'Kunde', createdAt: '2026-01-01' },
+      ],
+    });
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p-int', percentage: 40,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p-ext', percentage: 60,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+
+    const all = useAppStore.getState().getMemberAllocations('m1', '2026-03-15');
+    expect(all).toHaveLength(2);
+
+    const external = useAppStore.getState().getMemberAllocations('m1', '2026-03-15', 'external');
+    expect(external).toHaveLength(1);
+    expect(external[0].projectId).toBe('p-ext');
+
+    const internal = useAppStore.getState().getMemberAllocations('m1', '2026-03-15', 'internal');
+    expect(internal).toHaveLength(1);
+    expect(internal[0].projectId).toBe('p-int');
+  });
+});
+
+describe('Store: getProjectAllocations', () => {
+  it('gibt alle Zuweisungen eines Projekts zurück', () => {
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p1', percentage: 60,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+    useAppStore.getState().addAllocation({
+      memberId: 'm2', projectId: 'p1', percentage: 40,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+    useAppStore.getState().addAllocation({
+      memberId: 'm1', projectId: 'p2', percentage: 100,
+      startDate: '2026-01-01', endDate: '2026-06-30',
+    });
+
+    const result = useAppStore.getState().getProjectAllocations('p1');
+    expect(result).toHaveLength(2);
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   ALERTS (Überbuchung, Konflikte)
+   ═══════════════════════════════════════════════════════════════ */
+
+describe('Store: getAlerts', () => {
+  it('erkennt Überbuchung (>100%)', () => {
+    const member = useAppStore.getState().addMember({
+      name: 'Test', email: 'test@t.de', role: 'Dev', department: 'Eng',
+    });
+    // Mitarbeiter verfügbar machen
+    useAppStore.getState().addAvailability({
+      memberId: member.id, status: 'available', date: new Date().toISOString().slice(0, 10),
+    });
+    useAppStore.getState().addAllocation({
+      memberId: member.id, projectId: 'p1', percentage: 60,
+      startDate: '2025-01-01', endDate: '2027-12-31',
+    });
+    useAppStore.getState().addAllocation({
+      memberId: member.id, projectId: 'p2', percentage: 50,
+      startDate: '2025-01-01', endDate: '2027-12-31',
+    });
+
+    const alerts = useAppStore.getState().getAlerts();
+    const overbookings = alerts.filter((a) => a.type === 'overbooking');
+    expect(overbookings.length).toBeGreaterThanOrEqual(1);
+    expect(overbookings[0].severity).toBe('error');
+    expect(overbookings[0].memberId).toBe(member.id);
+  });
+
+  it('erkennt keine Warnung für zulässige Zuweisung (<= 100%)', () => {
+    const member = useAppStore.getState().addMember({
+      name: 'OK', email: 'ok@t.de', role: 'Dev', department: 'Eng',
+    });
+    useAppStore.getState().addAvailability({
+      memberId: member.id, status: 'available', date: new Date().toISOString().slice(0, 10),
+    });
+    useAppStore.getState().addAllocation({
+      memberId: member.id, projectId: 'p1', percentage: 50,
+      startDate: '2025-01-01', endDate: '2027-12-31',
+    });
+    useAppStore.getState().addAllocation({
+      memberId: member.id, projectId: 'p2', percentage: 50,
+      startDate: '2025-01-01', endDate: '2027-12-31',
+    });
+
+    const alerts = useAppStore.getState().getAlerts();
+    const overbookings = alerts.filter((a) => a.type === 'overbooking');
+    expect(overbookings).toHaveLength(0);
+  });
+
+  it('erkennt "keine Zuweisung" für verfügbare Mitarbeiter', () => {
+    const member = useAppStore.getState().addMember({
+      name: 'Frei', email: 'frei@t.de', role: 'Dev', department: 'Eng',
+    });
+    useAppStore.getState().addAvailability({
+      memberId: member.id, status: 'available', date: new Date().toISOString().slice(0, 10),
+    });
+
+    const alerts = useAppStore.getState().getAlerts();
+    const noAlloc = alerts.filter((a) => a.type === 'no_allocation' && a.memberId === member.id);
+    expect(noAlloc.length).toBeGreaterThanOrEqual(1);
+    expect(noAlloc[0].severity).toBe('warning');
+  });
+
+  it('gibt leeres Array für leeren Store', () => {
+    const alerts = useAppStore.getState().getAlerts();
+    expect(alerts).toEqual([]);
+  });
+});
+
 describe('Store: loadFromSupabase (Seed-Fallback)', () => {
   it('lädt Seed-Daten wenn Store leer ist und Supabase nicht verfügbar', async () => {
     await useAppStore.getState().loadFromSupabase();
@@ -336,5 +720,14 @@ describe('Store: loadFromSupabase (Seed-Fallback)', () => {
     expect(useAppStore.getState().members.length).toBeGreaterThanOrEqual(20);
     expect(useAppStore.getState().availabilities.length).toBeGreaterThanOrEqual(20);
     expect(useAppStore.getState().teams.length).toBeGreaterThanOrEqual(3);
+    expect(useAppStore.getState().projects.length).toBeGreaterThanOrEqual(8);
+    expect(useAppStore.getState().allocations.length).toBeGreaterThanOrEqual(20);
+  });
+
+  it('lädt Skills für Mitarbeiter', async () => {
+    await useAppStore.getState().loadFromSupabase();
+
+    const membersWithSkills = useAppStore.getState().members.filter((m) => m.skills && m.skills.length > 0);
+    expect(membersWithSkills.length).toBeGreaterThanOrEqual(15);
   });
 });

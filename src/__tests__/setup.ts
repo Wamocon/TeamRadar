@@ -14,14 +14,24 @@ beforeEach(() => {
   uuidCounter = 0;
 });
 
-// Mock localStorage
+// Mock localStorage (vollständig für zustand persist middleware)
 const store: Record<string, string> = {};
 vi.stubGlobal('localStorage', {
   getItem: (key: string) => store[key] ?? null,
   setItem: (key: string, value: string) => { store[key] = value; },
   removeItem: (key: string) => { delete store[key]; },
   clear: () => { Object.keys(store).forEach((k) => delete store[k]); },
+  get length() { return Object.keys(store).length; },
+  key: (index: number) => Object.keys(store)[index] ?? null,
 });
+
+// Zustand persist middleware: suppress expected storage-warnings in test env
+const originalConsoleError = console.error;
+console.error = (...args: unknown[]) => {
+  const msg = typeof args[0] === 'string' ? args[0] : '';
+  if (msg.includes('[zustand persist middleware]')) return;
+  originalConsoleError.apply(console, args);
+};
 
 // Mock process.env
 process.env.NEXT_PUBLIC_SUPABASE_URL = '';

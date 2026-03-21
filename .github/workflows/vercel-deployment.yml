@@ -1,0 +1,69 @@
+name: Deploy to Vercel
+
+on:
+  # Merge in main → Test-Umgebung (Vercel Preview, Schema: test)
+  push:
+    branches:
+      - main
+  # Neues Release → Prod-Umgebung (Vercel Production, Schema: prod)
+  release:
+    types: [published]
+
+jobs:
+  # ── Test-Deployment bei Merge in main ───────────────────────
+  deploy-test:
+    name: Deploy Test-Umgebung (Schema test)
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: Deploy → Vercel Preview (test)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
+          working-directory: ./
+          # Kein --prod → landet als Preview-URL, Schema kommt aus Vercel Dashboard (Preview=test)
+          vercel-args: ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deployment Summary
+        run: |
+          echo "✅ Test-Deployment abgeschlossen"
+          echo "Schema:  test"
+          echo "Commit:  ${{ github.sha }}"
+          echo "Branch:  ${{ github.ref_name }}"
+
+  # ── Prod-Deployment bei neuem Release ───────────────────────
+  deploy-prod:
+    name: Deploy Prod-Umgebung (Schema prod)
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release-Tag auschecken
+        uses: actions/checkout@v4
+        with:
+          # Genau den Stand des Releases deployen, nicht HEAD
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Deploy → Vercel Production (prod)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
+          working-directory: ./
+          # --prod: aktiviert die Vercel Production URL, Schema kommt aus Vercel Dashboard (Production=prod)
+          vercel-args: '--prod'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deployment Summary
+        run: |
+          echo "✅ Prod-Deployment abgeschlossen"
+          echo "Schema:  prod"
+          echo "Release: ${{ github.event.release.tag_name }}"

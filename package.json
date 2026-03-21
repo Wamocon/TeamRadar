@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:ci": "vitest run --coverage --reporter=verbose --reporter=json --outputFile=test-results.json",
+    "test:ci": "vitest run --coverage --reporter=verbose --reporter=junit --reporter=json --outputFile.junit=test-results/junit.xml --outputFile.json=test-results/results.json",
     "typecheck": "tsc --noEmit",
     "validate": "npm run typecheck && npm run test:coverage",
     "seed:supabase": "npx tsx scripts/seed-supabase.ts",

@@ -8,12 +8,23 @@ on:
   # Neues Release → Prod-Umgebung (Vercel Production, Schema: prod)
   release:
     types: [published]
+  # Manueller Start über GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Zielumgebung'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - test
+          - prod
 
 jobs:
   # ── Test-Deployment bei Merge in main ───────────────────────
   deploy-test:
     name: Deploy Test-Umgebung (Schema test)
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'test')
     runs-on: ubuntu-latest
     steps:
       - name: Code auschecken
@@ -41,7 +52,7 @@ jobs:
   # ── Prod-Deployment bei neuem Release ───────────────────────
   deploy-prod:
     name: Deploy Prod-Umgebung (Schema prod)
-    if: github.event_name == 'release'
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod')
     runs-on: ubuntu-latest
     steps:
       - name: Release-Tag auschecken

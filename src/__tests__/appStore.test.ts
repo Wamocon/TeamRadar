@@ -18,6 +18,9 @@ vi.mock('@/lib/supabase/db', () => ({
   dbAddTeam: vi.fn(),
   dbUpdateTeam: vi.fn(),
   dbDeleteTeam: vi.fn(),
+  dbAddProject: vi.fn(),
+  dbUpdateProject: vi.fn(),
+  dbDeleteProject: vi.fn(),
 }));
 
 // Store vor jedem Test zurücksetzen
@@ -26,6 +29,7 @@ beforeEach(() => {
     members: [],
     availabilities: [],
     teams: [],
+    projects: [],
     userProfile: null,
   });
 });
@@ -105,6 +109,17 @@ describe('Store: Mitarbeiter', () => {
 
     useAppStore.getState().deleteMember(member.id);
     expect(useAppStore.getState().teams[0].memberIds).not.toContain(member.id);
+  });
+
+  it('deleteMember: entfernt Member-ID aus Projekten', () => {
+    const member = useAppStore.getState().addMember(memberData);
+    useAppStore.getState().addProject({
+      name: 'Testprojekt', type: 'internal', status: 'active', memberIds: [member.id],
+    });
+    expect(useAppStore.getState().projects[0].memberIds).toContain(member.id);
+
+    useAppStore.getState().deleteMember(member.id);
+    expect(useAppStore.getState().projects[0].memberIds).not.toContain(member.id);
   });
 });
 
@@ -329,6 +344,82 @@ describe('Store: hasMinRole', () => {
    SEED-DATEN LADEN
    ═══════════════════════════════════════════════════════════════ */
 
+describe('Store: Projekte', () => {
+  const projectData = {
+    name: 'Cloud-Migration',
+    type: 'external' as const,
+    status: 'active' as const,
+    client: 'BMW AG',
+    description: 'Testprojekt',
+    memberIds: ['m1', 'm2'],
+    startDate: '2026-01-01',
+    endDate: '2026-06-30',
+  };
+
+  it('addProject: erstellt ein neues Projekt mit ID und Timestamp', () => {
+    const project = useAppStore.getState().addProject(projectData);
+
+    expect(project.id).toBeTruthy();
+    expect(project.name).toBe('Cloud-Migration');
+    expect(project.type).toBe('external');
+    expect(project.client).toBe('BMW AG');
+    expect(project.createdAt).toBeTruthy();
+    expect(useAppStore.getState().projects).toHaveLength(1);
+  });
+
+  it('addProject: internes Projekt ohne Kunde', () => {
+    const project = useAppStore.getState().addProject({
+      name: 'Interne Tools', type: 'internal', status: 'planned', memberIds: [],
+    });
+
+    expect(project.type).toBe('internal');
+    expect(project.client).toBeUndefined();
+  });
+
+  it('updateProject: aktualisiert Projektdaten', () => {
+    const project = useAppStore.getState().addProject(projectData);
+    useAppStore.getState().updateProject(project.id, { name: 'Neuer Name', status: 'completed' });
+
+    const updated = useAppStore.getState().projects.find((p) => p.id === project.id);
+    expect(updated!.name).toBe('Neuer Name');
+    expect(updated!.status).toBe('completed');
+    expect(updated!.client).toBe('BMW AG'); // unverändert
+  });
+
+  it('deleteProject: entfernt Projekt', () => {
+    const project = useAppStore.getState().addProject(projectData);
+    expect(useAppStore.getState().projects).toHaveLength(1);
+
+    useAppStore.getState().deleteProject(project.id);
+    expect(useAppStore.getState().projects).toHaveLength(0);
+  });
+
+  it('deleteProject: entfernt nur das richtige Projekt', () => {
+    const p1 = useAppStore.getState().addProject(projectData);
+    const p2 = useAppStore.getState().addProject({ ...projectData, name: 'Projekt B' });
+
+    useAppStore.getState().deleteProject(p1.id);
+    expect(useAppStore.getState().projects).toHaveLength(1);
+    expect(useAppStore.getState().projects[0].id).toBe(p2.id);
+  });
+
+  it('getMemberProjects: gibt aktive Projekte eines Mitglieds zurück', () => {
+    useAppStore.getState().addProject({
+      name: 'Aktiv', type: 'external', status: 'active', memberIds: ['m1'],
+    });
+    useAppStore.getState().addProject({
+      name: 'Abgeschlossen', type: 'internal', status: 'completed', memberIds: ['m1'],
+    });
+    useAppStore.getState().addProject({
+      name: 'Anderes', type: 'external', status: 'active', memberIds: ['m2'],
+    });
+
+    const result = useAppStore.getState().getMemberProjects('m1');
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe('Aktiv');
+  });
+});
+
 describe('Store: loadFromSupabase (Seed-Fallback)', () => {
   it('lädt Seed-Daten wenn Store leer ist und Supabase nicht verfügbar', async () => {
     await useAppStore.getState().loadFromSupabase();
@@ -336,5 +427,6 @@ describe('Store: loadFromSupabase (Seed-Fallback)', () => {
     expect(useAppStore.getState().members.length).toBeGreaterThanOrEqual(20);
     expect(useAppStore.getState().availabilities.length).toBeGreaterThanOrEqual(20);
     expect(useAppStore.getState().teams.length).toBeGreaterThanOrEqual(3);
+    expect(useAppStore.getState().projects.length).toBeGreaterThanOrEqual(8);
   });
 });

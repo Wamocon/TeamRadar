@@ -45,9 +45,12 @@ import {
   dbAddTeam,
   dbUpdateTeam,
   dbDeleteTeam,
+  dbAddProject,
+  dbUpdateProject,
+  dbDeleteProject,
 } from '@/lib/supabase/db';
 
-import type { Member, Availability, Team } from '@/types';
+import type { Member, Availability, Team, Project } from '@/types';
 
 describe('DB: Guard-Checks (ohne Supabase)', () => {
   beforeEach(() => {
@@ -86,6 +89,15 @@ describe('DB: Guard-Checks (ohne Supabase)', () => {
   it('dbAddTeam tut nichts ohne Supabase-Config', async () => {
     const team: Team = { id: '1', name: 'Test', memberIds: [] };
     await dbAddTeam(team);
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it('dbAddProject tut nichts ohne Supabase-Config', async () => {
+    const project: Project = {
+      id: '1', name: 'Test', type: 'internal', status: 'active',
+      memberIds: [], createdAt: '2026-01-01',
+    };
+    await dbAddProject(project);
     expect(mockFrom).not.toHaveBeenCalled();
   });
 });
@@ -196,12 +208,46 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(mockUpdate).toHaveBeenCalled();
   });
 
+  it('dbAddProject ruft from("projects").insert auf', async () => {
+    const project: Project = {
+      id: 'p1', name: 'Cloud-Migration', type: 'external', status: 'active',
+      client: 'BMW AG', memberIds: ['m1'], startDate: '2026-01-01',
+      endDate: '2026-06-30', createdAt: '2026-01-01',
+    };
+    await dbAddProject(project);
+
+    expect(mockFrom).toHaveBeenCalledWith('projects');
+    expect(mockInsert).toHaveBeenCalled();
+    const row = mockInsert.mock.calls[0][0];
+    expect(row.name).toBe('Cloud-Migration');
+    expect(row.type).toBe('external');
+    expect(row.client).toBe('BMW AG');
+    expect(row.member_ids).toEqual(['m1']);
+  });
+
+  it('dbUpdateProject ruft from("projects").update auf', async () => {
+    const project: Project = {
+      id: 'p1', name: 'Updated', type: 'internal', status: 'completed',
+      memberIds: ['m2'], createdAt: '2026-01-01',
+    };
+    await dbUpdateProject(project);
+    expect(mockFrom).toHaveBeenCalledWith('projects');
+    expect(mockUpdate).toHaveBeenCalled();
+  });
+
+  it('dbDeleteProject ruft from("projects").delete auf', async () => {
+    await dbDeleteProject('p1');
+    expect(mockFrom).toHaveBeenCalledWith('projects');
+    expect(mockDelete).toHaveBeenCalled();
+  });
+
   it('loadAllData gibt Daten zurück wenn Supabase konfiguriert', async () => {
     const data = await loadAllData();
     expect(data).not.toBeNull();
     expect(data).toHaveProperty('members');
     expect(data).toHaveProperty('availabilities');
     expect(data).toHaveProperty('teams');
+    expect(data).toHaveProperty('projects');
     expect(Array.isArray(data!.members)).toBe(true);
   });
 
@@ -254,6 +300,20 @@ describe('DB: Guard-Checks weitere Funktionen (ohne Supabase)', () => {
 
   it('dbDeleteTeam tut nichts ohne Supabase-Config', async () => {
     await dbDeleteTeam('t1');
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it('dbUpdateProject tut nichts ohne Supabase-Config', async () => {
+    const project: Project = {
+      id: '1', name: 'Test', type: 'internal', status: 'active',
+      memberIds: [], createdAt: '2026-01-01',
+    };
+    await dbUpdateProject(project);
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it('dbDeleteProject tut nichts ohne Supabase-Config', async () => {
+    await dbDeleteProject('p1');
     expect(mockFrom).not.toHaveBeenCalled();
   });
 });

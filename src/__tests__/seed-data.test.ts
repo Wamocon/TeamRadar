@@ -2,8 +2,8 @@
  * Tests für Seed-Daten: Konsistenz, Referenzielle Integrität
  */
 import { describe, it, expect } from 'vitest';
-import { SEED_MEMBERS, SEED_AVAILABILITIES, SEED_TEAMS } from '@/lib/seed-data';
-import { STATUS_CONFIG, type AvailabilityStatus } from '@/types';
+import { SEED_MEMBERS, SEED_AVAILABILITIES, SEED_TEAMS, SEED_PROJECTS } from '@/lib/seed-data';
+import { STATUS_CONFIG, type AvailabilityStatus, type ProjectType, type ProjectStatus } from '@/types';
 
 describe('SEED_MEMBERS', () => {
   it('enthält genau 20 Mitarbeiter', () => {
@@ -137,6 +137,72 @@ describe('SEED_TEAMS', () => {
   it('jedes Team hat mindestens ein Mitglied', () => {
     SEED_TEAMS.forEach((t) => {
       expect(t.memberIds.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+});
+
+describe('SEED_PROJECTS', () => {
+  const memberIds = new Set(SEED_MEMBERS.map((m) => m.id));
+  const validTypes: ProjectType[] = ['internal', 'external'];
+  const validStatuses: ProjectStatus[] = ['planned', 'active', 'completed'];
+
+  it('enthält mindestens 8 Projekte', () => {
+    expect(SEED_PROJECTS.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it('alle IDs sind einzigartig', () => {
+    const ids = SEED_PROJECTS.map((p) => p.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('alle Projektnamen sind einzigartig', () => {
+    const names = SEED_PROJECTS.map((p) => p.name);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('alle Projekt-Typen sind gültig', () => {
+    SEED_PROJECTS.forEach((p) => {
+      expect(validTypes).toContain(p.type);
+    });
+  });
+
+  it('alle Projekt-Status sind gültig', () => {
+    SEED_PROJECTS.forEach((p) => {
+      expect(validStatuses).toContain(p.status);
+    });
+  });
+
+  it('enthält sowohl interne als auch externe Projekte', () => {
+    const types = new Set(SEED_PROJECTS.map((p) => p.type));
+    expect(types.has('internal')).toBe(true);
+    expect(types.has('external')).toBe(true);
+  });
+
+  it('externe Projekte haben einen Kundennamen', () => {
+    SEED_PROJECTS.filter((p) => p.type === 'external').forEach((p) => {
+      expect(p.client).toBeTruthy();
+      expect(p.client!.trim().length).toBeGreaterThan(0);
+    });
+  });
+
+  it('alle memberIds verweisen auf existierende Mitarbeiter', () => {
+    SEED_PROJECTS.forEach((p) => {
+      p.memberIds.forEach((mid) => {
+        expect(memberIds.has(mid)).toBe(true);
+      });
+    });
+  });
+
+  it('jedes Projekt hat einen createdAt-Timestamp', () => {
+    SEED_PROJECTS.forEach((p) => {
+      expect(new Date(p.createdAt).getTime()).not.toBeNaN();
+    });
+  });
+
+  it('Datumsangaben haben ISO-Format wenn vorhanden', () => {
+    SEED_PROJECTS.forEach((p) => {
+      if (p.startDate) expect(p.startDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      if (p.endDate) expect(p.endDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     });
   });
 });

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useAppStore } from '@/stores/appStore';
+import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { FolderKanban, Plus, Trash2, Users } from 'lucide-react';
 
 export default function TeamsPage() {
@@ -10,6 +11,7 @@ export default function TeamsPage() {
   const updateTeam = useAppStore((s) => s.updateTeam);
   const deleteTeam = useAppStore((s) => s.deleteTeam);
 
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [showForm, setShowForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
@@ -45,13 +47,16 @@ export default function TeamsPage() {
             Mitarbeiter in Teams organisieren
           </p>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
-        >
-          <Plus size={14} />
-          Neues Team
-        </button>
+        <div className="flex items-center gap-3">
+          <ViewToggle value={viewMode} onChange={setViewMode} />
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
+          >
+            <Plus size={14} />
+            Neues Team
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -136,7 +141,7 @@ export default function TeamsPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
           {teams.map((team) => {
             const teamMembers = members.filter((m) => team.memberIds.includes(m.id));
             return (

@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   validate:
     name: TypeCheck, Lint & Test
@@ -140,6 +144,13 @@ jobs:
           fi
 
           exit $TEST_EXIT
+
+      - name: Vitest Coverage Report
+        if: always() && github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
+        with:
+          json-summary-path: coverage/coverage-summary.json
+          vite-config-path: vitest.config.ts
 
       - name: Upload Test Reports
         if: always()

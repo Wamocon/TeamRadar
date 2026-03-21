@@ -747,3 +747,101 @@ describe('Store: loadFromSupabase (Seed-Fallback)', () => {
     process.env.NEXT_PUBLIC_DB_SCHEMA = original;
   });
 });
+
+/* ═══════════════════════════════════════════════════════════════
+   PRODUCTION SEED-GUARD (NODE_ENV + Schema doppelt abgesichert)
+   ═══════════════════════════════════════════════════════════════ */
+
+describe('Store: Seed-Daten NIEMALS in Production (NODE_ENV Guard)', () => {
+  const assertNoSeedData = () => {
+    expect(useAppStore.getState().members).toHaveLength(0);
+    expect(useAppStore.getState().availabilities).toHaveLength(0);
+    expect(useAppStore.getState().teams).toHaveLength(0);
+    expect(useAppStore.getState().projects).toHaveLength(0);
+    expect(useAppStore.getState().allocations).toHaveLength(0);
+  };
+
+  it('NODE_ENV=production + Schema=public → KEINE Seed-Daten', async () => {
+    const origNodeEnv = process.env.NODE_ENV;
+    const origSchema = process.env.NEXT_PUBLIC_DB_SCHEMA;
+    process.env.NODE_ENV = 'production';
+    process.env.NEXT_PUBLIC_DB_SCHEMA = 'public';
+
+    useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
+    await useAppStore.getState().loadFromSupabase();
+    assertNoSeedData();
+
+    process.env.NODE_ENV = origNodeEnv;
+    process.env.NEXT_PUBLIC_DB_SCHEMA = origSchema;
+  });
+
+  it('NODE_ENV=production + Schema=test → KEINE Seed-Daten', async () => {
+    const origNodeEnv = process.env.NODE_ENV;
+    const origSchema = process.env.NEXT_PUBLIC_DB_SCHEMA;
+    process.env.NODE_ENV = 'production';
+    process.env.NEXT_PUBLIC_DB_SCHEMA = 'test';
+
+    useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
+    await useAppStore.getState().loadFromSupabase();
+    assertNoSeedData();
+
+    process.env.NODE_ENV = origNodeEnv;
+    process.env.NEXT_PUBLIC_DB_SCHEMA = origSchema;
+  });
+
+  it('NODE_ENV=production + Schema=prod → KEINE Seed-Daten', async () => {
+    const origNodeEnv = process.env.NODE_ENV;
+    const origSchema = process.env.NEXT_PUBLIC_DB_SCHEMA;
+    process.env.NODE_ENV = 'production';
+    process.env.NEXT_PUBLIC_DB_SCHEMA = 'prod';
+
+    useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
+    await useAppStore.getState().loadFromSupabase();
+    assertNoSeedData();
+
+    process.env.NODE_ENV = origNodeEnv;
+    process.env.NEXT_PUBLIC_DB_SCHEMA = origSchema;
+  });
+
+  it('NODE_ENV=production + Schema NICHT gesetzt → KEINE Seed-Daten', async () => {
+    const origNodeEnv = process.env.NODE_ENV;
+    const origSchema = process.env.NEXT_PUBLIC_DB_SCHEMA;
+    process.env.NODE_ENV = 'production';
+    delete process.env.NEXT_PUBLIC_DB_SCHEMA;
+
+    useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
+    await useAppStore.getState().loadFromSupabase();
+    assertNoSeedData();
+
+    process.env.NODE_ENV = origNodeEnv;
+    process.env.NEXT_PUBLIC_DB_SCHEMA = origSchema;
+  });
+
+  it('NODE_ENV=development + Schema=public → Seed-Daten werden geladen', async () => {
+    const origNodeEnv = process.env.NODE_ENV;
+    const origSchema = process.env.NEXT_PUBLIC_DB_SCHEMA;
+    process.env.NODE_ENV = 'development';
+    process.env.NEXT_PUBLIC_DB_SCHEMA = 'public';
+
+    useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
+    await useAppStore.getState().loadFromSupabase();
+    expect(useAppStore.getState().members.length).toBeGreaterThanOrEqual(20);
+
+    process.env.NODE_ENV = origNodeEnv;
+    process.env.NEXT_PUBLIC_DB_SCHEMA = origSchema;
+  });
+
+  it('NODE_ENV=development + Schema=prod → KEINE Seed-Daten (doppelter Guard)', async () => {
+    const origNodeEnv = process.env.NODE_ENV;
+    const origSchema = process.env.NEXT_PUBLIC_DB_SCHEMA;
+    process.env.NODE_ENV = 'development';
+    process.env.NEXT_PUBLIC_DB_SCHEMA = 'prod';
+
+    useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
+    await useAppStore.getState().loadFromSupabase();
+    assertNoSeedData();
+
+    process.env.NODE_ENV = origNodeEnv;
+    process.env.NEXT_PUBLIC_DB_SCHEMA = origSchema;
+  });
+});

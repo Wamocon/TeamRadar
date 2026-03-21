@@ -83,29 +83,28 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         {/* Stats */}
         {members.length > 0 && (
           <div
-            className="mx-3 mt-1 rounded-xl border border-black/[0.06] dark:border-white/[0.06] p-3"
-            style={{ background: theme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.03)' }}
+            className="mx-3 mt-1 rounded-xl border p-3"
+            style={{ borderColor: 'var(--border)', background: theme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}
           >
-            <div className="text-[9px] font-bold uppercase tracking-widest mb-2.5 text-black/30 dark:text-white/20">
+            <div className="text-[9px] font-bold uppercase tracking-widest mb-3 text-black/30 dark:text-white/20">
               Heute
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <div className="text-lg font-black leading-none text-gray-800 dark:text-white">{members.length}</div>
-                <div className="text-[9px] mt-0.5 text-gray-400 dark:text-white/30">Gesamt</div>
-              </div>
-              <div>
-                <div className="text-lg font-black leading-none text-green-500">{availableCount}</div>
-                <div className="text-[9px] mt-0.5 text-gray-400 dark:text-white/30">Verfügbar</div>
-              </div>
-              <div>
-                <div className="text-lg font-black leading-none text-amber-400">{busyCount}</div>
-                <div className="text-[9px] mt-0.5 text-gray-400 dark:text-white/30">Beschäftigt</div>
-              </div>
-              <div>
-                <div className="text-lg font-black leading-none text-violet-400">{absentCount}</div>
-                <div className="text-[9px] mt-0.5 text-gray-400 dark:text-white/30">Abwesend</div>
-              </div>
+            <div className="space-y-2.5">
+              {[
+                { label: 'Verfügbar', value: availableCount, total: members.length, color: '#22c55e' },
+                { label: 'Beschäftigt', value: busyCount, total: members.length, color: '#f59e0b' },
+                { label: 'Abwesend', value: absentCount, total: members.length, color: '#8b5cf6' },
+              ].map((stat) => (
+                <div key={stat.label}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] dark:text-white/40 text-gray-500">{stat.label}</span>
+                    <span className="text-[10px] font-bold" style={{ color: stat.color }}>{stat.value}</span>
+                  </div>
+                  <div className="h-1 rounded-full bg-black/[0.04] dark:bg-white/[0.04]">
+                    <div className="progress-bar h-full rounded-full" style={{ width: `${stat.total > 0 ? (stat.value / stat.total) * 100 : 0}%`, background: stat.color }} />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -198,16 +197,17 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const { theme } = useTheme();
-  const sidebarBgDesktop = theme === 'dark' ? 'rgba(8,10,20,0.85)' : '#f9f9fb';
-  const sidebarBgMobile = theme === 'dark' ? 'rgba(8,10,20,0.98)' : '#ffffff';
 
   return (
     <>
       {/* Desktop */}
       <aside
-        className="hidden md:flex flex-col w-52 shrink-0 border-r border-white/[0.06] dark:border-white/[0.06]"
-        style={{ background: sidebarBgDesktop }}
-      >
+        className="hidden md:flex flex-col w-56 shrink-0 border-r sidebar-scroll"
+        style={{
+          background: theme === 'dark' ? 'rgba(8,10,20,0.9)' : 'rgba(248,250,252,0.95)',
+          borderColor: 'var(--border)',
+          backdropFilter: 'blur(12px)',
+        }}>
         <SidebarContent />
       </aside>
 
@@ -217,8 +217,10 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
           <div className="fixed inset-0 bg-black/60 z-40 md:hidden" onClick={onClose} />
           <aside
             className="fixed inset-y-0 left-0 z-50 flex flex-col w-72 md:hidden"
-            style={{ background: sidebarBgMobile }}
-          >
+            style={{
+              background: theme === 'dark' ? 'rgba(8,10,20,0.98)' : '#ffffff',
+              backdropFilter: 'blur(16px)',
+            }}>
             <div className="flex items-center justify-between px-4 py-3 border-b border-black/[0.07] dark:border-white/[0.06] shrink-0">
               <span className="text-[9px] font-bold text-black/30 dark:text-white/30 uppercase tracking-widest">
                 Navigation

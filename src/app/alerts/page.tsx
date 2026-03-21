@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { ALERT_TYPE_CONFIG, PROJECT_TYPE_CONFIG, type AlertType, type ProjectType } from '@/types';
 import { ProjectTypeFilter } from '@/components/ui/ProjectTypeFilter';
+import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { AlertTriangle, CheckCircle, Users, Briefcase } from 'lucide-react';
 import Link from 'next/link';
 
@@ -11,6 +12,7 @@ export default function AlertsPage() {
   const projects = useAppStore((s) => s.projects);
   const getAlerts = useAppStore((s) => s.getAlerts);
 
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [filterType, setFilterType] = useState<'all' | ProjectType>('all');
 
   const allAlerts = useMemo(() => getAlerts(), [getAlerts]);
@@ -59,8 +61,11 @@ export default function AlertsPage() {
         </p>
       </div>
 
-      {/* Intern/Extern Filter */}
-      <ProjectTypeFilter value={filterType} onChange={setFilterType} counts={projectTypeCounts} />
+      {/* Filter & View Toggle */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <ProjectTypeFilter value={filterType} onChange={setFilterType} counts={projectTypeCounts} />
+        <ViewToggle value={viewMode} onChange={setViewMode} />
+      </div>
 
       {/* Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -111,7 +116,7 @@ export default function AlertsPage() {
                 {typeAlerts.length}
               </span>
             </h2>
-            <div className="space-y-2">
+            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-3' : 'space-y-2'}>
               {typeAlerts.map((alert) => {
                 const member = members.find((m) => m.id === alert.memberId);
                 const relatedProjects = (alert.projectIds ?? [])

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import { useAppStore } from '@/stores/appStore';
+import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import {
   PROJECT_TYPE_CONFIG,
   PROJECT_STATUS_CONFIG,
@@ -29,6 +30,7 @@ export default function ProjectsPage() {
 
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [filterType, setFilterType] = useState<ProjectType | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<ProjectStatus | 'all'>('all');
 
@@ -124,13 +126,16 @@ export default function ProjectsPage() {
             {internalCount} interne · {externalCount} externe Projekte
           </p>
         </div>
-        <button
-          onClick={() => { resetForm(); setShowForm(!showForm); }}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-sm font-semibold hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-md shadow-indigo-500/20"
-        >
-          <Plus size={14} />
-          Neues Projekt
-        </button>
+        <div className="flex items-center gap-3">
+          <ViewToggle value={viewMode} onChange={setViewMode} />
+          <button
+            onClick={() => { resetForm(); setShowForm(!showForm); }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-sm font-semibold hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-md shadow-indigo-500/20"
+          >
+            <Plus size={14} />
+            Neues Projekt
+          </button>
+        </div>
       </div>
 
       {/* Filter */}
@@ -271,7 +276,7 @@ export default function ProjectsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-4'}>
           {filtered.map((project) => {
             const projMembers = members.filter((m) => project.memberIds.includes(m.id));
             const typeConf = PROJECT_TYPE_CONFIG[project.type];

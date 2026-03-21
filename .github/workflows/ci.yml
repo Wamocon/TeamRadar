@@ -144,6 +144,9 @@ jobs:
           fi
 
           exit $TEST_EXIT
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
 
       - name: Vitest Coverage Report
         if: always() && github.event_name == 'pull_request'
@@ -228,4 +231,4 @@ jobs:
           fi
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-key
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key

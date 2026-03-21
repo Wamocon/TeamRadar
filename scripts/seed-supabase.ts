@@ -14,10 +14,15 @@ import { createClient } from '@supabase/supabase-js';
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const userId = process.env.SEED_USER_ID!;
-const schema = process.env.NEXT_PUBLIC_DB_SCHEMA ?? 'public';
+const schema = (process.env.NEXT_PUBLIC_DB_SCHEMA ?? 'test') as 'test' | 'prod' | 'public';
 
 if (!url || !key || !userId) {
   console.error('Fehlende Umgebungsvariablen. Bitte .env.local prüfen.');
+  process.exit(1);
+}
+
+if (schema === 'prod') {
+  console.error('❌ Seed in das prod-Schema ist nicht erlaubt! Abbruch.');
   process.exit(1);
 }
 
@@ -49,7 +54,7 @@ const teams = [
 ];
 
 async function seed() {
-  console.log('🌱 Seeding TeamRadar...\n');
+  console.log(`🌱 Seeding TeamRadar (Schema: ${schema})...\n`);
 
   // Members
   const { error: mErr } = await supabase.from('members').upsert(

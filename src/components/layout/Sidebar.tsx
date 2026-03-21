@@ -14,6 +14,10 @@ import {
   Sun,
   Moon,
   UserPlus,
+  BarChart3,
+  AlertTriangle,
+  FileDown,
+  CalendarRange,
 } from 'lucide-react';
 import { STATUS_CONFIG, PROJECT_TYPE_CONFIG } from '@/types';
 
@@ -24,12 +28,14 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const teams = useAppStore((s) => s.teams);
   const projects = useAppStore((s) => s.projects);
   const getMemberStatus = useAppStore((s) => s.getMemberStatus);
+  const getAlerts = useAppStore((s) => s.getAlerts);
   const { theme, setTheme } = useTheme();
 
   const today = new Date().toISOString().slice(0, 10);
   const availableCount = members.filter((m) => getMemberStatus(m.id, today) === 'available').length;
   const busyCount = members.filter((m) => ['busy', 'meeting'].includes(getMemberStatus(m.id, today))).length;
   const absentCount = members.filter((m) => ['vacation', 'sick'].includes(getMemberStatus(m.id, today))).length;
+  const alertCount = getAlerts().filter((a) => a.severity === 'error').length;
 
   const navItems = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
@@ -38,6 +44,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     { href: '/calendar', icon: CalendarDays, label: 'Kalender', exact: true },
     { href: '/teams', icon: FolderKanban, label: 'Teams', exact: false },
     { href: '/projects', icon: Briefcase, label: 'Projekte', exact: false },
+    { href: '/utilization', icon: BarChart3, label: 'Auslastung', exact: true },
+    { href: '/year', icon: CalendarRange, label: 'Jahresübersicht', exact: true },
+    { href: '/alerts', icon: AlertTriangle, label: 'Alerts', exact: true, badge: alertCount > 0 ? alertCount : undefined },
+    { href: '/reports', icon: FileDown, label: 'Reports', exact: true },
   ];
 
   return (
@@ -81,6 +91,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 {item.href === '/projects' && projects.length > 0 && (
                   <span className="ml-auto text-[9px] font-bold bg-black/5 dark:bg-white/8 text-gray-400 dark:text-white/35 px-1.5 py-0.5 rounded-full">
                     {projects.length}
+                  </span>
+                )}
+                {'badge' in item && item.badge && (
+                  <span className="ml-auto text-[9px] font-bold bg-red-500/15 text-red-500 px-1.5 py-0.5 rounded-full">
+                    {item.badge}
                   </span>
                 )}
               </Link>

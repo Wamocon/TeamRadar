@@ -6,7 +6,7 @@ import { StatusDonut } from '@/components/dashboard/StatusDonut';
 import { DepartmentBars } from '@/components/dashboard/DepartmentBars';
 import { AvailabilityTimeline } from '@/components/dashboard/AvailabilityTimeline';
 import { SearchFilter } from '@/components/dashboard/SearchFilter';
-import { STATUS_CONFIG, type AvailabilityStatus } from '@/types';
+import { STATUS_CONFIG, type AvailabilityStatus, type ProjectType } from '@/types';
 import { Radar, CalendarClock, Plus, Clock, BarChart3, Users, LayoutGrid, List } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [selectedStatus, setSelectedStatus] = useState<AvailabilityStatus | 'all'>('all');
   const [selectedDept, setSelectedDept] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
+  const [selectedProjectType, setSelectedProjectType] = useState<'all' | ProjectType>('all');
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -65,10 +66,14 @@ export default function DashboardPage() {
           const proj = projects.find((p) => p.id === selectedProject);
           if (proj && !proj.memberIds.includes(member.id)) return false;
         }
+        if (selectedProjectType !== 'all') {
+          const typeProjects = projects.filter((p) => p.type === selectedProjectType && p.status !== 'completed');
+          if (!typeProjects.some((p) => p.memberIds.includes(member.id))) return false;
+        }
         return true;
       })
       .map(({ member }) => member),
-    [memberStatuses, searchTerm, selectedStatus, selectedDept, selectedProject, projects]
+    [memberStatuses, searchTerm, selectedStatus, selectedDept, selectedProject, selectedProjectType, projects]
   );
 
   const availableNow = statusCounts.available || 0;
@@ -169,6 +174,7 @@ export default function DashboardPage() {
             departments={departments}
             selectedProject={selectedProject} onProjectChange={setSelectedProject}
             projects={projects.filter((p) => p.status !== 'completed').map((p) => ({ id: p.id, name: p.name, type: p.type }))}
+            selectedProjectType={selectedProjectType} onProjectTypeChange={setSelectedProjectType}
           />
         </div>
         <div className="flex gap-1 p-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.03]">

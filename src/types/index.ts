@@ -36,6 +36,7 @@ export interface Member {
   department: string;
   avatarUrl?: string;
   phone?: string;
+  skills?: Skill[];
   createdAt: string;
 }
 
@@ -83,8 +84,63 @@ export interface Project {
   memberIds: string[];
   startDate?: string;       // ISO-Datum YYYY-MM-DD
   endDate?: string;         // ISO-Datum YYYY-MM-DD
+  budgetHours?: number;     // Geplantes Stundenkontingent
   createdAt: string;
 }
+
+/* ── Skill / Kompetenz ──────────────────────────────────── */
+export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
+
+export const SKILL_LEVEL_CONFIG: Record<SkillLevel, { label: string; color: string; value: number }> = {
+  beginner:     { label: 'Grundkenntnisse', color: '#a3a3a3', value: 1 },
+  intermediate: { label: 'Fortgeschritten', color: '#3b82f6', value: 2 },
+  advanced:     { label: 'Erfahren',        color: '#f59e0b', value: 3 },
+  expert:       { label: 'Experte',         color: '#22c55e', value: 4 },
+};
+
+export const SKILL_CATEGORIES = [
+  'Frontend', 'Backend', 'Cloud', 'Mobile', 'Data', 'Design',
+  'DevOps', 'Security', 'Management', 'Sonstiges',
+] as const;
+
+export type SkillCategory = typeof SKILL_CATEGORIES[number];
+
+export interface Skill {
+  name: string;
+  category: SkillCategory;
+  level: SkillLevel;
+}
+
+/* ── Projekt-Zuweisung / Auslastung ────────────────────── */
+export interface Allocation {
+  id: string;
+  memberId: string;
+  projectId: string;
+  percentage: number;       // 0-100, z.B. 50 = halbe Stelle
+  startDate: string;        // ISO-Datum YYYY-MM-DD
+  endDate: string;          // ISO-Datum YYYY-MM-DD
+  note?: string;
+}
+
+/* ── Alert / Warnung ────────────────────────────────────── */
+export type AlertType = 'overbooking' | 'conflict' | 'no_allocation' | 'vacation_conflict';
+
+export interface Alert {
+  id: string;
+  type: AlertType;
+  memberId: string;
+  message: string;
+  projectIds?: string[];
+  date?: string;
+  severity: 'warning' | 'error';
+}
+
+export const ALERT_TYPE_CONFIG: Record<AlertType, { label: string; icon: string; color: string }> = {
+  overbooking:       { label: 'Überbuchung',          icon: '⚠️', color: '#ef4444' },
+  conflict:          { label: 'Konflikt',             icon: '🔴', color: '#f97316' },
+  no_allocation:     { label: 'Keine Zuweisung',      icon: '📋', color: '#a3a3a3' },
+  vacation_conflict: { label: 'Urlaubs-Konflikt',     icon: '🏖️', color: '#8b5cf6' },
+};
 
 /* ── Benutzerprofil ─────────────────────────────────────── */
 export interface UserProfile {

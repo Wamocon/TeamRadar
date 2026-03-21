@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Member, Availability, Team, Project, AvailabilityStatus, UserProfile, UserRole } from '@/types';
+import type { Member, Availability, Team, Project, AvailabilityStatus, UserProfile, UserRole, Allocation, Alert, ProjectType } from '@/types';
 import {
   loadAllData,
   dbAddMember,
@@ -16,7 +16,7 @@ import {
   dbUpdateProject,
   dbDeleteProject,
 } from '@/lib/supabase/db';
-import { SEED_MEMBERS, SEED_AVAILABILITIES, SEED_TEAMS, SEED_PROJECTS } from '@/lib/seed-data';
+import { SEED_MEMBERS, SEED_AVAILABILITIES, SEED_TEAMS, SEED_PROJECTS, SEED_ALLOCATIONS } from '@/lib/seed-data';
 
 interface AppStore {
   /* ── Daten ─────────────────────────────────── */
@@ -24,6 +24,7 @@ interface AppStore {
   availabilities: Availability[];
   teams: Team[];
   projects: Project[];
+  allocations: Allocation[];
   userProfile: UserProfile | null;
 
   /* ── Laden ─────────────────────────────────── */
@@ -50,6 +51,18 @@ interface AppStore {
   updateProject: (id: string, data: Partial<Project>) => void;
   deleteProject: (id: string) => void;
   getMemberProjects: (memberId: string) => Project[];
+
+  /* ── Allocations (Zuweisungen) ─────────────── */
+  addAllocation: (alloc: Omit<Allocation, 'id'>) => Allocation;
+  updateAllocation: (id: string, data: Partial<Allocation>) => void;
+  deleteAllocation: (id: string) => void;
+  getMemberUtilization: (memberId: string, date?: string, projectType?: ProjectType) => number;
+  getMemberAllocations: (memberId: string, date?: string, projectType?: ProjectType) => Allocation[];
+  getProjectAllocations: (projectId: string) => Allocation[];
+
+  /* ── Alerts ────────────────────────────────── */
+  getAlerts: () => Alert[];
+
   /* ── Rollen ────────────────────────────────── */
   hasMinRole: (role: UserRole) => boolean;
 }
@@ -61,6 +74,7 @@ export const useAppStore = create<AppStore>()(
       availabilities: [],
       teams: [],
       projects: [],
+      allocations: [],
       userProfile: null,
 
       /* ── Supabase laden ──────────────────────── */
@@ -86,12 +100,23 @@ export const useAppStore = create<AppStore>()(
             availabilities: SEED_AVAILABILITIES,
             teams: SEED_TEAMS,
             projects: SEED_PROJECTS,
+            allocations: SEED_ALLOCATIONS,
           });
         }
 
         // Projekte nachladen wenn Store aus älterer Version stammt
         if (get().projects.length === 0 && get().members.length > 0) {
           set({ projects: SEED_PROJECTS });
+        }
+
+        // Allocations nachladen wenn Store aus älterer Version stammt
+        if (get().allocations.length === 0 && get().projects.length > 0) {
+          set({ allocations: SEED_ALLOCATIONS });
+        }
+
+        // Skills nachladen wenn Mitglieder keine Skills haben
+        if (get().members.length > 0 && !get().members[0].skills) {
+          set({ members: SEED_MEMBERS });
         }
       },
 
@@ -225,6 +250,116 @@ export const useAppStore = create<AppStore>()(
         return get().projects.filter((p) => p.memberIds.includes(memberId) && p.status !== 'completed');
       },
 
+      /* ── Allocations ─────────────────────────── */
+      addAllocation: (data) => {
+        const alloc: Allocation = { ...data, id: crypto.randomUUID() };
+        set((state) => ({ allocations: [...state.allocations, alloc] }));
+        return alloc;
+      },
+
+      updateAllocation: (id, data) => {
+        set((state) => ({
+          allocations: state.allocations.map((a) => (a.id === id ? { ...a, ...data } : a)),
+        }));
+      },
+
+      deleteAllocation: (id) => {
+        set((state) => ({ allocations: state.allocations.filter((a) => a.id !== id) }));
+      },
+
+      getMemberUtilization: (memberId, date, projectType) => {
+        const d = date ?? new Date().toISOString().slice(0, 10);
+        let allocs = get().allocations.filter(
+          (a) => a.memberId === memberId && a.startDate <= d && a.endDate >= d
+        );
+        if (projectType) {
+          const projectIds = new Set(get().projects.filter((p) => p.type === projectType).map((p) => p.id));
+          allocs = allocs.filter((a) => projectIds.has(a.projectId));
+        }
+        return allocs.reduce((sum, a) => sum + a.percentage, 0);
+      },
+
+      getMemberAllocations: (memberId, date, projectType) => {
+        const d = date ?? new Date().toISOString().slice(0, 10);
+        let allocs = get().allocations.filter(
+          (a) => a.memberId === memberId && a.startDate <= d && a.endDate >= d
+        );
+        if (projectType) {
+          const projectIds = new Set(get().projects.filter((p) => p.type === projectType).map((p) => p.id));
+          allocs = allocs.filter((a) => projectIds.has(a.projectId));
+        }
+        return allocs;
+      },
+
+      getProjectAllocations: (projectId) => {
+        return get().allocations.filter((a) => a.projectId === projectId);
+      },
+
+      /* ── Alerts ────────────────────────────────── */
+      getAlerts: () => {
+        const today = new Date().toISOString().slice(0, 10);
+        const alerts: Alert[] = [];
+        const { members, allocations, availabilities, projects } = get();
+
+        members.forEach((member) => {
+          // Überbuchung prüfen (>100%)
+          const activeAllocs = allocations.filter(
+            (a) => a.memberId === member.id && a.startDate <= today && a.endDate >= today
+          );
+          const totalUtil = activeAllocs.reduce((s, a) => s + a.percentage, 0);
+          if (totalUtil > 100) {
+            const projNames = activeAllocs
+              .map((a) => projects.find((p) => p.id === a.projectId)?.name)
+              .filter(Boolean);
+            alerts.push({
+              id: `overbooking-${member.id}`,
+              type: 'overbooking',
+              memberId: member.id,
+              message: `${member.name} ist zu ${totalUtil}% ausgelastet (${projNames.join(', ')})`,
+              projectIds: activeAllocs.map((a) => a.projectId),
+              severity: 'error',
+            });
+          }
+
+          // Urlaubs-Konflikt: Hat Allocation während Urlaub/Krank
+          const absences = availabilities.filter(
+            (av) => av.memberId === member.id && ['vacation', 'sick'].includes(av.status) && av.date >= today
+          );
+          absences.forEach((absence) => {
+            const conflicting = allocations.filter(
+              (a) => a.memberId === member.id && a.startDate <= absence.date && a.endDate >= absence.date && a.percentage > 0
+            );
+            if (conflicting.length > 0) {
+              const projNames = conflicting
+                .map((a) => projects.find((p) => p.id === a.projectId)?.name)
+                .filter(Boolean);
+              alerts.push({
+                id: `vacation-${member.id}-${absence.date}`,
+                type: 'vacation_conflict',
+                memberId: member.id,
+                message: `${member.name} ist am ${absence.date} als ${absence.status === 'vacation' ? 'Urlaub' : 'Krank'} gemeldet, aber Projekten zugewiesen (${projNames.join(', ')})`,
+                projectIds: conflicting.map((a) => a.projectId),
+                date: absence.date,
+                severity: 'warning',
+              });
+            }
+          });
+
+          // Keine Zuweisung
+          if (activeAllocs.length === 0 && !['vacation', 'sick', 'offline'].includes(get().getMemberStatus(member.id, today))) {
+            alerts.push({
+              id: `no-alloc-${member.id}`,
+              type: 'no_allocation',
+              memberId: member.id,
+              message: `${member.name} hat keine aktive Projektzuweisung`,
+              severity: 'warning',
+            });
+          }
+        });
+
+        return alerts;
+      },
+
       /* ── Rollen ────────────────────────────────── */
       hasMinRole: (minRole) => {
         const profile = get().userProfile;
@@ -240,6 +375,7 @@ export const useAppStore = create<AppStore>()(
         availabilities: state.availabilities,
         teams: state.teams,
         projects: state.projects,
+        allocations: state.allocations,
       }),
     }
   )

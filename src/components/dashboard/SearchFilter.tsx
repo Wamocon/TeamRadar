@@ -15,6 +15,8 @@ interface Props {
   selectedProject?: string;
   onProjectChange?: (projectId: string) => void;
   projects?: { id: string; name: string; type: 'internal' | 'external' }[];
+  selectedProjectType?: 'all' | 'internal' | 'external';
+  onProjectTypeChange?: (type: 'all' | 'internal' | 'external') => void;
 }
 
 export function SearchFilter({
@@ -24,6 +26,7 @@ export function SearchFilter({
   departments,
   selectedProject, onProjectChange,
   projects,
+  selectedProjectType, onProjectTypeChange,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -87,6 +90,19 @@ export function SearchFilter({
           {projects.map((p) => (
             <option key={p.id} value={p.id}>{p.type === 'internal' ? '🏢' : '🌐'} {p.name}</option>
           ))}
+        </select>
+      )}
+
+      {/* Intern/Extern Filter */}
+      {onProjectTypeChange && (
+        <select
+          value={selectedProjectType ?? 'all'}
+          onChange={(e) => onProjectTypeChange(e.target.value as 'all' | 'internal' | 'external')}
+          className="px-3 py-2 rounded-lg text-xs border cursor-pointer"
+          style={{ minWidth: 130 }}>
+          <option value="all">📊 Alle Typen</option>
+          <option value="internal">🏢 Intern</option>
+          <option value="external">🌐 Extern</option>
         </select>
       )}
     </div>

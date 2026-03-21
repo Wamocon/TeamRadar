@@ -291,7 +291,9 @@ export default function ProjectsPage() {
                         {statusConf.label}
                       </span>
                     </div>
-                    <h3 className="text-sm font-bold dark:text-white text-gray-900 truncate">{project.name}</h3>
+                    <h3 className="text-sm font-bold dark:text-white text-gray-900 truncate">
+                      <a href={`/projects/${project.id}`} className="hover:text-indigo-500 transition-colors">{project.name}</a>
+                    </h3>
                     {project.client && (
                       <div className="flex items-center gap-1.5 mt-1">
                         <Building2 size={11} className="dark:text-white/30 text-gray-400" />

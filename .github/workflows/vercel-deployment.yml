@@ -1,10 +1,10 @@
 name: Deploy to Vercel
 
 on:
-  # Merge in main → Test-Umgebung (Vercel Preview, Schema: test)
+  # Push auf beliebigen Branch → Vercel Preview Deployment
   push:
     branches:
-      - main
+      - '**'
   # Neues Release → Prod-Umgebung (Vercel Production, Schema: prod)
   release:
     types: [published]

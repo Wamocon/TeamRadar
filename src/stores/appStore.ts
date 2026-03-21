@@ -93,9 +93,13 @@ export const useAppStore = create<AppStore>()(
           // Supabase nicht verfügbar – App startet mit lokalem Store
         }
 
-        // Demo-Daten laden wenn Store leer ist (nur außerhalb von prod)
+        // Demo-Daten laden wenn Store leer ist (nur in lokaler Entwicklung)
+        // Doppelter Guard: NODE_ENV UND DB_SCHEMA müssen beide nicht-prod sein.
+        // NODE_ENV ist auf Vercel immer 'production' – damit kommen
+        // Seed-Daten NIEMALS auf deployed Environments (weder Preview noch Prod).
+        const isDev = process.env.NODE_ENV !== 'production';
         const schema = process.env.NEXT_PUBLIC_DB_SCHEMA ?? 'public';
-        if (schema !== 'prod' && get().members.length === 0) {
+        if (isDev && schema !== 'prod' && get().members.length === 0) {
           set({
             members: SEED_MEMBERS,
             availabilities: SEED_AVAILABILITIES,
@@ -106,17 +110,17 @@ export const useAppStore = create<AppStore>()(
         }
 
         // Projekte nachladen wenn Store aus älterer Version stammt
-        if (schema !== 'prod' && get().projects.length === 0 && get().members.length > 0) {
+        if (isDev && schema !== 'prod' && get().projects.length === 0 && get().members.length > 0) {
           set({ projects: SEED_PROJECTS });
         }
 
         // Allocations nachladen wenn Store aus älterer Version stammt
-        if (schema !== 'prod' && get().allocations.length === 0 && get().projects.length > 0) {
+        if (isDev && schema !== 'prod' && get().allocations.length === 0 && get().projects.length > 0) {
           set({ allocations: SEED_ALLOCATIONS });
         }
 
         // Skills nachladen wenn Mitglieder keine Skills haben
-        if (schema !== 'prod' && get().members.length > 0 && !get().members[0].skills) {
+        if (isDev && schema !== 'prod' && get().members.length > 0 && !get().members[0].skills) {
           set({ members: SEED_MEMBERS });
         }
       },

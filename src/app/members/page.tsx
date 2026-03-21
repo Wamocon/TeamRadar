@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { MemberCard } from '@/components/team/MemberCard';
+import { ExcelImportDialog } from '@/components/team/ExcelImportDialog';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
-import { Users, Plus, Trash2, Pencil } from 'lucide-react';
+import { Users, Plus, Trash2, Pencil, FileSpreadsheet } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -12,6 +13,7 @@ export default function MembersPage() {
   const deleteMember = useAppStore((s) => s.deleteMember);
   const router = useRouter();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [showImport, setShowImport] = useState(false);
 
   const departments = [...new Set(members.map((m) => m.department).filter(Boolean))];
 
@@ -31,6 +33,13 @@ export default function MembersPage() {
         </div>
         <div className="flex items-center gap-3">
           <ViewToggle value={viewMode} onChange={setViewMode} />
+          <button
+            onClick={() => setShowImport(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border dark:border-white/10 border-gray-200 text-sm font-medium dark:text-white/70 text-gray-600 hover:bg-green-500/10 hover:text-green-500 hover:border-green-500/30 transition-all bg-transparent cursor-pointer"
+          >
+            <FileSpreadsheet size={14} />
+            Excel-Import
+          </button>
           <Link
             href="/members/new"
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors no-underline"
@@ -148,6 +157,8 @@ export default function MembersPage() {
           )}
         </>
       )}
+
+      {showImport && <ExcelImportDialog onClose={() => setShowImport(false)} />}
     </div>
   );
 }

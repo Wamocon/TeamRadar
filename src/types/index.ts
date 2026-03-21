@@ -58,6 +58,34 @@ export interface Team {
   memberIds: string[];
 }
 
+/* ── Projekt-Typ (Beratungshaus: intern vs. extern) ─────── */
+export type ProjectType = 'internal' | 'external';
+export type ProjectStatus = 'planned' | 'active' | 'completed';
+
+export const PROJECT_TYPE_CONFIG: Record<ProjectType, { label: string; color: string; bgClass: string }> = {
+  internal: { label: 'Intern',  color: '#6366f1', bgClass: 'bg-indigo-500' },
+  external: { label: 'Extern', color: '#f97316', bgClass: 'bg-orange-500' },
+};
+
+export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, { label: string; color: string }> = {
+  planned:   { label: 'Geplant',      color: '#a3a3a3' },
+  active:    { label: 'Aktiv',        color: '#22c55e' },
+  completed: { label: 'Abgeschlossen', color: '#6b7280' },
+};
+
+export interface Project {
+  id: string;
+  name: string;
+  type: ProjectType;
+  status: ProjectStatus;
+  client?: string;          // Kundenname (v.a. bei externen Projekten)
+  description?: string;
+  memberIds: string[];
+  startDate?: string;       // ISO-Datum YYYY-MM-DD
+  endDate?: string;         // ISO-Datum YYYY-MM-DD
+  createdAt: string;
+}
+
 /* ── Benutzerprofil ─────────────────────────────────────── */
 export interface UserProfile {
   id: string;

@@ -12,6 +12,9 @@ interface Props {
   selectedDepartment: string;
   onDepartmentChange: (dept: string) => void;
   departments: string[];
+  selectedProject?: string;
+  onProjectChange?: (projectId: string) => void;
+  projects?: { id: string; name: string; type: 'internal' | 'external' }[];
 }
 
 export function SearchFilter({
@@ -19,6 +22,8 @@ export function SearchFilter({
   selectedStatus, onStatusChange,
   selectedDepartment, onDepartmentChange,
   departments,
+  selectedProject, onProjectChange,
+  projects,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -67,6 +72,20 @@ export function SearchFilter({
           <option value="">Alle Abteilungen</option>
           {departments.map((d) => (
             <option key={d} value={d}>{d}</option>
+          ))}
+        </select>
+      )}
+
+      {/* Project Filter */}
+      {projects && projects.length > 0 && onProjectChange && (
+        <select
+          value={selectedProject ?? ''}
+          onChange={(e) => onProjectChange(e.target.value)}
+          className="px-3 py-2 rounded-lg text-xs border cursor-pointer"
+          style={{ minWidth: 130 }}>
+          <option value="">Alle Projekte</option>
+          {projects.map((p) => (
+            <option key={p.id} value={p.id}>{p.type === 'internal' ? '🏢' : '🌐'} {p.name}</option>
           ))}
         </select>
       )}

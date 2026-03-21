@@ -8,19 +8,21 @@ import {
   Users,
   CalendarDays,
   FolderKanban,
+  Briefcase,
   Settings,
   X,
   Sun,
   Moon,
   UserPlus,
 } from 'lucide-react';
-import { STATUS_CONFIG } from '@/types';
+import { STATUS_CONFIG, PROJECT_TYPE_CONFIG } from '@/types';
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const members = useAppStore((s) => s.members);
   const availabilities = useAppStore((s) => s.availabilities);
   const teams = useAppStore((s) => s.teams);
+  const projects = useAppStore((s) => s.projects);
   const getMemberStatus = useAppStore((s) => s.getMemberStatus);
   const { theme, setTheme } = useTheme();
 
@@ -35,6 +37,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     { href: '/members/new', icon: UserPlus, label: 'Neu anlegen', exact: true },
     { href: '/calendar', icon: CalendarDays, label: 'Kalender', exact: true },
     { href: '/teams', icon: FolderKanban, label: 'Teams', exact: false },
+    { href: '/projects', icon: Briefcase, label: 'Projekte', exact: false },
   ];
 
   return (
@@ -75,6 +78,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     {members.length}
                   </span>
                 )}
+                {item.href === '/projects' && projects.length > 0 && (
+                  <span className="ml-auto text-[9px] font-bold bg-black/5 dark:bg-white/8 text-gray-400 dark:text-white/35 px-1.5 py-0.5 rounded-full">
+                    {projects.length}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -105,6 +113,42 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Projects */}
+        {projects.filter((p) => p.status !== 'completed').length > 0 && (
+          <div className="p-3 mt-1">
+            <div className="text-[9px] font-bold uppercase tracking-widest px-2 pb-1.5 flex items-center gap-2 text-black/30 dark:text-white/20">
+              <Briefcase size={10} className="opacity-50" />
+              Projekte
+            </div>
+            <div className="flex flex-col gap-0.5">
+              {projects.filter((p) => p.status !== 'completed').map((p) => {
+                const active = pathname === `/projects/${p.id}`;
+                const dotColor = PROJECT_TYPE_CONFIG[p.type].color;
+                return (
+                  <Link
+                    key={p.id}
+                    href="/projects"
+                    onClick={onNavigate}
+                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg no-underline transition-all group ${
+                      active
+                        ? 'bg-black/[0.05] dark:bg-white/[0.06]'
+                        : 'hover:bg-black/[0.04] dark:hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dotColor }} />
+                    <span className="text-[11px] text-gray-400 group-hover:text-gray-600 dark:text-white/40 dark:group-hover:text-white/65 transition-colors truncate">
+                      {p.name}
+                    </span>
+                    <span className="ml-auto text-[10px] font-bold shrink-0" style={{ color: dotColor, opacity: 0.7 }}>
+                      {p.memberIds.length}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}

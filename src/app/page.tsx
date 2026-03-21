@@ -19,8 +19,11 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<AvailabilityStatus | 'all'>('all');
   const [selectedDept, setSelectedDept] = useState('');
+  const [selectedProject, setSelectedProject] = useState('');
 
   const today = new Date().toISOString().slice(0, 10);
+
+  const projects = useAppStore((s) => s.projects);
 
   const memberStatuses = useMemo(() =>
     members.map((m) => ({ member: m, status: getMemberStatus(m.id, today) })),
@@ -58,10 +61,14 @@ export default function DashboardPage() {
             !member.department.toLowerCase().includes(searchTerm.toLowerCase())) return false;
         if (selectedStatus !== 'all' && status !== selectedStatus) return false;
         if (selectedDept && member.department !== selectedDept) return false;
+        if (selectedProject) {
+          const proj = projects.find((p) => p.id === selectedProject);
+          if (proj && !proj.memberIds.includes(member.id)) return false;
+        }
         return true;
       })
       .map(({ member }) => member),
-    [memberStatuses, searchTerm, selectedStatus, selectedDept]
+    [memberStatuses, searchTerm, selectedStatus, selectedDept, selectedProject, projects]
   );
 
   const availableNow = statusCounts.available || 0;
@@ -160,6 +167,8 @@ export default function DashboardPage() {
             selectedStatus={selectedStatus} onStatusChange={setSelectedStatus}
             selectedDepartment={selectedDept} onDepartmentChange={setSelectedDept}
             departments={departments}
+            selectedProject={selectedProject} onProjectChange={setSelectedProject}
+            projects={projects.filter((p) => p.status !== 'completed').map((p) => ({ id: p.id, name: p.name, type: p.type }))}
           />
         </div>
         <div className="flex gap-1 p-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.03]">

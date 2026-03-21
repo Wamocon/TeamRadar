@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Member, Availability, Team, AvailabilityStatus, UserProfile, UserRole } from '@/types';
+import type { Member, Availability, Team, Project, AvailabilityStatus, UserProfile, UserRole } from '@/types';
 import {
   loadAllData,
   dbAddMember,
@@ -12,14 +12,18 @@ import {
   dbAddTeam,
   dbUpdateTeam,
   dbDeleteTeam,
+  dbAddProject,
+  dbUpdateProject,
+  dbDeleteProject,
 } from '@/lib/supabase/db';
-import { SEED_MEMBERS, SEED_AVAILABILITIES, SEED_TEAMS } from '@/lib/seed-data';
+import { SEED_MEMBERS, SEED_AVAILABILITIES, SEED_TEAMS, SEED_PROJECTS } from '@/lib/seed-data';
 
 interface AppStore {
   /* ── Daten ─────────────────────────────────── */
   members: Member[];
   availabilities: Availability[];
   teams: Team[];
+  projects: Project[];
   userProfile: UserProfile | null;
 
   /* ── Laden ─────────────────────────────────── */
@@ -41,7 +45,11 @@ interface AppStore {
   addTeam: (team: Omit<Team, 'id'>) => Team;
   updateTeam: (id: string, data: Partial<Team>) => void;
   deleteTeam: (id: string) => void;
-
+  /* ── Projekte ────────────────────────────── */
+  addProject: (project: Omit<Project, 'id' | 'createdAt'>) => Project;
+  updateProject: (id: string, data: Partial<Project>) => void;
+  deleteProject: (id: string) => void;
+  getMemberProjects: (memberId: string) => Project[];
   /* ── Rollen ────────────────────────────────── */
   hasMinRole: (role: UserRole) => boolean;
 }
@@ -52,6 +60,7 @@ export const useAppStore = create<AppStore>()(
       members: [],
       availabilities: [],
       teams: [],
+      projects: [],
       userProfile: null,
 
       /* ── Supabase laden ──────────────────────── */
@@ -63,6 +72,7 @@ export const useAppStore = create<AppStore>()(
               members: data.members,
               availabilities: data.availabilities,
               teams: data.teams,
+              projects: data.projects,
             });
           }
         } catch {
@@ -75,7 +85,13 @@ export const useAppStore = create<AppStore>()(
             members: SEED_MEMBERS,
             availabilities: SEED_AVAILABILITIES,
             teams: SEED_TEAMS,
+            projects: SEED_PROJECTS,
           });
+        }
+
+        // Projekte nachladen wenn Store aus älterer Version stammt
+        if (get().projects.length === 0 && get().members.length > 0) {
+          set({ projects: SEED_PROJECTS });
         }
       },
 
@@ -110,6 +126,10 @@ export const useAppStore = create<AppStore>()(
           teams: state.teams.map((t) => ({
             ...t,
             memberIds: t.memberIds.filter((mid) => mid !== id),
+          })),
+          projects: state.projects.map((p) => ({
+            ...p,
+            memberIds: p.memberIds.filter((mid) => mid !== id),
           })),
         }));
         void dbDeleteMember(id);
@@ -176,6 +196,35 @@ export const useAppStore = create<AppStore>()(
         void dbDeleteTeam(id);
       },
 
+      /* ── Projekte ──────────────────────────── */
+      addProject: (data) => {
+        const project: Project = {
+          ...data,
+          id: crypto.randomUUID(),
+          createdAt: new Date().toISOString(),
+        };
+        set((state) => ({ projects: [...state.projects, project] }));
+        void dbAddProject(project);
+        return project;
+      },
+
+      updateProject: (id, data) => {
+        set((state) => ({
+          projects: state.projects.map((p) => (p.id === id ? { ...p, ...data } : p)),
+        }));
+        const updated = get().projects.find((p) => p.id === id);
+        if (updated) void dbUpdateProject(updated);
+      },
+
+      deleteProject: (id) => {
+        set((state) => ({ projects: state.projects.filter((p) => p.id !== id) }));
+        void dbDeleteProject(id);
+      },
+
+      getMemberProjects: (memberId) => {
+        return get().projects.filter((p) => p.memberIds.includes(memberId) && p.status !== 'completed');
+      },
+
       /* ── Rollen ────────────────────────────────── */
       hasMinRole: (minRole) => {
         const profile = get().userProfile;
@@ -190,6 +239,7 @@ export const useAppStore = create<AppStore>()(
         members: state.members,
         availabilities: state.availabilities,
         teams: state.teams,
+        projects: state.projects,
       }),
     }
   )

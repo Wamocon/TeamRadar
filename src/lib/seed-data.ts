@@ -1,4 +1,4 @@
-import type { Member, Availability, Team, AvailabilityStatus } from '@/types';
+import type { Member, Availability, Team, Project, AvailabilityStatus } from '@/types';
 
 const today = new Date().toISOString().slice(0, 10);
 
@@ -71,6 +71,17 @@ export const SEED_AVAILABILITIES: Availability[] = [
   { id: 'a31', memberId: 'm09', status: 'sick',       date: offsetDate(2), note: 'Erkältet' },
   { id: 'a32', memberId: 'm12', status: 'meeting',    date: offsetDate(2), startTime: '09:00', endTime: '11:00', note: 'iOS Release Review' },
   { id: 'a33', memberId: 'm19', status: 'vacation',   date: offsetDate(2), note: 'Urlaub' },
+];
+
+export const SEED_PROJECTS: Project[] = [
+  { id: 'p01', name: 'Cloud-Migration Allianz',        type: 'external', status: 'active',    client: 'Allianz SE',           description: 'Migration der Legacy-Systeme in die Azure Cloud',           memberIds: ['m02', 'm05', 'm16', 'm14'], startDate: '2026-01-15', endDate: '2026-06-30', createdAt: '2026-01-10T08:00:00Z' },
+  { id: 'p02', name: 'Interne Toolchain-Modernisierung', type: 'internal', status: 'active',                                    description: 'Upgrade der internen CI/CD-Pipeline und Dev-Tools',         memberIds: ['m01', 'm08', 'm06'],         startDate: '2026-02-01', endDate: '2026-04-30', createdAt: '2026-01-20T08:00:00Z' },
+  { id: 'p03', name: 'BMW Connected Drive Portal',       type: 'external', status: 'active',    client: 'BMW AG',               description: 'Neuentwicklung des Kundenportals',                          memberIds: ['m01', 'm03', 'm09', 'm04'], startDate: '2026-02-10', endDate: '2026-08-31', createdAt: '2026-02-05T08:00:00Z' },
+  { id: 'p04', name: 'Mitarbeiter-App',                  type: 'internal', status: 'active',                                    description: 'Mobile App für Zeiterfassung und Verfügbarkeit',            memberIds: ['m12', 'm13', 'm03'],         startDate: '2026-03-01', endDate: '2026-05-31', createdAt: '2026-02-20T08:00:00Z' },
+  { id: 'p05', name: 'Siemens Data Analytics',            type: 'external', status: 'planned',   client: 'Siemens AG',           description: 'Aufbau einer Data-Analytics-Plattform',                     memberIds: ['m10', 'm02'],                startDate: '2026-04-01', endDate: '2026-09-30', createdAt: '2026-03-01T08:00:00Z' },
+  { id: 'p06', name: 'Security Audit 2026',               type: 'internal', status: 'planned',                                    description: 'Jährlicher Sicherheits-Audit aller Systeme',                memberIds: ['m14', 'm06'],                startDate: '2026-04-15', endDate: '2026-05-15', createdAt: '2026-03-10T08:00:00Z' },
+  { id: 'p07', name: 'Deutsche Bahn Ticketing-System',    type: 'external', status: 'active',    client: 'Deutsche Bahn AG',     description: 'Redesign des Online-Ticketing mit React & Microservices',   memberIds: ['m08', 'm02', 'm07', 'm11'], startDate: '2025-11-01', endDate: '2026-05-31', createdAt: '2025-10-15T08:00:00Z' },
+  { id: 'p08', name: 'Onboarding-Prozess Optimierung',    type: 'internal', status: 'completed',                                  description: 'Verbesserung des Onboarding für neue Berater',              memberIds: ['m17', 'm04'],                startDate: '2025-12-01', endDate: '2026-02-28', createdAt: '2025-11-20T08:00:00Z' },
 ];
 
 export const SEED_TEAMS: Team[] = [

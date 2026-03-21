@@ -3,7 +3,7 @@
  * Alle Funktionen spiegeln die Store-Aktionen, persistieren aber in Supabase.
  */
 import { createClient } from '@/lib/supabase/client';
-import type { Member, Availability, Team } from '@/types';
+import type { Member, Availability, Team, Project } from '@/types';
 
 /* ── Hilfsfunktionen: DB-Rows ↔ App-Typen ──────────────── */
 
@@ -77,6 +77,36 @@ function rowToTeam(row: Record<string, unknown>): Team {
   };
 }
 
+function projectToRow(project: Project, userId: string) {
+  return {
+    id: project.id,
+    user_id: userId,
+    name: project.name,
+    type: project.type,
+    status: project.status,
+    client: project.client ?? null,
+    description: project.description ?? null,
+    member_ids: project.memberIds,
+    start_date: project.startDate ?? null,
+    end_date: project.endDate ?? null,
+  };
+}
+
+function rowToProject(row: Record<string, unknown>): Project {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    type: row.type as Project['type'],
+    status: row.status as Project['status'],
+    client: row.client as string | undefined,
+    description: row.description as string | undefined,
+    memberIds: (row.member_ids as string[]) ?? [],
+    startDate: row.start_date as string | undefined,
+    endDate: row.end_date as string | undefined,
+    createdAt: row.created_at as string,
+  };
+}
+
 /* ── Öffentliche API ──────────────────────────────────────── */
 
 function isSupabaseConfigured(): boolean {
@@ -100,17 +130,20 @@ export async function loadAllData() {
     { data: memberRows },
     { data: availabilityRows },
     { data: teamRows },
+    { data: projectRows },
   ] = await Promise.all([
     supabase.from('members').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
     supabase.from('availabilities').select('*').eq('user_id', userId).order('date', { ascending: true }),
     supabase.from('teams').select('*').eq('user_id', userId).order('name', { ascending: true }),
+    supabase.from('projects').select('*').eq('user_id', userId).order('name', { ascending: true }),
   ]);
 
   const members = (memberRows ?? []).map(rowToMember);
   const availabilities = (availabilityRows ?? []).map(rowToAvailability);
   const teams = (teamRows ?? []).map(rowToTeam);
+  const projects = (projectRows ?? []).map(rowToProject);
 
-  return { members, availabilities, teams };
+  return { members, availabilities, teams, projects };
 }
 
 /* ── Members ──────────────────────────────────────────────── */
@@ -184,4 +217,28 @@ export async function dbDeleteTeam(id: string) {
   if (!isSupabaseConfigured()) return;
   const supabase = createClient();
   await supabase.from('teams').delete().eq('id', id);
+}
+
+/* ── Projects ─────────────────────────────────────────────── */
+
+export async function dbAddProject(project: Project) {
+  if (!isSupabaseConfigured()) return;
+  const userId = await getUserId();
+  if (!userId) return;
+  const supabase = createClient();
+  await supabase.from('projects').insert(projectToRow(project, userId));
+}
+
+export async function dbUpdateProject(project: Project) {
+  if (!isSupabaseConfigured()) return;
+  const userId = await getUserId();
+  if (!userId) return;
+  const supabase = createClient();
+  await supabase.from('projects').update(projectToRow(project, userId)).eq('id', project.id);
+}
+
+export async function dbDeleteProject(id: string) {
+  if (!isSupabaseConfigured()) return;
+  const supabase = createClient();
+  await supabase.from('projects').delete().eq('id', id);
 }

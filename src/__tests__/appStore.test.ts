@@ -730,4 +730,20 @@ describe('Store: loadFromSupabase (Seed-Fallback)', () => {
     const membersWithSkills = useAppStore.getState().members.filter((m) => m.skills && m.skills.length > 0);
     expect(membersWithSkills.length).toBeGreaterThanOrEqual(15);
   });
+
+  it('lädt KEINE Seed-Daten im prod-Schema', async () => {
+    const original = process.env.NEXT_PUBLIC_DB_SCHEMA;
+    process.env.NEXT_PUBLIC_DB_SCHEMA = 'prod';
+
+    useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
+    await useAppStore.getState().loadFromSupabase();
+
+    expect(useAppStore.getState().members).toHaveLength(0);
+    expect(useAppStore.getState().availabilities).toHaveLength(0);
+    expect(useAppStore.getState().teams).toHaveLength(0);
+    expect(useAppStore.getState().projects).toHaveLength(0);
+    expect(useAppStore.getState().allocations).toHaveLength(0);
+
+    process.env.NEXT_PUBLIC_DB_SCHEMA = original;
+  });
 });

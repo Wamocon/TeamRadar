@@ -8,7 +8,8 @@
  * Voraussetzungen:
  *   - .env.local mit NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY und SEED_USER_ID
  */
-import 'dotenv/config';
+import { config } from 'dotenv';
+config({ path: '.env.local' });
 import { createClient } from '@supabase/supabase-js';
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;

@@ -93,8 +93,9 @@ export const useAppStore = create<AppStore>()(
           // Supabase nicht verfügbar – App startet mit lokalem Store
         }
 
-        // Demo-Daten laden wenn Store leer ist
-        if (get().members.length === 0) {
+        // Demo-Daten laden wenn Store leer ist (nur außerhalb von prod)
+        const schema = process.env.NEXT_PUBLIC_DB_SCHEMA ?? 'public';
+        if (schema !== 'prod' && get().members.length === 0) {
           set({
             members: SEED_MEMBERS,
             availabilities: SEED_AVAILABILITIES,
@@ -105,17 +106,17 @@ export const useAppStore = create<AppStore>()(
         }
 
         // Projekte nachladen wenn Store aus älterer Version stammt
-        if (get().projects.length === 0 && get().members.length > 0) {
+        if (schema !== 'prod' && get().projects.length === 0 && get().members.length > 0) {
           set({ projects: SEED_PROJECTS });
         }
 
         // Allocations nachladen wenn Store aus älterer Version stammt
-        if (get().allocations.length === 0 && get().projects.length > 0) {
+        if (schema !== 'prod' && get().allocations.length === 0 && get().projects.length > 0) {
           set({ allocations: SEED_ALLOCATIONS });
         }
 
         // Skills nachladen wenn Mitglieder keine Skills haben
-        if (get().members.length > 0 && !get().members[0].skills) {
+        if (schema !== 'prod' && get().members.length > 0 && !get().members[0].skills) {
           set({ members: SEED_MEMBERS });
         }
       },

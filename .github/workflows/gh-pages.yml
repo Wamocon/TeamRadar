@@ -1,5 +1,6 @@
 name: Deploy Produkthandbuch auf GitHub Pages
 
+
 on:
   push:
     branches:
@@ -7,6 +8,7 @@ on:
     paths:
       - 'docs/index.html'
       - '.github/workflows/gh-pages.yml'
+  workflow_dispatch:
 
 jobs:
   deploy:

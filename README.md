@@ -1,6 +1,28 @@
+
 # TeamRadar
 
 Mitarbeiter-Verfügbarkeit visualisieren und verwalten.
+
+---
+
+## Produkthandbuch Deployment (GitHub Pages)
+
+Das Produkthandbuch liegt als statische HTML-Datei im Verzeichnis `docs/index.html` vor und wird automatisch über GitHub Actions auf GitHub Pages veröffentlicht.
+
+**Wichtige Hinweise:**
+
+- Es wird ausschließlich das `docs/`-Verzeichnis deployed (kein Next.js-Build, keine App-Abhängigkeit).
+- Der Workflow `.github/workflows/gh-pages.yml` sorgt für das Deployment auf den Branch `gh-pages`.
+- In den Repository-Einstellungen muss GitHub Pages auf den Branch `gh-pages` und das Verzeichnis `/` (root) zeigen.
+- Die Seite ist nach erfolgreichem Deployment unter `https://<username>.github.io/<repo>/` erreichbar.
+
+**Ablauf:**
+
+1. Änderungen an `docs/index.html` committen und auf `main` pushen.
+2. Der Workflow wird automatisch ausgelöst und deployed die Datei auf den Branch `gh-pages`.
+3. Nach wenigen Minuten ist das Handbuch unter der GitHub Pages-URL verfügbar.
+
+---
 
 ## Tech-Stack
 
@@ -47,6 +69,7 @@ src/
 │   └── index.ts          # TypeScript Interfaces
 └── middleware.ts          # Auth-Guard
 ```
+
 
 ## Setup
 

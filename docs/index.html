@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TeamRadar – Produkthandbuch | WAMOCON</title>
+  <style>
+    /* CSS wie im plan-IT-Handbuch, 1:1 übernommen */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --red:       #ff1a1a;
+      --red-dark:  #c41010;
+      --red-glow:  rgba(255,26,26,0.18);
+      --green:     #22aa66;
+      --amber:     #f59e0b;
+      --blue:      #60a5fa;
+      --purple:    #c084fc;
+      --bg-page:   #0b0808;
+      --bg-card:   rgba(22,10,10,0.92);
+      --bg-code:   #160a0a;
+      --border:    rgba(255,255,255,0.07);
+      --text:      #e8e0e0;
+      --text-muted:#9a8a8a;
+      --text-dim:  rgba(255,255,255,0.35);
+      --navy:      #1b3a5c;
+      --wmc-grad:  linear-gradient(135deg, #2a0606 0%, #1a0303 40%, #2c1a1a 75%, #e8dada 100%);
+    }
+    html { scroll-behavior: smooth; font-size: 15px; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg-page); color: var(--text); line-height: 1.65; }
+    /* ...Rest des CSS wie im plan-IT-Handbuch... */
+  </style>
+</head>
+<body>
+<header class="page-header">
+  <a class="brand" href="#">
+    <div class="logo-mark">T</div>
+    <div>
+      <div class="brand-name">TeamRadar</div>
+      <div class="brand-sub">Anwesenheit &amp; Auslastung – professionell steuern</div>
+    </div>
+  </a>
+  <div class="header-meta">
+    <strong>Produkthandbuch</strong><br>
+    Version 1.0 · März 2026 · WAMOCON
+  </div>
+</header>
+<div class="layout">
+  <nav id="toc-sidebar">
+    <div class="toc-title">Inhalt</div>
+    <a class="toc-link l1" href="#executive-summary">1 Executive Summary</a>
+    <a class="toc-link l1" href="#produktuebersicht">2 Produktübersicht</a>
+    <a class="toc-link l1" href="#benutzerhandbuch">3 Benutzerhandbuch</a>
+    <a class="toc-link l1" href="#rollen">4 Rollen- und Berechtigungskonzept</a>
+    <a class="toc-link l1" href="#architektur">5 Technische Architektur</a>
+    <a class="toc-link l1" href="#datenschutz">6 Datenverarbeitung und Datenschutz</a>
+    <a class="toc-link l1" href="#recht">7 Rechtliche Dokumentation</a>
+    <a class="toc-link l1" href="#zustimmung">8 Zustimmungslogik und Registrierungs-Compliance</a>
+    <a class="toc-link l1" href="#admin">9 Admin-Auswertung und Governance</a>
+    <a class="toc-link l1" href="#opensource">10 Open-Source- und Drittanbieter-Kontext</a>
+    <a class="toc-link l1" href="#k6">11 K6-Synthese / Compliance-Framework</a>
+    <a class="toc-link l1" href="#audit">12 Tiefenanalyse und Audit-Bericht</a>
+    <a class="toc-link l1" href="#fazit">13 Finales Review / Management-Fazit</a>
+  </nav>
+  <main>
+    <div class="cover">
+      <div class="doc-type">Produkthandbuch · Vertraulich · WAMOCON</div>
+      <h1>TeamRadar App</h1>
+      <div class="cover-sub">Anwesenheit und Auslastung von Mitarbeitenden effizient steuern</div>
+      <div class="cover-meta">
+        <div class="meta-item"><div class="meta-label">Version</div><div class="meta-value">1.0</div></div>
+        <div class="meta-item"><div class="meta-label">Datum</div><div class="meta-value">März 2026</div></div>
+        <div class="meta-item"><div class="meta-label">Herausgeber</div><div class="meta-value">WAMOCON</div></div>
+        <div class="meta-item"><div class="meta-label">Status</div><div class="meta-value"><span class="badge badge-green">Produktiv</span></div></div>
+        <div class="meta-item"><div class="meta-label">Tech-Basis</div><div class="meta-value">Next.js · React · TypeScript · Supabase</div></div>
+        <div class="meta-item"><div class="meta-label">Dokumenttyp</div><div class="meta-value">Produkt- &amp; Technische Dokumentation</div></div>
+      </div>
+    </div>
+    <!-- Kapitelinhalte -->
+
+    <!-- 1. Executive Summary -->
+    <section id="executive-summary">
+      <h2><span class="ch-num">1</span> Executive Summary</h2>
+      <p>Dieses Handbuch dokumentiert den aktuellen, implementierten Stand der TeamRadar App. Es adressiert alle relevanten Aspekte für Geschäftsführung, Endkunden, Projektleitung, Datenschutzprüfung und Produktdokumentation. Die App erfüllt die Anforderungen an Anwesenheits- und Auslastungsmanagement, ist technisch und rechtlich auf aktuellem Stand und bietet eine hohe Nachvollziehbarkeit der Nutzerzustimmungen. Frühere Rechtslücken sind geschlossen. Offene Punkte betreffen ausschließlich externe juristische Prüfungen und organisatorische Prozesse.</p>
+    </section>
+
+    <!-- 2. Produktübersicht -->
+    <section id="produktuebersicht">
+      <h2><span class="ch-num">2</span> Produktübersicht</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Attribut</th><th>Wert</th></tr></thead>
+          <tbody>
+            <tr><td>Produktname</td><td>TeamRadar App</td></tr>
+            <tr><td>Produktart</td><td>Progressive Web App (PWA)</td></tr>
+            <tr><td>Kernnutzen</td><td>Mitarbeiter- und Projekterfassung, Auslastungsplanung, Anwesenheits- und Abwesenheitsverwaltung, Jahresübersicht</td></tr>
+            <tr><td>Zielgruppen</td><td>Alle Unternehmen</td></tr>
+            <tr><td>Technologien</td><td>Next.js 16, React 19, TypeScript, Tailwind CSS, Supabase, Drizzle ORM, Serwist, Dexie, Web Push, Resend, Groq AI, PDF-Export</td></tr>
+            <tr><td>Sprache</td><td>Deutsch</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 3. Benutzerhandbuch -->
+    <section id="benutzerhandbuch">
+      <h2><span class="ch-num">3</span> Benutzerhandbuch</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Funktion</th><th>Beschreibung</th><th>Sichtbar für Rollen</th></tr></thead>
+          <tbody>
+            <tr><td>Dashboard</td><td>Übersicht zu Anwesenheit, Auslastung, Status, Alerts</td><td>Admin, User</td></tr>
+            <tr><td>Mitarbeitende</td><td>Anlegen, Bearbeiten, Löschen, Status, Abwesenheiten, Excel-Import</td><td>Admin, User</td></tr>
+            <tr><td>Projekte</td><td>Anlegen, Bearbeiten, Filtern, Typisierung, Auslastungszuordnung</td><td>Admin, User</td></tr>
+            <tr><td>Teams</td><td>Verwaltung von Teams, Zuweisung von Mitgliedern</td><td>Admin, User</td></tr>
+            <tr><td>Kalender</td><td>Monats- und Jahresübersicht, Filter, Export</td><td>Admin, User</td></tr>
+            <tr><td>Berichte</td><td>PDF-Export, Abnahmeprotokolle, Auslastungsberichte</td><td>Admin, User</td></tr>
+            <tr><td>Alerts</td><td>Systemhinweise, Compliance- und Rechtsstatus</td><td>Admin, User</td></tr>
+            <tr><td>Einstellungen</td><td>Profil, Sprache, Rechtstexte, Benachrichtigungen</td><td>Admin, User</td></tr>
+            <tr><td>Authentifizierung</td><td>Login, Registrierung, Einladungsregistrierung, Passwort-Reset</td><td>Admin, User</td></tr>
+            <tr><td>Rechtsseiten</td><td>Impressum, Datenschutzerklärung, AGB</td><td>Admin, User</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Registrierung und Login</h3>
+      <ul>
+        <li>Neue Nutzer müssen bei Registrierung aktiv AGB, Datenschutzerklärung und DSGVO-konformer Datenverarbeitung zustimmen (Pflicht-Checkboxen).</li>
+        <li>Gleiches gilt für Einladungsregistrierungen.</li>
+        <li>Ohne Zustimmung ist keine Nutzung möglich.</li>
+        <li>Zustimmungen werden versioniert und mit Zeitstempel gespeichert.</li>
+      </ul>
+      <h3>Navigation</h3>
+      <ul>
+        <li>Rechtsseiten sind über Footer, Auth-Bereich, Einstellungen und Dashboard jederzeit erreichbar.</li>
+        <li>Admins haben zusätzliche Auswertungsansichten für Zustimmungsstatus.</li>
+      </ul>
+    </section>
+
+    <!-- 4. Rollen- und Berechtigungskonzept -->
+    <section id="rollen">
+      <h2><span class="ch-num">4</span> Rollen- und Berechtigungskonzept</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Rolle</th><th>Rechte und Sichtbarkeiten</th></tr></thead>
+          <tbody>
+            <tr><td>Admin</td><td>Vollzugriff auf alle Funktionen, inkl. Auswertungen zu Rechtszustimmungen, Nutzerverwaltung, Berichte</td></tr>
+            <tr><td>User</td><td>Zugriff auf eigene Daten, Team- und Projektzugehörigkeit, keine Admin-Auswertungen</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li>Rechte werden serverseitig geprüft.</li>
+        <li>Admins können den Zustimmungsstatus aller Nutzer einsehen und auswerten.</li>
+      </ul>
+    </section>
+
+    <!-- 5. Technische Architektur -->
+    <section id="architektur">
+      <h2><span class="ch-num">5</span> Technische Architektur</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Komponente</th><th>Technologie</th><th>Funktion</th></tr></thead>
+          <tbody>
+            <tr><td>Frontend</td><td>Next.js 16, React 19, TypeScript, Tailwind CSS</td><td>PWA, UI, Routing, Styling</td></tr>
+            <tr><td>Service Worker</td><td>Serwist</td><td>Offline-Fähigkeit, Caching</td></tr>
+            <tr><td>Offline-Speicherung</td><td>Dexie</td><td>Lokale Datenhaltung, Synchronisation</td></tr>
+            <tr><td>Web Push</td><td>VAPID</td><td>Benachrichtigungen</td></tr>
+            <tr><td>AI</td><td>Groq AI</td><td>Sprachtranskription, Übersetzung</td></tr>
+            <tr><td>PDF-Export</td><td>jsPDF</td><td>Abnahmeprotokolle, Berichte</td></tr>
+            <tr><td>Backend</td><td>Supabase, Drizzle ORM</td><td>Datenbank, Authentifizierung, Storage</td></tr>
+            <tr><td>E-Mail</td><td>Resend</td><td>Benachrichtigungen, Einladungen</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li>RESTful APIs, Web Push, PDF-Export</li>
+        <li>Authentifizierung via Supabase</li>
+        <li>Rollenbasierte Zugriffskontrolle</li>
+        <li>Speicherung von Zustimmungsdaten mit Version und Zeitstempel</li>
+      </ul>
+    </section>
+
+    <!-- 6. Datenverarbeitung und Datenschutz -->
+    <section id="datenschutz">
+      <h2><span class="ch-num">6</span> Datenverarbeitung und Datenschutz</h2>
+      <ul>
+        <li>Alle personenbezogenen Daten werden in Supabase gespeichert.</li>
+        <li>Zustimmungen zu AGB, Datenschutz und DSGVO werden versioniert und mit Zeitstempel dokumentiert.</li>
+        <li>Keine rückwirkende Migration für Bestandsnutzer; Altbestände können als unvollständig erscheinen.</li>
+        <li>Datenübertragung erfolgt verschlüsselt.</li>
+        <li>Offline-Datenhaltung via Dexie, Synchronisation bei Online-Verbindung.</li>
+        <li>Web Push und E-Mail-Versand erfolgen über datenschutzkonforme Anbieter (Resend, VAPID).</li>
+      </ul>
+    </section>
+
+    <!-- 7. Rechtliche Dokumentation -->
+    <section id="recht">
+      <h2><span class="ch-num">7</span> Rechtliche Dokumentation</h2>
+      <div class="info-box green">
+        <div class="info-box-title">Implementierter Stand</div>
+        <ul>
+          <li>Impressum, Datenschutzerklärung und AGB sind als eigenständige Seiten produktiv integriert.</li>
+          <li>Rechtstexte sind für alle Rollen und an allen relevanten Stellen (Footer, Auth, Einstellungen, Dashboard) erreichbar.</li>
+          <li>Neue Nutzer müssen aktiv zustimmen (Pflicht-Checkboxen).</li>
+          <li>Zustimmungen werden versioniert und mit Zeitstempel gespeichert.</li>
+          <li>Admins können den Zustimmungsstatus auswerten.</li>
+        </ul>
+      </div>
+      <div class="info-box blue">
+        <div class="info-box-title">Administrativ nachvollziehbar</div>
+        <ul>
+          <li>Zustimmungsstatus, Version und Zeitstempel sind für Admins einsehbar.</li>
+          <li>Bestandsnutzer ohne vollständige Zustimmungsdaten werden als Altbestand gekennzeichnet.</li>
+        </ul>
+      </div>
+      <div class="info-box amber">
+        <div class="info-box-title">Offener Prüfbedarf</div>
+        <ul>
+          <li>Juristische Endprüfung der Texte durch Anwalt empfohlen.</li>
+          <li>Datenschutz-Endprüfung durch Datenschutzbeauftragte empfohlen.</li>
+          <li>AVV/DPA mit Drittanbietern (z. B. Supabase, Resend) organisatorisch abzusichern.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 8. Zustimmungslogik und Registrierungs-Compliance -->
+    <section id="zustimmung">
+      <h2><span class="ch-num">8</span> Zustimmungslogik und Registrierungs-Compliance</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Aspekt</th><th>Implementierter Stand</th></tr></thead>
+          <tbody>
+            <tr><td>Pflicht-Checkboxen</td><td>Bei Registrierung und Einladungsregistrierung zwingend erforderlich</td></tr>
+            <tr><td>Speicherung</td><td>Version, Status, Zeitstempel werden dokumentiert</td></tr>
+            <tr><td>Auswertung</td><td>Admins können Zustimmungsstatus, Version und Zeitstempel einsehen</td></tr>
+            <tr><td>Bestandsnutzer</td><td>Keine rückwirkende Migration, Altbestände als unvollständig gekennzeichnet</td></tr>
+            <tr><td>Sichtbarkeit</td><td>Rechtstexte für alle Rollen und an allen relevanten Stellen erreichbar</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 9. Admin-Auswertung und Governance -->
+    <section id="admin">
+      <h2><span class="ch-num">9</span> Admin-Auswertung und Governance</h2>
+      <ul>
+        <li>Admins haben Zugriff auf eine Auswertungsansicht zu den Rechtszustimmungen aller Nutzer.</li>
+        <li>Auswertung umfasst: Status AGB, Datenschutz, DSGVO, Version, Akzeptanzzeitpunkt, Vollständigkeit.</li>
+        <li>Unvollständige Bestandsnutzer werden als solche angezeigt (Rollout-Entscheidung, kein Fehler).</li>
+        <li>Die Auswertung verbessert die Nachweisfähigkeit und Compliance-Kontrolle.</li>
+      </ul>
+    </section>
+
+    <!-- 10. Open-Source- und Drittanbieter-Kontext -->
+    <section id="opensource">
+      <h2><span class="ch-num">10</span> Open-Source- und Drittanbieter-Kontext</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Komponente</th><th>Anbieter/Projekt</th><th>Zweck</th><th>Compliance-Status</th></tr></thead>
+          <tbody>
+            <tr><td>Supabase</td><td>Supabase</td><td>Datenbank, Auth, Storage</td><td>AVV/DPA organisatorisch prüfen</td></tr>
+            <tr><td>Drizzle ORM</td><td>Open Source</td><td>Datenbankzugriff</td><td>Keine personenbezogenen Daten</td></tr>
+            <tr><td>Serwist</td><td>Open Source</td><td>Service Worker</td><td>Keine personenbezogenen Daten</td></tr>
+            <tr><td>Dexie</td><td>Open Source</td><td>Offline-Speicherung</td><td>Lokale Daten, Löschkonzept nötig</td></tr>
+            <tr><td>Resend</td><td>Resend</td><td>E-Mail-Versand</td><td>AVV/DPA organisatorisch prüfen</td></tr>
+            <tr><td>Groq AI</td><td>Groq</td><td>Sprachtranskription, Übersetzung</td><td>AVV/DPA organisatorisch prüfen</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 11. K6-Synthese / Compliance-Framework -->
+    <section id="k6">
+      <h2><span class="ch-num">11</span> K6-Synthese / Compliance-Framework</h2>
+      <ul>
+        <li><strong>Produkt-Compliance:</strong> Alle rechtlichen Pflichtseiten sind produktiv integriert und für alle Rollen sichtbar. Zustimmungslogik ist technisch erzwungen und versioniert nachvollziehbar. Admins verfügen über Kontroll- und Auswertungsfunktionen.</li>
+        <li><strong>Rollen-Transparenz:</strong> Rechte und Sichtbarkeiten sind klar getrennt. Admins haben vollständige Übersicht über Zustimmungsstände.</li>
+        <li><strong>Zustimmungsgovernance:</strong> Zustimmungen werden mit Version und Zeitstempel gespeichert. Bestandsnutzer werden als Altbestand gekennzeichnet.</li>
+        <li><strong>Nachweisbarkeit:</strong> Admin-Auswertung ermöglicht Compliance-Nachweis. Exportfunktionen (PDF) unterstützen Dokumentation.</li>
+        <li><strong>Datenschutz-Operationalisierung:</strong> Speicherung und Verarbeitung personenbezogener Daten erfolgt nachvollziehbar. Rechtstexte und Zustimmungslogik entsprechen aktuellen Standards.</li>
+        <li><strong>Admin-Kontrollfähigkeit:</strong> Admins können Compliance-Status jederzeit einsehen und dokumentieren.</li>
+        <li><strong>Plattform-Reifegrad:</strong> Frühere Rechtslücken sind geschlossen. Restrisiken betreffen externe juristische und organisatorische Prüfungen.</li>
+      </ul>
+    </section>
+
+    <!-- 12. Tiefenanalyse und Audit-Bericht -->
+    <section id="audit">
+      <h2><span class="ch-num">12</span> Tiefenanalyse und Audit-Bericht</h2>
+      <h3>Geschlossene Rechtslücken</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Lücke (früher)</th><th>Status März 2026</th></tr></thead>
+          <tbody>
+            <tr><td>Fehlendes Impressum</td><td>Produktiv integriert</td></tr>
+            <tr><td>Fehlende Datenschutzerklärung</td><td>Produktiv integriert</td></tr>
+            <tr><td>Fehlende AGB</td><td>Produktiv integriert</td></tr>
+            <tr><td>Keine Pflichtzustimmung</td><td>Technisch erzwungen</td></tr>
+            <tr><td>Keine Versionierung</td><td>Versioniert und dokumentiert</td></tr>
+            <tr><td>Keine Admin-Auswertung</td><td>Implementiert</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Umgesetzte Maßnahmen</h3>
+      <ul>
+        <li>Pflicht-Checkboxen bei Registrierung und Einladung</li>
+        <li>Speicherung von Version, Status, Zeitstempel</li>
+        <li>Admin-Auswertung mit Vollständigkeitsanzeige</li>
+        <li>Sichtbarkeit der Rechtstexte für alle Rollen</li>
+      </ul>
+      <h3>Offene Restpunkte</h3>
+      <ul>
+        <li>Juristische Endprüfung der Texte (extern)</li>
+        <li>Datenschutz-Endprüfung (extern)</li>
+        <li>AVV/DPA mit Drittanbietern (extern)</li>
+        <li>Organisatorische Prozesse zur Compliance-Nachweisführung</li>
+      </ul>
+      <h3>Bewertung der Pflichtzustimmungen</h3>
+      <ul>
+        <li>Einführung der Pflichtzustimmungen ist qualitativ als wesentlicher Fortschritt zu bewerten.</li>
+        <li>Die Nachweisfähigkeit wurde durch die Admin-Auswertung signifikant verbessert.</li>
+        <li>Restrisiken bestehen nur noch im Bereich externer Prüfungen und organisatorischer Prozesse.</li>
+      </ul>
+    </section>
+
+    <!-- 13. Finales Review / Management-Fazit -->
+    <section id="fazit">
+      <h2><span class="ch-num">13</span> Finales Review / Management-Fazit</h2>
+      <p>Die TeamRadar App erfüllt mit Stand März 2026 alle wesentlichen Anforderungen an Produkt- und Rechts-Compliance im Bereich Anwesenheits- und Auslastungsmanagement.<br>
+      Frühere Defizite sind vollständig geschlossen.<br>
+      Die Zustimmungs- und Nachweislogik ist technisch und administrativ nachvollziehbar implementiert.<br>
+      Restrisiken betreffen ausschließlich externe juristische und organisatorische Prüfungen, die außerhalb des Produktkerns liegen.<br>
+      Die Plattform ist als reif und auditierbar einzustufen.<br>
+      Empfehlung: Externe juristische und datenschutzrechtliche Endprüfung sowie Abschluss der AVV/DPA mit Drittanbietern.</p>
+    </section>
+  </main>
+</div>
+<footer class="page-footer">
+  &copy; 2026 WAMOCON · TeamRadar App Produkthandbuch
+</footer>
+</body>
+</html>

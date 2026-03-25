@@ -10,3 +10,4 @@ Entscheidungen TeamRadar
 8. Excel-Import/-Export als Hauptschnittstelle für Massenänderungen
 9. Keine native Mobile-App, Fokus auf Responsive Web
 10. DSGVO-Konformität durch Supabase-Hosting in EU
+11. Multi-Schema-Strategie mit Supabase

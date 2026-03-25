@@ -21,3 +21,9 @@ Technische Schnittstellenbeschreibung TeamRadar
 - Framework: fetch/axios
 - Auth: JWT im Header
 - Fehlerbehandlung: HTTP-Statuscodes
+
+5. Technische Details Supabase-Anbindung
+- Verbindung zu Supabase erfolgt über die offiziellen Client-Bibliotheken.
+- Das Schema wird dynamisch gesetzt, Migrationen und Policies werden automatisiert angewendet.
+- Fehlerquellen (z.B. falsches Schema, fehlende Rechte) werden im UI und in der Dokumentation behandelt.
+- Tests und Validierungschecks sind im Repository dokumentiert.

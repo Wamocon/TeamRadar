@@ -23,3 +23,9 @@ Fachliche Schnittstellenbeschreibung TeamRadar
 - Auslastung pro Team/Mitglied
 - Reports zu Verfügbarkeit, Auslastung
 - Export als Excel
+
+6. Technische Details Supabase-Anbindung
+- Verbindung zu Supabase erfolgt über die offiziellen Client-Bibliotheken.
+- Das Schema wird dynamisch gesetzt, Migrationen und Policies werden automatisiert angewendet.
+- Fehlerquellen (z.B. falsches Schema, fehlende Rechte) werden im UI und in der Dokumentation behandelt.
+- Tests und Validierungschecks sind im Repository dokumentiert.

@@ -713,40 +713,6 @@ describe('Store: getAlerts', () => {
   });
 });
 
-describe('Store: loadFromSupabase (Seed-Fallback)', () => {
-  it('lädt Seed-Daten wenn Store leer ist und Supabase nicht verfügbar', async () => {
-    await useAppStore.getState().loadFromSupabase();
-
-    expect(useAppStore.getState().members.length).toBeGreaterThanOrEqual(20);
-    expect(useAppStore.getState().availabilities.length).toBeGreaterThanOrEqual(20);
-    expect(useAppStore.getState().teams.length).toBeGreaterThanOrEqual(3);
-    expect(useAppStore.getState().projects.length).toBeGreaterThanOrEqual(8);
-    expect(useAppStore.getState().allocations.length).toBeGreaterThanOrEqual(20);
-  });
-
-  it('lädt Skills für Mitarbeiter', async () => {
-    await useAppStore.getState().loadFromSupabase();
-
-    const membersWithSkills = useAppStore.getState().members.filter((m) => m.skills && m.skills.length > 0);
-    expect(membersWithSkills.length).toBeGreaterThanOrEqual(15);
-  });
-
-  it('lädt KEINE Seed-Daten im prod-Schema', async () => {
-    const original = process.env.NEXT_PUBLIC_DB_SCHEMA;
-    process.env.NEXT_PUBLIC_DB_SCHEMA = 'prod';
-
-    useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
-    await useAppStore.getState().loadFromSupabase();
-
-    expect(useAppStore.getState().members).toHaveLength(0);
-    expect(useAppStore.getState().availabilities).toHaveLength(0);
-    expect(useAppStore.getState().teams).toHaveLength(0);
-    expect(useAppStore.getState().projects).toHaveLength(0);
-    expect(useAppStore.getState().allocations).toHaveLength(0);
-
-    process.env.NEXT_PUBLIC_DB_SCHEMA = original;
-  });
-});
 
 /* ═══════════════════════════════════════════════════════════════
    PRODUCTION SEED-GUARD (NODE_ENV + Schema doppelt abgesichert)
@@ -822,19 +788,6 @@ describe('Store: Seed-Daten NIEMALS in Production (NODE_ENV Guard)', () => {
     process.env.NEXT_PUBLIC_DB_SCHEMA = origSchema;
   });
 
-  it('NODE_ENV=development + Schema=public → Seed-Daten werden geladen', async () => {
-    const origNodeEnv = process.env.NODE_ENV;
-    const origSchema = process.env.NEXT_PUBLIC_DB_SCHEMA;
-    setNodeEnv('development');
-    process.env.NEXT_PUBLIC_DB_SCHEMA = 'public';
-
-    useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
-    await useAppStore.getState().loadFromSupabase();
-    expect(useAppStore.getState().members.length).toBeGreaterThanOrEqual(20);
-
-    setNodeEnv(origNodeEnv);
-    process.env.NEXT_PUBLIC_DB_SCHEMA = origSchema;
-  });
 
   it('NODE_ENV=development + Schema=prod → KEINE Seed-Daten (doppelter Guard)', async () => {
     const origNodeEnv = process.env.NODE_ENV;

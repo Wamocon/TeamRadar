@@ -1,0 +1,32 @@
+Architekturdokumentation TeamRadar
+
+1. Überblick
+- Web-App auf Basis von Next.js (React, TypeScript)
+- Supabase als Backend (Datenbank, Auth, Storage)
+- Zustand für State-Management
+- Tailwind CSS für UI
+
+2. Komponenten
+- Frontend: Next.js, React, Zustand, Tailwind
+- Backend: Supabase (PostgreSQL, Auth, Storage)
+- Deployment: Vercel
+
+3. Datenmodell (vereinfacht)
+- members (id, user_id, name, ...)
+- teams (id, user_id, name, member_ids, ...)
+- availabilities (id, user_id, member_id, status, ...)
+- projects (id, user_id, name, member_ids, ...)
+
+4. Authentifizierung & Sicherheit
+- Supabase Auth (JWT)
+- Row Level Security (RLS) für alle Tabellen
+- Zugriff nur auf eigene Daten
+
+5. Schnittstellen
+- REST-API von Supabase (CRUD auf Tabellen)
+- Excel-Import/-Export
+
+6. Besonderheiten
+- Mandantenfähigkeit über Schemata (prod, test, public)
+- Responsive Design
+- CI/CD via Vercel

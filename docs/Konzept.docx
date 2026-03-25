@@ -1,0 +1,48 @@
+Konzept TeamRadar
+
+1. Zielsetzung
+TeamRadar ist eine webbasierte Anwendung zur Verwaltung von Teams, Projekten und Verfügbarkeiten in Unternehmen. Ziel ist es, Transparenz über die Auslastung und Verfügbarkeit von Mitarbeitenden zu schaffen, die Teamplanung zu vereinfachen und die Zusammenarbeit zu fördern.
+
+2. Zielgruppe
+- Unternehmen mit projektbasiertem Arbeiten
+- Teamleiter, Projektmanager, HR
+- Mitarbeitende, die ihre Verfügbarkeit selbst pflegen
+
+3. Hauptfunktionen
+- Benutzerverwaltung mit Rollen (Admin, Manager, Member)
+- Teams und Mitglieder anlegen, bearbeiten, löschen
+- Verfügbarkeiten (Status, Zeiträume) erfassen und visualisieren
+- Projekte verwalten und Mitglieder zuweisen
+- Auslastungs- und Kalenderübersichten
+- Alerts und Reports
+- Excel-Import/-Export
+
+4. Technische Basis
+- Frontend: Next.js (React, TypeScript), Zustand, Tailwind CSS
+- Backend: Supabase (PostgreSQL, Auth, Storage)
+- Deployment: Vercel
+- Mandantenfähigkeit über Schemata (prod, test, public)
+
+5. Sicherheit & Datenschutz
+- Authentifizierung über Supabase Auth
+- Zugriffsbeschränkung durch RLS-Policies
+- DSGVO-konforme Speicherung (EU-Hosting)
+
+6. Bedienkonzept
+- Responsive Web-App für Desktop und Tablet
+- Intuitive, moderne UI mit Fokus auf Übersichtlichkeit
+- Filter- und Suchfunktionen für alle Kernbereiche
+- Self-Service für Mitarbeitende (eigene Verfügbarkeiten pflegen)
+
+7. Erweiterbarkeit
+- Modularer Aufbau für spätere Erweiterungen (z.B. weitere Auswertungen, Integrationen)
+- API-first-Ansatz für externe Anbindungen
+
+8. Abgrenzung
+- Keine native Mobile-App (Fokus auf Web)
+- Keine komplexe Ressourcenplanung, sondern Fokus auf Transparenz und einfache Bedienung
+
+9. Erfolgskriterien
+- Schnelle Erfassung und Übersicht von Verfügbarkeiten
+- Einfache Team- und Projektverwaltung
+- Hohe Akzeptanz bei Nutzern durch intuitive Bedienung

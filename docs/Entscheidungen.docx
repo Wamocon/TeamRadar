@@ -1,0 +1,12 @@
+Entscheidungen TeamRadar
+
+1. Architektur: Next.js + Supabase (statt klassisches Backend)
+2. Authentifizierung: Supabase Auth (statt eigener Lösung)
+3. Datenhaltung: Mandantenfähigkeit über Schemata (prod, test, public)
+4. Sicherheit: RLS-Policies für alle Tabellen
+5. UI: Tailwind CSS für schnelle Entwicklung
+6. State-Management: Zustand (statt Redux)
+7. Deployment: Vercel (statt eigener Server)
+8. Excel-Import/-Export als Hauptschnittstelle für Massenänderungen
+9. Keine native Mobile-App, Fokus auf Responsive Web
+10. DSGVO-Konformität durch Supabase-Hosting in EU

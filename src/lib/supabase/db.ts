@@ -3,9 +3,22 @@
  * Alle Funktionen spiegeln die Store-Aktionen, persistieren aber in Supabase.
  */
 import { createClient } from '@/lib/supabase/client';
-import type { Member, Availability, Team, Project } from '@/types';
+import type { Member, Availability, Team, Project, Allocation } from '@/types';
 
 /* ── Hilfsfunktionen: DB-Rows ↔ App-Typen ──────────────── */
+
+function rowToMember(row: Record<string, unknown>): Member {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    email: row.email as string,
+    role: row.role as string,
+    department: row.department as string,
+    avatarUrl: row.avatar_url as string | undefined,
+    phone: row.phone as string | undefined,
+    createdAt: row.created_at as string,
+  };
+}
 
 function memberToRow(member: Member, userId: string) {
   return {
@@ -20,16 +33,15 @@ function memberToRow(member: Member, userId: string) {
   };
 }
 
-function rowToMember(row: Record<string, unknown>): Member {
+function rowToAvailability(row: Record<string, unknown>): Availability {
   return {
     id: row.id as string,
-    name: row.name as string,
-    email: row.email as string,
-    role: row.role as string,
-    department: row.department as string,
-    avatarUrl: row.avatar_url as string | undefined,
-    phone: row.phone as string | undefined,
-    createdAt: row.created_at as string,
+    memberId: row.member_id as string,
+    status: row.status as Availability['status'],
+    date: row.date as string,
+    startTime: row.start_time as string | undefined,
+    endTime: row.end_time as string | undefined,
+    note: row.note as string | undefined,
   };
 }
 
@@ -46,15 +58,12 @@ function availabilityToRow(entry: Availability, userId: string) {
   };
 }
 
-function rowToAvailability(row: Record<string, unknown>): Availability {
+function rowToTeam(row: Record<string, unknown>): Team {
   return {
     id: row.id as string,
-    memberId: row.member_id as string,
-    status: row.status as Availability['status'],
-    date: row.date as string,
-    startTime: row.start_time as string | undefined,
-    endTime: row.end_time as string | undefined,
-    note: row.note as string | undefined,
+    name: row.name as string,
+    description: row.description as string | undefined,
+    memberIds: (row.member_ids as string[]) ?? [],
   };
 }
 
@@ -68,12 +77,18 @@ function teamToRow(team: Team, userId: string) {
   };
 }
 
-function rowToTeam(row: Record<string, unknown>): Team {
+function rowToProject(row: Record<string, unknown>): Project {
   return {
     id: row.id as string,
     name: row.name as string,
+    type: row.type as Project['type'],
+    status: row.status as Project['status'],
+    client: row.client as string | undefined,
     description: row.description as string | undefined,
     memberIds: (row.member_ids as string[]) ?? [],
+    startDate: row.start_date as string | undefined,
+    endDate: row.end_date as string | undefined,
+    createdAt: row.created_at as string,
   };
 }
 
@@ -92,18 +107,26 @@ function projectToRow(project: Project, userId: string) {
   };
 }
 
-function rowToProject(row: Record<string, unknown>): Project {
+function rowToAllocation(row: Record<string, unknown>): Allocation {
   return {
     id: row.id as string,
-    name: row.name as string,
-    type: row.type as Project['type'],
-    status: row.status as Project['status'],
-    client: row.client as string | undefined,
-    description: row.description as string | undefined,
-    memberIds: (row.member_ids as string[]) ?? [],
-    startDate: row.start_date as string | undefined,
-    endDate: row.end_date as string | undefined,
-    createdAt: row.created_at as string,
+    projectId: row.project_id as string,
+    memberId: row.member_id as string,
+    percentage: row.percentage as number,
+    startDate: row.start_date as string,
+    endDate: row.end_date as string,
+  };
+}
+
+function allocationToRow(alloc: Allocation, userId: string) {
+  return {
+    id: alloc.id,
+    user_id: userId,
+    member_id: alloc.memberId,
+    project_id: alloc.projectId,
+    percentage: alloc.percentage,
+    start_date: alloc.startDate,
+    end_date: alloc.endDate,
   };
 }
 
@@ -131,24 +154,28 @@ export async function loadAllData() {
     { data: availabilityRows, error: aError },
     { data: teamRows, error: tError },
     { data: projectRows, error: pError },
+    { data: allocationRows, error: alError },
   ] = await Promise.all([
     supabase.from('members').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
     supabase.from('availabilities').select('*').eq('user_id', userId).order('date', { ascending: true }),
     supabase.from('teams').select('*').eq('user_id', userId).order('name', { ascending: true }),
     supabase.from('projects').select('*').eq('user_id', userId).order('name', { ascending: true }),
+    supabase.from('allocations').select('*').eq('user_id', userId),
   ]);
 
   if (mError) throw mError;
   if (aError) throw aError;
   if (tError) throw tError;
   if (pError) throw pError;
+  if (alError) throw alError;
 
   const members = (memberRows ?? []).map(rowToMember);
   const availabilities = (availabilityRows ?? []).map(rowToAvailability);
   const teams = (teamRows ?? []).map(rowToTeam);
   const projects = (projectRows ?? []).map(rowToProject);
+  const allocations = (allocationRows ?? []).map(rowToAllocation);
 
-  return { members, availabilities, teams, projects };
+  return { members, availabilities, teams, projects, allocations };
 }
 
 /* ── Members ──────────────────────────────────────────────── */
@@ -173,6 +200,7 @@ export async function dbDeleteMember(id: string) {
   if (!isSupabaseConfigured()) return;
   const supabase = createClient();
   await supabase.from('availabilities').delete().eq('member_id', id);
+  await supabase.from('allocations').delete().eq('member_id', id);
   await supabase.from('members').delete().eq('id', id);
 }
 
@@ -245,5 +273,30 @@ export async function dbUpdateProject(project: Project) {
 export async function dbDeleteProject(id: string) {
   if (!isSupabaseConfigured()) return;
   const supabase = createClient();
+  await supabase.from('allocations').delete().eq('project_id', id);
   await supabase.from('projects').delete().eq('id', id);
+}
+
+/* ── Allocations ──────────────────────────────────────────── */
+
+export async function dbAddAllocation(alloc: Allocation) {
+  if (!isSupabaseConfigured()) return;
+  const userId = await getUserId();
+  if (!userId) return;
+  const supabase = createClient();
+  await supabase.from('allocations').insert(allocationToRow(alloc, userId));
+}
+
+export async function dbUpdateAllocation(alloc: Allocation) {
+  if (!isSupabaseConfigured()) return;
+  const userId = await getUserId();
+  if (!userId) return;
+  const supabase = createClient();
+  await supabase.from('allocations').update(allocationToRow(alloc, userId)).eq('id', alloc.id);
+}
+
+export async function dbDeleteAllocation(id: string) {
+  if (!isSupabaseConfigured()) return;
+  const supabase = createClient();
+  await supabase.from('allocations').delete().eq('id', id);
 }

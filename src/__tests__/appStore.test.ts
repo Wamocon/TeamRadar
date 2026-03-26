@@ -21,6 +21,9 @@ vi.mock('@/lib/supabase/db', () => ({
   dbAddProject: vi.fn(),
   dbUpdateProject: vi.fn(),
   dbDeleteProject: vi.fn(),
+  dbAddAllocation: vi.fn(),
+  dbUpdateAllocation: vi.fn(),
+  dbDeleteAllocation: vi.fn(),
 }));
 
 // Store vor jedem Test zurücksetzen

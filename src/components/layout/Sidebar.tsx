@@ -19,9 +19,13 @@ import {
   FileDown,
   CalendarRange,
 } from 'lucide-react';
+
 import { STATUS_CONFIG, PROJECT_TYPE_CONFIG } from '@/types';
+import { useEffect, useState } from 'react';
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const pathname = usePathname();
   const members = useAppStore((s) => s.members);
   const availabilities = useAppStore((s) => s.availabilities);
@@ -46,7 +50,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     { href: '/projects', icon: Briefcase, label: 'Projekte', exact: false },
     { href: '/utilization', icon: BarChart3, label: 'Auslastung', exact: true },
     { href: '/year', icon: CalendarRange, label: 'Jahresübersicht', exact: true },
-    { href: '/alerts', icon: AlertTriangle, label: 'Alerts', exact: true, badge: alertCount > 0 ? alertCount : undefined },
+    { href: '/alerts', icon: AlertTriangle, label: 'Alerts', exact: true, badge: mounted && alertCount > 0 ? alertCount : undefined },
     { href: '/reports', icon: FileDown, label: 'Reports', exact: true },
   ];
 

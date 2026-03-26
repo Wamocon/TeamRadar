@@ -67,9 +67,29 @@ src/
 │   └── appStore.ts       # Zustand Store
 ├── types/
 │   └── index.ts          # TypeScript Interfaces
+
 └── middleware.ts          # Auth-Guard
 ```
 
+## Supabase Setup & Umgebungsmanagement
+
+- Die App nutzt Supabase als Datenbank mit den Schemas `public`, `test` und `prod`.
+- Das aktive Schema wird über die Umgebungsvariable `NEXT_PUBLIC_DB_SCHEMA` gesteuert (siehe `.env.local`).
+- Migrationen und Rechte siehe `README_SUPABASE.md` und `supabase/migrations/`.
+- Nach Änderungen an Migrationen oder .env: Projekt neu starten!
+
+## Validierung & Tests
+
+- Prüfe im UI-Debug-Bereich (oben rechts), ob das gewünschte Schema aktiv ist.
+- Die App zeigt nur Daten an, die zum eingeloggten Supabase-User gehören (user_id).
+- Nach dem Start: LocalStorage leeren, um Demo-Daten zu vermeiden.
+- Tests für Seed-Daten, Policies und Datenkonsistenz siehe `src/__tests__/`.
+
+## Troubleshooting
+
+- Hydration-Fehler: Badge-Rendering wurde angepasst, tritt nicht mehr auf.
+- Demo-Daten werden nicht mehr automatisch geladen.
+- Bei 404-Fehlern prüfen: Supabase-URL, Key, Schema, Policies, Authentifizierung.
 
 ## Setup
 

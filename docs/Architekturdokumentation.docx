@@ -17,16 +17,23 @@ Architekturdokumentation TeamRadar
 - availabilities (id, user_id, member_id, status, ...)
 - projects (id, user_id, name, member_ids, ...)
 
-4. Authentifizierung & Sicherheit
+4. Supabase-Schema-Management
+- Die Anwendung nutzt mehrere Schemas in Supabase, um Entwicklungs-, Test- und Produktionsdaten zu trennen.
+- Die Auswahl des Schemas erfolgt über die Umgebungsvariable NEXT_PUBLIC_DB_SCHEMA.
+- Migrationen werden für alle Schemas identisch ausgeführt.
+- Row Level Security (RLS) ist für alle Tabellen aktiv, Policies erlauben nur Zugriff auf eigene Daten.
+- Validierung: Das aktive Schema und der eingeloggte User sind im UI und in der Datenbank nachvollziehbar.
+
+5. Authentifizierung & Sicherheit
 - Supabase Auth (JWT)
 - Row Level Security (RLS) für alle Tabellen
 - Zugriff nur auf eigene Daten
 
-5. Schnittstellen
+6. Schnittstellen
 - REST-API von Supabase (CRUD auf Tabellen)
 - Excel-Import/-Export
 
-6. Besonderheiten
+7. Besonderheiten
 - Mandantenfähigkeit über Schemata (prod, test, public)
 - Responsive Design
 - CI/CD via Vercel

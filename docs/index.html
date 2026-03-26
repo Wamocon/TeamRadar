@@ -184,6 +184,18 @@
       </ul>
     </section>
 
+    <!-- Supabase Setup & Validierung -->
+    <section id="supabase-setup">
+      <h2><span class="ch-num">3a</span> Supabase Setup &amp; Validierung</h2>
+      <ul>
+        <li>Die App nutzt Supabase mit den Schemas <code>public</code>, <code>test</code> und <code>prod</code>.</li>
+        <li>Das aktive Schema wird über die Umgebungsvariable <code>NEXT_PUBLIC_DB_SCHEMA</code> gesteuert und ist im UI sichtbar.</li>
+        <li>Migrationen, Policies und Seed-Daten siehe <code>README_SUPABASE.md</code> und <code>supabase/migrations/</code>.</li>
+        <li>Nach Änderungen an Migrationen oder .env: Projekt neu starten!</li>
+        <li>Validierung: Im UI-Debug-Bereich (oben rechts) ist das aktive Schema sichtbar.</li>
+        <li>Tests und Validierungschecks sind im Code unter <code>src/__tests__/</code> dokumentiert.</li>
+      </ul>
+    </section>
     <!-- 4. Rollen- und Berechtigungskonzept -->
     <section id="rollen">
       <h2><span class="ch-num">4</span> Rollen- und Berechtigungskonzept</h2>

@@ -30,3 +30,12 @@ Anforderungsliste TeamRadar
 10. Sicherheit & Datenschutz
    - RLS-Policies in Supabase
    - DSGVO-konforme Speicherung
+11. Supabase Setup & Validierung
+   - Die Anwendung nutzt Supabase als Datenbank mit den Schemas public, test und prod.
+   - Das aktive Schema wird über die Umgebungsvariable NEXT_PUBLIC_DB_SCHEMA gesteuert.
+   - Migrationen und Rechte sind dokumentiert (siehe Projekthandbuch und README_SUPABASE.md).
+   - Nach Änderungen an Migrationen oder .env muss das Projekt neu gestartet werden.
+   - Die App zeigt nur Daten an, die zum eingeloggten Supabase-User gehören (user_id).
+   - Validierung: Im UI-Debug-Bereich (oben rechts) ist das aktive Schema sichtbar.
+   - Tests und Validierungschecks sind im Code unter __tests__ dokumentiert.
+

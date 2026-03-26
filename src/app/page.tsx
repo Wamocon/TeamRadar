@@ -83,10 +83,6 @@ export default function DashboardPage() {
 
   return (
     <div className="p-4 sm:p-6 max-w-[1400px] mx-auto space-y-6">
-      {/* Debug: Aktuelles Supabase-Schema anzeigen */}
-      <div style={{ position: 'absolute', top: 8, right: 16, background: '#222', color: '#fff', padding: '4px 12px', borderRadius: 6, fontSize: 14, zIndex: 1000 }}>
-        <b>Supabase Schema:</b> {process.env.NEXT_PUBLIC_DB_SCHEMA || 'public'}
-      </div>
       {/* ── Header ──────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
         <div>
@@ -206,10 +202,6 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="card-shimmer rounded-xl p-5">
-          {/* Debug: Aktuelles Supabase-Schema anzeigen */}
-          <div style={{ position: 'absolute', top: 8, right: 16, background: '#222', color: '#fff', padding: '4px 12px', borderRadius: 6, fontSize: 14, zIndex: 1000 }}>
-            <b>Supabase Schema:</b> {process.env.NEXT_PUBLIC_DB_SCHEMA || 'public'}
-          </div>
           <div className="flex items-center gap-2 mb-4">
             <Clock size={14} className="dark:text-white/40 text-gray-400" />
             <h2 className="text-xs font-bold dark:text-white/50 text-gray-600 uppercase tracking-wider">

@@ -19,8 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (!isAuthPage) {
       void loadFromSupabase();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAuthPage, loadFromSupabase]);
 
   if (isAuthPage) return <>{children}</>;
 

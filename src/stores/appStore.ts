@@ -14,6 +14,9 @@ import {
   dbAddProject,
   dbUpdateProject,
   dbDeleteProject,
+  dbAddAllocation,
+  dbUpdateAllocation,
+  dbDeleteAllocation,
 } from '@/lib/supabase/db';
 
 interface AppStore {
@@ -92,14 +95,16 @@ export const useAppStore = create<AppStore>()(
             availabilities: data.availabilities,
             teams: data.teams,
             projects: data.projects,
+            allocations: data.allocations,
             isLoading: false,
           });
         } else {
           // Kein User eingeloggt oder Supabase nicht konfiguriert
           set({ isLoading: false });
         }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Datenbankfehler';
+      } catch (err: any) {
+        console.error('loadFromSupabase error:', err);
+        const message = err?.message || (typeof err === 'string' ? err : 'Datenbankfehler');
         set({ isLoading: false, dbError: message });
       }
     },
@@ -238,6 +243,7 @@ export const useAppStore = create<AppStore>()(
     addAllocation: (data) => {
       const alloc: Allocation = { ...data, id: crypto.randomUUID() };
       set((state) => ({ allocations: [...state.allocations, alloc] }));
+      void dbAddAllocation(alloc);
       return alloc;
     },
 
@@ -245,10 +251,13 @@ export const useAppStore = create<AppStore>()(
       set((state) => ({
         allocations: state.allocations.map((a) => (a.id === id ? { ...a, ...data } : a)),
       }));
+      const updated = get().allocations.find((a) => a.id === id);
+      if (updated) void dbUpdateAllocation(updated);
     },
 
     deleteAllocation: (id) => {
       set((state) => ({ allocations: state.allocations.filter((a) => a.id !== id) }));
+      void dbDeleteAllocation(id);
     },
 
     getMemberUtilization: (memberId, date, projectType) => {

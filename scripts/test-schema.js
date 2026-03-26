@@ -22,3 +22,9 @@ const clientTest = createClient(url, key, { db: { schema: 'test' } });
 clientTest.from('members').select('*').limit(1).then(res => {
   console.log('TEST SCHEMA:', res);
 });
+
+// Check prod schema
+const clientProd = createClient(url, key, { db: { schema: 'prod' } });
+clientProd.from('members').select('*').limit(1).then(res => {
+  console.log('PROD SCHEMA:', res);
+});

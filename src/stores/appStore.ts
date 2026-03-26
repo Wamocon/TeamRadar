@@ -98,8 +98,9 @@ export const useAppStore = create<AppStore>()(
           // Kein User eingeloggt oder Supabase nicht konfiguriert
           set({ isLoading: false });
         }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Datenbankfehler';
+      } catch (err: any) {
+        console.error('loadFromSupabase error:', err);
+        const message = err?.message || (typeof err === 'string' ? err : 'Datenbankfehler');
         set({ isLoading: false, dbError: message });
       }
     },

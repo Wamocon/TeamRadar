@@ -127,16 +127,21 @@ export async function loadAllData() {
   if (!userId) return null;
 
   const [
-    { data: memberRows },
-    { data: availabilityRows },
-    { data: teamRows },
-    { data: projectRows },
+    { data: memberRows, error: mError },
+    { data: availabilityRows, error: aError },
+    { data: teamRows, error: tError },
+    { data: projectRows, error: pError },
   ] = await Promise.all([
     supabase.from('members').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
     supabase.from('availabilities').select('*').eq('user_id', userId).order('date', { ascending: true }),
     supabase.from('teams').select('*').eq('user_id', userId).order('name', { ascending: true }),
     supabase.from('projects').select('*').eq('user_id', userId).order('name', { ascending: true }),
   ]);
+
+  if (mError) throw mError;
+  if (aError) throw aError;
+  if (tError) throw tError;
+  if (pError) throw pError;
 
   const members = (memberRows ?? []).map(rowToMember);
   const availabilities = (availabilityRows ?? []).map(rowToAvailability);

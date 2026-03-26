@@ -1,5 +1,10 @@
--- TeamRadar – Supabase Schema
--- Dieses Skript erstellt die Tabellen für das TeamRadar-Projekt.
+-- ============================================================
+-- TeamRadar – Initiales Schema (public)
+-- Führe dieses Skript im Supabase SQL Editor aus.
+-- Setzt den search_path auf "public" (Standard).
+-- ============================================================
+
+SET search_path TO public;
 
 -- ── Members ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS members (
@@ -14,10 +19,8 @@ CREATE TABLE IF NOT EXISTS members (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Schnellzugriff nach User
 CREATE INDEX IF NOT EXISTS idx_members_user_id ON members(user_id);
 
--- RLS aktivieren
 ALTER TABLE members ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Eigene Members lesen" ON members;
@@ -79,3 +82,31 @@ DROP POLICY IF EXISTS "Eigene Teams ändern" ON teams;
 CREATE POLICY "Eigene Teams ändern" ON teams FOR UPDATE USING (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Eigene Teams löschen" ON teams;
 CREATE POLICY "Eigene Teams löschen" ON teams FOR DELETE USING (auth.uid() = user_id);
+
+-- ── Projects ─────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS projects (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name        TEXT NOT NULL,
+  type        TEXT NOT NULL CHECK (type IN ('internal','external')),
+  status      TEXT NOT NULL CHECK (status IN ('planned','active','completed','on_hold')),
+  client      TEXT,
+  description TEXT,
+  member_ids  UUID[] DEFAULT '{}',
+  start_date  DATE,
+  end_date    DATE,
+  created_at  TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
+
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Eigene Projects lesen" ON projects;
+CREATE POLICY "Eigene Projects lesen"  ON projects FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Eigene Projects erstellen" ON projects;
+CREATE POLICY "Eigene Projects erstellen" ON projects FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Eigene Projects ändern" ON projects;
+CREATE POLICY "Eigene Projects ändern" ON projects FOR UPDATE USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Eigene Projects löschen" ON projects;
+CREATE POLICY "Eigene Projects löschen" ON projects FOR DELETE USING (auth.uid() = user_id);

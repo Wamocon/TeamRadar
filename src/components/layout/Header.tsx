@@ -1,10 +1,11 @@
 'use client';
 import { useState } from 'react';
-import { Radar, Menu, LogOut, Plane, Clock } from 'lucide-react';
+import { Menu, LogOut, Plane, Clock } from 'lucide-react';
 import { useTheme } from '@/components/ui/ThemeProvider';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { AppPortal } from './AppPortal';
+import Image from 'next/image';
 
 export function Header({ onMenuToggle }: { onMenuToggle: () => void }) {
   const { theme } = useTheme();
@@ -62,8 +63,8 @@ export function Header({ onMenuToggle }: { onMenuToggle: () => void }) {
 
         {/* Logo */}
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-teal-400 flex items-center justify-center">
-            <Radar size={18} className="text-white" />
+          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center relative">
+            <Image src="/logo.png" alt="TeamRadar Logo" fill className="object-cover" />
           </div>
           <div>
             <div className="text-sm font-bold tracking-tight dark:text-white text-gray-900">

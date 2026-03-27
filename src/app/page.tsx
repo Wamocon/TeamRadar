@@ -7,9 +7,10 @@ import { DepartmentBars } from '@/components/dashboard/DepartmentBars';
 import { AvailabilityTimeline } from '@/components/dashboard/AvailabilityTimeline';
 import { SearchFilter } from '@/components/dashboard/SearchFilter';
 import { STATUS_CONFIG, type AvailabilityStatus, type ProjectType } from '@/types';
-import { Radar, CalendarClock, Plus, Clock, BarChart3, Users, LayoutGrid, List } from 'lucide-react';
+import { Globe, CalendarClock, Plus, Clock, BarChart3, Users, LayoutGrid, List } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function DashboardPage() {
   const members = useAppStore((s) => s.members);
@@ -123,8 +124,8 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-teal-400 flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <Radar size={20} className="text-white" />
+            <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center shadow-lg shadow-blue-500/20 border border-white/5 relative">
+              <Image src="/logo.png" alt="TeamRadar Logo" fill className="object-cover" />
             </div>
             Dashboard
           </h1>
@@ -162,7 +163,7 @@ export default function DashboardPage() {
           {[
             { label: 'Verfügbar', value: availableNow, color: '#22c55e', icon: Users, gradient: 'from-green-500/10 to-green-500/5' },
             { label: 'Im Meeting', value: inMeetings, color: '#f59e0b', icon: Clock, gradient: 'from-amber-500/10 to-amber-500/5' },
-            { label: 'Remote', value: remoteCount, color: '#3b82f6', icon: Radar, gradient: 'from-blue-500/10 to-blue-500/5' },
+            { label: 'Remote', value: remoteCount, color: '#3b82f6', icon: Globe, gradient: 'from-blue-500/10 to-blue-500/5' },
             { label: 'Urlaub / Krank', value: onVacation + (statusCounts.sick || 0), color: '#8b5cf6', icon: CalendarClock, gradient: 'from-violet-500/10 to-violet-500/5' },
           ].map((stat) => (
             <div key={stat.label} className={`stat-card card-shimmer rounded-xl p-4 bg-gradient-to-br ${stat.gradient}`}>

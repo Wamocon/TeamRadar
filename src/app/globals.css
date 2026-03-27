@@ -21,10 +21,27 @@ html::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.25); border-radius
   --bg-elevated:#1a2236;
   --bg-input:   #0f1729;
   --text-base:  #f1f5f9;
-  --text-muted: rgba(255,255,255,0.35);
-  --border:     rgba(255,255,255,0.08);
-  --glow-1:     rgba(59,130,246,0.06);
-  --glow-2:     rgba(20,184,166,0.035);
+  --text-muted: rgba(255,255,255,0.40);
+  --text-subtle: rgba(255,255,255,0.20);
+  --border:     rgba(255,255,255,0.12);
+  --border-subtle: rgba(255,255,255,0.06);
+
+  /* Brand – TeamRadar Blue */
+  --primary:      #3b82f6;
+  --primary-hover:#2563eb;
+  --primary-light: rgba(59,130,246,0.12);
+  --primary-glow: rgba(59,130,246,0.25);
+
+  /* Status */
+  --success:      #10b981;
+  --success-light: rgba(16,185,129,0.12);
+  --warning:      #f59e0b;
+  --warning-light: rgba(245,158,11,0.12);
+  --danger:       #ef4444;
+  --danger-light: rgba(239,68,68,0.12);
+
+  --glow-1:     rgba(59,130,246,0.08);
+  --glow-2:     rgba(20,184,166,0.04);
   --dot-grid:   rgba(255,255,255,0.018);
   --ring-focus: rgba(59,130,246,0.35);
   --glass:      rgba(17,24,39,0.6);

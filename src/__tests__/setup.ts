@@ -37,3 +37,5 @@ console.error = (...args: unknown[]) => {
 process.env.NEXT_PUBLIC_SUPABASE_URL = '';
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
 process.env.NEXT_PUBLIC_DB_SCHEMA = 'public';
+process.env.NEXT_PUBLIC_AWAY_URL = 'http://localhost:3001';
+process.env.NEXT_PUBLIC_TRACE_URL = 'http://localhost:3002';

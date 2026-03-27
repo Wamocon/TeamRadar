@@ -7,6 +7,12 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'TeamRadar – Verfügbarkeit im Blick',
   description: 'Mitarbeiter-Verfügbarkeit visualisieren und verwalten',
+  icons: {
+    icon: [
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    apple: '/favicon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

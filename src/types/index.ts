@@ -19,12 +19,13 @@ export const STATUS_CONFIG: Record<AvailabilityStatus, { label: string; color: s
 };
 
 /* ── Benutzerrollen ─────────────────────────────────────── */
-export type UserRole = 'admin' | 'manager' | 'member';
+export type UserRole = 'admin' | 'cio' | 'department_lead' | 'employee';
 
 export const USER_ROLE_HIERARCHY: Record<UserRole, number> = {
-  admin: 3,
-  manager: 2,
-  member: 1,
+  admin: 4,
+  cio: 3,
+  department_lead: 2,
+  employee: 1,
 };
 
 /* ── Team-Mitglied ──────────────────────────────────────── */

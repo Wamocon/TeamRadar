@@ -17,6 +17,7 @@ import {
   dbAddAllocation,
   dbUpdateAllocation,
   dbDeleteAllocation,
+  dbGetUserProfile,
 } from '@/lib/supabase/db';
 
 interface AppStore {
@@ -35,6 +36,7 @@ interface AppStore {
   /* ── Laden ─────────────────────────────────── */
   loadFromSupabase: () => Promise<void>;
   loadUserProfile: () => Promise<void>;
+  setUserProfile: (profile: UserProfile | null) => void;
 
   /* ── Mitarbeiter ───────────────────────────── */
   addMember: (member: Omit<Member, 'id' | 'createdAt'>) => Member;
@@ -80,7 +82,7 @@ export const useAppStore = create<AppStore>()(
     teams: [],
     projects: [],
     allocations: [],
-    userProfile: null,
+    userProfile: process.env.NODE_ENV !== 'production' ? { id: 'mock-1', email: 'admin@dev.local', displayName: 'Dev Admin', role: 'admin' } : null,
     isLoading: false,
     dbError: null,
 
@@ -88,6 +90,9 @@ export const useAppStore = create<AppStore>()(
     loadFromSupabase: async () => {
       set({ isLoading: true, dbError: null });
       try {
+        // Zuerst Profil laden für RBAC
+        await get().loadUserProfile();
+        
         const data = await loadAllData();
         if (data) {
           set({
@@ -110,8 +115,13 @@ export const useAppStore = create<AppStore>()(
     },
 
     loadUserProfile: async () => {
-      // Wird in der Supabase-Integration implementiert
+      const profile = await dbGetUserProfile();
+      if (profile) {
+        set({ userProfile: profile as UserProfile });
+      }
     },
+
+    setUserProfile: (profile) => set({ userProfile: profile }),
 
     /* ── Mitarbeiter ─────────────────────────── */
     addMember: (data) => {
@@ -151,6 +161,16 @@ export const useAppStore = create<AppStore>()(
 
     /* ── Verfügbarkeit ─────────────────────────── */
     addAvailability: (data) => {
+      // Prüfen, ob für diesen Tag und diesen Member bereits ein Eintrag existiert (Ganztagesstatus)
+      const existing = get().availabilities.find(
+        (a) => a.memberId === data.memberId && a.date === data.date && !a.startTime && !a.endTime
+      );
+
+      if (existing) {
+        get().updateAvailability(existing.id, { status: data.status });
+        return { ...existing, status: data.status };
+      }
+
       const entry: Availability = { ...data, id: crypto.randomUUID() };
       set((state) => ({ availabilities: [...state.availabilities, entry] }));
       void dbAddAvailability(entry);
@@ -357,7 +377,7 @@ export const useAppStore = create<AppStore>()(
     hasMinRole: (minRole) => {
       const profile = get().userProfile;
       if (!profile) return false;
-      const hierarchy: Record<UserRole, number> = { admin: 3, manager: 2, member: 1 };
+      const hierarchy: Record<UserRole, number> = { admin: 4, cio: 3, department_lead: 2, employee: 1 };
       return hierarchy[profile.role] >= hierarchy[minRole];
     },
   })

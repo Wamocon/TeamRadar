@@ -10,6 +10,8 @@ export default function TeamsPage() {
   const addTeam = useAppStore((s) => s.addTeam);
   const updateTeam = useAppStore((s) => s.updateTeam);
   const deleteTeam = useAppStore((s) => s.deleteTeam);
+  const hasMinRole = useAppStore((s) => s.hasMinRole);
+  const isAdmin = hasMinRole('admin');
 
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [showForm, setShowForm] = useState(false);
@@ -34,7 +36,7 @@ export default function TeamsPage() {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
+    <div className="p-6 w-full space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
@@ -49,13 +51,15 @@ export default function TeamsPage() {
         </div>
         <div className="flex items-center gap-3">
           <ViewToggle value={viewMode} onChange={setViewMode} />
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
-          >
-            <Plus size={14} />
-            Neues Team
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
+            >
+              <Plus size={14} />
+              Neues Team
+            </button>
+          )}
         </div>
       </div>
 
@@ -156,16 +160,18 @@ export default function TeamsPage() {
                       <p className="text-xs dark:text-white/40 text-gray-500 mt-0.5">{team.description}</p>
                     )}
                   </div>
-                  <button
-                    onClick={() => {
-                      if (confirm(`Team "${team.name}" wirklich löschen?`)) {
-                        deleteTeam(team.id);
-                      }
-                    }}
-                    className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all bg-transparent border-none cursor-pointer"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => {
+                        if (confirm(`Team "${team.name}" wirklich löschen?`)) {
+                          deleteTeam(team.id);
+                        }
+                      }}
+                      className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all bg-transparent border-none cursor-pointer"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {teamMembers.length > 0 ? (

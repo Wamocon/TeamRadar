@@ -22,6 +22,7 @@ export function AvailabilityForm({ memberId, date, onClose }: Props) {
 
   const [selectedMember, setSelectedMember] = useState(memberId ?? '');
   const [selectedDate, setSelectedDate] = useState(date ?? new Date().toISOString().slice(0, 10));
+  const [endDate, setEndDate] = useState(date ?? new Date().toISOString().slice(0, 10));
   const [status, setStatus] = useState<AvailabilityStatus>('available');
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('17:00');
@@ -31,14 +32,23 @@ export function AvailabilityForm({ memberId, date, onClose }: Props) {
     e.preventDefault();
     if (!selectedMember || !selectedDate) return;
 
-    addAvailability({
-      memberId: selectedMember,
-      status,
-      date: selectedDate,
-      startTime: startTime || undefined,
-      endTime: endTime || undefined,
-      note: note || undefined,
-    });
+    // Zeitraum-Logik
+    const start = new Date(selectedDate);
+    const end = new Date(endDate || selectedDate);
+    
+    const current = new Date(start);
+    while (current <= end) {
+      const dateStr = current.toISOString().slice(0, 10);
+      addAvailability({
+        memberId: selectedMember,
+        status,
+        date: dateStr,
+        startTime: startTime || undefined,
+        endTime: endTime || undefined,
+        note: note || undefined,
+      });
+      current.setDate(current.getDate() + 1);
+    }
 
     onClose?.();
   };
@@ -62,17 +72,32 @@ export function AvailabilityForm({ memberId, date, onClose }: Props) {
         </div>
       )}
 
-      <div>
-        <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Datum *</label>
-        <div className="relative">
-          <CalendarDays size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-lg border text-sm"
-            required
-          />
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Von Datum *</label>
+          <div className="relative">
+            <CalendarDays size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 rounded-lg border text-sm"
+              required
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Bis Datum *</label>
+          <div className="relative">
+            <CalendarDays size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 rounded-lg border text-sm"
+              required
+            />
+          </div>
         </div>
       </div>
 

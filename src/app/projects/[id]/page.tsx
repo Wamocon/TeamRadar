@@ -33,7 +33,7 @@ export default function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className="p-6 max-w-3xl mx-auto text-center py-20">
+      <div className="p-6 w-full text-center py-20">
         <h2 className="text-lg font-bold dark:text-white/60 text-gray-500">Projekt nicht gefunden</h2>
         <Link href="/projects" className="text-sm text-blue-500 hover:text-blue-600 mt-2 inline-block">
           ← Zurück zu Projekte
@@ -58,7 +58,7 @@ export default function ProjectDetailPage() {
   const totalAllocationPercent = allocations.reduce((s, a) => s + a.percentage, 0);
 
   return (
-    <div className="p-4 sm:p-6 max-w-[1000px] mx-auto space-y-6 animate-fade-in">
+    <div className="p-4 sm:p-6 w-full space-y-6 animate-fade-in">
       {/* Top nav */}
       <Link href="/projects" className="inline-flex items-center gap-1.5 text-xs dark:text-white/40 text-gray-500 hover:text-blue-500 transition-colors">
         <ArrowLeft size={12} /> Zurück zu Projekte

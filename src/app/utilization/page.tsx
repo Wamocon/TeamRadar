@@ -88,7 +88,7 @@ export default function UtilizationPage() {
     util > 100 ? '#ef4444' : util >= 80 ? '#f59e0b' : util > 0 ? '#22c55e' : '#6b7280';
 
   return (
-    <div className="p-4 sm:p-6 max-w-[1200px] mx-auto space-y-6">
+    <div className="p-4 sm:p-6 w-full space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
         <div>

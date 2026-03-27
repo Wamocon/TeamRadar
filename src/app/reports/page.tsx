@@ -307,7 +307,7 @@ export default function ReportsPage() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 max-w-[1000px] mx-auto space-y-6 animate-fade-in">
+    <div className="p-4 sm:p-6 w-full space-y-6 animate-fade-in">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">

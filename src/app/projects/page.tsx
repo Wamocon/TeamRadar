@@ -27,6 +27,8 @@ export default function ProjectsPage() {
   const addProject = useAppStore((s) => s.addProject);
   const updateProject = useAppStore((s) => s.updateProject);
   const deleteProject = useAppStore((s) => s.deleteProject);
+  const hasMinRole = useAppStore((s) => s.hasMinRole);
+  const isAdmin = hasMinRole('admin');
 
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -112,7 +114,7 @@ export default function ProjectsPage() {
   const externalCount = projects.filter((p) => p.type === 'external').length;
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
+    <div className="p-6 w-full space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -128,13 +130,15 @@ export default function ProjectsPage() {
         </div>
         <div className="flex items-center gap-3">
           <ViewToggle value={viewMode} onChange={setViewMode} />
-          <button
-            onClick={() => { resetForm(); setShowForm(!showForm); }}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-sm font-semibold hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-md shadow-indigo-500/20"
-          >
-            <Plus size={14} />
-            Neues Projekt
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => { resetForm(); setShowForm(!showForm); }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-sm font-semibold hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-md shadow-indigo-500/20"
+            >
+              <Plus size={14} />
+              Neues Projekt
+            </button>
+          )}
         </div>
       </div>
 
@@ -310,14 +314,18 @@ export default function ProjectsPage() {
                     )}
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <button onClick={() => openEdit(project.id)}
-                      className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-indigo-500 hover:bg-indigo-500/10 transition-all bg-transparent border-none cursor-pointer">
-                      <Edit3 size={14} />
-                    </button>
-                    <button onClick={() => { if (confirm(`Projekt "${project.name}" wirklich löschen?`)) deleteProject(project.id); }}
-                      className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all bg-transparent border-none cursor-pointer">
-                      <Trash2 size={14} />
-                    </button>
+                    {isAdmin && (
+                      <>
+                        <button onClick={() => openEdit(project.id)}
+                          className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-indigo-500 hover:bg-indigo-500/10 transition-all bg-transparent border-none cursor-pointer">
+                          <Edit3 size={14} />
+                        </button>
+                        <button onClick={() => { if (confirm(`Projekt "${project.name}" wirklich löschen?`)) deleteProject(project.id); }}
+                          className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all bg-transparent border-none cursor-pointer">
+                          <Trash2 size={14} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 

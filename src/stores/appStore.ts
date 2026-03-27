@@ -35,6 +35,7 @@ interface AppStore {
   /* ── Laden ─────────────────────────────────── */
   loadFromSupabase: () => Promise<void>;
   loadUserProfile: () => Promise<void>;
+  setUserProfile: (profile: UserProfile | null) => void;
 
   /* ── Mitarbeiter ───────────────────────────── */
   addMember: (member: Omit<Member, 'id' | 'createdAt'>) => Member;
@@ -80,7 +81,7 @@ export const useAppStore = create<AppStore>()(
     teams: [],
     projects: [],
     allocations: [],
-    userProfile: null,
+    userProfile: process.env.NODE_ENV !== 'production' ? { id: 'mock-1', email: 'admin@dev.local', displayName: 'Dev Admin', role: 'admin' } : null,
     isLoading: false,
     dbError: null,
 
@@ -112,6 +113,8 @@ export const useAppStore = create<AppStore>()(
     loadUserProfile: async () => {
       // Wird in der Supabase-Integration implementiert
     },
+
+    setUserProfile: (profile) => set({ userProfile: profile }),
 
     /* ── Mitarbeiter ─────────────────────────── */
     addMember: (data) => {

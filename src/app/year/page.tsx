@@ -283,7 +283,7 @@ export default function YearOverviewPage() {
   }, [year, consultantMonth, members, availabilities, allocations, projects]);
 
   return (
-    <div className="p-4 sm:p-6 max-w-[1400px] mx-auto space-y-6 animate-fade-in">
+    <div className="p-4 sm:p-6 w-full space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>

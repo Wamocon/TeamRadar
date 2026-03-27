@@ -11,6 +11,8 @@ import { useRouter } from 'next/navigation';
 export default function MembersPage() {
   const members = useAppStore((s) => s.members);
   const deleteMember = useAppStore((s) => s.deleteMember);
+  const hasMinRole = useAppStore((s) => s.hasMinRole);
+  const isAdmin = hasMinRole('admin');
   const router = useRouter();
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [showImport, setShowImport] = useState(false);
@@ -18,7 +20,7 @@ export default function MembersPage() {
   const departments = [...new Set(members.map((m) => m.department).filter(Boolean))];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
+    <div className="p-6 w-full space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
@@ -33,20 +35,24 @@ export default function MembersPage() {
         </div>
         <div className="flex items-center gap-3">
           <ViewToggle value={viewMode} onChange={setViewMode} />
-          <button
-            onClick={() => setShowImport(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border dark:border-white/10 border-gray-200 text-sm font-medium dark:text-white/70 text-gray-600 hover:bg-green-500/10 hover:text-green-500 hover:border-green-500/30 transition-all bg-transparent cursor-pointer"
-          >
-            <FileSpreadsheet size={14} />
-            Excel-Import
-          </button>
-          <Link
-            href="/members/new"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors no-underline"
-          >
-            <Plus size={14} />
-            Neu anlegen
-          </Link>
+          {isAdmin && (
+            <>
+              <button
+                onClick={() => setShowImport(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border dark:border-white/10 border-gray-200 text-sm font-medium dark:text-white/70 text-gray-600 hover:bg-green-500/10 hover:text-green-500 hover:border-green-500/30 transition-all bg-transparent cursor-pointer"
+              >
+                <FileSpreadsheet size={14} />
+                Excel-Import
+              </button>
+              <Link
+                href="/members/new"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors no-underline"
+              >
+                <Plus size={14} />
+                Neu anlegen
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -61,13 +67,15 @@ export default function MembersPage() {
           <p className="text-sm dark:text-white/30 text-gray-400 mt-1 max-w-sm">
             Lege deinen ersten Mitarbeiter an, um dessen Verfügbarkeit zu verwalten.
           </p>
-          <Link
-            href="/members/new"
-            className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors no-underline"
-          >
-            <Plus size={14} />
-            Ersten Mitarbeiter anlegen
-          </Link>
+          {isAdmin && (
+            <Link
+              href="/members/new"
+              className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors no-underline"
+            >
+              <Plus size={14} />
+              Ersten Mitarbeiter anlegen
+            </Link>
+          )}
         </div>
       ) : (
         <>
@@ -83,24 +91,28 @@ export default function MembersPage() {
                     <MemberCard member={member} />
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    <Link
-                      href={`/members/${member.id}/edit`}
-                      className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all no-underline"
-                      title="Bearbeiten"
-                    >
-                      <Pencil size={14} />
-                    </Link>
-                    <button
-                      onClick={() => {
-                        if (confirm(`"${member.name}" wirklich löschen?`)) {
-                          deleteMember(member.id);
-                        }
-                      }}
-                      className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all bg-transparent border-none cursor-pointer"
-                      title="Löschen"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {isAdmin && (
+                      <>
+                        <Link
+                          href={`/members/${member.id}/edit`}
+                          className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all no-underline"
+                          title="Bearbeiten"
+                        >
+                          <Pencil size={14} />
+                        </Link>
+                        <button
+                          onClick={() => {
+                            if (confirm(`"${member.name}" wirklich löschen?`)) {
+                              deleteMember(member.id);
+                            }
+                          }}
+                          className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all bg-transparent border-none cursor-pointer"
+                          title="Löschen"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}
@@ -111,24 +123,28 @@ export default function MembersPage() {
                 <div key={member.id} className="relative group/card">
                   <MemberCard member={member} />
                   <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
-                    <Link
-                      href={`/members/${member.id}/edit`}
-                      className="p-1.5 rounded-lg bg-white/90 dark:bg-gray-800/90 text-gray-400 hover:text-blue-500 transition-all no-underline shadow-sm"
-                      title="Bearbeiten"
-                    >
-                      <Pencil size={12} />
-                    </Link>
-                    <button
-                      onClick={() => {
-                        if (confirm(`"${member.name}" wirklich löschen?`)) {
-                          deleteMember(member.id);
-                        }
-                      }}
-                      className="p-1.5 rounded-lg bg-white/90 dark:bg-gray-800/90 text-gray-400 hover:text-red-500 transition-all border-none cursor-pointer shadow-sm"
-                      title="Löschen"
-                    >
-                      <Trash2 size={12} />
-                    </button>
+                    {isAdmin && (
+                      <>
+                        <Link
+                          href={`/members/${member.id}/edit`}
+                          className="p-1.5 rounded-lg bg-white/90 dark:bg-gray-800/90 text-gray-400 hover:text-blue-500 transition-all no-underline shadow-sm"
+                          title="Bearbeiten"
+                        >
+                          <Pencil size={12} />
+                        </Link>
+                        <button
+                          onClick={() => {
+                            if (confirm(`"${member.name}" wirklich löschen?`)) {
+                              deleteMember(member.id);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg bg-white/90 dark:bg-gray-800/90 text-gray-400 hover:text-red-500 transition-all border-none cursor-pointer shadow-sm"
+                          title="Löschen"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}

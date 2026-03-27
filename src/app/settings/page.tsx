@@ -3,7 +3,7 @@ import { Settings } from 'lucide-react';
 
 export default function SettingsPage() {
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-6">
+    <div className="p-6 w-full space-y-6">
       <div>
         <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-teal-400/20 border border-blue-500/20 flex items-center justify-center">

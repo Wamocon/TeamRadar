@@ -18,6 +18,8 @@ import {
   AlertTriangle,
   FileDown,
   CalendarRange,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 
 import { STATUS_CONFIG, PROJECT_TYPE_CONFIG } from '@/types';
@@ -33,7 +35,14 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const projects = useAppStore((s) => s.projects);
   const getMemberStatus = useAppStore((s) => s.getMemberStatus);
   const getAlerts = useAppStore((s) => s.getAlerts);
+  const hasMinRole = useAppStore((s) => s.hasMinRole);
+  const userProfile = useAppStore((s) => s.userProfile);
+  const setUserProfile = useAppStore((s) => s.setUserProfile);
   const { theme, setTheme } = useTheme();
+
+  const [isTodayOpen, setIsTodayOpen] = useState(false);
+  const [isProjectsOpen, setIsProjectsOpen] = useState(false);
+  const [isTeamsOpen, setIsTeamsOpen] = useState(false);
 
   const today = new Date().toISOString().slice(0, 10);
   const availableCount = members.filter((m) => getMemberStatus(m.id, today) === 'available').length;
@@ -44,7 +53,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const navItems = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
     { href: '/members', icon: Users, label: 'Mitarbeiter', exact: false },
-    { href: '/members/new', icon: UserPlus, label: 'Neu anlegen', exact: true },
+    { href: '/members/new', icon: UserPlus, label: 'Neu anlegen', exact: true, adminOnly: true },
     { href: '/calendar', icon: CalendarDays, label: 'Kalender', exact: true },
     { href: '/teams', icon: FolderKanban, label: 'Teams', exact: false },
     { href: '/projects', icon: Briefcase, label: 'Projekte', exact: false },
@@ -63,6 +72,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             Navigation
           </div>
           {navItems.map((item) => {
+            if ('adminOnly' in item && item.adminOnly && !hasMinRole('admin')) return null;
             const active = item.exact
               ? pathname === item.href
               : pathname.startsWith(item.href);
@@ -110,13 +120,20 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         {/* Stats */}
         {members.length > 0 && (
           <div
-            className="mx-3 mt-1 rounded-xl border p-3"
+            className="mx-3 mt-1 rounded-xl border p-3 flex flex-col transition-all"
             style={{ borderColor: 'var(--border)', background: theme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}
           >
-            <div className="text-[9px] font-bold uppercase tracking-widest mb-3 text-black/30 dark:text-white/20">
-              Heute
+            <div 
+              className="flex items-center justify-between cursor-pointer group"
+              onClick={() => setIsTodayOpen(!isTodayOpen)}
+            >
+              <div className="text-[9px] font-bold uppercase tracking-widest text-black/30 dark:text-white/20 group-hover:text-black/50 dark:group-hover:text-white/40 transition-colors">
+                Heute
+              </div>
+              {isTodayOpen ? <ChevronDown size={12} className="text-black/30 dark:text-white/30" /> : <ChevronRight size={12} className="text-black/30 dark:text-white/30" />}
             </div>
-            <div className="space-y-2.5">
+            {isTodayOpen && (
+              <div className="space-y-2.5 mt-3">
               {[
                 { label: 'Verfügbar', value: availableCount, total: members.length, color: '#22c55e' },
                 { label: 'Beschäftigt', value: busyCount, total: members.length, color: '#f59e0b' },
@@ -133,17 +150,25 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 </div>
               ))}
             </div>
+            )}
           </div>
         )}
 
         {/* Projects */}
         {projects.filter((p) => p.status !== 'completed').length > 0 && (
           <div className="p-3 mt-1">
-            <div className="text-[9px] font-bold uppercase tracking-widest px-2 pb-1.5 flex items-center gap-2 text-black/30 dark:text-white/20">
-              <Briefcase size={10} className="opacity-50" />
-              Projekte
+            <div 
+              className="text-[9px] font-bold uppercase tracking-widest px-2 pb-1.5 flex items-center justify-between cursor-pointer group text-black/30 dark:text-white/20 hover:text-black/50 dark:hover:text-white/40 transition-colors"
+              onClick={() => setIsProjectsOpen(!isProjectsOpen)}
+            >
+              <div className="flex items-center gap-2">
+                <Briefcase size={10} className="opacity-50" />
+                Projekte
+              </div>
+              {isProjectsOpen ? <ChevronDown size={12} className="opacity-50" /> : <ChevronRight size={12} className="opacity-50" />}
             </div>
-            <div className="flex flex-col gap-0.5">
+            {isProjectsOpen && (
+              <div className="flex flex-col gap-0.5">
               {projects.filter((p) => p.status !== 'completed').map((p) => {
                 const active = pathname === `/projects/${p.id}`;
                 const dotColor = PROJECT_TYPE_CONFIG[p.type].color;
@@ -168,18 +193,26 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   </Link>
                 );
               })}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
         {/* Teams */}
         {teams.length > 0 && (
           <div className="p-3 mt-2">
-            <div className="text-[9px] font-bold uppercase tracking-widest px-2 pb-1.5 flex items-center gap-2 text-black/30 dark:text-white/20">
-              <FolderKanban size={10} className="opacity-50" />
-              Teams
+            <div 
+              className="text-[9px] font-bold uppercase tracking-widest px-2 pb-1.5 flex items-center justify-between cursor-pointer group text-black/30 dark:text-white/20 hover:text-black/50 dark:hover:text-white/40 transition-colors"
+              onClick={() => setIsTeamsOpen(!isTeamsOpen)}
+            >
+              <div className="flex items-center gap-2">
+                <FolderKanban size={10} className="opacity-50" />
+                Teams
+              </div>
+              {isTeamsOpen ? <ChevronDown size={12} className="opacity-50" /> : <ChevronRight size={12} className="opacity-50" />}
             </div>
-            <div className="flex flex-col gap-0.5">
+            {isTeamsOpen && (
+              <div className="flex flex-col gap-0.5">
               {teams.map((t) => {
                 const active = pathname === `/teams/${t.id}`;
                 return (
@@ -203,13 +236,40 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   </Link>
                 );
               })}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {/* Footer */}
       <div className="shrink-0 p-3 border-t border-black/[0.05] dark:border-white/[0.04] flex flex-col gap-0.5">
+        
+        {/* Mock Role Switcher (Non-Prod) */}
+        {process.env.NODE_ENV !== 'production' && mounted && (
+          <div className="mb-2 p-0.5 rounded-lg bg-red-500/10 border border-red-500/20 flex flex-col gap-1 p-2">
+            <div className="text-[9px] font-bold text-red-500 uppercase tracking-widest px-1">Dev: Rolle</div>
+            <div className="flex gap-1">
+              <button
+                onClick={() => userProfile && setUserProfile({ ...userProfile, role: 'admin' })}
+                className={`flex-1 py-1 rounded text-[10px] font-semibold transition-all ${
+                  hasMinRole('admin') ? 'bg-red-500 text-white shadow-sm' : 'text-red-500/50 hover:bg-red-500/10'
+                }`}
+              >
+                Admin
+              </button>
+              <button
+                onClick={() => userProfile && setUserProfile({ ...userProfile, role: 'member' })}
+                className={`flex-1 py-1 rounded text-[10px] font-semibold transition-all ${
+                  !hasMinRole('admin') ? 'bg-red-500 text-white shadow-sm' : 'text-red-500/50 hover:bg-red-500/10'
+                }`}
+              >
+                User
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Theme-Umschalter */}
         <div className="mb-2 p-0.5 rounded-lg bg-black/[0.04] dark:bg-white/[0.04] flex">
           <button
@@ -236,23 +296,25 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           </button>
         </div>
 
-        <Link
-          href="/settings"
-          onClick={onNavigate}
-          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium no-underline transition-all duration-150 ${
-            pathname === '/settings'
-              ? 'bg-blue-500/12 border border-blue-500/20'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-black/[0.05] dark:text-white/45 dark:hover:text-white/80 dark:hover:bg-white/[0.05]'
-          }`}
-          style={
-            pathname === '/settings'
-              ? { boxShadow: '0 0 12px rgba(59,130,246,0.08)', color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : '#374151' }
-              : {}
-          }
-        >
-          <Settings size={14} className="shrink-0" />
-          <span>Einstellungen</span>
-        </Link>
+        {hasMinRole('admin') && (
+          <Link
+            href="/settings"
+            onClick={onNavigate}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium no-underline transition-all duration-150 ${
+              pathname === '/settings'
+                ? 'bg-blue-500/12 border border-blue-500/20'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-black/[0.05] dark:text-white/45 dark:hover:text-white/80 dark:hover:bg-white/[0.05]'
+            }`}
+            style={
+              pathname === '/settings'
+                ? { boxShadow: '0 0 12px rgba(59,130,246,0.08)', color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : '#374151' }
+                : {}
+            }
+          >
+            <Settings size={14} className="shrink-0" />
+            <span>Einstellungen</span>
+          </Link>
+        )}
       </div>
     </>
   );

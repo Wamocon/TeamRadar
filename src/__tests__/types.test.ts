@@ -60,13 +60,14 @@ describe('STATUS_CONFIG', () => {
 });
 
 describe('USER_ROLE_HIERARCHY', () => {
-  it('enthält alle 3 Rollen', () => {
-    expect(Object.keys(USER_ROLE_HIERARCHY)).toHaveLength(3);
+  it('enthält alle 4 Rollen', () => {
+    expect(Object.keys(USER_ROLE_HIERARCHY)).toHaveLength(4);
   });
 
-  it('admin > manager > member', () => {
-    expect(USER_ROLE_HIERARCHY.admin).toBeGreaterThan(USER_ROLE_HIERARCHY.manager);
-    expect(USER_ROLE_HIERARCHY.manager).toBeGreaterThan(USER_ROLE_HIERARCHY.member);
+  it('admin > cio > department_lead > employee', () => {
+    expect(USER_ROLE_HIERARCHY.admin).toBeGreaterThan(USER_ROLE_HIERARCHY.cio);
+    expect(USER_ROLE_HIERARCHY.cio).toBeGreaterThan(USER_ROLE_HIERARCHY.department_lead);
+    expect(USER_ROLE_HIERARCHY.department_lead).toBeGreaterThan(USER_ROLE_HIERARCHY.employee);
   });
 });
 
@@ -98,9 +99,9 @@ describe('Type-Safety: Interface-Shapes', () => {
 
   it('UserProfile hat alle erforderlichen Felder', () => {
     const profile: UserProfile = {
-      id: '1', email: 'a@b.de', displayName: 'Test', role: 'member',
+      id: '1', email: 'a@b.de', displayName: 'Test', role: 'employee',
     };
-    expect(profile.role).toBe('member');
+    expect(profile.role).toBe('employee');
   });
 
   it('Member kann optionale Skills haben', () => {

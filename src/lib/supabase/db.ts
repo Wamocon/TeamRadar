@@ -143,6 +143,31 @@ export async function getUserId(): Promise<string | null> {
   return data.user?.id ?? null;
 }
 
+export async function dbGetUserProfile() {
+  if (!isSupabaseConfigured()) return null;
+  const supabase = createClient();
+  const userId = await getUserId();
+  if (!userId) return null;
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.warn('dbGetUserProfile error:', error);
+    return null;
+  }
+
+  return {
+    id: data.id,
+    email: data.email,
+    displayName: data.display_name, // Mapping snake_case -> camelCase
+    role: data.role,
+  };
+}
+
 export async function loadAllData() {
   if (!isSupabaseConfigured()) return null;
   const supabase = createClient();

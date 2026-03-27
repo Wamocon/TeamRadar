@@ -35,6 +35,7 @@ vi.mock('@/lib/supabase/client', () => ({
 // Import NACH dem Mock
 import {
   getUserId,
+  dbGetUserProfile,
   loadAllData,
   dbAddMember,
   dbUpdateMember,
@@ -144,6 +145,31 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
 
     expect(mockFrom).toHaveBeenCalledWith('members');
     expect(mockUpdate).toHaveBeenCalled();
+  });
+
+  it('dbGetUserProfile mapping: snake_case -> camelCase', async () => {
+    const mockProfile = { 
+      id: 'user-123', 
+      email: 'test@test.de', 
+      display_name: 'Max Mustermann', 
+      role: 'admin' 
+    };
+    // Mock select().eq().maybeSingle()
+    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: mockProfile, error: null });
+    const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
+    const mockSelectInternal = vi.fn().mockReturnValue({ eq: mockEq });
+    
+    mockFrom.mockReturnValueOnce({ select: mockSelectInternal });
+
+    const result = await dbGetUserProfile();
+
+    expect(mockFrom).toHaveBeenCalledWith('profiles');
+    expect(result).toEqual({
+      id: 'user-123',
+      email: 'test@test.de',
+      displayName: 'Max Mustermann',
+      role: 'admin'
+    });
   });
 
   it('dbDeleteMember ruft delete für availabilities und members auf', async () => {

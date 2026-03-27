@@ -24,7 +24,7 @@ import Link from 'next/link';
 const MONTH_NAMES = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 const MONTH_NAMES_LONG = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
-type ViewMode = 'overview' | 'heatmap' | 'projects' | 'absences' | 'consultants';
+type ViewMode = 'overview' | 'heatmap' | 'projects' | 'absences' | 'presence' | 'consultants';
 
 /* ── Tageskategorien für Beraterübersicht ─────────────── */
 type DayCategory =
@@ -71,6 +71,7 @@ export default function YearOverviewPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [filterType, setFilterType] = useState<'all' | ProjectType>('all');
+  const [quickStatus, setQuickStatus] = useState<{ memberId: string; date: string } | null>(null);
   const [consultantMonth, setConsultantMonth] = useState(new Date().getMonth());
 
   const activeType = filterType === 'all' ? undefined : filterType;
@@ -194,6 +195,23 @@ export default function YearOverviewPage() {
     });
   }, [members, year, availabilities]);
 
+  // ── Anwesenheits-Heatmap: Mitarbeiter × Monat ────────
+  const presenceData = useMemo(() => {
+    return members.map((member) => {
+      const monthValues = Array.from({ length: 12 }, (_, month) => {
+        const daysInMonth = getDaysInMonth(year, month);
+        const monthStart = formatDate(year, month, 1);
+        const monthEnd = formatDate(year, month, daysInMonth);
+        const presence = availabilities.filter(
+          (a) => a.memberId === member.id && a.date >= monthStart && a.date <= monthEnd &&
+            !['vacation', 'sick', 'offline'].includes(a.status)
+        );
+        return presence.length;
+      });
+      return { member, monthValues };
+    });
+  }, [members, year, availabilities]);
+
   const getUtilColor = (util: number) => {
     if (util === 0) return 'rgba(107, 114, 128, 0.1)';
     if (util <= 50) return 'rgba(34, 197, 94, 0.3)';
@@ -209,6 +227,13 @@ export default function YearOverviewPage() {
     return 'rgba(139, 92, 246, 0.7)';
   };
 
+  const getPresenceColor = (days: number) => {
+    if (days === 0) return 'transparent';
+    if (days <= 5) return 'rgba(34, 197, 94, 0.2)';
+    if (days <= 15) return 'rgba(34, 197, 94, 0.5)';
+    return 'rgba(34, 197, 94, 0.8)';
+  };
+
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
@@ -217,8 +242,8 @@ export default function YearOverviewPage() {
     const dayOfWeek = new Date(dateStr).getDay();
     if (dayOfWeek === 0 || dayOfWeek === 6) return 'weekend';
 
-    // Verfügbarkeitsstatus prüfen
-    const avail = availabilities.find((a) => a.memberId === memberId && a.date === dateStr);
+    // Verfügbarkeitsstatus prüfen (Letzten Eintrag nehmen für Aktualität)
+    const avail = [...availabilities].reverse().find((a) => a.memberId === memberId && a.date === dateStr);
     if (avail?.status === 'vacation') return 'vacation';
     if (avail?.status === 'sick') return 'sick';
 
@@ -282,6 +307,10 @@ export default function YearOverviewPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, consultantMonth, members, availabilities, allocations, projects]);
 
+  const addAvailability = useAppStore((s) => s.addAvailability);
+  const hasMinRole = useAppStore((s) => s.hasMinRole);
+  const canEdit = hasMinRole('department_lead') || hasMinRole('admin');
+
   return (
     <div className="p-4 sm:p-6 w-full space-y-6 animate-fade-in">
       {/* Header */}
@@ -336,6 +365,7 @@ export default function YearOverviewPage() {
           { mode: 'heatmap' as ViewMode, label: 'Auslastung', icon: BarChart3 },
           { mode: 'projects' as ViewMode, label: 'Projekte', icon: Briefcase },
           { mode: 'absences' as ViewMode, label: 'Abwesenheiten', icon: Users },
+          { mode: 'presence' as ViewMode, label: 'Anwesenheiten', icon: Users },
           { mode: 'consultants' as ViewMode, label: 'Beraterübersicht', icon: CalendarDays },
         ]).map((tab) => (
           <button key={tab.mode} onClick={() => setViewMode(tab.mode)}
@@ -633,6 +663,53 @@ export default function YearOverviewPage() {
         </div>
       )}
 
+      {/* ── VIEW: Anwesenheits-Heatmap (Mitarbeiter × Monat) ── */}
+      {viewMode === 'presence' && (
+        <div className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] overflow-x-auto">
+          <table className="w-full text-xs min-w-[700px]">
+            <thead>
+              <tr className="border-b border-black/[0.06] dark:border-white/[0.06]">
+                <th className="text-left px-3 py-2 font-semibold dark:text-white/40 text-gray-500 sticky left-0 bg-white dark:bg-gray-900 z-10">
+                  Mitarbeiter
+                </th>
+                {MONTH_NAMES.map((m, i) => (
+                  <th key={m} className={`text-center px-1 py-2 font-semibold min-w-[50px] ${
+                    i === currentMonth && year === currentYear ? 'text-cyan-500' : 'dark:text-white/40 text-gray-500'
+                  }`}>{m}</th>
+                ))}
+                <th className="text-center px-2 py-2 font-semibold dark:text-white/40 text-gray-500">Σ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {presenceData.map(({ member, monthValues }) => {
+                const total = monthValues.reduce((s, v) => s + v, 0);
+                return (
+                  <tr key={member.id} className="border-b border-black/[0.03] dark:border-white/[0.03] hover:bg-black/[0.02] dark:hover:bg-white/[0.02]">
+                    <td className="px-3 py-1.5 font-medium dark:text-white/70 text-gray-700 whitespace-nowrap sticky left-0 bg-white dark:bg-gray-900 z-10">
+                      {member.name}
+                    </td>
+                    {monthValues.map((val, i) => (
+                      <td key={i} className="text-center px-1 py-1.5">
+                        <div className="mx-auto w-10 h-6 rounded flex items-center justify-center text-[10px] font-bold"
+                          style={{ background: getPresenceColor(val), color: val > 10 ? '#fff' : '#22c55e' }}>
+                          {val > 0 ? val : <span className="text-gray-300 dark:text-white/10">–</span>}
+                        </div>
+                      </td>
+                    ))}
+                    <td className="text-center px-2 py-1.5">
+                      <span className="text-[10px] font-bold text-emerald-500">{total}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <div className="px-3 py-2 border-t border-black/[0.04] dark:border-white/[0.04] text-[9px] dark:text-white/30 text-gray-400">
+            Anwesenheitstage pro Monat (jeder Status außer Urlaub/Krank/Offline)
+          </div>
+        </div>
+      )}
+
       {/* ═══════════════════════════════════════════════════
           VIEW: Beraterübersicht (Tagesmatrix à la Excel)
           ═══════════════════════════════════════════════════ */}
@@ -733,12 +810,16 @@ export default function YearOverviewPage() {
                       {categories.map((cat, i) => {
                         const conf = DAY_CATEGORY_CONFIG[cat];
                         const isToday = consultantData.days[i].dateStr === new Date().toISOString().slice(0, 10);
+                        const isQuickSelected = quickStatus?.memberId === member.id && quickStatus?.date === consultantData.days[i].dateStr;
+
                         return (
-                          <td key={i} className="text-center px-0 py-0.5">
-                            <div
-                              className={`mx-auto w-[22px] h-[20px] rounded-sm flex items-center justify-center text-[8px] font-bold ${
+                          <td key={i} className="text-center px-0 py-0.5 relative">
+                            <button
+                              disabled={!canEdit || consultantData.days[i].isWeekend}
+                              onClick={() => setQuickStatus({ memberId: member.id, date: consultantData.days[i].dateStr })}
+                              className={`mx-auto w-[22px] h-[20px] rounded-sm flex items-center justify-center text-[8px] font-bold transition-transform ${
                                 isToday ? 'ring-1 ring-cyan-500' : ''
-                              }`}
+                              } ${canEdit && !consultantData.days[i].isWeekend ? 'hover:scale-110 cursor-pointer border-none' : 'cursor-default'}`}
                               style={{
                                 background: conf.bg,
                                 color: cat === 'free' ? 'transparent' : conf.color,
@@ -746,7 +827,37 @@ export default function YearOverviewPage() {
                               title={`${consultantData.days[i].day}. ${MONTH_NAMES_LONG[consultantMonth]} — ${member.name}: ${conf.label}`}
                             >
                               {conf.short}
-                            </div>
+                            </button>
+
+                            {/* Quick Status Picker */}
+                            {isQuickSelected && (
+                              <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 shadow-xl border border-black/10 dark:border-white/10 rounded-lg p-1 grid grid-cols-2 gap-1 min-w-[120px]">
+                                {Object.entries(STATUS_CONFIG).map(([key, s]) => (
+                                  <button
+                                    key={key}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      addAvailability({
+                                        memberId: member.id,
+                                        date: consultantData.days[i].dateStr,
+                                        status: key as AvailabilityStatus,
+                                      });
+                                      setQuickStatus(null);
+                                    }}
+                                    className="px-1.5 py-1 rounded text-[9px] font-bold text-left hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-1 border-none cursor-pointer w-full"
+                                  >
+                                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: s.color }} />
+                                    <span className="truncate">{s.label}</span>
+                                  </button>
+                                ))}
+                                <button 
+                                  onClick={() => setQuickStatus(null)}
+                                  className="col-span-2 mt-1 py-1 text-[8px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-600 border-none cursor-pointer bg-transparent"
+                                >
+                                  Schließen
+                                </button>
+                              </div>
+                            )}
                           </td>
                         );
                       })}

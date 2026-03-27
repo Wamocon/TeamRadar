@@ -245,27 +245,31 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       {/* Footer */}
       <div className="shrink-0 p-3 border-t border-black/[0.05] dark:border-white/[0.04] flex flex-col gap-0.5">
         
-        {/* Mock Role Switcher (Non-Prod) */}
-        {process.env.NODE_ENV !== 'production' && mounted && (
-          <div className="mb-2 p-0.5 rounded-lg bg-red-500/10 border border-red-500/20 flex flex-col gap-1 p-2">
-            <div className="text-[9px] font-bold text-red-500 uppercase tracking-widest px-1">Dev: Rolle</div>
-            <div className="flex gap-1">
-              <button
-                onClick={() => userProfile && setUserProfile({ ...userProfile, role: 'admin' })}
-                className={`flex-1 py-1 rounded text-[10px] font-semibold transition-all ${
-                  hasMinRole('admin') ? 'bg-red-500 text-white shadow-sm' : 'text-red-500/50 hover:bg-red-500/10'
-                }`}
-              >
-                Admin
-              </button>
-              <button
-                onClick={() => userProfile && setUserProfile({ ...userProfile, role: 'member' })}
-                className={`flex-1 py-1 rounded text-[10px] font-semibold transition-all ${
-                  !hasMinRole('admin') ? 'bg-red-500 text-white shadow-sm' : 'text-red-500/50 hover:bg-red-500/10'
-                }`}
-              >
-                User
-              </button>
+        {/* Mock Role Switcher (Lokaler Dev-Modus: nur im 'public' Schema) */}
+        {process.env.NODE_ENV !== 'production' && 
+         process.env.NEXT_PUBLIC_DB_SCHEMA === 'public' && 
+         mounted && (
+          <div className="mb-2 p-0.5 rounded-xl bg-blue-500/5 border border-blue-500/10 flex flex-col gap-1 p-2">
+            <div className="text-[8px] font-black text-blue-500/50 uppercase tracking-[0.2em] px-1 mb-1">Dev: Role Switch</div>
+            <div className="grid grid-cols-2 gap-1">
+              {[
+                { id: 'admin', label: 'Admin' },
+                { id: 'cio', label: 'CIO' },
+                { id: 'department_lead', label: 'Ltg.' },
+                { id: 'employee', label: 'Mitarb.' },
+              ].map((r) => (
+                <button
+                  key={r.id}
+                  onClick={() => userProfile && setUserProfile({ ...userProfile, role: r.id as any })}
+                  className={`py-1 rounded text-[10px] font-bold transition-all border-none cursor-pointer ${
+                    userProfile?.role === r.id 
+                      ? 'bg-blue-500 text-white shadow-sm' 
+                      : 'text-blue-500/40 hover:bg-blue-500/10'
+                  }`}
+                >
+                  {r.label}
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -296,25 +300,24 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           </button>
         </div>
 
-        {hasMinRole('admin') && (
-          <Link
-            href="/settings"
-            onClick={onNavigate}
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium no-underline transition-all duration-150 ${
-              pathname === '/settings'
-                ? 'bg-blue-500/12 border border-blue-500/20'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-black/[0.05] dark:text-white/45 dark:hover:text-white/80 dark:hover:bg-white/[0.05]'
-            }`}
-            style={
-              pathname === '/settings'
-                ? { boxShadow: '0 0 12px rgba(59,130,246,0.08)', color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : '#374151' }
-                : {}
-            }
-          >
-            <Settings size={14} className="shrink-0" />
-            <span>Einstellungen</span>
-          </Link>
-        )}
+        {/* Einstellungen (Sichtbar für alle, Inhalt wird auf der Seite gefiltert) */}
+        <Link
+          href="/settings"
+          onClick={onNavigate}
+          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium no-underline transition-all duration-150 ${
+            pathname === '/settings'
+              ? 'bg-blue-500/12 border border-blue-500/20'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-black/[0.05] dark:text-white/45 dark:hover:text-white/80 dark:hover:bg-white/[0.05]'
+          }`}
+          style={
+            pathname === '/settings'
+              ? { boxShadow: '0 0 12px rgba(59,130,246,0.08)', color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : '#374151' }
+              : {}
+          }
+        >
+          <Settings size={14} className="shrink-0" />
+          <span>Einstellungen</span>
+        </Link>
       </div>
     </>
   );

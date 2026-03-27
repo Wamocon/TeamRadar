@@ -39,6 +39,11 @@ export default function DashboardPage() {
     [memberStatuses]
   );
 
+  const availableNow = statusCounts.available || 0;
+  const inMeetings = statusCounts.meeting || 0;
+  const onVacation = statusCounts.vacation || 0;
+  const remoteCount = statusCounts.remote || 0;
+
   const departments = useMemo(() =>
     [...new Set(members.map((m) => m.department).filter(Boolean))].sort(),
     [members]
@@ -76,10 +81,42 @@ export default function DashboardPage() {
     [memberStatuses, searchTerm, selectedStatus, selectedDept, selectedProject, selectedProjectType, projects]
   );
 
-  const availableNow = statusCounts.available || 0;
-  const inMeetings = statusCounts.meeting || 0;
-  const onVacation = statusCounts.vacation || 0;
-  const remoteCount = statusCounts.remote || 0;
+  const getMemberUtilization = useAppStore((s) => s.getMemberUtilization);
+  const userProfile = useAppStore((s) => s.userProfile);
+  const hasMinRole = useAppStore((s) => s.hasMinRole);
+
+  const canCreate = hasMinRole('department_lead') || hasMinRole('admin');
+
+  const groupedMembers = useMemo(() => {
+    const groups = [
+      { id: 'stark_ueberlastet',   name: 'Stark überlastet (>120%)',   color: '#ef4444', members: [] as typeof filteredMembers },
+      { id: 'leicht_ueberlastet',  name: 'Leicht überlastet (101-120%)', color: '#f97316', members: [] as typeof filteredMembers },
+      { id: 'perfekte_auslastung', name: 'Perfekte Auslastung (80-100%)',  color: '#22c55e', members: [] as typeof filteredMembers },
+      { id: 'leicht_unterlastet',  name: 'Leicht unterlastet (50-79%)',  color: '#3b82f6', members: [] as typeof filteredMembers },
+      { id: 'stark_unterlastet',   name: 'Stark unterlastet (<50%)',   color: '#6b7280', members: [] as typeof filteredMembers },
+    ];
+
+    filteredMembers.forEach((m) => {
+      const util = getMemberUtilization(m.id, today);
+      if (util > 120) groups[0].members.push(m);
+      else if (util > 100) groups[1].members.push(m);
+      else if (util >= 80) groups[2].members.push(m);
+      else if (util >= 50) groups[3].members.push(m);
+      else groups[4].members.push(m);
+    });
+
+    return groups.filter((g) => g.members.length > 0);
+  }, [filteredMembers, getMemberUtilization, today]);
+
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    stark_ueberlastet: true,
+    leicht_ueberlastet: true,
+    perfekte_auslastung: true,
+    leicht_unterlastet: true,
+    stark_unterlastet: true,
+  });
+
+  const toggleGroup = (id: string) => setExpandedGroups(prev => ({ ...prev, [id]: !prev[id] }));
 
   return (
     <div className="p-4 sm:p-6 w-full space-y-6">
@@ -102,11 +139,13 @@ export default function DashboardPage() {
             <CalendarClock size={14} />
             Status eintragen
           </button>
-          <Link href="/members/new"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500/20 text-blue-500 text-xs font-semibold hover:bg-blue-500/10 transition-colors no-underline">
-            <Plus size={14} />
-            Mitarbeiter
-          </Link>
+          {canCreate && (
+            <Link href="/members/new"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500/20 text-blue-500 text-xs font-semibold hover:bg-blue-500/10 transition-colors no-underline">
+              <Plus size={14} />
+              Mitarbeiter
+            </Link>
+          )}
         </div>
       </div>
 
@@ -191,14 +230,38 @@ export default function DashboardPage() {
 
       {/* ── Content ────────────────────────────── */}
       {viewMode === 'grid' ? (
-        <div>
-          <div className="flex items-center gap-2 mb-4">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-2">
             <Users size={14} className="dark:text-white/40 text-gray-400" />
             <h2 className="text-xs font-bold dark:text-white/50 text-gray-600 uppercase tracking-wider">
-              Team ({filteredMembers.length}{filteredMembers.length !== members.length ? ` von ${members.length}` : ''})
+              Team ({filteredMembers.length})
             </h2>
           </div>
-          <TeamGrid members={filteredMembers} />
+          
+          {groupedMembers.map((group) => (
+            <div key={group.id} className="space-y-3">
+              <button 
+                onClick={() => toggleGroup(group.id)}
+                className="w-full flex items-center justify-between p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors border-none cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full" style={{ background: group.color }} />
+                  <span className="text-xs font-bold dark:text-white/70 text-gray-700 uppercase tracking-widest">
+                    {group.name} ({group.members.length})
+                  </span>
+                </div>
+                <div className={`transition-transform duration-200 ${expandedGroups[group.id] ? 'rotate-180' : ''}`}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="dark:text-white/30 text-gray-400"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+              </button>
+              
+              {expandedGroups[group.id] && (
+                <div className="animate-fade-in">
+                  <TeamGrid members={group.members} />
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       ) : (
         <div className="card-shimmer rounded-xl p-5">

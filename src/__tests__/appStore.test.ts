@@ -146,6 +146,28 @@ describe('Store: Verfügbarkeit', () => {
     expect(useAppStore.getState().availabilities).toHaveLength(1);
   });
 
+  it('addAvailability: aktualisiert bestehenden Ganztages-Eintrag (Upsert)', () => {
+    // 1. Eintrag erstellen
+    useAppStore.getState().addAvailability({
+      memberId: 'm1',
+      status: 'available',
+      date: '2026-03-20',
+    });
+    expect(useAppStore.getState().availabilities).toHaveLength(1);
+
+    // 2. Erneut für den gleichen Tag hinzufügen (anderer Status)
+    useAppStore.getState().addAvailability({
+      memberId: 'm1',
+      status: 'vacation',
+      date: '2026-03-20',
+    });
+
+    // Es darf kein neuer Eintrag hinzugefügt worden sein
+    expect(useAppStore.getState().availabilities).toHaveLength(1);
+    // Der Status muss aktualisiert worden sein
+    expect(useAppStore.getState().availabilities[0].status).toBe('vacation');
+  });
+
   it('addAvailability: mit optionalem Note', () => {
     const entry = useAppStore.getState().addAvailability({
       memberId: 'm1',
@@ -217,7 +239,7 @@ describe('Store: getMemberStatus', () => {
     expect(status).toBe('offline');
   });
 
-  it('gibt ersten passenden Eintrag zurück bei mehreren ohne Zeitfenster', () => {
+  it('aktualisiert den Status bei mehrmaligem Hinzufügen (Upsert-Verhalten)', () => {
     useAppStore.getState().addAvailability({
       memberId: 'm1', status: 'meeting', date: testDate,
     });
@@ -226,8 +248,8 @@ describe('Store: getMemberStatus', () => {
     });
 
     const status = useAppStore.getState().getMemberStatus('m1', testDate);
-    // Ohne Zeitfenster matcht .find() den ersten Eintrag
-    expect(status).toBe('meeting');
+    // Das Upsert-Verhalten überschreibt den alten Status
+    expect(status).toBe('available');
   });
 
   it('verschiedene Mitarbeiter haben unabhängige Status', () => {
@@ -310,7 +332,7 @@ describe('Store: Teams', () => {
 
 describe('Store: hasMinRole', () => {
   it('gibt false zurück ohne Profil', () => {
-    expect(useAppStore.getState().hasMinRole('member')).toBe(false);
+    expect(useAppStore.getState().hasMinRole('employee')).toBe(false);
   });
 
   it('admin hat alle Rollen', () => {
@@ -318,35 +340,49 @@ describe('Store: hasMinRole', () => {
       userProfile: { id: '1', email: 'a@b.de', displayName: 'Admin', role: 'admin' },
     });
 
-    expect(useAppStore.getState().hasMinRole('member')).toBe(true);
-    expect(useAppStore.getState().hasMinRole('manager')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('employee')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('department_lead')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('cio')).toBe(true);
     expect(useAppStore.getState().hasMinRole('admin')).toBe(true);
   });
 
-  it('manager hat member + manager, nicht admin', () => {
+  it('cio hat employee + lead + cio, nicht admin', () => {
     useAppStore.setState({
-      userProfile: { id: '1', email: 'a@b.de', displayName: 'Mgr', role: 'manager' },
+      userProfile: { id: '1', email: 'a@b.de', displayName: 'CIO', role: 'cio' },
     });
 
-    expect(useAppStore.getState().hasMinRole('member')).toBe(true);
-    expect(useAppStore.getState().hasMinRole('manager')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('employee')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('department_lead')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('cio')).toBe(true);
     expect(useAppStore.getState().hasMinRole('admin')).toBe(false);
   });
 
-  it('member hat nur member', () => {
+  it('department_lead hat employee + lead, nicht cio/admin', () => {
     useAppStore.setState({
-      userProfile: { id: '1', email: 'a@b.de', displayName: 'User', role: 'member' },
+      userProfile: { id: '1', email: 'a@b.de', displayName: 'Lead', role: 'department_lead' },
     });
 
-    expect(useAppStore.getState().hasMinRole('member')).toBe(true);
-    expect(useAppStore.getState().hasMinRole('manager')).toBe(false);
+    expect(useAppStore.getState().hasMinRole('employee')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('department_lead')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('cio')).toBe(false);
+    expect(useAppStore.getState().hasMinRole('admin')).toBe(false);
+  });
+
+  it('employee hat nur employee', () => {
+    useAppStore.setState({
+      userProfile: { id: '1', email: 'a@b.de', displayName: 'User', role: 'employee' },
+    });
+
+    expect(useAppStore.getState().hasMinRole('employee')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('department_lead')).toBe(false);
+    expect(useAppStore.getState().hasMinRole('cio')).toBe(false);
     expect(useAppStore.getState().hasMinRole('admin')).toBe(false);
   });
 });
 
 describe('Store: Profil & Mocking', () => {
   it('setUserProfile: aktualisiert das UserProfile', () => {
-    const profile = { id: 'u1', email: 'test@test.de', displayName: 'Test User', role: 'member' as const };
+    const profile = { id: 'u1', email: 'test@test.de', displayName: 'Test User', role: 'employee' as const };
     useAppStore.getState().setUserProfile(profile);
     expect(useAppStore.getState().userProfile).toEqual(profile);
 

@@ -14,7 +14,6 @@ export default function MembersPage() {
   const members = useAppStore((s) => s.members);
   const deleteMember = useAppStore((s) => s.deleteMember);
   const hasMinRole = useAppStore((s) => s.hasMinRole);
-  const isAdmin = hasMinRole('admin');
   const canCreate = hasMinRole('admin') || hasMinRole('department_lead');
   const router = useRouter();
   const [viewMode, setViewMode] = useState<ViewMode>('list');

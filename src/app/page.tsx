@@ -82,7 +82,6 @@ export default function DashboardPage() {
   );
 
   const getMemberUtilization = useAppStore((s) => s.getMemberUtilization);
-  const userProfile = useAppStore((s) => s.userProfile);
   const hasMinRole = useAppStore((s) => s.hasMinRole);
 
   const canCreate = hasMinRole('department_lead') || hasMinRole('admin');

@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  Settings, 
   Shield, 
   Database, 
-  Palette, 
   Users, 
   PlusCircle, 
   Building, 

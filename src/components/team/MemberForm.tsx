@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/stores/appStore';
-import { Save, X, Plus, Trash2, Loader } from 'lucide-react';
+import { Save, X, Plus, Loader } from 'lucide-react';
 import { SKILL_CATEGORIES, SKILL_LEVEL_CONFIG, type Skill, type SkillLevel, type SkillCategory } from '@/types';
 
 export function MemberForm({ memberId }: { memberId?: string }) {
@@ -80,6 +80,16 @@ export function MemberForm({ memberId }: { memberId?: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-lg space-y-4">
+      {msg && (
+        <div className={`p-4 rounded-xl text-sm font-bold border animate-slide-up ${
+          msg.type === 'success' 
+          ? 'bg-green-500/10 text-green-500 border-green-500/20' 
+          : 'bg-red-500/10 text-red-500 border-red-500/20'
+        }`}>
+          {msg.text}
+        </div>
+      )}
+
       <div>
         <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Name *</label>
         <input

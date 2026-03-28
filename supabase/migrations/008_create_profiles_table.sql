@@ -73,8 +73,34 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger auf auth.users setzen (muss im public Schema oder global sein)
+-- Trigger auf auth.users setzen
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ── BACKFILL: Bestehende User in Profiles-Tabelle übernehmen ──
+-- Füllt die Profile für alle User auf, die bereits vor dieser Migration existierten.
+
+DO $$
+BEGIN
+  -- Backfill public
+  INSERT INTO public.profiles (id, email, role)
+  SELECT id, email, 'user' FROM auth.users
+  ON CONFLICT (id) DO NOTHING;
+
+  -- Backfill test
+  IF EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'test') THEN
+    INSERT INTO test.profiles (id, email, role)
+    SELECT id, email, 'user' FROM auth.users
+    ON CONFLICT (id) DO NOTHING;
+  END IF;
+
+  -- Backfill prod
+  IF EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'prod') THEN
+    INSERT INTO prod.profiles (id, email, role)
+    SELECT id, email, 'user' FROM auth.users
+    ON CONFLICT (id) DO NOTHING;
+  END IF;
+END;
+$$;

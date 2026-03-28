@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   id           UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email        TEXT NOT NULL,
   display_name TEXT,
-  role         TEXT DEFAULT 'user',
+  role         TEXT DEFAULT 'employee',
   created_at   TIMESTAMPTZ DEFAULT now()
 );
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -56,17 +56,17 @@ RETURNS trigger AS $$
 BEGIN
   -- In public einfügen
   INSERT INTO public.profiles (id, email, display_name, role)
-  VALUES (new.id, new.email, new.raw_user_meta_data->>'display_name', 'user')
+  VALUES (new.id, new.email, new.raw_user_meta_data->>'display_name', 'employee')
   ON CONFLICT (id) DO NOTHING;
   
   -- In test einfügen (falls Schema existiert)
   INSERT INTO test.profiles (id, email, display_name, role)
-  VALUES (new.id, new.email, new.raw_user_meta_data->>'display_name', 'user')
+  VALUES (new.id, new.email, new.raw_user_meta_data->>'display_name', 'employee')
   ON CONFLICT (id) DO NOTHING;
   
   -- In prod einfügen (falls Schema existiert)
   INSERT INTO prod.profiles (id, email, display_name, role)
-  VALUES (new.id, new.email, new.raw_user_meta_data->>'display_name', 'user')
+  VALUES (new.id, new.email, new.raw_user_meta_data->>'display_name', 'employee')
   ON CONFLICT (id) DO NOTHING;
   
   RETURN new;
@@ -86,20 +86,20 @@ DO $$
 BEGIN
   -- Backfill public
   INSERT INTO public.profiles (id, email, role)
-  SELECT id, email, 'user' FROM auth.users
+  SELECT id, email, 'employee' FROM auth.users
   ON CONFLICT (id) DO NOTHING;
 
   -- Backfill test
   IF EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'test') THEN
     INSERT INTO test.profiles (id, email, role)
-    SELECT id, email, 'user' FROM auth.users
+    SELECT id, email, 'employee' FROM auth.users
     ON CONFLICT (id) DO NOTHING;
   END IF;
 
   -- Backfill prod
   IF EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'prod') THEN
     INSERT INTO prod.profiles (id, email, role)
-    SELECT id, email, 'user' FROM auth.users
+    SELECT id, email, 'employee' FROM auth.users
     ON CONFLICT (id) DO NOTHING;
   END IF;
 END;

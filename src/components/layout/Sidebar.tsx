@@ -1,8 +1,10 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAppStore } from '@/stores/appStore';
 import { useTheme } from '@/components/ui/ThemeProvider';
+import { createClient } from '@/lib/supabase/client';
 import {
   LayoutDashboard,
   Users,
@@ -20,17 +22,25 @@ import {
   CalendarRange,
   ChevronDown,
   ChevronRight,
+  Shield,
+  Plane,
+  Clock,
+  LogOut,
+  Building,
+  Menu
 } from 'lucide-react';
 
 import { STATUS_CONFIG, PROJECT_TYPE_CONFIG } from '@/types';
-import { useEffect, useState } from 'react';
+import { AppPortal } from './AppPortal';
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const pathname = usePathname();
+  const router = useRouter();
+  const { theme, setTheme } = useTheme();
+  
   const members = useAppStore((s) => s.members);
-  const availabilities = useAppStore((s) => s.availabilities);
   const teams = useAppStore((s) => s.teams);
   const projects = useAppStore((s) => s.projects);
   const getMemberStatus = useAppStore((s) => s.getMemberStatus);
@@ -38,22 +48,31 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const hasMinRole = useAppStore((s) => s.hasMinRole);
   const userProfile = useAppStore((s) => s.userProfile);
   const setUserProfile = useAppStore((s) => s.setUserProfile);
-  const { theme, setTheme } = useTheme();
 
   const [isTodayOpen, setIsTodayOpen] = useState(false);
   const [isProjectsOpen, setIsProjectsOpen] = useState(false);
-  const [isTeamsOpen, setIsTeamsOpen] = useState(false);
+  const [activePortal, setActivePortal] = useState<{ url: string; title: string; icon: any; color: string } | null>(null);
 
-  const today = new Date().toISOString().slice(0, 10);
-  const availableCount = members.filter((m) => getMemberStatus(m.id, today) === 'available').length;
-  const busyCount = members.filter((m) => ['busy', 'meeting'].includes(getMemberStatus(m.id, today))).length;
-  const absentCount = members.filter((m) => ['vacation', 'sick'].includes(getMemberStatus(m.id, today))).length;
   const alertCount = getAlerts().filter((a) => a.severity === 'error').length;
 
-  const navItems = [
+  const handleLogout = async () => {
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // Supabase nicht konfiguriert
+    }
+    router.push('/auth/login');
+  };
+
+  const apps = [
+    { id: 'away', title: 'AWAY Urlaubsplaner', label: 'AWAY', url: process.env.NEXT_PUBLIC_AWAY_URL || 'http://localhost:3001', icon: Plane, color: 'text-blue-400' },
+    { id: 'trace', title: 'TRACE Zeiterfassung', label: 'TRACE', url: process.env.NEXT_PUBLIC_TRACE_URL || 'http://localhost:3002', icon: Clock, color: 'text-teal-400' }
+  ];
+
+  const mainNav = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
     { href: '/members', icon: Users, label: 'Mitarbeiter', exact: false },
-    { href: '/members/new', icon: UserPlus, label: 'Neu anlegen', exact: true, adminOnly: true },
     { href: '/calendar', icon: CalendarDays, label: 'Kalender', exact: true },
     { href: '/teams', icon: FolderKanban, label: 'Teams', exact: false },
     { href: '/projects', icon: Briefcase, label: 'Projekte', exact: false },
@@ -63,307 +82,186 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     { href: '/reports', icon: FileDown, label: 'Reports', exact: true },
   ];
 
+  const adminNav = [
+    { href: '/members/new', icon: UserPlus, label: 'Mitarbeiter einladen', exact: true },
+    { href: '/settings/admin', icon: Shield, label: 'Administration', exact: true },
+  ];
+
   return (
-    <>
-      <div className="flex-1 overflow-y-auto min-h-0">
-        {/* Navigation */}
-        <nav className="p-3 flex flex-col gap-0.5">
-          <div className="text-[9px] font-bold uppercase tracking-widest px-2 pt-3 pb-1.5 text-black/30 dark:text-white/20">
-            Navigation
+    <div className="flex flex-col h-full bg-[var(--sidebar-bg)] text-[var(--sidebar-text-muted)] transition-colors duration-300">
+      {/* 1. Header & Organization */}
+      <div className="p-6 pb-2">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
+            <LayoutDashboard size={20} />
           </div>
-          {navItems.map((item) => {
-            if ('adminOnly' in item && item.adminOnly && !hasMinRole('admin')) return null;
-            const active = item.exact
-              ? pathname === item.href
-              : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onNavigate}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium no-underline transition-all duration-150 ${
-                  active
-                    ? 'bg-blue-500/12 border border-blue-500/20'
-                    : 'dark:text-white/45 dark:hover:text-white/80 dark:hover:bg-white/[0.05] text-gray-600 hover:text-gray-900 hover:bg-black/[0.05]'
-                }`}
-                style={
-                  active
-                    ? {
-                        boxShadow: '0 0 12px rgba(59,130,246,0.08)',
-                        color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : '#374151',
-                      }
-                    : {}
-                }
-              >
-                <item.icon size={14} className="shrink-0" />
-                <span>{item.label}</span>
-                {item.href === '/members' && members.length > 0 && (
-                  <span className="ml-auto text-[9px] font-bold bg-black/5 dark:bg-white/8 text-gray-400 dark:text-white/35 px-1.5 py-0.5 rounded-full">
-                    {members.length}
-                  </span>
-                )}
-                {item.href === '/projects' && projects.length > 0 && (
-                  <span className="ml-auto text-[9px] font-bold bg-black/5 dark:bg-white/8 text-gray-400 dark:text-white/35 px-1.5 py-0.5 rounded-full">
-                    {projects.length}
-                  </span>
-                )}
-                {'badge' in item && item.badge && (
-                  <span className="ml-auto text-[9px] font-bold bg-red-500/15 text-red-500 px-1.5 py-0.5 rounded-full">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Stats */}
-        {members.length > 0 && (
-          <div
-            className="mx-3 mt-1 rounded-xl border p-3 flex flex-col transition-all"
-            style={{ borderColor: 'var(--border)', background: theme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' }}
-          >
-            <div 
-              className="flex items-center justify-between cursor-pointer group"
-              onClick={() => setIsTodayOpen(!isTodayOpen)}
-            >
-              <div className="text-[9px] font-bold uppercase tracking-widest text-black/30 dark:text-white/20 group-hover:text-black/50 dark:group-hover:text-white/40 transition-colors">
-                Heute
-              </div>
-              {isTodayOpen ? <ChevronDown size={12} className="text-black/30 dark:text-white/30" /> : <ChevronRight size={12} className="text-black/30 dark:text-white/30" />}
-            </div>
-            {isTodayOpen && (
-              <div className="space-y-2.5 mt-3">
-              {[
-                { label: 'Verfügbar', value: availableCount, total: members.length, color: '#22c55e' },
-                { label: 'Beschäftigt', value: busyCount, total: members.length, color: '#f59e0b' },
-                { label: 'Abwesend', value: absentCount, total: members.length, color: '#8b5cf6' },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] dark:text-white/40 text-gray-500">{stat.label}</span>
-                    <span className="text-[10px] font-bold" style={{ color: stat.color }}>{stat.value}</span>
-                  </div>
-                  <div className="h-1 rounded-full bg-black/[0.04] dark:bg-white/[0.04]">
-                    <div className="progress-bar h-full rounded-full" style={{ width: `${stat.total > 0 ? (stat.value / stat.total) * 100 : 0}%`, background: stat.color }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-            )}
+          <div>
+            <div className="text-sm font-black text-[var(--sidebar-text)] tracking-tight">TeamRadar</div>
+            <div className="text-[10px] font-bold text-[var(--sidebar-text-muted)] opacity-60 uppercase tracking-widest">Verfügbarkeit</div>
           </div>
-        )}
-
-        {/* Projects */}
-        {projects.filter((p) => p.status !== 'completed').length > 0 && (
-          <div className="p-3 mt-1">
-            <div 
-              className="text-[9px] font-bold uppercase tracking-widest px-2 pb-1.5 flex items-center justify-between cursor-pointer group text-black/30 dark:text-white/20 hover:text-black/50 dark:hover:text-white/40 transition-colors"
-              onClick={() => setIsProjectsOpen(!isProjectsOpen)}
-            >
-              <div className="flex items-center gap-2">
-                <Briefcase size={10} className="opacity-50" />
-                Projekte
-              </div>
-              {isProjectsOpen ? <ChevronDown size={12} className="opacity-50" /> : <ChevronRight size={12} className="opacity-50" />}
-            </div>
-            {isProjectsOpen && (
-              <div className="flex flex-col gap-0.5">
-              {projects.filter((p) => p.status !== 'completed').map((p) => {
-                const active = pathname === `/projects/${p.id}`;
-                const dotColor = PROJECT_TYPE_CONFIG[p.type].color;
-                return (
-                  <Link
-                    key={p.id}
-                    href="/projects"
-                    onClick={onNavigate}
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg no-underline transition-all group ${
-                      active
-                        ? 'bg-black/[0.05] dark:bg-white/[0.06]'
-                        : 'hover:bg-black/[0.04] dark:hover:bg-white/[0.04]'
-                    }`}
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dotColor }} />
-                    <span className="text-[11px] text-gray-400 group-hover:text-gray-600 dark:text-white/40 dark:group-hover:text-white/65 transition-colors truncate">
-                      {p.name}
-                    </span>
-                    <span className="ml-auto text-[10px] font-bold shrink-0" style={{ color: dotColor, opacity: 0.7 }}>
-                      {p.memberIds.length}
-                    </span>
-                  </Link>
-                );
-              })}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Teams */}
-        {teams.length > 0 && (
-          <div className="p-3 mt-2">
-            <div 
-              className="text-[9px] font-bold uppercase tracking-widest px-2 pb-1.5 flex items-center justify-between cursor-pointer group text-black/30 dark:text-white/20 hover:text-black/50 dark:hover:text-white/40 transition-colors"
-              onClick={() => setIsTeamsOpen(!isTeamsOpen)}
-            >
-              <div className="flex items-center gap-2">
-                <FolderKanban size={10} className="opacity-50" />
-                Teams
-              </div>
-              {isTeamsOpen ? <ChevronDown size={12} className="opacity-50" /> : <ChevronRight size={12} className="opacity-50" />}
-            </div>
-            {isTeamsOpen && (
-              <div className="flex flex-col gap-0.5">
-              {teams.map((t) => {
-                const active = pathname === `/teams/${t.id}`;
-                return (
-                  <Link
-                    key={t.id}
-                    href={`/teams/${t.id}`}
-                    onClick={onNavigate}
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg no-underline transition-all group ${
-                      active
-                        ? 'bg-black/[0.05] dark:bg-white/[0.06]'
-                        : 'hover:bg-black/[0.04] dark:hover:bg-white/[0.04]'
-                    }`}
-                  >
-                    <div className="w-1.5 h-1.5 rounded-full shrink-0 bg-blue-500" />
-                    <span className="text-[11px] text-gray-400 group-hover:text-gray-600 dark:text-white/40 dark:group-hover:text-white/65 transition-colors truncate">
-                      {t.name}
-                    </span>
-                    <span className="ml-auto text-[10px] font-bold shrink-0 text-blue-500/70">
-                      {t.memberIds.length}
-                    </span>
-                  </Link>
-                );
-              })}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="shrink-0 p-3 border-t border-black/[0.05] dark:border-white/[0.04] flex flex-col gap-0.5">
-        
-        {/* Mock Role Switcher (Lokaler Dev-Modus: nur im 'public' Schema) */}
-        {process.env.NODE_ENV !== 'production' && 
-         process.env.NEXT_PUBLIC_DB_SCHEMA === 'public' && 
-         mounted && (
-          <div className="mb-2 p-0.5 rounded-xl bg-blue-500/5 border border-blue-500/10 flex flex-col gap-1 p-2">
-            <div className="text-[8px] font-black text-blue-500/50 uppercase tracking-[0.2em] px-1 mb-1">Dev: Role Switch</div>
-            <div className="grid grid-cols-2 gap-1">
-              {[
-                { id: 'admin', label: 'Admin' },
-                { id: 'cio', label: 'CIO' },
-                { id: 'department_lead', label: 'Ltg.' },
-                { id: 'employee', label: 'Mitarb.' },
-              ].map((r) => (
-                <button
-                  key={r.id}
-                  onClick={() => userProfile && setUserProfile({ ...userProfile, role: r.id as any })}
-                  className={`py-1 rounded text-[10px] font-bold transition-all border-none cursor-pointer ${
-                    userProfile?.role === r.id 
-                      ? 'bg-blue-500 text-white shadow-sm' 
-                      : 'text-blue-500/40 hover:bg-blue-500/10'
-                  }`}
-                >
-                  {r.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Theme-Umschalter */}
-        <div className="mb-2 p-0.5 rounded-lg bg-black/[0.04] dark:bg-white/[0.04] flex">
-          <button
-            onClick={() => setTheme('light')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-semibold transition-all ${
-              theme === 'light'
-                ? 'bg-white text-blue-500 shadow-sm'
-                : 'text-gray-400 hover:text-gray-600 dark:text-white/30 dark:hover:text-white/55'
-            }`}
-          >
-            <Sun size={11} />
-            <span>Hell</span>
-          </button>
-          <button
-            onClick={() => setTheme('dark')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-semibold transition-all ${
-              theme === 'dark'
-                ? 'bg-white/[0.12] text-blue-500'
-                : 'text-gray-400 hover:text-gray-600 dark:text-white/30 dark:hover:text-white/55'
-            }`}
-          >
-            <Moon size={11} />
-            <span>Dunkel</span>
-          </button>
         </div>
 
-        {/* Einstellungen (Sichtbar für alle, Inhalt wird auf der Seite gefiltert) */}
-        <Link
-          href="/settings"
-          onClick={onNavigate}
-          className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium no-underline transition-all duration-150 ${
-            pathname === '/settings'
-              ? 'bg-blue-500/12 border border-blue-500/20'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-black/[0.05] dark:text-white/45 dark:hover:text-white/80 dark:hover:bg-white/[0.05]'
-          }`}
-          style={
-            pathname === '/settings'
-              ? { boxShadow: '0 0 12px rgba(59,130,246,0.08)', color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : '#374151' }
-              : {}
-          }
-        >
-          <Settings size={14} className="shrink-0" />
-          <span>Einstellungen</span>
-        </Link>
+        {/* Org Box */}
+        <div className="p-3 rounded-2xl bg-[var(--bg-ghost)] border border-[var(--sidebar-border)] flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+              <Building size={16} />
+            </div>
+            <div className="text-[11px] font-bold text-[var(--sidebar-text)] opacity-90">WAMOCON GmbH</div>
+          </div>
+          {hasMinRole('admin') && (
+            <div className="px-2 py-0.5 rounded-md bg-red-500/10 text-red-500 text-[9px] font-black uppercase tracking-widest">
+              Admin
+            </div>
+          )}
+        </div>
+
+        {/* App Switcher */}
+        <div className="grid grid-cols-2 gap-2 mb-6">
+          {apps.map((app) => (
+            <button
+              key={app.id}
+              onClick={() => setActivePortal(app)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--bg-ghost)] border border-[var(--sidebar-border)] hover:bg-blue-500/5 hover:border-blue-500/20 transition-all text-[10px] font-bold text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text)]"
+            >
+              <app.icon size={12} className={app.color} />
+              {app.label}
+            </button>
+          ))}
+        </div>
       </div>
-    </>
+
+      {/* 2. Navigation Section */}
+      <div className="flex-1 overflow-y-auto px-4 pb-8 sidebar-scroll">
+        <div className="space-y-6">
+          {/* Main Nav */}
+          <div>
+            <div className="text-[9px] font-black uppercase tracking-[0.2em] px-3 mb-3 text-[var(--sidebar-text-muted)] opacity-40">Navigation</div>
+            <div className="flex flex-col gap-1">
+              {mainNav.map((item) => {
+                const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={onNavigate}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all no-underline ${
+                      active 
+                        ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20 shadow-sm' 
+                        : 'hover:bg-[var(--sidebar-item-hover)] text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text)] border border-transparent'
+                    }`}
+                  >
+                    <item.icon size={15} className={active ? 'text-blue-500' : 'opacity-50'} />
+                    {item.label}
+                    {item.badge && <span className="ml-auto text-[9px] bg-red-500 text-white px-1.5 py-0.5 rounded-full">{item.badge}</span>}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Admin Nav */}
+          {hasMinRole('admin') && (
+            <div>
+              <div className="text-[9px] font-black uppercase tracking-[0.2em] px-3 mb-3 text-[var(--sidebar-text-muted)] opacity-40">Administration</div>
+              <div className="flex flex-col gap-1">
+                {adminNav.map((item) => {
+                  const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={onNavigate}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all no-underline ${
+                        active 
+                          ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20' 
+                          : 'hover:bg-[var(--sidebar-item-hover)] text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text)] border border-transparent'
+                      }`}
+                    >
+                      <item.icon size={15} className={active ? 'text-purple-500' : 'opacity-50'} />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Footer Section (User & Config) */}
+      <div className="p-4 bg-[var(--bg-ghost)] border-t border-[var(--sidebar-border)]">
+        {/* Dev Tools (only dev) */}
+        {process.env.NODE_ENV !== 'production' && (
+          <div className="mb-4 space-y-2">
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--bg-ghost)] border border-[var(--sidebar-border)]">
+              <button onClick={() => setTheme('light')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'light' ? 'bg-white shadow-sm text-blue-600' : 'text-[var(--sidebar-text-muted)]'}`}><Sun size={12} /></button>
+              <button onClick={() => setTheme('dark')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'dark' ? 'bg-[#1a2236] text-white shadow-lg' : 'text-[var(--sidebar-text-muted)]'}`}><Moon size={12} /></button>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-1 px-1">
+               {['admin', 'employee'].map(r => (
+                 <button key={r} onClick={() => userProfile && setUserProfile({...userProfile, role: r as any})} className={`text-[9px] font-bold py-1 rounded border-none cursor-pointer ${userProfile?.role === r ? 'text-blue-500 bg-blue-500/10' : 'text-slate-600'}`}>
+                   Dev: {r.toUpperCase()}
+                 </button>
+               ))}
+            </div>
+          </div>
+        )}
+
+        {/* User Profile Bar */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center overflow-hidden">
+            {userProfile?.avatarUrl ? <img src={userProfile.avatarUrl} alt="User Avatar" className="w-full h-full object-cover" /> : <div className="text-blue-500 font-black text-xs">{userProfile?.displayName?.charAt(0) || userProfile?.email?.charAt(0)}</div>}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[11px] font-black text-[var(--sidebar-text)] truncate">{userProfile?.displayName || 'User'}</div>
+            <div className="text-[9px] font-medium text-[var(--sidebar-text-muted)] flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              Angemeldet
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            <Link href="/settings" className="p-2 rounded-lg hover:bg-blue-500/10 text-[var(--sidebar-text-muted)] hover:text-blue-500 transition-all">
+              <Settings size={16} />
+            </Link>
+            <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-red-500/10 text-[var(--sidebar-text-muted)] hover:text-red-500 transition-all bg-transparent border-none cursor-pointer">
+              <LogOut size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {activePortal && (
+        <AppPortal
+          isOpen={!!activePortal}
+          onClose={() => setActivePortal(null)}
+          url={activePortal.url}
+          title={activePortal.title}
+          icon={activePortal.icon}
+          iconColor={activePortal.color}
+        />
+      )}
+    </div>
   );
 }
 
 export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
-  const { theme } = useTheme();
-
   return (
     <>
       {/* Desktop */}
-      <aside
-        className="hidden md:flex flex-col w-56 shrink-0 border-r sidebar-scroll"
-        style={{
-          background: theme === 'dark' ? 'rgba(8,10,20,0.9)' : 'rgba(248,250,252,0.95)',
-          borderColor: 'var(--border)',
-          backdropFilter: 'blur(12px)',
-        }}>
+      <aside className="hidden md:flex flex-col w-64 border-r border-[var(--sidebar-border)] h-screen">
         <SidebarContent />
       </aside>
 
       {/* Mobile Overlay */}
       {isOpen && (
-        <>
-          <div className="fixed inset-0 bg-black/60 z-40 md:hidden" onClick={onClose} />
-          <aside
-            className="fixed inset-y-0 left-0 z-50 flex flex-col w-72 md:hidden"
-            style={{
-              background: theme === 'dark' ? 'rgba(8,10,20,0.98)' : '#ffffff',
-              backdropFilter: 'blur(16px)',
-            }}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-black/[0.07] dark:border-white/[0.06] shrink-0">
-              <span className="text-[9px] font-bold text-black/30 dark:text-white/30 uppercase tracking-widest">
-                Navigation
-              </span>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-700 dark:text-white/40 dark:hover:text-white bg-transparent border-none cursor-pointer p-1 rounded transition-colors"
-                aria-label="Menü schließen"
-              >
-                <X size={18} />
-              </button>
-            </div>
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
+          <aside className="relative flex flex-col w-72 h-full shadow-2xl animate-slide-right">
             <SidebarContent onNavigate={onClose} />
           </aside>
-        </>
+        </div>
       )}
     </>
   );

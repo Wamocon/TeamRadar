@@ -41,15 +41,15 @@ export default function CalendarPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-teal-400/20 border border-blue-500/20 flex items-center justify-center">
-              <CalendarDays size={20} className="text-blue-400" />
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+              <CalendarDays size={20} className="text-blue-500" />
             </div>
             Kalender
           </h1>
           <p className="text-sm dark:text-white/40 text-gray-500 mt-1">Verfügbarkeiten im Monatsüberblick</p>
         </div>
         <div className="flex gap-2">
-          <div className="flex gap-1 p-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.03]">
+          <div className="flex gap-1 p-1 rounded-lg bg-slate-100 dark:bg-white/5">
             <button onClick={() => setViewMode('month')}
               className={`px-3 py-1 rounded-md text-xs font-medium transition-colors border-none cursor-pointer ${viewMode === 'month' ? 'bg-blue-500 text-white shadow-sm' : 'bg-transparent dark:text-white/40 text-gray-400'}`}>
               Monat
@@ -108,7 +108,7 @@ export default function CalendarPage() {
                 <button key={dateStr}
                   onClick={() => { setSelectedDate(dateStr); setShowForm(true); }}
                   className={`relative p-2 min-h-[80px] border-b border-r text-left transition-all bg-transparent cursor-pointer ${
-                    inMonth ? 'dark:text-white/70 text-gray-700' : 'dark:text-white/15 text-gray-300'
+                    inMonth ? 'text-gray-700 dark:text-white/70' : 'text-gray-300 dark:text-white/15'
                   } hover:bg-blue-500/5`}
                   style={{ borderColor: 'var(--border)' }}>
                   <div className={`text-xs font-bold ${

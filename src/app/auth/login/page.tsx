@@ -1,9 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Loader, AlertCircle, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Loader, AlertCircle, Mail, Lock, LayoutDashboard } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import Image from 'next/image';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -69,8 +68,8 @@ export default function LoginPage() {
         }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center border border-white/10 shadow-lg relative">
-            <Image src="/logo.png" alt="TeamRadar Logo" fill className="object-cover" />
+          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white border border-white/10 shadow-lg">
+            <LayoutDashboard size={22} />
           </div>
           <div>
             <div className="text-white font-black text-lg">TeamRadar</div>
@@ -107,8 +106,8 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           {/* Mobile Logo */}
           <div className="lg:hidden flex flex-col items-center gap-4 mb-8 justify-center">
-            <div className="w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center shadow-2xl shadow-blue-500/20 ring-1 ring-white/10 relative">
-              <Image src="/logo.png" alt="TeamRadar Logo" fill className="object-cover" />
+            <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-2xl shadow-blue-500/20 ring-1 ring-white/10">
+              <LayoutDashboard size={32} />
             </div>
             <div className="text-center">
               <h1 className="text-2xl font-black text-white">

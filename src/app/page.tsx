@@ -7,10 +7,9 @@ import { DepartmentBars } from '@/components/dashboard/DepartmentBars';
 import { AvailabilityTimeline } from '@/components/dashboard/AvailabilityTimeline';
 import { SearchFilter } from '@/components/dashboard/SearchFilter';
 import { STATUS_CONFIG, type AvailabilityStatus, type ProjectType } from '@/types';
-import { Globe, CalendarClock, Plus, Clock, BarChart3, Users, LayoutGrid, List } from 'lucide-react';
+import { Globe, CalendarClock, Plus, Clock, BarChart3, Users, LayoutGrid, List, LayoutDashboard } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function DashboardPage() {
   const members = useAppStore((s) => s.members);
@@ -124,8 +123,8 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center shadow-lg shadow-blue-500/20 border border-white/5 relative">
-              <Image src="/logo.png" alt="TeamRadar Logo" fill className="object-cover" />
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 border border-white/10 dark:border-white/5">
+              <LayoutDashboard size={22} />
             </div>
             Dashboard
           </h1>
@@ -172,7 +171,7 @@ export default function DashboardPage() {
                 <span className="text-[10px] dark:text-white/30 text-gray-400 font-medium">{stat.label}</span>
               </div>
               <div className="text-3xl font-black" style={{ color: stat.color }}>{stat.value}</div>
-              <div className="mt-1 h-1 rounded-full bg-black/[0.03] dark:bg-white/[0.03]">
+              <div className="mt-1 h-1 rounded-full bg-slate-200 dark:bg-white/10">
                 <div className="progress-bar h-full rounded-full" style={{ width: `${members.length > 0 ? (stat.value / members.length) * 100 : 0}%`, background: stat.color }} />
               </div>
             </div>
@@ -216,7 +215,7 @@ export default function DashboardPage() {
             selectedProjectType={selectedProjectType} onProjectTypeChange={setSelectedProjectType}
           />
         </div>
-        <div className="flex gap-1 p-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.03]">
+        <div className="flex gap-1 p-1 rounded-lg bg-slate-100 dark:bg-white/5">
           <button onClick={() => setViewMode('grid')}
             className={`p-1.5 rounded-md transition-colors border-none cursor-pointer ${viewMode === 'grid' ? 'bg-blue-500 text-white shadow-sm' : 'bg-transparent dark:text-white/40 text-gray-400 hover:text-blue-500'}`}>
             <LayoutGrid size={14} />
@@ -242,7 +241,7 @@ export default function DashboardPage() {
             <div key={group.id} className="space-y-3">
               <button 
                 onClick={() => toggleGroup(group.id)}
-                className="w-full flex items-center justify-between p-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors border-none cursor-pointer"
+                className="w-full flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors border-none cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full" style={{ background: group.color }} />

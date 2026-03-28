@@ -5,8 +5,8 @@ import path from 'path';
 describe('Branding Assets', () => {
   const publicDir = path.resolve(__dirname, '../../public');
 
-  it('should have the favicon.png in the public directory', () => {
-    const faviconPath = path.join(publicDir, 'favicon.png');
+  it('should have the favicon.svg in the public directory', () => {
+    const faviconPath = path.join(publicDir, 'favicon.svg');
     expect(fs.existsSync(faviconPath)).toBe(true);
   });
 

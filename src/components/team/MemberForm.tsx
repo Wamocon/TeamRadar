@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/stores/appStore';
-import { Save, X, Plus, Trash2 } from 'lucide-react';
+import { Save, X, Plus, Trash2, Loader } from 'lucide-react';
 import { SKILL_CATEGORIES, SKILL_LEVEL_CONFIG, type Skill, type SkillLevel, type SkillCategory } from '@/types';
 
 export function MemberForm({ memberId }: { memberId?: string }) {
@@ -36,16 +36,46 @@ export function MemberForm({ memberId }: { memberId?: string }) {
     setSkills(skills.filter((s) => s.name !== name));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [msg, setMsg] = useState<{ type: 'error' | 'success', text: string } | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim()) return;
 
-    if (existing) {
-      updateMember(existing.id, { name, email, role, department, phone: phone || undefined, skills });
-    } else {
-      addMember({ name, email, role, department, phone: phone || undefined, skills });
+    setIsSubmitting(true);
+    setMsg(null);
+
+    try {
+      if (existing) {
+        // Edit existing (local store for now, or db update)
+        updateMember(existing.id, { name, email, role, department, phone: phone || undefined, skills });
+        router.push('/members');
+      } else {
+        // REAL INVITATION
+        const { inviteUserByEmail } = await import('@/lib/actions/authActions');
+        const result = await inviteUserByEmail(
+          email,
+          'employee', // Default role for new members
+          window.location.origin,
+          name,
+          department
+        );
+
+        if (result.error) {
+          setMsg({ type: 'error', text: result.error });
+        } else {
+          setMsg({ type: 'success', text: `Einladung an ${email} wurde gesendet!` });
+          // Optional: Add to store as "pending"
+          addMember({ name, email, role, department, phone: phone || undefined, skills });
+          setTimeout(() => router.push('/members'), 2000);
+        }
+      }
+    } catch (err) {
+      setMsg({ type: 'error', text: 'Ein interner Fehler ist aufgetreten.' });
+    } finally {
+      setIsSubmitting(false);
     }
-    router.push('/members');
   };
 
   return (
@@ -56,7 +86,7 @@ export function MemberForm({ memberId }: { memberId?: string }) {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg border text-sm"
+          className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white"
           placeholder="Max Mustermann"
           required
         />
@@ -67,7 +97,7 @@ export function MemberForm({ memberId }: { memberId?: string }) {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg border text-sm"
+          className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white"
           placeholder="max@firma.de"
           required
         />
@@ -78,7 +108,7 @@ export function MemberForm({ memberId }: { memberId?: string }) {
           type="text"
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg border text-sm"
+          className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white"
           placeholder="Frontend-Entwickler"
         />
       </div>
@@ -88,7 +118,7 @@ export function MemberForm({ memberId }: { memberId?: string }) {
           type="text"
           value={department}
           onChange={(e) => setDepartment(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg border text-sm"
+          className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white"
           placeholder="Engineering"
         />
       </div>
@@ -98,7 +128,7 @@ export function MemberForm({ memberId }: { memberId?: string }) {
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg border text-sm"
+          className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white"
           placeholder="+49 151 12345678"
         />
       </div>
@@ -130,15 +160,15 @@ export function MemberForm({ memberId }: { memberId?: string }) {
         <div className="flex gap-2 items-end">
           <div className="flex-1">
             <input type="text" value={newSkillName} onChange={(e) => setNewSkillName(e.target.value)}
-              className="w-full px-2.5 py-1.5 rounded-lg border text-xs" placeholder="z.B. React, SAP, AWS..."
+              className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-xs dark:text-white" placeholder="z.B. React, SAP, AWS..."
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } }} />
           </div>
           <select value={newSkillCategory} onChange={(e) => setNewSkillCategory(e.target.value as SkillCategory)}
-            className="px-2 py-1.5 rounded-lg border text-xs cursor-pointer">
+            className="px-2 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-xs cursor-pointer dark:text-white">
             {SKILL_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
           <select value={newSkillLevel} onChange={(e) => setNewSkillLevel(e.target.value as SkillLevel)}
-            className="px-2 py-1.5 rounded-lg border text-xs cursor-pointer">
+            className="px-2 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-xs cursor-pointer dark:text-white">
             {(Object.entries(SKILL_LEVEL_CONFIG) as [SkillLevel, { label: string }][]).map(
               ([k, v]) => <option key={k} value={k}>{v.label}</option>
             )}
@@ -153,15 +183,16 @@ export function MemberForm({ memberId }: { memberId?: string }) {
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
+          disabled={isSubmitting}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors disabled:opacity-50"
         >
-          <Save size={14} />
-          {existing ? 'Speichern' : 'Anlegen'}
+          {isSubmitting ? <Loader size={14} className="animate-spin" /> : <Save size={14} />}
+          {existing ? 'Speichern' : 'Anlegen & Einladen'}
         </button>
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-black/10 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600 hover:bg-black/[0.03] dark:hover:bg-white/[0.03] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
         >
           <X size={14} />
           Abbrechen

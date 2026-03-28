@@ -120,8 +120,8 @@ export default function ProjectsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-orange-400/20 border border-indigo-500/20 flex items-center justify-center">
-              <Briefcase size={20} className="text-indigo-400" />
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+              <Briefcase size={20} className="text-indigo-500" />
             </div>
             Projekte
           </h1>
@@ -150,7 +150,7 @@ export default function ProjectsPage() {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as ProjectType | 'all')}
-            className="px-3 py-1.5 rounded-lg text-xs border border-black/[0.06] dark:border-white/[0.06] bg-transparent cursor-pointer dark:text-white/60 text-gray-600"
+            className="px-3 py-1.5 rounded-lg text-xs border border-slate-100 dark:border-white/5 bg-transparent cursor-pointer dark:text-white/60 text-gray-600"
             style={{ minWidth: 120 }}
           >
             <option value="all">Alle Typen</option>
@@ -160,7 +160,7 @@ export default function ProjectsPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as ProjectStatus | 'all')}
-            className="px-3 py-1.5 rounded-lg text-xs border border-black/[0.06] dark:border-white/[0.06] bg-transparent cursor-pointer dark:text-white/60 text-gray-600"
+            className="px-3 py-1.5 rounded-lg text-xs border border-slate-100 dark:border-white/5 bg-transparent cursor-pointer dark:text-white/60 text-gray-600"
             style={{ minWidth: 120 }}
           >
             <option value="all">Alle Status</option>
@@ -175,7 +175,7 @@ export default function ProjectsPage() {
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] p-5 space-y-4 animate-fade-in"
+          className="card-shimmer rounded-xl border border-slate-100 dark:border-white/5 p-5 space-y-4 animate-fade-in"
         >
           <h2 className="text-sm font-bold dark:text-white text-gray-900">
             {editId ? 'Projekt bearbeiten' : 'Neues Projekt anlegen'}
@@ -247,7 +247,7 @@ export default function ProjectsPage() {
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
                     formMembers.includes(m.id)
                       ? 'bg-indigo-500/15 border-indigo-500/40 text-indigo-500'
-                      : 'border-black/[0.06] dark:border-white/[0.06] dark:text-white/50 text-gray-600 hover:border-indigo-500/20 bg-transparent'
+                      : 'border-slate-100 dark:border-white/0.06 dark:text-white/50 text-gray-600 hover:border-indigo-500/20 bg-transparent'
                   }`}>
                   {m.name}
                 </button>
@@ -299,7 +299,7 @@ export default function ProjectsPage() {
                     const projMembers = members.filter((m) => project.memberIds.includes(m.id));
                     const typeConf = PROJECT_TYPE_CONFIG[project.type];
                     return (
-                      <div key={project.id} className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] p-5 hover:border-indigo-500/20 transition-all">
+                      <div key={project.id} className="card-shimmer rounded-xl border border-slate-100 dark:border-white/5 p-5 hover:border-indigo-500/20 transition-all">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">

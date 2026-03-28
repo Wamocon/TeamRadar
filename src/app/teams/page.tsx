@@ -40,8 +40,8 @@ export default function TeamsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-teal-400/20 border border-blue-500/20 flex items-center justify-center">
-              <FolderKanban size={20} className="text-blue-400" />
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+              <FolderKanban size={20} className="text-blue-500" />
             </div>
             Teams
           </h1>
@@ -66,7 +66,7 @@ export default function TeamsPage() {
       {showForm && (
         <form
           onSubmit={handleCreateTeam}
-          className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] p-5 space-y-4"
+          className="card-shimmer rounded-xl border border-slate-100 dark:border-white/5 p-5 space-y-4"
         >
           <div>
             <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Teamname *</label>
@@ -102,7 +102,7 @@ export default function TeamsPage() {
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
                     selectedMembers.includes(m.id)
                       ? 'bg-blue-500/15 border-blue-500/40 text-blue-500'
-                      : 'border-black/[0.06] dark:border-white/[0.06] dark:text-white/50 text-gray-600 hover:border-blue-500/20'
+                      : 'border-slate-100 dark:border-white/5 text-gray-600 dark:text-white/50 hover:border-blue-500/20'
                   }`}
                 >
                   {m.name}
@@ -151,7 +151,7 @@ export default function TeamsPage() {
             return (
               <div
                 key={team.id}
-                className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] p-5"
+                className="card-shimmer rounded-xl border border-slate-100 dark:border-white/5 p-5"
               >
                 <div className="flex items-start justify-between">
                   <div>

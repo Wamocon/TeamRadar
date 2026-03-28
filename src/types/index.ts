@@ -149,4 +149,12 @@ export interface UserProfile {
   email: string;
   displayName: string;
   role: UserRole;
+  avatarUrl?: string;
+  statusMessage?: string;
+  phone?: string;
+  createdAt?: string;
+  preferences?: {
+    theme?: 'light' | 'dark' | 'system';
+    notifications?: boolean;
+  };
 }

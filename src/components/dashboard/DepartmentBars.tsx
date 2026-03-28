@@ -16,7 +16,7 @@ export function DepartmentBars({ departments }: { departments: { name: string; c
           <span className="text-xs dark:text-white/50 text-gray-500 w-28 truncate shrink-0" title={dept.name}>
             {dept.name}
           </span>
-          <div className="flex-1 flex h-5 rounded-md overflow-hidden bg-black/[0.03] dark:bg-white/[0.03]">
+          <div className="flex-1 flex h-5 rounded-md overflow-hidden bg-slate-100 dark:bg-white/5">
             {(Object.entries(STATUS_CONFIG) as [AvailabilityStatus, typeof STATUS_CONFIG[AvailabilityStatus]][]).map(
               ([key, config]) => {
                 const count = dept.counts[key] || 0;

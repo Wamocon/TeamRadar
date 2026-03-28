@@ -28,6 +28,12 @@ interface AppStore {
   projects: Project[];
   allocations: Allocation[];
   userProfile: UserProfile | null;
+  systemSettings: {
+    orgName: string;
+    orgLogoUrl?: string;
+    supportEmail: string;
+    maintenanceMode: boolean;
+  } | null;
 
   /* ── Lade-Zustand ──────────────────────────── */
   isLoading: boolean;
@@ -37,6 +43,8 @@ interface AppStore {
   loadFromSupabase: () => Promise<void>;
   loadUserProfile: () => Promise<void>;
   setUserProfile: (profile: UserProfile | null) => void;
+  loadSystemSettings: () => Promise<void>;
+  updateSystemSettings: (data: any) => void;
 
   /* ── Mitarbeiter ───────────────────────────── */
   addMember: (member: Omit<Member, 'id' | 'createdAt'>) => Member;
@@ -82,7 +90,25 @@ export const useAppStore = create<AppStore>()(
     teams: [],
     projects: [],
     allocations: [],
-    userProfile: process.env.NODE_ENV !== 'production' ? { id: 'mock-1', email: 'admin@dev.local', displayName: 'Dev Admin', role: 'admin' } : null,
+    userProfile: process.env.NODE_ENV !== 'production' 
+      ? { 
+          id: 'mock-1', 
+          email: 'admin@dev.local', 
+          displayName: 'Dev Admin', 
+          role: 'admin',
+          avatarUrl: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&q=80&w=150',
+          statusMessage: 'Building TeamRadar 🚀',
+          phone: '+49 123 456789',
+          preferences: { theme: 'system' as const, notifications: true }
+        } 
+      : null,
+    systemSettings: process.env.NODE_ENV !== 'production'
+      ? {
+          orgName: 'Wamocon TeamRadar',
+          supportEmail: 'support@wamocon.de',
+          maintenanceMode: false
+        }
+      : null,
     isLoading: false,
     dbError: null,
 
@@ -122,6 +148,25 @@ export const useAppStore = create<AppStore>()(
     },
 
     setUserProfile: (profile) => set({ userProfile: profile }),
+
+    loadSystemSettings: async () => {
+      const { getSystemSettingsAction } = await import('@/lib/actions/settingsActions');
+      const result = await getSystemSettingsAction();
+      if (result.data) {
+        set({
+          systemSettings: {
+            orgName: result.data.org_name,
+            orgLogoUrl: result.data.org_logo_url,
+            supportEmail: result.data.support_email,
+            maintenanceMode: result.data.maintenance_mode
+          }
+        });
+      }
+    },
+
+    updateSystemSettings: (data) => set((state) => ({
+      systemSettings: state.systemSettings ? { ...state.systemSettings, ...data } : data
+    })),
 
     /* ── Mitarbeiter ─────────────────────────── */
     addMember: (data) => {

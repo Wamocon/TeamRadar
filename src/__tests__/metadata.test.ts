@@ -15,7 +15,7 @@ describe('Root Layout Metadata', () => {
     expect(metadata.icons).toBeDefined();
     const icons = metadata.icons as any;
     expect(icons.icon).toBeDefined();
-    expect(icons.icon[0].url).toBe('/favicon.png');
-    expect(icons.apple).toBe('/favicon.png');
+    expect(icons.icon[0].url).toBe('/favicon.svg?v=2');
+    expect(icons.apple[0].url).toBe('/favicon.png?v=2');
   });
 });

@@ -29,7 +29,7 @@ export function CollapsiblePanel({
     <div className={`overflow-hidden ${className}`}>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`w-full flex items-center justify-between p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-all border border-black/[0.05] dark:border-white/[0.05] cursor-pointer ${headerClassName}`}
+        className={`w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-all border border-slate-100 dark:border-white/5 cursor-pointer ${headerClassName}`}
       >
         <div className="flex items-center gap-3">
           {accentColor && (

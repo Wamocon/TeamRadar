@@ -36,7 +36,7 @@ export function MemberCard({ member }: { member: Member }) {
               <span>{initials}</span>
             )}
           </div>
-          <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 dark:border-[#111827] border-white"
+          <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-[#060810]"
             style={{ background: config.color }} />
         </div>
 
@@ -52,7 +52,7 @@ export function MemberCard({ member }: { member: Member }) {
 
           {/* Utilization bar */}
           <div className="mt-1.5 flex items-center gap-2">
-            <div className="flex-1 h-1.5 rounded-full bg-black/[0.06] dark:bg-white/[0.06]">
+            <div className="flex-1 h-1.5 rounded-full bg-slate-100 dark:bg-white/10">
               <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(utilization, 100)}%`, background: utilColor }} />
             </div>
             <span className="text-[10px] font-bold" style={{ color: utilColor }}>{utilization}%</span>

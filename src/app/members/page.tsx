@@ -26,8 +26,8 @@ export default function MembersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-teal-400/20 border border-blue-500/20 flex items-center justify-center">
-              <Users size={20} className="text-blue-400" />
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+              <Users size={20} className="text-blue-500" />
             </div>
             Mitarbeiter
           </h1>
@@ -96,7 +96,7 @@ export default function MembersPage() {
                     {deptMembers.map((member) => (
                       <div
                         key={member.id}
-                        className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] p-4 flex items-center gap-4"
+                        className="card-shimmer rounded-xl border border-slate-100 dark:border-white/5 p-4 flex items-center gap-4"
                       >
                         <div className="flex-1">
                           <MemberCard member={member} />

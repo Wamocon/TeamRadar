@@ -31,7 +31,7 @@ export function StatusDot({ status }: { status: AvailabilityStatus }) {
   const config = STATUS_CONFIG[status];
   return (
     <span
-      className="inline-block w-2.5 h-2.5 rounded-full ring-2 ring-offset-1 dark:ring-offset-gray-900 ring-offset-white"
+      className="inline-block w-2.5 h-2.5 rounded-full ring-2 ring-offset-1 dark:ring-offset-[#060810] ring-offset-white"
       style={{ background: config.color, boxShadow: `0 0 0 2px ${config.color}40` }}
       title={config.label}
     />

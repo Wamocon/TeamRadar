@@ -19,6 +19,29 @@ export async function createClient() {
           } catch { /* In Server Components ignorieren */ }
         },
       },
+      cookieOptions: {
+        sameSite: 'lax',
+        secure: true,
+      },
+    }
+  );
+}
+
+export async function createAdminClient() {
+  const schema = process.env.NEXT_PUBLIC_DB_SCHEMA || 'public';
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      db: { schema },
+      cookies: {
+        getAll() { return [] },
+        setAll() {},
+      },
+      cookieOptions: {
+        sameSite: 'lax',
+        secure: true,
+      },
     }
   );
 }

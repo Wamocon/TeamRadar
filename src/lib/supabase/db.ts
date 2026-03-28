@@ -160,11 +160,14 @@ export async function dbGetUserProfile() {
     return null;
   }
 
+  if (!data) return null;
+
   return {
     id: data.id,
     email: data.email,
-    displayName: data.display_name, // Mapping snake_case -> camelCase
+    displayName: data.display_name,
     role: data.role,
+    createdAt: data.created_at,
   };
 }
 

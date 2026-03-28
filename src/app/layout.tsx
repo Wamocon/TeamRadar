@@ -9,9 +9,12 @@ export const metadata: Metadata = {
   description: 'Mitarbeiter-Verfügbarkeit visualisieren und verwalten',
   icons: {
     icon: [
-      { url: '/favicon.png', type: 'image/png' },
+      { url: '/favicon.svg?v=2', type: 'image/svg+xml' },
+      { url: '/favicon.png?v=2', type: 'image/png' },
     ],
-    apple: '/favicon.png',
+    apple: [
+      { url: '/favicon.png?v=2', type: 'image/png' },
+    ],
   },
 };
 

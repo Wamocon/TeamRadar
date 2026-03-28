@@ -170,7 +170,6 @@ export async function dbGetUserProfile() {
     createdAt: data.created_at,
   };
 }
-}
 
 export async function loadAllData() {
   if (!isSupabaseConfigured()) return null;

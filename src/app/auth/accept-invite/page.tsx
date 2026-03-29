@@ -3,7 +3,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Users, Eye, EyeOff, Loader, AlertCircle, Lock, CheckCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { completeInvitationAction } from '@/lib/actions/authActions';
+import { completeInvitationAction, saveConsentAction } from '@/lib/actions/authActions';
 
 function AcceptInviteContent() {
   const router = useRouter();
@@ -17,6 +17,8 @@ function AcceptInviteContent() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
+  const [agbAccepted, setAgbAccepted] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -97,11 +99,19 @@ function AcceptInviteContent() {
     setLoading(true);
     try {
       const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Nutzer-ID nicht gefunden.');
+
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
 
+      // 1. Profil vervollständigen (Rolle setzen)
       const result = await completeInvitationAction(role);
       if (result && 'error' in result && result.error) throw new Error(result.error as string);
+
+      // 2. Zustimmungen speichern
+      const consentResult = await saveConsentAction(user.id, ['agb', 'datenschutz', 'dsgvo']);
+      if (consentResult.error) throw new Error(consentResult.error);
 
       setSuccess(true);
       setTimeout(() => {
@@ -186,19 +196,36 @@ function AcceptInviteContent() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Passwort bestätigen</label>
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
-                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-3 pl-12 pr-12 text-sm focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
-                    placeholder="Passwort erneut eingeben"
-                    required
-                  />
-                </div>
+              <div className="space-y-4 pt-2">
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <div className="pt-0.5">
+                    <input
+                      type="checkbox"
+                      checked={agbAccepted}
+                      onChange={e => setAgbAccepted(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer"
+                      required
+                    />
+                  </div>
+                  <span className="text-xs text-slate-500 leading-normal group-hover:text-slate-700 transition-colors">
+                    Ich akzeptiere die <a href="/agb" target="_blank" className="text-indigo-600 font-bold hover:underline">Allgemeinen Geschäftsbedingungen (AGB)</a> von TeamRadar.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <div className="pt-0.5">
+                    <input
+                      type="checkbox"
+                      checked={privacyAccepted}
+                      onChange={e => setPrivacyAccepted(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer"
+                      required
+                    />
+                  </div>
+                  <span className="text-xs text-slate-500 leading-normal group-hover:text-slate-700 transition-colors">
+                    Ich habe die <a href="/datenschutz" target="_blank" className="text-indigo-600 font-bold hover:underline">Datenschutzerklärung</a> zur Kenntnis genommen und willige in die Verarbeitung meiner Daten ein.
+                  </span>
+                </label>
               </div>
 
               {error && (

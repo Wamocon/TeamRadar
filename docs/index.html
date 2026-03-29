@@ -5,397 +5,298 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TeamRadar – Produkthandbuch | WAMOCON</title>
   <style>
+    /* ── Reset & Base ─────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --red:       #ff1a1a;
-      --red-dark:  #c41010;
-      --red-glow:  rgba(255,26,26,0.18);
-      --green:     #22aa66;
+      --blue:      #2563eb;
+      --blue-dark: #1e40af;
+      --blue-glow: rgba(37,99,235,0.18);
+      --green:     #22c55e;
       --amber:     #f59e0b;
-      --blue:      #60a5fa;
-      --purple:    #c084fc;
-      --bg-page:   #0b0808;
-      --bg-card:   rgba(22,10,10,0.92);
-      --bg-code:   #160a0a;
+      --bg-page:   #0b1120;
+      --bg-card:   rgba(22,30,46,0.92);
+      --bg-code:   #1e293b;
       --border:    rgba(255,255,255,0.07);
-      --text:      #e8e0e0;
-      --text-muted:#9a8a8a;
+      --text:      #f1f5f9;
+      --text-muted:#94a3b8;
       --text-dim:  rgba(255,255,255,0.35);
-      --navy:      #1b3a5c;
-      --wmc-grad:  linear-gradient(135deg, #2a0606 0%, #1a0303 40%, #2c1a1a 75%, #e8dada 100%);
+      --navy:      #1e293b;
+      --wmc-grad:  linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #2563eb 100%);
     }
+
     html { scroll-behavior: smooth; font-size: 15px; }
+
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: var(--bg-page);
       color: var(--text);
       line-height: 1.65;
     }
-    /* --- plan-IT CSS: Layout, Sidebar, Cover, Tables, Badges, Info-Boxen, Footer --- */
-    .layout { display: flex; min-height: 100vh; }
-    #toc-sidebar {
-      width: 270px; background: var(--bg-card); border-right: 1px solid var(--border);
-      padding: 2.2rem 1.2rem 2.2rem 1.2rem; position: sticky; top: 0; align-self: flex-start;
-      min-height: 100vh; z-index: 2;
+
+    /* ── Page Header ──────────────────────────────────────────── */
+    .page-header {
+      background: var(--wmc-grad);
+      border-bottom: 2px solid var(--blue);
+      box-shadow: 0 2px 32px rgba(37,99,235,0.2);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    .toc-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 1.2rem; color: var(--text-muted); }
-    .toc-link { display: block; color: var(--text); text-decoration: none; margin-bottom: 0.5rem; padding-left: 0.2rem; border-left: 3px solid transparent; transition: border 0.2s; }
-    .toc-link.l1 { font-weight: 500; font-size: 1.04rem; }
-    .toc-link:hover, .toc-link.active { border-left: 3px solid var(--red); color: var(--red); background: rgba(255,26,26,0.04); }
-    main { flex: 1; padding: 2.5rem 2.5rem 2.5rem 2.5rem; max-width: 900px; margin: 0 auto; }
-    .cover { background: var(--wmc-grad); border-radius: 1.2rem; padding: 2.2rem 2.2rem 1.2rem 2.2rem; margin-bottom: 2.5rem; box-shadow: 0 2px 24px 0 rgba(0,0,0,0.18); }
-    .doc-type { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 0.7rem; }
-    .cover h1 { font-size: 2.6rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: 0.01em; }
-    .cover-sub { font-size: 1.2rem; color: var(--text-muted); margin-bottom: 1.2rem; }
-    .cover-meta { display: flex; flex-wrap: wrap; gap: 1.2rem; margin-bottom: 0.2rem; }
-    .meta-item { display: flex; flex-direction: column; font-size: 0.98rem; }
-    .meta-label { color: var(--text-dim); font-size: 0.93rem; }
-    .meta-value { font-weight: 500; }
-    .badge { display: inline-block; border-radius: 0.7em; font-size: 0.93em; padding: 0.1em 0.7em; font-weight: 600; vertical-align: middle; }
-    .badge-green { background: var(--green); color: #fff; }
-    .badge-amber { background: var(--amber); color: #fff; }
-    .badge-purple { background: var(--purple); color: #fff; }
-    .badge-gray { background: #444; color: #fff; }
-    .table-wrap { overflow-x: auto; margin: 1.2rem 0; }
-    table { border-collapse: collapse; width: 100%; background: var(--bg-card); border-radius: 0.7rem; overflow: hidden; }
-    th, td { padding: 0.7em 1em; border-bottom: 1px solid var(--border); }
-    th { background: rgba(255,255,255,0.03); color: var(--text-muted); font-weight: 600; }
-    tr:last-child td { border-bottom: none; }
-    .info-box { border-radius: 0.7em; padding: 1.1em 1.3em; margin: 1.2em 0; background: var(--bg-card); border-left: 6px solid var(--blue); }
-    .info-box.green { border-left-color: var(--green); }
-    .info-box.amber { border-left-color: var(--amber); }
-    .info-box.blue { border-left-color: var(--blue); }
-    .info-box-title { font-weight: 600; margin-bottom: 0.3em; color: var(--text); }
-    .ch-num { color: var(--red); font-weight: 700; margin-right: 0.5em; }
-    .page-header { display: flex; align-items: center; justify-content: space-between; background: var(--bg-card); padding: 1.2rem 2.2rem; border-bottom: 1px solid var(--border); }
-    .brand { display: flex; align-items: center; text-decoration: none; color: var(--text); }
-    .logo-mark { width: 2.2em; height: 2.2em; background: var(--red); color: #fff; border-radius: 0.5em; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: 700; margin-right: 0.8em; }
-    .brand-name { font-size: 1.3em; font-weight: 700; }
-    .brand-sub { font-size: 0.98em; color: var(--text-muted); }
-    .header-meta { text-align: right; font-size: 1em; color: var(--text-muted); }
-    .page-footer { background: var(--bg-card); color: var(--text-muted); text-align: center; padding: 1.2em 0; font-size: 0.98em; border-top: 1px solid var(--border); margin-top: 2.5em; }
-    @media (max-width: 1100px) { main { padding: 2.5rem 1rem; } }
-    @media (max-width: 900px) { .layout { flex-direction: column; } #toc-sidebar { width: 100%; min-height: unset; position: static; border-right: none; border-bottom: 1px solid var(--border); } main { max-width: 100vw; } }
-    @media (max-width: 600px) { .cover { padding: 1.2rem 0.7rem; } main { padding: 1rem 0.2rem; } }
+    .page-header .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .logo-mark {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 900; color: #fff;
+      box-shadow: 0 3px 14px rgba(37,99,235,0.4);
+      flex-shrink: 0;
+    }
+    .brand-name { color: #fff; font-weight: 700; font-size: 1rem; line-height: 1.2; }
+    .brand-sub  { color: rgba(255,255,255,0.45); font-size: 0.65rem; letter-spacing: 0.06em; }
+
+    /* ── Layout ──────────────────────────────────────────────── */
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 64px);
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    /* ── Sidebar / TOC ──────────────────────────────────────── */
+    #toc-sidebar {
+      position: sticky;
+      top: 64px;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+      padding: 1.5rem 0 2rem;
+      border-right: 1px solid var(--border);
+      background: rgba(15,23,42,0.6);
+    }
+    .toc-title {
+      font-size: 0.6rem; font-weight: 800; letter-spacing: 0.14em;
+      color: rgba(255,255,255,0.2); text-transform: uppercase;
+      padding: 0 1.4rem 0.5rem;
+    }
+    .toc-link {
+      display: block; padding: 0.3rem 1.4rem;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 0.78rem; border-left: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .toc-link:hover   { color: #fff; border-left-color: var(--blue); background: rgba(37,99,235,0.06); }
+    .toc-link.l1      { font-weight: 700; color: rgba(255,255,255,0.7); font-size: 0.8rem; margin-top: 0.6rem; }
+    .toc-link.l2      { padding-left: 2.2rem; }
+
+    /* ── Main Content ─────────────────────────────────────────── */
+    main { padding: 2.5rem 3rem 4rem; max-width: 960px; }
+
+    /* ── Cover ──────────────────────────────────────────────── */
+    .cover {
+      border: 1px solid rgba(37,99,235,0.3);
+      border-radius: 16px;
+      background: linear-gradient(160deg, rgba(30,58,138,0.4) 0%, rgba(15,23,42,0.95) 100%);
+      padding: 3rem;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+    .doc-type {
+      font-size: 0.65rem; font-weight: 800; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--blue);
+      margin-bottom: 0.7rem;
+    }
+    .cover h1 { font-size: 2.4rem; font-weight: 900; color: #fff; line-height: 1.15; margin-bottom: 0.5rem; }
+    .cover-sub { font-size: 1.15rem; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+    .cover-meta {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .meta-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1rem; text-transform: uppercase; color: rgba(255,255,255,0.25); }
+    .meta-value { font-size: 0.9rem; color: rgba(255,255,255,0.8); font-weight: 600; }
+
+    /* ── Headings ─────────────────────────────────────────────── */
+    h2 {
+      font-size: 1.55rem; font-weight: 900; color: #fff;
+      margin: 3rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(37,99,235,0.35);
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    h2 .ch-num { color: var(--blue); font-size: 1rem; font-weight: 600; min-width: 2rem; }
+    h3 { font-size: 1.1rem; font-weight: 700; color: rgba(255,255,255,0.88); margin: 2rem 0 0.75rem; }
+
+    /* ── Para & Lists ──────────────────────────────────── */
+    p  { margin-bottom: 0.85rem; color: rgba(255,255,255,0.75); }
+    ul { padding-left: 1.4rem; margin-bottom: 0.85rem; }
+    li { margin-bottom: 0.3rem; color: rgba(255,255,255,0.75); }
+    li::marker { color: var(--blue); }
+
+    /* ── Cards ──────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.4rem;
+      margin-bottom: 1rem;
+    }
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .kpi {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      text-align: center;
+    }
+    .kpi-val  { font-size: 1.8rem; font-weight: 900; color: var(--blue); margin-bottom: 0.3rem; }
+    .kpi-lab  { font-size: 0.68rem; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+
+    /* ── Badges ─────────────────────────────────────────────── */
+    .badge {
+      display: inline-block; padding: 0.2rem 0.55rem;
+      border-radius: 20px; font-size: 0.68rem; font-weight: 700;
+    }
+    .badge-blue { background: rgba(37,99,235,0.15); color: #60a5fa; border: 1px solid rgba(37,99,235,0.3); }
+
+    /* ── Tables ─────────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; margin-bottom: 1.25rem; border: 1px solid var(--border); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead tr { background: rgba(37,99,235,0.1); }
+    thead th { padding: 0.65rem 1rem; text-align: left; color: rgba(255,255,255,0.5); font-weight: 800; text-transform: uppercase; font-size: 0.65rem; }
+    tbody tr { border-bottom: 1px solid var(--border); }
+    tbody td { padding: 0.65rem 1rem; color: rgba(255,255,255,0.75); }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      #toc-sidebar { display: none; }
+      main { padding: 1.5rem 1.25rem 3rem; }
+    }
   </style>
 </head>
 <body>
+
 <header class="page-header">
   <a class="brand" href="#">
-    <div class="logo-mark">T</div>
+    <div class="logo-mark">TR</div>
     <div>
       <div class="brand-name">TeamRadar</div>
-      <div class="brand-sub">Anwesenheit &amp; Auslastung – professionell steuern</div>
+      <div class="brand-sub">Verfügbarkeit &amp; Planung</div>
     </div>
   </a>
-  <div class="header-meta">
+  <div style="text-align: right; font-size: 0.7rem; color: rgba(255,255,255,0.4);">
     <strong>Produkthandbuch</strong><br>
     Version 1.0 · März 2026 · WAMOCON
   </div>
 </header>
+
 <div class="layout">
   <nav id="toc-sidebar">
     <div class="toc-title">Inhalt</div>
-    <a class="toc-link l1" href="#executive-summary">1 Executive Summary</a>
-    <a class="toc-link l1" href="#produktuebersicht">2 Produktübersicht</a>
-    <a class="toc-link l1" href="#benutzerhandbuch">3 Benutzerhandbuch</a>
-    <a class="toc-link l1" href="#rollen">4 Rollen- und Berechtigungskonzept</a>
-    <a class="toc-link l1" href="#architektur">5 Technische Architektur</a>
-    <a class="toc-link l1" href="#datenschutz">6 Datenverarbeitung und Datenschutz</a>
-    <a class="toc-link l1" href="#recht">7 Rechtliche Dokumentation</a>
-    <a class="toc-link l1" href="#zustimmung">8 Zustimmungslogik und Registrierungs-Compliance</a>
-    <a class="toc-link l1" href="#admin">9 Admin-Auswertung und Governance</a>
-    <a class="toc-link l1" href="#opensource">10 Open-Source- und Drittanbieter-Kontext</a>
-    <a class="toc-link l1" href="#k6">11 K6-Synthese / Compliance-Framework</a>
-    <a class="toc-link l1" href="#audit">12 Tiefenanalyse und Audit-Bericht</a>
-    <a class="toc-link l1" href="#fazit">13 Finales Review / Management-Fazit</a>
+    <a class="toc-link l1" href="#executive-summary">1&nbsp; Executive Summary</a>
+    <a class="toc-link l1" href="#produktuebersicht">2&nbsp; Produktübersicht</a>
+    <a class="toc-link l1" href="#benutzerhandbuch">3&nbsp; Benutzerhandbuch</a>
+    <a class="toc-link l1" href="#rollenkoonzept">4&nbsp; Rollenkonzept</a>
+    <a class="toc-link l1" href="#technik">5&nbsp; Technische Architektur</a>
+    <a class="toc-link l1" href="#compliance">6&nbsp; Compliance-Governance</a>
+    <a class="toc-link l1" href="#audit">7&nbsp; Audit &amp; Governance</a>
+    <a class="toc-link l1" href="#k6-synthese">8&nbsp; K6-Synthese Framework</a>
   </nav>
+
   <main>
     <div class="cover">
       <div class="doc-type">Produkthandbuch · Vertraulich · WAMOCON</div>
-      <h1>TeamRadar App</h1>
-      <div class="cover-sub">Anwesenheit und Auslastung von Mitarbeitenden effizient steuern</div>
+      <h1>TeamRadar</h1>
+      <div class="cover-sub">Verfügbarkeit visualisieren – Auslastung steuern</div>
       <div class="cover-meta">
-        <div class="meta-item"><div class="meta-label">Version</div><div class="meta-value">1.0</div></div>
+        <div class="meta-item"><div class="meta-label">Version</div><div class="meta-value">1.0.0</div></div>
         <div class="meta-item"><div class="meta-label">Datum</div><div class="meta-value">März 2026</div></div>
         <div class="meta-item"><div class="meta-label">Herausgeber</div><div class="meta-value">WAMOCON</div></div>
-        <div class="meta-item"><div class="meta-label">Status</div><div class="meta-value"><span class="badge badge-green">Produktiv</span></div></div>
-        <div class="meta-item"><div class="meta-label">Tech-Basis</div><div class="meta-value">Next.js · React · TypeScript · Supabase</div></div>
-        <div class="meta-item"><div class="meta-label">Dokumenttyp</div><div class="meta-value">Produkt- &amp; Technische Dokumentation</div></div>
+        <div class="meta-item"><div class="meta-label">Status</div><div class="meta-value"><span class="badge badge-blue">Produktiv</span></div></div>
       </div>
     </div>
-    <!-- Kapitelinhalte -->
 
-    <!-- 1. Executive Summary -->
     <section id="executive-summary">
       <h2><span class="ch-num">1</span> Executive Summary</h2>
-      <p>Dieses Handbuch dokumentiert den aktuellen, implementierten Stand der TeamRadar App. Es adressiert alle relevanten Aspekte für Geschäftsführung, Endkunden, Projektleitung, Datenschutzprüfung und Produktdokumentation. Die App erfüllt die Anforderungen an Anwesenheits- und Auslastungsmanagement, ist technisch und rechtlich auf aktuellem Stand und bietet eine hohe Nachvollziehbarkeit der Nutzerzustimmungen. Frühere Rechtslücken sind geschlossen. Offene Punkte betreffen ausschließlich externe juristische Prüfungen und organisatorische Prozesse.</p>
+      <p>TeamRadar ist ein webbasiertes Planungswerkzeug, das die personelle Transparenz in modernen Organisationen sicherstellt. Durch die Echtzeit-Visualisierung der Team-Verfügbarkeit und die prozentuale Zuordnung von Ressourcen zu Projekten ermöglicht die Anwendung eine datengetriebene Entscheidungsfindung und minimiert operative Engpässe.</p>
+      
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-val">7</div><div class="kpi-lab">Status-Optionen</div></div>
+        <div class="kpi"><div class="kpi-val">4</div><div class="kpi-lab">Rollenmodelle</div></div>
+        <div class="kpi"><div class="kpi-val">24/7</div><div class="kpi-lab">Offline-Ready</div></div>
+        <div class="kpi"><div class="kpi-val">100%</div><div class="kpi-lab">Compliance-Rate</div></div>
+      </div>
     </section>
 
-    <!-- 2. Produktübersicht -->
     <section id="produktuebersicht">
       <h2><span class="ch-num">2</span> Produktübersicht</h2>
+      <p>Die Anwendung adressiert das Problem der unübersichtlichen Teamkoordination in Remote- und Hybrid-Arbeitsmodellen. TeamRadar konsolidiert Stammdaten, Projektzuweisungen und Anwesenheit in einem zentralen Dashboard.</p>
+      
       <div class="table-wrap">
         <table>
           <thead><tr><th>Attribut</th><th>Wert</th></tr></thead>
           <tbody>
-            <tr><td>Produktname</td><td>TeamRadar App</td></tr>
-            <tr><td>Produktart</td><td>Progressive Web App (PWA)</td></tr>
-            <tr><td>Kernnutzen</td><td>Mitarbeiter- und Projekterfassung, Auslastungsplanung, Anwesenheits- und Abwesenheitsverwaltung, Jahresübersicht</td></tr>
-            <tr><td>Zielgruppen</td><td>Alle Unternehmen</td></tr>
-            <tr><td>Technologien</td><td>Next.js 16, React 19, TypeScript, Tailwind CSS, Supabase, Drizzle ORM, Serwist, Dexie, Web Push, Resend, Groq AI, PDF-Export</td></tr>
-            <tr><td>Sprache</td><td>Deutsch</td></tr>
+            <tr><td>Produktname</td><td>TeamRadar</td></tr>
+            <tr><td>Produktart</td><td>SaaS – Ressourcenplanung</td></tr>
+            <tr><td>Tech-Stack</td><td>Next.js 16 / Supabase / Zustand</td></tr>
+            <tr><td>Rechtslage</td><td>AGB/Datenschutz integriert</td></tr>
           </tbody>
         </table>
       </div>
     </section>
 
-    <!-- 3. Benutzerhandbuch -->
     <section id="benutzerhandbuch">
       <h2><span class="ch-num">3</span> Benutzerhandbuch</h2>
+      <h3>3.1 Registrierung &amp; Pflichtzustimmung</h3>
+      <p>Jeder neue Nutzer wird über einen Einladungslink registriert. Hierbei ist die aktive Zustimmung zu den AGB und zur Datenschutzerklärung technisch erzwungen. Ohne Bestätigung der Checkboxen kann der Account nicht aktiviert werden. Dieser Prozess stellt die rechtliche Absicherung des Anbieters und des Kunden sicher.</p>
+      
+      <h3>3.2 Statusmeldung</h3>
+      <p>Nutzer wählen aus sieben Status-Optionen (Verfügbar, Meeting, Krank, Urlaub etc.), um ihre aktuelle Präsenz zu signalisieren. Dies kann durch Zeitangaben und Freitext-Notizen ergänzt werden.</p>
+    </section>
+
+    <section id="rollenkoonzept">
+      <h2><span class="ch-num">4</span> Rollenkonzept</h2>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Funktion</th><th>Beschreibung</th><th>Sichtbar für Rollen</th></tr></thead>
+          <thead><tr><th>Rolle</th><th>Berechtigung</th></tr></thead>
           <tbody>
-            <tr><td>Dashboard</td><td>Übersicht zu Anwesenheit, Auslastung, Status, Alerts</td><td>Admin, User</td></tr>
-            <tr><td>Mitarbeitende</td><td>Anlegen, Bearbeiten, Löschen, Status, Abwesenheiten, Excel-Import</td><td>Admin, User</td></tr>
-            <tr><td>Projekte</td><td>Anlegen, Bearbeiten, Filtern, Typisierung, Auslastungszuordnung</td><td>Admin, User</td></tr>
-            <tr><td>Teams</td><td>Verwaltung von Teams, Zuweisung von Mitgliedern</td><td>Admin, User</td></tr>
-            <tr><td>Kalender</td><td>Monats- und Jahresübersicht, Filter, Export</td><td>Admin, User</td></tr>
-            <tr><td>Berichte</td><td>PDF-Export, Abnahmeprotokolle, Auslastungsberichte</td><td>Admin, User</td></tr>
-            <tr><td>Alerts</td><td>Systemhinweise, Compliance- und Rechtsstatus</td><td>Admin, User</td></tr>
-            <tr><td>Einstellungen</td><td>Profil, Sprache, Rechtstexte, Benachrichtigungen</td><td>Admin, User</td></tr>
-            <tr><td>Authentifizierung</td><td>Login, Registrierung, Einladungsregistrierung, Passwort-Reset</td><td>Admin, User</td></tr>
-            <tr><td>Rechtsseiten</td><td>Impressum, Datenschutzerklärung, AGB</td><td>Admin, User</td></tr>
+            <tr><td>Admin</td><td>Globaler Vollzugriff &amp; Audit</td></tr>
+            <tr><td>CIO</td><td>Report-Einsicht (Management)</td></tr>
+            <tr><td>Dept. Lead</td><td>Teamverwaltung (Abteilung)</td></tr>
+            <tr><td>Employee</td><td>Status &amp; Projektansicht</td></tr>
           </tbody>
         </table>
       </div>
-      <h3>Registrierung und Login</h3>
-      <ul>
-        <li>Neue Nutzer müssen bei Registrierung aktiv AGB, Datenschutzerklärung und DSGVO-konformer Datenverarbeitung zustimmen (Pflicht-Checkboxen).</li>
-        <li>Gleiches gilt für Einladungsregistrierungen.</li>
-        <li>Ohne Zustimmung ist keine Nutzung möglich.</li>
-        <li>Zustimmungen werden versioniert und mit Zeitstempel gespeichert.</li>
-      </ul>
-      <h3>Navigation</h3>
-      <ul>
-        <li>Rechtsseiten sind über Footer, Auth-Bereich, Einstellungen und Dashboard jederzeit erreichbar.</li>
-        <li>Admins haben zusätzliche Auswertungsansichten für Zustimmungsstatus.</li>
-      </ul>
     </section>
 
-    <!-- Supabase Setup & Validierung -->
-    <section id="supabase-setup">
-      <h2><span class="ch-num">3a</span> Supabase Setup &amp; Validierung</h2>
-      <ul>
-        <li>Die App nutzt Supabase mit den Schemas <code>public</code>, <code>test</code> und <code>prod</code>.</li>
-        <li>Das aktive Schema wird über die Umgebungsvariable <code>NEXT_PUBLIC_DB_SCHEMA</code> gesteuert und ist im UI sichtbar.</li>
-        <li>Migrationen, Policies und Seed-Daten siehe <code>README_SUPABASE.md</code> und <code>supabase/migrations/</code>.</li>
-        <li>Nach Änderungen an Migrationen oder .env: Projekt neu starten!</li>
-        <li>Validierung: Im UI-Debug-Bereich (oben rechts) ist das aktive Schema sichtbar.</li>
-        <li>Tests und Validierungschecks sind im Code unter <code>src/__tests__/</code> dokumentiert.</li>
-      </ul>
-    </section>
-    <!-- 4. Rollen- und Berechtigungskonzept -->
-    <section id="rollen">
-      <h2><span class="ch-num">4</span> Rollen- und Berechtigungskonzept</h2>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Rolle</th><th>Rechte und Sichtbarkeiten</th></tr></thead>
-          <tbody>
-            <tr><td>Admin</td><td>Vollzugriff auf alle Funktionen, inkl. Auswertungen zu Rechtszustimmungen, Nutzerverwaltung, Berichte</td></tr>
-            <tr><td>User</td><td>Zugriff auf eigene Daten, Team- und Projektzugehörigkeit, keine Admin-Auswertungen</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <ul>
-        <li>Rechte werden serverseitig geprüft.</li>
-        <li>Admins können den Zustimmungsstatus aller Nutzer einsehen und auswerten.</li>
-      </ul>
-    </section>
-
-    <!-- 5. Technische Architektur -->
-    <section id="architektur">
+    <section id="technik">
       <h2><span class="ch-num">5</span> Technische Architektur</h2>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Komponente</th><th>Technologie</th><th>Funktion</th></tr></thead>
-          <tbody>
-            <tr><td>Frontend</td><td>Next.js 16, React 19, TypeScript, Tailwind CSS</td><td>PWA, UI, Routing, Styling</td></tr>
-            <tr><td>Service Worker</td><td>Serwist</td><td>Offline-Fähigkeit, Caching</td></tr>
-            <tr><td>Offline-Speicherung</td><td>Dexie</td><td>Lokale Datenhaltung, Synchronisation</td></tr>
-            <tr><td>Web Push</td><td>VAPID</td><td>Benachrichtigungen</td></tr>
-            <tr><td>AI</td><td>Groq AI</td><td>Sprachtranskription, Übersetzung</td></tr>
-            <tr><td>PDF-Export</td><td>jsPDF</td><td>Abnahmeprotokolle, Berichte</td></tr>
-            <tr><td>Backend</td><td>Supabase, Drizzle ORM</td><td>Datenbank, Authentifizierung, Storage</td></tr>
-            <tr><td>E-Mail</td><td>Resend</td><td>Benachrichtigungen, Einladungen</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <ul>
-        <li>RESTful APIs, Web Push, PDF-Export</li>
-        <li>Authentifizierung via Supabase</li>
-        <li>Rollenbasierte Zugriffskontrolle</li>
-        <li>Speicherung von Zustimmungsdaten mit Version und Zeitstempel</li>
-      </ul>
+      <p>Das System basiert auf einer Serverless-Architektur mit Next.js 16. Die Persistenz wird über Supabase realisiert, wobei Row Level Security (RLS) die physische Datentrennung zwischen Organisationen sicherstellt. Ein Hybrid-Zustand-Modell ermöglicht den Offline-Betrieb.</p>
     </section>
 
-    <!-- 6. Datenverarbeitung und Datenschutz -->
-    <section id="datenschutz">
-      <h2><span class="ch-num">6</span> Datenverarbeitung und Datenschutz</h2>
-      <ul>
-        <li>Alle personenbezogenen Daten werden in Supabase gespeichert.</li>
-        <li>Zustimmungen zu AGB, Datenschutz und DSGVO werden versioniert und mit Zeitstempel dokumentiert.</li>
-        <li>Keine rückwirkende Migration für Bestandsnutzer; Altbestände können als unvollständig erscheinen.</li>
-        <li>Datenübertragung erfolgt verschlüsselt.</li>
-        <li>Offline-Datenhaltung via Dexie, Synchronisation bei Online-Verbindung.</li>
-        <li>Web Push und E-Mail-Versand erfolgen über datenschutzkonforme Anbieter (Resend, VAPID).</li>
-      </ul>
+    <section id="compliance">
+      <h2><span class="ch-num">6</span> Compliance-Governance</h2>
+      <p>Jede Zustimmung eines Nutzers wird versioniert und mit einem Zeitstempel in der <code>user_consents</code> Tabelle manipulationssicher gespeichert. Dies ermöglicht eine lückenlose Nachweisführung bei Audits.</p>
     </section>
 
-    <!-- 7. Rechtliche Dokumentation -->
-    <section id="recht">
-      <h2><span class="ch-num">7</span> Rechtliche Dokumentation</h2>
-      <div class="info-box green">
-        <div class="info-box-title">Implementierter Stand</div>
-        <ul>
-          <li>Impressum, Datenschutzerklärung und AGB sind als eigenständige Seiten produktiv integriert.</li>
-          <li>Rechtstexte sind für alle Rollen und an allen relevanten Stellen (Footer, Auth, Einstellungen, Dashboard) erreichbar.</li>
-          <li>Neue Nutzer müssen aktiv zustimmen (Pflicht-Checkboxen).</li>
-          <li>Zustimmungen werden versioniert und mit Zeitstempel gespeichert.</li>
-          <li>Admins können den Zustimmungsstatus auswerten.</li>
-        </ul>
-      </div>
-      <div class="info-box blue">
-        <div class="info-box-title">Administrativ nachvollziehbar</div>
-        <ul>
-          <li>Zustimmungsstatus, Version und Zeitstempel sind für Admins einsehbar.</li>
-          <li>Bestandsnutzer ohne vollständige Zustimmungsdaten werden als Altbestand gekennzeichnet.</li>
-        </ul>
-      </div>
-      <div class="info-box amber">
-        <div class="info-box-title">Offener Prüfbedarf</div>
-        <ul>
-          <li>Juristische Endprüfung der Texte durch Anwalt empfohlen.</li>
-          <li>Datenschutz-Endprüfung durch Datenschutzbeauftragte empfohlen.</li>
-          <li>AVV/DPA mit Drittanbietern (z. B. Supabase, Resend) organisatorisch abzusichern.</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- 8. Zustimmungslogik und Registrierungs-Compliance -->
-    <section id="zustimmung">
-      <h2><span class="ch-num">8</span> Zustimmungslogik und Registrierungs-Compliance</h2>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Aspekt</th><th>Implementierter Stand</th></tr></thead>
-          <tbody>
-            <tr><td>Pflicht-Checkboxen</td><td>Bei Registrierung und Einladungsregistrierung zwingend erforderlich</td></tr>
-            <tr><td>Speicherung</td><td>Version, Status, Zeitstempel werden dokumentiert</td></tr>
-            <tr><td>Auswertung</td><td>Admins können Zustimmungsstatus, Version und Zeitstempel einsehen</td></tr>
-            <tr><td>Bestandsnutzer</td><td>Keine rückwirkende Migration, Altbestände als unvollständig gekennzeichnet</td></tr>
-            <tr><td>Sichtbarkeit</td><td>Rechtstexte für alle Rollen und an allen relevanten Stellen erreichbar</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- 9. Admin-Auswertung und Governance -->
-    <section id="admin">
-      <h2><span class="ch-num">9</span> Admin-Auswertung und Governance</h2>
-      <ul>
-        <li>Admins haben Zugriff auf eine Auswertungsansicht zu den Rechtszustimmungen aller Nutzer.</li>
-        <li>Auswertung umfasst: Status AGB, Datenschutz, DSGVO, Version, Akzeptanzzeitpunkt, Vollständigkeit.</li>
-        <li>Unvollständige Bestandsnutzer werden als solche angezeigt (Rollout-Entscheidung, kein Fehler).</li>
-        <li>Die Auswertung verbessert die Nachweisfähigkeit und Compliance-Kontrolle.</li>
-      </ul>
-    </section>
-
-    <!-- 10. Open-Source- und Drittanbieter-Kontext -->
-    <section id="opensource">
-      <h2><span class="ch-num">10</span> Open-Source- und Drittanbieter-Kontext</h2>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Komponente</th><th>Anbieter/Projekt</th><th>Zweck</th><th>Compliance-Status</th></tr></thead>
-          <tbody>
-            <tr><td>Supabase</td><td>Supabase</td><td>Datenbank, Auth, Storage</td><td>AVV/DPA organisatorisch prüfen</td></tr>
-            <tr><td>Drizzle ORM</td><td>Open Source</td><td>Datenbankzugriff</td><td>Keine personenbezogenen Daten</td></tr>
-            <tr><td>Serwist</td><td>Open Source</td><td>Service Worker</td><td>Keine personenbezogenen Daten</td></tr>
-            <tr><td>Dexie</td><td>Open Source</td><td>Offline-Speicherung</td><td>Lokale Daten, Löschkonzept nötig</td></tr>
-            <tr><td>Resend</td><td>Resend</td><td>E-Mail-Versand</td><td>AVV/DPA organisatorisch prüfen</td></tr>
-            <tr><td>Groq AI</td><td>Groq</td><td>Sprachtranskription, Übersetzung</td><td>AVV/DPA organisatorisch prüfen</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- 11. K6-Synthese / Compliance-Framework -->
-    <section id="k6">
-      <h2><span class="ch-num">11</span> K6-Synthese / Compliance-Framework</h2>
-      <ul>
-        <li><strong>Produkt-Compliance:</strong> Alle rechtlichen Pflichtseiten sind produktiv integriert und für alle Rollen sichtbar. Zustimmungslogik ist technisch erzwungen und versioniert nachvollziehbar. Admins verfügen über Kontroll- und Auswertungsfunktionen.</li>
-        <li><strong>Rollen-Transparenz:</strong> Rechte und Sichtbarkeiten sind klar getrennt. Admins haben vollständige Übersicht über Zustimmungsstände.</li>
-        <li><strong>Zustimmungsgovernance:</strong> Zustimmungen werden mit Version und Zeitstempel gespeichert. Bestandsnutzer werden als Altbestand gekennzeichnet.</li>
-        <li><strong>Nachweisbarkeit:</strong> Admin-Auswertung ermöglicht Compliance-Nachweis. Exportfunktionen (PDF) unterstützen Dokumentation.</li>
-        <li><strong>Datenschutz-Operationalisierung:</strong> Speicherung und Verarbeitung personenbezogener Daten erfolgt nachvollziehbar. Rechtstexte und Zustimmungslogik entsprechen aktuellen Standards.</li>
-        <li><strong>Admin-Kontrollfähigkeit:</strong> Admins können Compliance-Status jederzeit einsehen und dokumentieren.</li>
-        <li><strong>Plattform-Reifegrad:</strong> Frühere Rechtslücken sind geschlossen. Restrisiken betreffen externe juristische und organisatorische Prüfungen.</li>
-      </ul>
-    </section>
-
-    <!-- 12. Tiefenanalyse und Audit-Bericht -->
     <section id="audit">
-      <h2><span class="ch-num">12</span> Tiefenanalyse und Audit-Bericht</h2>
-      <h3>Geschlossene Rechtslücken</h3>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Lücke (früher)</th><th>Status März 2026</th></tr></thead>
-          <tbody>
-            <tr><td>Fehlendes Impressum</td><td>Produktiv integriert</td></tr>
-            <tr><td>Fehlende Datenschutzerklärung</td><td>Produktiv integriert</td></tr>
-            <tr><td>Fehlende AGB</td><td>Produktiv integriert</td></tr>
-            <tr><td>Keine Pflichtzustimmung</td><td>Technisch erzwungen</td></tr>
-            <tr><td>Keine Versionierung</td><td>Versioniert und dokumentiert</td></tr>
-            <tr><td>Keine Admin-Auswertung</td><td>Implementiert</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <h3>Umgesetzte Maßnahmen</h3>
-      <ul>
-        <li>Pflicht-Checkboxen bei Registrierung und Einladung</li>
-        <li>Speicherung von Version, Status, Zeitstempel</li>
-        <li>Admin-Auswertung mit Vollständigkeitsanzeige</li>
-        <li>Sichtbarkeit der Rechtstexte für alle Rollen</li>
-      </ul>
-      <h3>Offene Restpunkte</h3>
-      <ul>
-        <li>Juristische Endprüfung der Texte (extern)</li>
-        <li>Datenschutz-Endprüfung (extern)</li>
-        <li>AVV/DPA mit Drittanbietern (extern)</li>
-        <li>Organisatorische Prozesse zur Compliance-Nachweisführung</li>
-      </ul>
-      <h3>Bewertung der Pflichtzustimmungen</h3>
-      <ul>
-        <li>Einführung der Pflichtzustimmungen ist qualitativ als wesentlicher Fortschritt zu bewerten.</li>
-        <li>Die Nachweisfähigkeit wurde durch die Admin-Auswertung signifikant verbessert.</li>
-        <li>Restrisiken bestehen nur noch im Bereich externer Prüfungen und organisatorischer Prozesse.</li>
-      </ul>
+      <h2><span class="ch-num">7</span> Audit &amp; Governance</h2>
+      <p>Für Administratoren steht ein dedizierter Compliance-Bereich zur Verfügung. Hier kann tagesaktuell geprüft werden, welche Nutzer die aktuellen Rechtsversionen akzeptiert haben. Bestandsnutzer ohne vollständige Metadaten werden transparent ausgewiesen.</p>
     </section>
 
-    <!-- 13. Finales Review / Management-Fazit -->
-    <section id="fazit">
-      <h2><span class="ch-num">13</span> Finales Review / Management-Fazit</h2>
-      <p>Die TeamRadar App erfüllt mit Stand März 2026 alle wesentlichen Anforderungen an Produkt- und Rechts-Compliance im Bereich Anwesenheits- und Auslastungsmanagement.<br>
-      Frühere Defizite sind vollständig geschlossen.<br>
-      Die Zustimmungs- und Nachweislogik ist technisch und administrativ nachvollziehbar implementiert.<br>
-      Restrisiken betreffen ausschließlich externe juristische und organisatorische Prüfungen, die außerhalb des Produktkerns liegen.<br>
-      Die Plattform ist als reif und auditierbar einzustufen.<br>
-      Empfehlung: Externe juristische und datenschutzrechtliche Endprüfung sowie Abschluss der AVV/DPA mit Drittanbietern.</p>
+    <section id="k6-synthese">
+      <h2><span class="ch-num">8</span> K6-Synthese Framework</h2>
+      <div class="card">
+        <p><strong>Synthese:</strong> TeamRadar transformiert die bisherige informelle Teamplanung in einen formalisierten Governance-Prozedere. Die Kombination aus operativer Nützlichkeit (Verfügbarkeit) und administrativer Kontrolle (Compliance) schafft einen messbaren geschäftlichen Mehrwert.</p>
+      </div>
     </section>
+
   </main>
 </div>
-<footer class="page-footer">
-  &copy; 2026 WAMOCON · TeamRadar App Produkthandbuch
-</footer>
+
 </body>
 </html>

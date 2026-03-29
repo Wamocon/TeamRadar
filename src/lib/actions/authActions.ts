@@ -89,3 +89,35 @@ export async function completeInvitationAction(role: string) {
     throw err instanceof Error ? err : new Error('Ein unbekannter Fehler ist aufgetreten');
   }
 }
+
+/**
+ * Speichert rechtliche Zustimmungen eines Nutzers versioniert
+ */
+export async function saveConsentAction(userId: string, consentTypes: ('agb' | 'datenschutz' | 'dsgvo')[]) {
+  try {
+    const admin = await createAdminClient();
+    const version = '2026-03';
+    
+    const consents = consentTypes.map(type => ({
+      user_id: userId,
+      consent_type: type,
+      status: true,
+      version: version,
+      accepted_at: new Date().toISOString()
+    }));
+
+    const { error } = await admin
+      .from('user_consents')
+      .upsert(consents, { onConflict: 'user_id, consent_type, version' });
+
+    if (error) {
+      console.error('Consent Save Error:', error);
+      return { error: 'Fehler beim Speichern der Zustimmungen.' };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error('SERVER ACTION ERROR (saveConsent):', err);
+    return { error: 'Unerwarteter Fehler beim Speichern der Zustimmungen.' };
+  }
+}

@@ -391,13 +391,27 @@ describe('Store: Profil & Mocking', () => {
   });
 
   it('Initialzustand: hat Mock-Admin in Development', () => {
-    // Wir prüfen hier nicht das Ergebnis des beforeEach, sondern das Verhalten des Stores an sich.
-    // Da wir aber oben useAppStore.setState({ userProfile: null }) im beforeEach haben,
-    // testen wir hier, ob setUserProfile(null) wirklich funktioniert hat (oben) 
-    // und ob wir manuell wieder umschalten können.
     const profile = { id: 'mock-1', email: 'admin@dev.local', displayName: 'Dev Admin', role: 'admin' as const };
     useAppStore.getState().setUserProfile(profile);
     expect(useAppStore.getState().userProfile?.role).toBe('admin');
+  });
+
+  it('setUserProfile: unterstützt neue Felder (avatarUrl, statusMessage, phone, preferences)', () => {
+    const profile = { 
+      id: 'u1', 
+      email: 'test@test.de', 
+      displayName: 'Test User', 
+      role: 'employee' as const,
+      avatarUrl: 'https://example.com/a.png',
+      statusMessage: 'Status',
+      phone: '12345',
+      preferences: { theme: 'system' as const, notifications: true }
+    };
+    useAppStore.getState().setUserProfile(profile);
+    const stored = useAppStore.getState().userProfile;
+    expect(stored?.avatarUrl).toBe('https://example.com/a.png');
+    expect(stored?.statusMessage).toBe('Status');
+    expect(stored?.preferences?.theme).toBe('system');
   });
 });
 

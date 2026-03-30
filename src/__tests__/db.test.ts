@@ -147,12 +147,16 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(mockUpdate).toHaveBeenCalled();
   });
 
-  it('dbGetUserProfile mapping: snake_case -> camelCase', async () => {
+  it('dbGetUserProfile mapping: snake_case -> camelCase inkl. neuer Felder', async () => {
     const mockProfile = { 
       id: 'user-123', 
       email: 'test@test.de', 
       display_name: 'Max Mustermann', 
-      role: 'admin' 
+      role: 'admin',
+      avatar_url: 'https://example.com/avatar.png',
+      status_message: 'Im Homeoffice',
+      phone: '+49 123 456',
+      preferences: { theme: 'dark', notifications: true }
     };
     // Mock select().eq().maybeSingle()
     const mockMaybeSingle = vi.fn().mockResolvedValue({ data: mockProfile, error: null });
@@ -168,7 +172,11 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
       id: 'user-123',
       email: 'test@test.de',
       displayName: 'Max Mustermann',
-      role: 'admin'
+      role: 'admin',
+      avatarUrl: 'https://example.com/avatar.png',
+      statusMessage: 'Im Homeoffice',
+      phone: '+49 123 456',
+      preferences: { theme: 'dark', notifications: true }
     });
   });
 

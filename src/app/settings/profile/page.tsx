@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { 
   User, 
   Shield, 
@@ -18,10 +19,12 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { updateUserProfileAction } from '@/lib/actions/settingsActions';
+import { useTheme } from '@/components/ui/ThemeProvider';
 
 export default function ProfileSettingsPage() {
   const userProfile = useAppStore((s) => s.userProfile);
   const setUserProfile = useAppStore((s) => s.setUserProfile);
+  const { setTheme: setGlobalTheme } = useTheme();
   
   const [isSaving, setIsSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -125,7 +128,15 @@ export default function ProfileSettingsPage() {
               <div className="relative group">
                 <div className="w-32 h-32 rounded-3xl bg-slate-100 dark:bg-white/5 border-4 border-white dark:border-white/10 shadow-xl overflow-hidden">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    <div className="relative w-full h-full">
+                      <Image 
+                        src={avatarUrl} 
+                        alt="Avatar" 
+                        fill 
+                        className="object-cover" 
+                        sizes="128px"
+                      />
+                    </div>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400">
                       <User size={48} />
@@ -205,7 +216,11 @@ export default function ProfileSettingsPage() {
               ].map((opt) => (
                 <button
                   key={opt.id}
-                  onClick={() => setTheme(opt.id as any)}
+                  onClick={() => {
+                    const newTheme = opt.id as any;
+                    setTheme(newTheme);
+                    setGlobalTheme(newTheme);
+                  }}
                   className={`flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all ${
                     theme === opt.id 
                     ? 'border-blue-500 bg-blue-500/10 text-blue-500' 

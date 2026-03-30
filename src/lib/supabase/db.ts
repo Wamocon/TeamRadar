@@ -167,6 +167,10 @@ export async function dbGetUserProfile() {
     email: data.email,
     displayName: data.display_name,
     role: data.role,
+    avatarUrl: data.avatar_url,
+    statusMessage: data.status_message,
+    phone: data.phone,
+    preferences: data.preferences,
     createdAt: data.created_at,
   };
 }

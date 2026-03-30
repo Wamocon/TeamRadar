@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { 
   User, 
   Shield, 
@@ -127,7 +128,15 @@ export default function ProfileSettingsPage() {
               <div className="relative group">
                 <div className="w-32 h-32 rounded-3xl bg-slate-100 dark:bg-white/5 border-4 border-white dark:border-white/10 shadow-xl overflow-hidden">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    <div className="relative w-full h-full">
+                      <Image 
+                        src={avatarUrl} 
+                        alt="Avatar" 
+                        fill 
+                        className="object-cover" 
+                        sizes="128px"
+                      />
+                    </div>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400">
                       <User size={48} />

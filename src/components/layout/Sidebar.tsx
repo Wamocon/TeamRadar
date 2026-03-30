@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppStore } from '@/stores/appStore';
 import { useTheme } from '@/components/ui/ThemeProvider';
@@ -212,7 +213,21 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         {/* User Profile Bar */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center overflow-hidden">
-            {userProfile?.avatarUrl ? <img src={userProfile.avatarUrl} alt="User Avatar" className="w-full h-full object-cover" /> : <div className="text-blue-500 font-black text-xs">{userProfile?.displayName?.charAt(0) || userProfile?.email?.charAt(0)}</div>}
+            {userProfile?.avatarUrl ? (
+              <div className="relative w-full h-full">
+                <Image 
+                  src={userProfile.avatarUrl} 
+                  alt="User Avatar" 
+                  fill 
+                  className="object-cover" 
+                  sizes="40px"
+                />
+              </div>
+            ) : (
+              <div className="text-blue-500 font-black text-xs">
+                {userProfile?.displayName?.charAt(0) || userProfile?.email?.charAt(0)}
+              </div>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-[11px] font-black text-[var(--sidebar-text)] truncate">{userProfile?.displayName || 'User'}</div>

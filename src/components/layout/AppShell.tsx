@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar';
 import { Footer } from './Footer';
 import { useAppStore } from '@/stores/appStore';
 import { AlertTriangle, Loader2, Menu } from 'lucide-react';
+import { useTheme } from '@/components/ui/ThemeProvider';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -12,6 +13,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const loadFromSupabase = useAppStore((s) => s.loadFromSupabase);
   const isLoading = useAppStore((s) => s.isLoading);
   const dbError = useAppStore((s) => s.dbError);
+  const userProfile = useAppStore((s) => s.userProfile);
+  const { setTheme } = useTheme();
 
   const isAuthPage = pathname.startsWith('/auth/');
 
@@ -20,6 +23,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       void loadFromSupabase();
     }
   }, [isAuthPage, loadFromSupabase]);
+
+  useEffect(() => {
+    if (userProfile?.preferences?.theme) {
+      setTheme(userProfile.preferences.theme);
+    }
+  }, [userProfile, setTheme]);
 
   if (isAuthPage) return <>{children}</>;
 

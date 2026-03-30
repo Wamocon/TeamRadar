@@ -41,10 +41,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [theme, applyTheme]);
 
-  const setTheme = (t: Theme) => {
+  const setTheme = useCallback((t: Theme) => {
     setThemeState(t);
     localStorage.setItem('team-radar-theme', t);
-  };
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>

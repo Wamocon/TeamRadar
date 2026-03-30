@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Users, Eye, EyeOff, Loader, AlertCircle, Lock, CheckCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -19,6 +19,11 @@ function AcceptInviteContent() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [agbAccepted, setAgbAccepted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const checkingSessionRef = useRef(checkingSession);
+
+  useEffect(() => {
+    checkingSessionRef.current = checkingSession;
+  }, [checkingSession]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -27,7 +32,7 @@ function AcceptInviteContent() {
     console.log('TeamRadar: Component mounted, checking session...');
 
     const timeout = setTimeout(() => {
-      if (mounted && checkingSession) {
+      if (mounted && checkingSessionRef.current) {
         console.warn('TeamRadar AcceptInvite: Session detection timed out.');
         setCheckingSession(false);
         setError('Keine aktive Einladung gefunden. Bitte stelle sicher, dass du den Link aus der E-Mail geklickt hast.');

@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { CollapsiblePanel } from '@/components/ui/CollapsiblePanel';
+import { Modal } from '@/components/ui/Modal';
 import {
   PROJECT_TYPE_CONFIG,
   PROJECT_STATUS_CONFIG,
@@ -133,8 +134,8 @@ export default function ProjectsPage() {
           <ViewToggle value={viewMode} onChange={setViewMode} />
           {canCreate && (
             <button
-              onClick={() => { resetForm(); setShowForm(!showForm); }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-sm font-semibold hover:from-indigo-600 hover:to-indigo-700 transition-all shadow-md shadow-indigo-500/20 shadow-none border-none cursor-pointer"
+              onClick={() => { resetForm(); setShowForm(true); }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-indigo-600 text-white text-sm font-semibold hover:from-indigo-600 hover:to-indigo-700 shadow-lg shadow-indigo-500/20 shadow-none border-none cursor-pointer"
             >
               <Plus size={14} />
               Neues Projekt
@@ -172,20 +173,21 @@ export default function ProjectsPage() {
       </div>
 
       {/* Form */}
-      {showForm && (
+      <Modal
+        isOpen={showForm}
+        onClose={() => { resetForm(); setShowForm(false); }}
+        title={editId ? 'Projekt bearbeiten' : 'Neues Projekt anlegen'}
+        subtitle="Projektplanung & Teamzuweisung"
+      >
         <form
           onSubmit={handleSubmit}
-          className="card-shimmer rounded-xl border border-slate-100 dark:border-white/5 p-5 space-y-4 animate-fade-in"
+          className="space-y-4 py-2 animate-fade-in"
         >
-          <h2 className="text-sm font-bold dark:text-white text-gray-900">
-            {editId ? 'Projekt bearbeiten' : 'Neues Projekt anlegen'}
-          </h2>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Projektname *</label>
               <input type="text" value={formName} onChange={(e) => setFormName(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border dark:border-white/10 border-gray-200 bg-transparent text-sm dark:text-white" placeholder="z.B. Cloud-Migration" required />
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white" placeholder="z.B. Cloud-Migration" required />
             </div>
             <div>
               <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Typ *</label>
@@ -195,7 +197,7 @@ export default function ProjectsPage() {
                     className={`flex-1 px-3 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
                       formType === t
                         ? `border-current bg-opacity-10`
-                        : 'border-black/[0.06] dark:border-white/[0.06] dark:text-white/50 text-gray-500 bg-transparent'
+                        : 'border-slate-200 dark:border-white/10 dark:text-white/50 text-gray-500 bg-transparent'
                     }`}
                     style={formType === t ? { color: PROJECT_TYPE_CONFIG[t].color, background: `${PROJECT_TYPE_CONFIG[t].color}15`, borderColor: `${PROJECT_TYPE_CONFIG[t].color}40` } : {}}>
                     {t === 'internal' ? '🏢' : '🌐'} {PROJECT_TYPE_CONFIG[t].label}
@@ -206,7 +208,7 @@ export default function ProjectsPage() {
             <div>
               <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Status</label>
               <select value={formStatus} onChange={(e) => setFormStatus(e.target.value as ProjectStatus)}
-                className="w-full px-3 py-2 rounded-lg border dark:border-white/10 border-gray-200 bg-transparent text-sm cursor-pointer dark:text-white">
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm cursor-pointer dark:text-white">
                 {(Object.entries(PROJECT_STATUS_CONFIG) as [ProjectStatus, { label: string }][]).map(
                   ([key, conf]) => <option key={key} value={key}>{conf.label}</option>
                 )}
@@ -216,38 +218,38 @@ export default function ProjectsPage() {
               <div>
                 <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Kunde</label>
                 <input type="text" value={formClient} onChange={(e) => setFormClient(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border dark:border-white/10 border-gray-200 bg-transparent text-sm dark:text-white" placeholder="z.B. BMW AG" />
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white" placeholder="z.B. BMW AG" />
               </div>
             )}
             <div>
               <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Startdatum</label>
               <input type="date" value={formStart} onChange={(e) => setFormStart(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border dark:border-white/10 border-gray-200 bg-transparent text-sm dark:text-white" />
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white" />
             </div>
             <div>
               <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Enddatum</label>
               <input type="date" value={formEnd} onChange={(e) => setFormEnd(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border dark:border-white/10 border-gray-200 bg-transparent text-sm dark:text-white" />
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white" />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Beschreibung</label>
             <input type="text" value={formDesc} onChange={(e) => setFormDesc(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border dark:border-white/10 border-gray-200 bg-transparent text-sm dark:text-white" placeholder="Optional" />
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white" placeholder="Optional" />
           </div>
 
           <div>
             <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">
               Teammitglieder ({formMembers.length} ausgewählt)
             </label>
-            <div className="flex flex-wrap gap-2 mt-1 max-h-32 overflow-y-auto p-1">
+            <div className="flex flex-wrap gap-2 mt-1 max-h-48 overflow-y-auto p-1">
               {members.map((m) => (
                 <button key={m.id} type="button" onClick={() => toggleMember(m.id)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
                     formMembers.includes(m.id)
                       ? 'bg-indigo-500/15 border-indigo-500/40 text-indigo-500'
-                      : 'border-slate-100 dark:border-white/0.06 dark:text-white/50 text-gray-600 hover:border-indigo-500/20 bg-transparent'
+                      : 'border-slate-200 dark:border-white/10 dark:text-white/50 text-gray-600 hover:border-indigo-500/20 bg-transparent'
                   }`}>
                   {m.name}
                 </button>
@@ -262,12 +264,12 @@ export default function ProjectsPage() {
               {editId ? 'Speichern' : 'Projekt erstellen'}
             </button>
             <button type="button" onClick={() => { resetForm(); setShowForm(false); }}
-              className="px-4 py-2 rounded-lg border border-black/10 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600 bg-transparent cursor-pointer">
+              className="px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600 bg-transparent cursor-pointer">
               Abbrechen
             </button>
           </div>
         </form>
-      )}
+      </Modal>
 
       {/* Project List grouped by Status */}
       {filtered.length === 0 && !showForm ? (

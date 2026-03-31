@@ -1,23 +1,43 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { Loader } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { MemberCard } from '@/components/team/MemberCard';
 import { ExcelImportDialog } from '@/components/team/ExcelImportDialog';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { Users, Plus, Trash2, Pencil, FileSpreadsheet } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { CollapsiblePanel } from '@/components/ui/CollapsiblePanel';
+import { Modal } from '@/components/ui/Modal';
+import { MemberForm } from '@/components/team/MemberForm';
 
-export default function MembersPage() {
+function MembersContent() {
   const members = useAppStore((s) => s.members);
   const deleteMember = useAppStore((s) => s.deleteMember);
   const hasMinRole = useAppStore((s) => s.hasMinRole);
   const canCreate = hasMinRole('admin') || hasMinRole('department_lead');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const action = searchParams.get('action');
+
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [showImport, setShowImport] = useState(false);
+  const [showMemberModal, setShowMemberModal] = useState(false);
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
+
+  // Handle cross-page modal trigger (e.g. from Sidebar)
+  useEffect(() => {
+    if (action === 'invite') {
+      setEditingMemberId(null);
+      setShowMemberModal(true);
+      // Clean up the URL
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.delete('action');
+      router.replace(`/members${newParams.toString() ? '?' + newParams.toString() : ''}`);
+    }
+  }, [action, searchParams, router]);
 
   const departments = [...new Set(members.map((m) => m.department).filter(Boolean))].sort();
 
@@ -46,13 +66,13 @@ export default function MembersPage() {
                 <FileSpreadsheet size={14} />
                 Excel-Import
               </button>
-              <Link
-                href="/members/new"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors no-underline"
+              <button
+                onClick={() => { setEditingMemberId(null); setShowMemberModal(true); }}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 shadow-lg shadow-blue-500/20 transition-all border-none cursor-pointer"
               >
                 <Plus size={14} />
                 Neu anlegen
-              </Link>
+              </button>
             </>
           )}
         </div>
@@ -70,13 +90,13 @@ export default function MembersPage() {
             Lege deinen ersten Mitarbeiter an, um dessen Verfügbarkeit zu verwalten.
           </p>
           {canCreate && (
-            <Link
-              href="/members/new"
-              className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors no-underline"
+            <button
+              onClick={() => { setEditingMemberId(null); setShowMemberModal(true); }}
+              className="mt-6 flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 shadow-lg shadow-blue-500/20 transition-all border-none cursor-pointer"
             >
               <Plus size={14} />
               Ersten Mitarbeiter anlegen
-            </Link>
+            </button>
           )}
         </div>
       ) : (
@@ -104,13 +124,13 @@ export default function MembersPage() {
                         <div className="flex gap-2 shrink-0">
                           {canCreate && (
                             <>
-                              <Link
-                                href={`/members/${member.id}/edit`}
-                                className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all no-underline"
+                              <button
+                                onClick={() => { setEditingMemberId(member.id); setShowMemberModal(true); }}
+                                className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all border-none bg-transparent cursor-pointer"
                                 title="Bearbeiten"
                               >
                                 <Pencil size={14} />
-                              </Link>
+                              </button>
                               <button
                                 onClick={() => {
                                   if (confirm(`"${member.name}" wirklich löschen?`)) {
@@ -136,13 +156,13 @@ export default function MembersPage() {
                         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
                           {canCreate && (
                             <>
-                              <Link
-                                href={`/members/${member.id}/edit`}
-                                className="p-1.5 rounded-lg bg-white/90 dark:bg-gray-800/90 text-gray-400 hover:text-blue-500 transition-all no-underline shadow-sm"
+                              <button
+                                onClick={() => { setEditingMemberId(member.id); setShowMemberModal(true); }}
+                                className="p-1.5 rounded-lg bg-white/90 dark:bg-gray-800/90 text-gray-400 hover:text-blue-500 transition-all border-none cursor-pointer shadow-sm"
                                 title="Bearbeiten"
                               >
                                 <Pencil size={12} />
-                              </Link>
+                              </button>
                               <button
                                 onClick={() => {
                                   if (confirm(`"${member.name}" wirklich löschen?`)) {
@@ -168,6 +188,34 @@ export default function MembersPage() {
       )}
 
       {showImport && <ExcelImportDialog onClose={() => setShowImport(false)} />}
+
+      <Modal
+        isOpen={showMemberModal}
+        onClose={() => setShowMemberModal(false)}
+        title={editingMemberId ? 'Mitarbeiter bearbeiten' : 'Neuer Mitarbeiter'}
+        subtitle="Mitarbeiter verwalten & Einladungen versenden"
+      >
+        <div className="py-2">
+          <MemberForm 
+            memberId={editingMemberId || undefined} 
+            onSuccess={() => setShowMemberModal(false)}
+            onCancel={() => setShowMemberModal(false)}
+          />
+        </div>
+      </Modal>
     </div>
+  );
+}
+export default function MembersPage() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader className="animate-spin text-blue-600" size={32} />
+        </div>
+      }
+    >
+      <MembersContent />
+    </Suspense>
   );
 }

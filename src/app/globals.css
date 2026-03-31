@@ -116,11 +116,22 @@ html:not(.dark) .card-shimmer {
 .status-pulse-available { animation: pulse-ring 2s ease-out infinite; }
 
 /* ── Animations ────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-up {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-in { animation: fade-in-up 0.4s ease-out forwards; }
+
+.animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+.animate-scale-up { animation: scale-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-fade-up { animation: fade-in-up 0.4s ease-out forwards; }
 .animate-fade-in-delay-1 { animation: fade-in-up 0.4s ease-out 0.05s forwards; opacity: 0; }
 .animate-fade-in-delay-2 { animation: fade-in-up 0.4s ease-out 0.1s forwards; opacity: 0; }
 .animate-fade-in-delay-3 { animation: fade-in-up 0.4s ease-out 0.15s forwards; opacity: 0; }
@@ -132,6 +143,11 @@ html:not(.dark) .card-shimmer {
 }
 .timeline-bar:hover { filter: brightness(1.1); transform: scaleY(1.2); }
 
-/* ── Custom Scrollbar Sidebar ─────────────────────────────────── */
+/* ── Custom Scrollbar ─────────────────────────────────────────── */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.2); border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.3); }
+
 .sidebar-scroll::-webkit-scrollbar { width: 3px; }
 .sidebar-scroll::-webkit-scrollbar-thumb { background: var(--sidebar-border); border-radius: 2px; }

@@ -5,7 +5,11 @@ import { useAppStore } from '@/stores/appStore';
 import { Save, X, Plus, Loader } from 'lucide-react';
 import { SKILL_CATEGORIES, SKILL_LEVEL_CONFIG, type Skill, type SkillLevel, type SkillCategory } from '@/types';
 
-export function MemberForm({ memberId }: { memberId?: string }) {
+export function MemberForm({ memberId, onSuccess, onCancel }: { 
+  memberId?: string; 
+  onSuccess?: () => void;
+  onCancel?: () => void;
+}) {
   const router = useRouter();
   const members = useAppStore((s) => s.members);
   const addMember = useAppStore((s) => s.addMember);
@@ -50,7 +54,8 @@ export function MemberForm({ memberId }: { memberId?: string }) {
       if (existing) {
         // Edit existing (local store for now, or db update)
         updateMember(existing.id, { name, email, role, department, phone: phone || undefined, skills });
-        router.push('/members');
+        if (onSuccess) onSuccess();
+        else router.push('/members');
       } else {
         // REAL INVITATION
         const { inviteUserByEmail } = await import('@/lib/actions/authActions');
@@ -68,7 +73,10 @@ export function MemberForm({ memberId }: { memberId?: string }) {
           setMsg({ type: 'success', text: `Einladung an ${email} wurde gesendet!` });
           // Optional: Add to store as "pending"
           addMember({ name, email, role, department, phone: phone || undefined, skills });
-          setTimeout(() => router.push('/members'), 2000);
+          setTimeout(() => {
+            if (onSuccess) onSuccess();
+            else router.push('/members');
+          }, 2000);
         }
       }
     } catch (err) {
@@ -201,7 +209,7 @@ export function MemberForm({ memberId }: { memberId?: string }) {
         </button>
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => onCancel ? onCancel() : router.back()}
           className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
         >
           <X size={14} />

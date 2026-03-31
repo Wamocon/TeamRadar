@@ -84,7 +84,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   ];
 
   const adminNav = [
-    { href: '/members/new', icon: UserPlus, label: 'Mitarbeiter einladen', exact: true },
+    { href: '/members?action=invite', icon: UserPlus, label: 'Mitarbeiter einladen', exact: true },
     { href: '/settings/admin', icon: Shield, label: 'Administration', exact: true },
   ];
 

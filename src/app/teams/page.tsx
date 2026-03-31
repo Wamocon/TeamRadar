@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
+import { Modal } from '@/components/ui/Modal';
 import { FolderKanban, Plus, Trash2, Users } from 'lucide-react';
 
 export default function TeamsPage() {
@@ -15,6 +16,7 @@ export default function TeamsPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
@@ -22,11 +24,26 @@ export default function TeamsPage() {
   const handleCreateTeam = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim()) return;
-    addTeam({ name: newName, description: newDesc || undefined, memberIds: selectedMembers });
+    if (editId) {
+      updateTeam(editId, { name: newName, description: newDesc || undefined, memberIds: selectedMembers });
+    } else {
+      addTeam({ name: newName, description: newDesc || undefined, memberIds: selectedMembers });
+    }
     setNewName('');
     setNewDesc('');
     setSelectedMembers([]);
+    setEditId(null);
     setShowForm(false);
+  };
+
+  const openEdit = (id: string) => {
+    const t = teams.find((team) => team.id === id);
+    if (!t) return;
+    setNewName(t.name);
+    setNewDesc(t.description ?? '');
+    setSelectedMembers(t.memberIds);
+    setEditId(id);
+    setShowForm(true);
   };
 
   const toggleMember = (id: string) => {
@@ -53,8 +70,8 @@ export default function TeamsPage() {
           <ViewToggle value={viewMode} onChange={setViewMode} />
           {isAdmin && (
             <button
-              onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
+              onClick={() => { setEditId(null); setShowForm(true); }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 shadow-lg shadow-blue-500/20 transition-all border-none cursor-pointer"
             >
               <Plus size={14} />
               Neues Team
@@ -63,10 +80,16 @@ export default function TeamsPage() {
         </div>
       </div>
 
-      {showForm && (
+      {/* Modal für Team-Formular */}
+      <Modal
+        isOpen={showForm}
+        onClose={() => { setShowForm(false); setEditId(null); }}
+        title={editId ? 'Team bearbeiten' : 'Neues Team erstellen'}
+        subtitle="Mitarbeiter zusammenführen"
+      >
         <form
           onSubmit={handleCreateTeam}
-          className="card-shimmer rounded-xl border border-slate-100 dark:border-white/5 p-5 space-y-4"
+          className="space-y-4 py-2"
         >
           <div>
             <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">Teamname *</label>
@@ -74,7 +97,7 @@ export default function TeamsPage() {
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white"
               placeholder="z.B. Frontend-Team"
               required
             />
@@ -85,7 +108,7 @@ export default function TeamsPage() {
               type="text"
               value={newDesc}
               onChange={(e) => setNewDesc(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white"
               placeholder="Optional"
             />
           </div>
@@ -93,16 +116,16 @@ export default function TeamsPage() {
             <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-1">
               Mitglieder ({selectedMembers.length} ausgewählt)
             </label>
-            <div className="flex flex-wrap gap-2 mt-1">
+            <div className="flex flex-wrap gap-2 mt-1 max-h-48 overflow-y-auto p-1">
               {members.map((m) => (
                 <button
                   key={m.id}
                   type="button"
                   onClick={() => toggleMember(m.id)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer ${
                     selectedMembers.includes(m.id)
                       ? 'bg-blue-500/15 border-blue-500/40 text-blue-500'
-                      : 'border-slate-100 dark:border-white/5 text-gray-600 dark:text-white/50 hover:border-blue-500/20'
+                      : 'border-slate-200 dark:border-white/10 text-gray-600 dark:text-white/50 hover:border-blue-500/20 bg-transparent'
                   }`}
                 >
                   {m.name}
@@ -115,23 +138,23 @@ export default function TeamsPage() {
               )}
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors border-none cursor-pointer"
             >
-              Team erstellen
+              {editId ? 'Speichern' : 'Team erstellen'}
             </button>
             <button
               type="button"
-              onClick={() => setShowForm(false)}
-              className="px-4 py-2 rounded-lg border border-black/10 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600"
+              onClick={() => { setShowForm(false); setEditId(null); }}
+              className="px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600 bg-transparent cursor-pointer"
             >
               Abbrechen
             </button>
           </div>
         </form>
-      )}
+      </Modal>
 
       {/* Team-Liste */}
       {teams.length === 0 && !showForm ? (
@@ -160,18 +183,29 @@ export default function TeamsPage() {
                       <p className="text-xs dark:text-white/40 text-gray-500 mt-0.5">{team.description}</p>
                     )}
                   </div>
-                  {isAdmin && (
-                    <button
-                      onClick={() => {
-                        if (confirm(`Team "${team.name}" wirklich löschen?`)) {
-                          deleteTeam(team.id);
-                        }
-                      }}
-                      className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all bg-transparent border-none cursor-pointer"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
+                  <div className="flex gap-1 shrink-0">
+                    {isAdmin && (
+                      <>
+                        <button
+                          onClick={() => openEdit(team.id)}
+                          className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-blue-500 hover:bg-blue-500/10 transition-all border-none bg-transparent cursor-pointer"
+                        >
+                          <Plus size={14} className="rotate-45" /> 
+                          {/* Hier könnte man auch ein Pencil-Icon nehmen, aber wir bleiben konsistent */}
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`Team "${team.name}" wirklich löschen?`)) {
+                              deleteTeam(team.id);
+                            }
+                          }}
+                          className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all bg-transparent border-none cursor-pointer"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {teamMembers.length > 0 ? (

@@ -6,6 +6,7 @@ import { StatusDonut } from '@/components/dashboard/StatusDonut';
 import { DepartmentBars } from '@/components/dashboard/DepartmentBars';
 import { AvailabilityTimeline } from '@/components/dashboard/AvailabilityTimeline';
 import { SearchFilter } from '@/components/dashboard/SearchFilter';
+import { Modal } from '@/components/ui/Modal';
 import { STATUS_CONFIG, type AvailabilityStatus, type ProjectType } from '@/types';
 import { Globe, CalendarClock, Plus, Clock, BarChart3, Users, LayoutGrid, List, LayoutDashboard } from 'lucide-react';
 import { useState, useMemo } from 'react';
@@ -139,7 +140,7 @@ export default function DashboardPage() {
             Status eintragen
           </button>
           {canCreate && (
-            <Link href="/members/new"
+            <Link href="/members?action=invite"
               className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500/20 text-blue-500 text-xs font-semibold hover:bg-blue-500/10 transition-colors no-underline">
               <Plus size={14} />
               Mitarbeiter
@@ -148,13 +149,17 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Form (collapsible) ─────────────────── */}
-      {showForm && (
-        <div className="card-shimmer rounded-xl p-5 animate-fade-in">
-          <h2 className="text-sm font-bold dark:text-white text-gray-900 mb-4">Verfügbarkeit eintragen</h2>
+      {/* ── Status Modal ────────────────────── */}
+      <Modal
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        title="Verfügbarkeit eintragen"
+        subtitle="Status & Projektzuordnung für heute"
+      >
+        <div className="py-2">
           <AvailabilityForm onClose={() => setShowForm(false)} />
         </div>
-      )}
+      </Modal>
 
       {/* ── Quick Stats ────────────────────────── */}
       {members.length > 0 && (

@@ -1,5 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { Loader } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { MemberCard } from '@/components/team/MemberCard';
 import { ExcelImportDialog } from '@/components/team/ExcelImportDialog';
@@ -12,7 +13,7 @@ import { CollapsiblePanel } from '@/components/ui/CollapsiblePanel';
 import { Modal } from '@/components/ui/Modal';
 import { MemberForm } from '@/components/team/MemberForm';
 
-export default function MembersPage() {
+function MembersContent() {
   const members = useAppStore((s) => s.members);
   const deleteMember = useAppStore((s) => s.deleteMember);
   const hasMinRole = useAppStore((s) => s.hasMinRole);
@@ -203,5 +204,18 @@ export default function MembersPage() {
         </div>
       </Modal>
     </div>
+  );
+}
+export default function MembersPage() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader className="animate-spin text-blue-600" size={32} />
+        </div>
+      }
+    >
+      <MembersContent />
+    </Suspense>
   );
 }

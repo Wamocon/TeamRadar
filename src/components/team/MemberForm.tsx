@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/stores/appStore';
 import { Save, X, Plus, Loader } from 'lucide-react';
 import { SKILL_CATEGORIES, SKILL_LEVEL_CONFIG, type Skill, type SkillLevel, type SkillCategory } from '@/types';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 export function MemberForm({ memberId, onSuccess, onCancel }: { 
   memberId?: string; 
@@ -42,6 +43,24 @@ export function MemberForm({ memberId, onSuccess, onCancel }: {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [msg, setMsg] = useState<{ type: 'error' | 'success', text: string } | null>(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+  const isDirty = name !== (existing?.name ?? '') || 
+                  email !== (existing?.email ?? '') || 
+                  role !== (existing?.role ?? '') || 
+                  department !== (existing?.department ?? '') || 
+                  phone !== (existing?.phone ?? '') || 
+                  JSON.stringify(skills) !== JSON.stringify(existing?.skills ?? []);
+
+  const handleCancelClick = () => {
+    if (isDirty) {
+      setShowCancelConfirm(true);
+    } else if (onCancel) {
+      onCancel();
+    } else {
+      router.back();
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,13 +228,27 @@ export function MemberForm({ memberId, onSuccess, onCancel }: {
         </button>
         <button
           type="button"
-          onClick={() => onCancel ? onCancel() : router.back()}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+          onClick={handleCancelClick}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors bg-transparent border-none cursor-pointer"
         >
           <X size={14} />
           Abbrechen
         </button>
       </div>
+
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        onClose={() => setShowCancelConfirm(false)}
+        onConfirm={() => {
+          setShowCancelConfirm(false);
+          if (onCancel) onCancel();
+          else router.back();
+        }}
+        title="Änderungen verwerfen"
+        message="Du hast ungespeicherte Änderungen. Möchtest du diese wirklich verwerfen?"
+        confirmLabel="Verwerfen"
+        variant="warning"
+      />
     </form>
   );
 }

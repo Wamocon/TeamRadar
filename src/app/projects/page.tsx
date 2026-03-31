@@ -4,6 +4,7 @@ import { useAppStore } from '@/stores/appStore';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { CollapsiblePanel } from '@/components/ui/CollapsiblePanel';
 import { Modal } from '@/components/ui/Modal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import {
   PROJECT_TYPE_CONFIG,
   PROJECT_STATUS_CONFIG,
@@ -46,6 +47,27 @@ export default function ProjectsPage() {
   const [formMembers, setFormMembers] = useState<string[]>([]);
   const [formStart, setFormStart] = useState('');
   const [formEnd, setFormEnd] = useState('');
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+  const existingProject = editId ? projects.find(p => p.id === editId) : null;
+  const isDirty = formName !== (existingProject?.name ?? '') || 
+                  formType !== (existingProject?.type ?? 'external') || 
+                  formStatus !== (existingProject?.status ?? 'active') || 
+                  formClient !== (existingProject?.client ?? '') || 
+                  formDesc !== (existingProject?.description ?? '') || 
+                  formStart !== (existingProject?.startDate ?? '') || 
+                  formEnd !== (existingProject?.endDate ?? '') || 
+                  JSON.stringify(formMembers.sort()) !== JSON.stringify([...(existingProject?.memberIds ?? [])].sort());
+
+  const handleCancelClick = () => {
+    if (isDirty) {
+      setShowCancelConfirm(true);
+    } else {
+      resetForm();
+      setShowForm(false);
+    }
+  };
 
   const resetForm = () => {
     setFormName('');
@@ -175,9 +197,10 @@ export default function ProjectsPage() {
       {/* Form */}
       <Modal
         isOpen={showForm}
-        onClose={() => { resetForm(); setShowForm(false); }}
+        onClose={handleCancelClick}
         title={editId ? 'Projekt bearbeiten' : 'Neues Projekt anlegen'}
         subtitle="Projektplanung & Teamzuweisung"
+        showCloseButton={!isDirty}
       >
         <form
           onSubmit={handleSubmit}
@@ -263,7 +286,7 @@ export default function ProjectsPage() {
               <Check size={14} />
               {editId ? 'Speichern' : 'Projekt erstellen'}
             </button>
-            <button type="button" onClick={() => { resetForm(); setShowForm(false); }}
+            <button type="button" onClick={handleCancelClick}
               className="px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600 bg-transparent cursor-pointer">
               Abbrechen
             </button>
@@ -327,7 +350,7 @@ export default function ProjectsPage() {
                                   className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-indigo-500 hover:bg-indigo-500/10 transition-all bg-transparent border-none cursor-pointer">
                                   <Edit3 size={14} />
                                 </button>
-                                <button onClick={() => { if (confirm(`Projekt "${project.name}" wirklich löschen?`)) deleteProject(project.id); }}
+                                <button onClick={() => setDeletingProjectId(project.id)}
                                   className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all bg-transparent border-none cursor-pointer">
                                   <Trash2 size={14} />
                                 </button>
@@ -372,6 +395,34 @@ export default function ProjectsPage() {
           })}
         </div>
       )}
+      <ConfirmModal
+        isOpen={!!deletingProjectId}
+        onClose={() => setDeletingProjectId(null)}
+        onConfirm={() => {
+          if (deletingProjectId) {
+            deleteProject(deletingProjectId);
+            setDeletingProjectId(null);
+          }
+        }}
+        title="Projekt löschen"
+        message={`Möchtest du das Projekt "${projects.find(p => p.id === deletingProjectId)?.name}" wirklich löschen? Diese Aktion entfernt alle Zuordnungen und kann nicht rückgängig gemacht werden.`}
+        confirmLabel="Projekt löschen"
+        variant="danger"
+      />
+
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        onClose={() => setShowCancelConfirm(false)}
+        onConfirm={() => {
+          setShowCancelConfirm(false);
+          resetForm();
+          setShowForm(false);
+        }}
+        title="Änderungen verwerfen"
+        message="Du hast ungespeicherte Änderungen am Projekt. Möchtest du diese wirklich verwerfen?"
+        confirmLabel="Verwerfen"
+        variant="warning"
+      />
     </div>
   );
 }

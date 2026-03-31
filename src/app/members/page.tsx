@@ -12,6 +12,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { CollapsiblePanel } from '@/components/ui/CollapsiblePanel';
 import { Modal } from '@/components/ui/Modal';
 import { MemberForm } from '@/components/team/MemberForm';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 function MembersContent() {
   const members = useAppStore((s) => s.members);
@@ -26,6 +27,7 @@ function MembersContent() {
   const [showImport, setShowImport] = useState(false);
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
+  const [deletingMemberId, setDeletingMemberId] = useState<string | null>(null);
 
   // Handle cross-page modal trigger (e.g. from Sidebar)
   useEffect(() => {
@@ -132,11 +134,7 @@ function MembersContent() {
                                 <Pencil size={14} />
                               </button>
                               <button
-                                onClick={() => {
-                                  if (confirm(`"${member.name}" wirklich löschen?`)) {
-                                    deleteMember(member.id);
-                                  }
-                                }}
+                                onClick={() => setDeletingMemberId(member.id)}
                                 className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all bg-transparent border-none cursor-pointer"
                                 title="Löschen"
                               >
@@ -164,11 +162,7 @@ function MembersContent() {
                                 <Pencil size={12} />
                               </button>
                               <button
-                                onClick={() => {
-                                  if (confirm(`"${member.name}" wirklich löschen?`)) {
-                                    deleteMember(member.id);
-                                  }
-                                }}
+                                onClick={() => setDeletingMemberId(member.id)}
                                 className="p-1.5 rounded-lg bg-white/90 dark:bg-gray-800/90 text-gray-400 hover:text-red-500 transition-all border-none cursor-pointer shadow-sm"
                                 title="Löschen"
                               >
@@ -203,9 +197,25 @@ function MembersContent() {
           />
         </div>
       </Modal>
+
+      <ConfirmModal
+        isOpen={!!deletingMemberId}
+        onClose={() => setDeletingMemberId(null)}
+        onConfirm={() => {
+          if (deletingMemberId) {
+            deleteMember(deletingMemberId);
+            setDeletingMemberId(null);
+          }
+        }}
+        title="Mitarbeiter löschen"
+        message={`Möchtest du "${members.find(m => m.id === deletingMemberId)?.name}" wirklich aus dem Team entfernen? Diese Aktion kann nicht rückgängig gemacht werden.`}
+        confirmLabel="Löschen"
+        variant="danger"
+      />
     </div>
   );
 }
+
 export default function MembersPage() {
   return (
     <Suspense 

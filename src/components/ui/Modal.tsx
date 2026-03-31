@@ -9,9 +9,17 @@ interface ModalProps {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
+  showCloseButton?: boolean;
 }
 
-export function Modal({ isOpen, onClose, title, subtitle, children }: ModalProps) {
+export function Modal({ 
+  isOpen, 
+  onClose, 
+  title, 
+  subtitle, 
+  children,
+  showCloseButton = true 
+}: ModalProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -40,12 +48,14 @@ export function Modal({ isOpen, onClose, title, subtitle, children }: ModalProps
       <div className="relative w-full max-w-2xl bg-[#0f172a] rounded-3xl border border-white/5 shadow-2xl overflow-hidden animate-scale-up flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-8 pb-4 relative">
-          <button 
-            onClick={onClose}
-            className="absolute top-6 right-6 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border-none cursor-pointer"
-          >
-            <X size={20} />
-          </button>
+          {showCloseButton && (
+            <button 
+              onClick={onClose}
+              className="absolute top-6 right-6 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border-none cursor-pointer"
+            >
+              <X size={20} />
+            </button>
+          )}
           
           <h2 className="text-2xl font-black text-white tracking-tight">{title}</h2>
           {subtitle && (

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { Modal } from '@/components/ui/Modal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { FolderKanban, Plus, Trash2, Users } from 'lucide-react';
 
 export default function TeamsPage() {
@@ -20,6 +21,22 @@ export default function TeamsPage() {
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [deletingTeamId, setDeletingTeamId] = useState<string | null>(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+  const existingTeam = editId ? teams.find(t => t.id === editId) : null;
+  const isDirty = newName !== (existingTeam?.name ?? '') || 
+                  newDesc !== (existingTeam?.description ?? '') || 
+                  JSON.stringify(selectedMembers.sort()) !== JSON.stringify([...(existingTeam?.memberIds ?? [])].sort());
+
+  const handleCancelClick = () => {
+    if (isDirty) {
+      setShowCancelConfirm(true);
+    } else {
+      setShowForm(false);
+      setEditId(null);
+    }
+  };
 
   const handleCreateTeam = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,9 +100,10 @@ export default function TeamsPage() {
       {/* Modal für Team-Formular */}
       <Modal
         isOpen={showForm}
-        onClose={() => { setShowForm(false); setEditId(null); }}
+        onClose={handleCancelClick}
         title={editId ? 'Team bearbeiten' : 'Neues Team erstellen'}
         subtitle="Mitarbeiter zusammenführen"
+        showCloseButton={!isDirty}
       >
         <form
           onSubmit={handleCreateTeam}
@@ -147,7 +165,7 @@ export default function TeamsPage() {
             </button>
             <button
               type="button"
-              onClick={() => { setShowForm(false); setEditId(null); }}
+              onClick={handleCancelClick}
               className="px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600 bg-transparent cursor-pointer"
             >
               Abbrechen
@@ -194,11 +212,7 @@ export default function TeamsPage() {
                           {/* Hier könnte man auch ein Pencil-Icon nehmen, aber wir bleiben konsistent */}
                         </button>
                         <button
-                          onClick={() => {
-                            if (confirm(`Team "${team.name}" wirklich löschen?`)) {
-                              deleteTeam(team.id);
-                            }
-                          }}
+                          onClick={() => setDeletingTeamId(team.id)}
                           className="p-2 rounded-lg dark:text-white/30 text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all bg-transparent border-none cursor-pointer"
                         >
                           <Trash2 size={14} />
@@ -226,6 +240,35 @@ export default function TeamsPage() {
           })}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={!!deletingTeamId}
+        onClose={() => setDeletingTeamId(null)}
+        onConfirm={() => {
+          if (deletingTeamId) {
+            deleteTeam(deletingTeamId);
+            setDeletingTeamId(null);
+          }
+        }}
+        title="Team löschen"
+        message={`Möchtest du das Team "${teams.find(t => t.id === deletingTeamId)?.name}" wirklich auflösen? Alle Mitglieder bleiben erhalten, aber die Team-Zuordnung wird gelöscht.`}
+        confirmLabel="Team auflösen"
+        variant="danger"
+      />
+
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        onClose={() => setShowCancelConfirm(false)}
+        onConfirm={() => {
+          setShowCancelConfirm(false);
+          setShowForm(false);
+          setEditId(null);
+        }}
+        title="Änderungen verwerfen"
+        message="Du hast ungespeicherte Änderungen am Team. Möchtest du diese wirklich verwerfen?"
+        confirmLabel="Verwerfen"
+        variant="warning"
+      />
     </div>
   );
 }

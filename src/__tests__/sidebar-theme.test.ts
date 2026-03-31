@@ -31,4 +31,11 @@ describe('Sidebar Theme-Awareness Check', () => {
   it('should have alt prop for user avatar for accessibility (lint-fix check)', () => {
     expect(sidebarContent).toContain('alt="User Avatar"');
   });
+
+  it('should use the Image component with fill and cover for the avatar', () => {
+    expect(sidebarContent).toContain('<Image');
+    expect(sidebarContent).toContain('src={userProfile.avatarUrl}');
+    expect(sidebarContent).toContain('fill');
+    expect(sidebarContent).toContain('className="object-cover"');
+  });
 });

@@ -1,8 +1,8 @@
 /**
  * Excel-Import/-Export für Mitarbeiter-Massenimport.
- * Nutzt SheetJS (xlsx) für .xlsx-Dateien.
+ * Nutzt @e965/xlsx (SheetJS Community Fork) für .xlsx-Dateien.
  */
-import * as XLSX from 'xlsx';
+import * as XLSX from '@e965/xlsx';
 import type { Member } from '@/types';
 
 /* ── Spalten-Mapping: Excel-Header ↔ Member-Felder ─────── */

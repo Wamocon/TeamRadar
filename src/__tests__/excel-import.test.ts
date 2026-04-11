@@ -3,7 +3,7 @@
  * Prüft: Template-Generierung, Validierung, Parsing, Fehlerbehandlung
  */
 import { describe, it, expect } from 'vitest';
-import * as XLSX from 'xlsx';
+import * as XLSX from '@e965/xlsx';
 import { generateTemplate, parseExcelFile } from '@/lib/excel-import';
 
 /* ── Hilfsfunktion: Erzeugt eine File-Instanz aus Excel-Daten ── */

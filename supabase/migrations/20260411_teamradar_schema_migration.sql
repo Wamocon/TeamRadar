@@ -6,14 +6,15 @@
 --        Das public-Schema verbleibt als Cross-App-Schema für
 --        AWAY und TRACE (super_admins, is_super_admin etc.).
 --
+-- ============================================================
 -- Reihenfolge:
 --   1. test → teamradar-test umbenennen (Daten bleiben erhalten)
 --   2. prod → teamradar-prod umbenennen (Daten bleiben erhalten)
 --   3. teamradar-dev erstellen + Grants
---   4. Alle Tabellen in teamradar-dev aufbauen
---   5. Daten aus public → teamradar-dev kopieren
---   6. user_consents in teamradar-test + teamradar-prod nachrüsten
---   7. RBAC-Funktionen in alle drei teamradar-Schemas schreiben
+--   4. RBAC-Hilfsfunktionen erstellen (MUSS vor Tabellen sein!)
+--   5. Alle Tabellen in teamradar-dev aufbauen
+--   6. Daten aus public → teamradar-dev kopieren
+--   7. user_consents in teamradar-test + teamradar-prod nachrüsten
 --   8. Auth-Trigger auf teamradar-* umstellen
 --   9. TeamRadar-Objekte aus public entfernen
 --
@@ -69,7 +70,46 @@ GRANT USAGE ON SCHEMA "teamradar-prod" TO authenticator, anon, authenticated, se
 
 
 -- ============================================================
--- SCHRITT 4: Tabellen in teamradar-dev erstellen
+-- SCHRITT 4: RBAC-Hilfsfunktionen erstellen
+--
+-- MUSS vor den Tabellen/Policies stehen, da die RLS-Policies
+-- diese Funktionen referenzieren!
+-- ============================================================
+
+SET search_path TO public;
+
+CREATE OR REPLACE FUNCTION public.get_user_role_for_schema(p_schema TEXT)
+RETURNS TEXT AS $$
+DECLARE
+  v_role TEXT;
+BEGIN
+  EXECUTE format(
+    'SELECT role FROM %I.profiles WHERE id = auth.uid()',
+    p_schema
+  ) INTO v_role;
+  RETURN v_role;
+END;
+$$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.get_user_department_for_schema(p_schema TEXT)
+RETURNS TEXT AS $$
+DECLARE
+  v_dept TEXT;
+BEGIN
+  EXECUTE format(
+    'SELECT department FROM %I.profiles WHERE id = auth.uid()',
+    p_schema
+  ) INTO v_dept;
+  RETURN v_dept;
+END;
+$$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.get_user_role_for_schema(TEXT)       TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_user_department_for_schema(TEXT) TO authenticated, service_role;
+
+
+-- ============================================================
+-- SCHRITT 5: Tabellen in teamradar-dev erstellen
 -- ============================================================
 
 SET search_path TO "teamradar-dev";
@@ -295,7 +335,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA "teamradar-dev" GRANT ALL ON SEQUENCES TO aut
 
 
 -- ============================================================
--- SCHRITT 5: Daten aus public → teamradar-dev kopieren
+-- SCHRITT 6: Daten aus public → teamradar-dev kopieren
 -- Nur ausführen wenn public noch TeamRadar-Tabellen hat.
 -- ============================================================
 
@@ -349,7 +389,7 @@ END $$;
 
 
 -- ============================================================
--- SCHRITT 6: user_consents in teamradar-test + teamradar-prod
+-- SCHRITT 7: user_consents in teamradar-test + teamradar-prod
 --            nachrüsten (fehlte bisher in test/prod)
 -- ============================================================
 
@@ -431,51 +471,6 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA "teamradar-prod" GRANT ALL ON SEQUENCES TO au
 
 
 -- ============================================================
--- SCHRITT 7: RBAC-Hilfsfunktionen in public
--- 
--- get_user_role_for_schema(schema_name) und
--- get_user_department_for_schema(schema_name) sind Schema-aware
--- Ersatz für die alten public.get_user_role() / get_user_department().
--- 
--- Die alten Funktionen bleiben NICHT in public (sie verwiesen
--- hart auf public.profiles, was nach dem Umzug falsch wäre).
--- Die neuen Funktionen sind generisch und funktionieren mit
--- jedem teamradar-*-Schema.
--- ============================================================
-
-SET search_path TO public;
-
-CREATE OR REPLACE FUNCTION public.get_user_role_for_schema(p_schema TEXT)
-RETURNS TEXT AS $$
-DECLARE
-  v_role TEXT;
-BEGIN
-  EXECUTE format(
-    'SELECT role FROM %I.profiles WHERE id = auth.uid()',
-    p_schema
-  ) INTO v_role;
-  RETURN v_role;
-END;
-$$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
-
-CREATE OR REPLACE FUNCTION public.get_user_department_for_schema(p_schema TEXT)
-RETURNS TEXT AS $$
-DECLARE
-  v_dept TEXT;
-BEGIN
-  EXECUTE format(
-    'SELECT department FROM %I.profiles WHERE id = auth.uid()',
-    p_schema
-  ) INTO v_dept;
-  RETURN v_dept;
-END;
-$$ LANGUAGE plpgsql STABLE SECURITY DEFINER;
-
-GRANT EXECUTE ON FUNCTION public.get_user_role_for_schema(TEXT)       TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.get_user_department_for_schema(TEXT) TO authenticated, service_role;
-
-
--- ============================================================
 -- SCHRITT 8: Auth-Trigger auf teamradar-* umstellen
 -- 
 -- handle_new_user() schreibt ab jetzt in teamradar-dev/test/prod
@@ -529,10 +524,6 @@ CREATE TRIGGER on_auth_user_created
 
 -- ============================================================
 -- SCHRITT 9: TeamRadar-Objekte aus public entfernen
--- 
--- ACHTUNG: public.super_admins + AWAY/TRACE-Funktionen bleiben!
--- Nur TeamRadar-eigene Tabellen und Funktionen werden entfernt.
--- ============================================================
 
 SET search_path TO public;
 

@@ -4,8 +4,8 @@ import { useAppStore } from '@/stores/appStore';
 import { createClient } from '@/lib/supabase/client';
 import {
   Building2, Plus, Edit3, Trash2, Users, Mail, Globe, Phone,
-  Save, Loader, Lock, X, Check, MapPin, Shield, CreditCard,
-  ChevronRight, Upload, Image as ImageIcon, AlertCircle, CheckCircle,
+  Save, Loader, Lock, X, Check, Shield, CreditCard,
+  Image as ImageIcon, AlertCircle, CheckCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 

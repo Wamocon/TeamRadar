@@ -348,6 +348,7 @@ BEGIN
       (id, user_id, name, email, role, department, avatar_url, phone, created_at)
     SELECT id, user_id, name, email, role, department, avatar_url, phone, created_at
     FROM public.members
+    WHERE user_id IN (SELECT id FROM auth.users)
     ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE 'members kopiert.';
 
@@ -355,6 +356,7 @@ BEGIN
       (id, user_id, member_id, status, date, start_time, end_time, note, created_at)
     SELECT id, user_id, member_id, status, date, start_time, end_time, note, created_at
     FROM public.availabilities
+    WHERE user_id IN (SELECT id FROM auth.users)
     ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE 'availabilities kopiert.';
 
@@ -362,6 +364,7 @@ BEGIN
       (id, user_id, name, description, member_ids, created_at)
     SELECT id, user_id, name, description, member_ids, created_at
     FROM public.teams
+    WHERE user_id IN (SELECT id FROM auth.users)
     ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE 'teams kopiert.';
 
@@ -369,6 +372,7 @@ BEGIN
       (id, user_id, name, type, status, client, description, member_ids, start_date, end_date, created_at)
     SELECT id, user_id, name, type, status, client, description, member_ids, start_date, end_date, created_at
     FROM public.projects
+    WHERE user_id IN (SELECT id FROM auth.users)
     ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE 'projects kopiert.';
 
@@ -376,23 +380,15 @@ BEGIN
       (id, user_id, member_id, project_id, percentage, start_date, end_date, created_at)
     SELECT id, user_id, member_id, project_id, percentage, start_date, end_date, created_at
     FROM public.allocations
+    WHERE user_id IN (SELECT id FROM auth.users)
     ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE 'allocations kopiert.';
 
     INSERT INTO "teamradar-dev".profiles
       (id, email, display_name, role, department, avatar_url, status_message, phone, preferences, created_at)
-    SELECT
-      id,
-      email,
-      display_name,
-      role,
-      department,
-      avatar_url,
-      status_message,
-      phone,
-      preferences,
-      created_at
+    SELECT id, email, display_name, role, department, avatar_url, status_message, phone, preferences, created_at
     FROM public.profiles
+    WHERE id IN (SELECT id FROM auth.users)
     ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE 'profiles kopiert.';
 
@@ -402,6 +398,7 @@ BEGIN
         (id, user_id, consent_type, status, version, ip_address, user_agent, accepted_at)
       SELECT id, user_id, consent_type, status, version, ip_address, user_agent, accepted_at
       FROM public.user_consents
+      WHERE user_id IN (SELECT id FROM auth.users)
       ON CONFLICT (user_id, consent_type, version) DO NOTHING;
       RAISE NOTICE 'user_consents kopiert.';
     END IF;

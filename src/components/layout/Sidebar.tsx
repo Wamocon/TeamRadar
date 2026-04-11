@@ -37,6 +37,7 @@ interface NavItem {
   label: string;
   exact?: boolean;
   badge?: number;
+  activeColor?: string; // Override für aktive Farbe
 }
 
 function SidebarContent({
@@ -108,13 +109,14 @@ function SidebarContent({
   const mainNav: NavItem[] = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
     { href: '/members', icon: BookOpen, label: 'WamoBook', exact: false },
-    { href: '/year', icon: CalendarRange, label: 'Jahresübersicht', exact: true },
+    { href: '/year', icon: CalendarRange, label: 'Jahres\u00fcbersicht', exact: true },
     { href: '/projects', icon: Briefcase, label: 'Projekte', exact: false },
     { href: '/calendar', icon: CalendarDays, label: 'Kalender', exact: true },
   ];
 
   const privilegedNav: NavItem[] = [
-    { href: '/utilization', icon: BarChart3, label: 'Auslastung', exact: true, badge: mounted && alertCount > 0 ? alertCount : undefined },
+    { href: '/members?action=invite', icon: UserPlus, label: 'Mitglied einladen', exact: false, activeColor: 'bg-blue-500/10 text-blue-500' },
+    { href: '/utilization', icon: BarChart3, label: 'Auslastung', exact: true, badge: mounted && alertCount > 0 ? alertCount : undefined, activeColor: 'bg-purple-500/10 text-purple-500' },
     { href: '/reports', icon: FileDown, label: 'Reports', exact: true },
   ];
 
@@ -130,16 +132,17 @@ function SidebarContent({
 
   const NavLink = ({ item }: { item: NavItem }) => {
     const active = isActive(item.href, item.exact);
+    const activeClass = item.activeColor ?? 'bg-[var(--primary-light)] border-[rgba(99,102,241,0.2)]';
     return (
       <Link
         href={item.href}
         onClick={onNavigate}
         className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium no-underline transition-all duration-150 group ${
           active
-            ? 'bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)]'
+            ? `${activeClass} border`
             : 'text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-item-hover)] border border-transparent'
         }`}
-        style={active ? { color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : '#374151' } : {}}
+        style={active && !item.activeColor ? { color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : '#374151' } : {}}
       >
         <item.icon size={15} className={`shrink-0 transition-colors ${active ? 'text-[var(--primary)]' : 'opacity-50 group-hover:opacity-80'}`} />
         <span className="flex-1">{item.label}</span>
@@ -264,7 +267,7 @@ function SidebarContent({
           <div className="w-8 h-8 rounded-xl flex items-center justify-center overflow-hidden shrink-0 border" style={{ background: 'var(--primary-light)', borderColor: 'rgba(99,102,241,0.2)' }}>
             {userProfile?.avatarUrl ? (
               <div className="relative w-full h-full">
-                <Image src={userProfile.avatarUrl} alt="Avatar" fill className="object-cover" sizes="32px" />
+                <Image src={userProfile.avatarUrl} alt="User Avatar" fill className="object-cover" sizes="32px" />
               </div>
             ) : (
               <span className="text-[var(--primary)] font-black text-xs">

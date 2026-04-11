@@ -51,6 +51,7 @@ export function Modal({
           {showCloseButton && (
             <button 
               onClick={onClose}
+              title="Schließen"
               className="absolute top-6 right-6 p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border-none cursor-pointer"
             >
               <X size={20} />

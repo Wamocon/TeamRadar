@@ -552,4 +552,6 @@ DROP TABLE IF EXISTS public.teams          CASCADE;
 DROP TABLE IF EXISTS public.members        CASCADE;
 DROP TABLE IF EXISTS public.profiles       CASCADE;
 
-RAISE NOTICE '✓ TeamRadar-Migration abgeschlossen: public ist nun sauber (nur Cross-App-Objekte).';
+DO $$ BEGIN
+  RAISE NOTICE '✓ TeamRadar-Migration abgeschlossen: public ist nun sauber (nur Cross-App-Objekte).';
+END $$;

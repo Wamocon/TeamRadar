@@ -54,7 +54,6 @@ function WamoBookContent() {
   const [showImport, setShowImport] = useState(false);
   const [privacySettings, setPrivacySettings] = useState<Record<string, boolean>>({});
   const [privacyLoading, setPrivacyLoading] = useState(false);
-  const [profileMsg, setProfileMsg] = useState<string | null>(null);
 
   // Invite action from URL
   useEffect(() => {

@@ -11,7 +11,6 @@ import {
   isSameDay, addDays,
 } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { useAppStore } from '@/stores/appStore';
 
 // ── Types ─────────────────────────────────────────────────
 interface CalendarEvent {

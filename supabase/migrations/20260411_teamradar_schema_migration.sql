@@ -544,15 +544,67 @@ CREATE TRIGGER on_auth_user_created
 
 
 -- ============================================================
--- SCHRITT 9: TeamRadar-Objekte aus public entfernen
+-- SCHRITT 9: RBAC-Policies in teamradar-test + teamradar-prod aktualisieren
+-- Die alten Migrations haben dort noch Policies mit public.get_user_role().
+-- Diese müssen auf get_user_role_for_schema() umgestellt werden
+-- bevor die alte Funktion gedroppt werden kann.
+-- ============================================================
+
+DO $$
+DECLARE
+  s TEXT;
+  schemas TEXT[] := ARRAY['"teamradar-test"', '"teamradar-prod"'];
+BEGIN
+  FOREACH s IN ARRAY schemas LOOP
+    IF EXISTS (SELECT 1 FROM information_schema.tables
+               WHERE table_schema = trim(both '"' from s) AND table_name = 'members') THEN
+      EXECUTE format('DROP POLICY IF EXISTS "RBAC Members"        ON %s.members',        s);
+      EXECUTE format('DROP POLICY IF EXISTS "RBAC Availabilities" ON %s.availabilities', s);
+      EXECUTE format('DROP POLICY IF EXISTS "RBAC Teams"          ON %s.teams',          s);
+      EXECUTE format('DROP POLICY IF EXISTS "RBAC Projects"       ON %s.projects',       s);
+      EXECUTE format('DROP POLICY IF EXISTS "RBAC Allocations"    ON %s.allocations',    s);
+
+      EXECUTE format(
+        'CREATE POLICY "RBAC Members" ON %s.members FOR ALL USING (
+           public.get_user_role_for_schema(%L) IN (''admin'', ''cio'') OR
+           (public.get_user_role_for_schema(%L) = ''department_lead''
+              AND department = public.get_user_department_for_schema(%L)) OR
+           auth.uid() = user_id)', s, trim(both '"' from s), trim(both '"' from s), trim(both '"' from s));
+
+      EXECUTE format(
+        'CREATE POLICY "RBAC Availabilities" ON %s.availabilities FOR ALL USING (
+           public.get_user_role_for_schema(%L) IN (''admin'', ''cio'', ''department_lead'') OR
+           auth.uid() = user_id)', s, trim(both '"' from s));
+
+      EXECUTE format(
+        'CREATE POLICY "RBAC Teams" ON %s.teams FOR ALL USING (
+           public.get_user_role_for_schema(%L) IN (''admin'', ''cio'', ''department_lead'') OR
+           auth.uid() = user_id)', s, trim(both '"' from s));
+
+      EXECUTE format(
+        'CREATE POLICY "RBAC Projects" ON %s.projects FOR ALL USING (
+           public.get_user_role_for_schema(%L) IN (''admin'', ''cio'', ''department_lead'') OR
+           auth.uid() = user_id)', s, trim(both '"' from s));
+
+      EXECUTE format(
+        'CREATE POLICY "RBAC Allocations" ON %s.allocations FOR ALL USING (
+           public.get_user_role_for_schema(%L) IN (''admin'', ''cio'', ''department_lead'') OR
+           auth.uid() = user_id)', s, trim(both '"' from s));
+    END IF;
+  END LOOP;
+END $$;
+
+
+-- ============================================================
+-- SCHRITT 10: TeamRadar-Objekte aus public entfernen
 
 SET search_path TO public;
 
--- Funktionen entfernen (alte get_user_role/get_user_department
--- verwiesen auf public.profiles → werden durch schema-aware
--- Varianten ersetzt und sind damit obsolet)
-DROP FUNCTION IF EXISTS public.get_user_role();
-DROP FUNCTION IF EXISTS public.get_user_department();
+-- CASCADE: entfernt auch alle verbleibenden abhängigen Policies
+-- (z.B. auf Tabellen die nicht TeamRadar gehören aber durch die
+-- alte 006_rbac_setup.sql Migration get_user_role() bekommen haben)
+DROP FUNCTION IF EXISTS public.get_user_role()   CASCADE;
+DROP FUNCTION IF EXISTS public.get_user_department() CASCADE;
 
 -- TeamRadar-Tabellen aus public löschen
 -- Reihenfolge wegen FK-Constraints: abhängige zuerst

@@ -189,11 +189,12 @@ export async function loadAllData() {
     { data: projectRows, error: pError },
     { data: allocationRows, error: alError },
   ] = await Promise.all([
-    supabase.from('members').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
-    supabase.from('availabilities').select('*').eq('user_id', userId).order('date', { ascending: true }),
-    supabase.from('teams').select('*').eq('user_id', userId).order('name', { ascending: true }),
-    supabase.from('projects').select('*').eq('user_id', userId).order('name', { ascending: true }),
-    supabase.from('allocations').select('*').eq('user_id', userId),
+    // Kein user_id-Filter: RLS-Policies steuern Sichtbarkeit (alle Teammitglieder sichtbar)
+    supabase.from('members').select('*').order('created_at', { ascending: true }),
+    supabase.from('availabilities').select('*').order('date', { ascending: true }),
+    supabase.from('teams').select('*').order('name', { ascending: true }),
+    supabase.from('projects').select('*').order('name', { ascending: true }),
+    supabase.from('allocations').select('*'),
   ]);
 
   if (mError) throw mError;

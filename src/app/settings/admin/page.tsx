@@ -100,7 +100,11 @@ export default function AdminSettingsPage() {
   const [jiraUrl, setJiraUrl] = useState('');
   const [confluenceEnabled, setConfluenceEnabled] = useState(false);
   const [apiKeyVisible, setApiKeyVisible] = useState(false);
-  const [apiKey] = useState('tr-' + Math.random().toString(36).slice(2, 18));
+  const [apiKey] = useState(() => {
+    const arr = new Uint8Array(12);
+    crypto.getRandomValues(arr);
+    return 'tr-' + Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('');
+  });
 
   // Advanced
   const [dataRetentionDays, setDataRetentionDays] = useState(365);

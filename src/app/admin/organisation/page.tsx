@@ -270,7 +270,7 @@ export default function OrganisationPage() {
 
           {/* Right: Logo preview + stats */}
           <div className="space-y-4">
-            {settings.org_logo_url && (
+            {settings.org_logo_url && /^https?:\/\//.test(settings.org_logo_url) && (
               <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-4 flex flex-col items-center gap-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest dark:text-white/30 text-gray-500">Logo Vorschau</p>
                 <img src={settings.org_logo_url} alt="Logo" className="max-h-20 object-contain" />
@@ -332,7 +332,7 @@ export default function OrganisationPage() {
               <div className="flex gap-2">
                 <button onClick={() => { setShowInvite(false); setInviteEmail(''); }}
                   className="px-3 py-1.5 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 cursor-pointer border dark:border-white/10 border-gray-200 bg-transparent transition-colors hover:bg-gray-100 dark:hover:bg-white/5">Abbrechen</button>
-                <Link href={`/members?action=invite&email=${encodeURIComponent(inviteEmail)}&role=${inviteRole}`}
+                <Link href={`/members?action=invite&email=${encodeURIComponent(inviteEmail)}&role=${encodeURIComponent(inviteRole)}`}
                   className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[var(--primary)] text-white text-xs font-bold cursor-pointer no-underline hover:opacity-90 transition-opacity">
                   <Mail size={12} /> Einladung öffnen
                 </Link>

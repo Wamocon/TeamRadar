@@ -55,7 +55,6 @@ function WamoBookContent() {
   const [privacySettings, setPrivacySettings] = useState<Record<string, boolean>>({});
   const [privacyLoading, setPrivacyLoading] = useState(false);
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
-  const [dsgvoAck, setDsgvoAck] = useState(false);
 
   // Invite action from URL
   useEffect(() => {

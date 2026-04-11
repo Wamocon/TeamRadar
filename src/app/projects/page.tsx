@@ -42,7 +42,7 @@ export default function ProjectsPage() {
 
   const canManage = hasMinRole('department_lead');
 
-  const [filterType, setFilterType] = useState<'all' | ProjectType>('all');
+  const [filterType] = useState<'all' | ProjectType>('all');
   const [filterStatus, setFilterStatus] = useState<'all' | ProjectStatus>('all');
   const [search, setSearch] = useState('');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);

@@ -47,9 +47,10 @@ export default function ProjectsPage() {
   const [search, setSearch] = useState('');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [editMode, setEditMode] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   // Edit form state
   const [editName, setEditName] = useState('');
@@ -71,6 +72,13 @@ export default function ProjectsPage() {
     setEditStartDate(project.startDate || '');
     setEditEndDate(project.endDate || '');
   };
+
+  const isDirty = editMode && selectedProject && (
+    editName !== selectedProject.name ||
+    editType !== selectedProject.type ||
+    editStatus !== selectedProject.status ||
+    editClient !== (selectedProject.client || '')
+  );
 
   const handleSave = async () => {
     if (!selectedProject) return;
@@ -296,7 +304,7 @@ export default function ProjectsPage() {
                   </button>
                 )}
                 {canManage && (
-                  <button onClick={() => { setDeletingId(selectedProject.id); setSelectedProject(null); }}
+                  <button onClick={() => { setDeletingProjectId(selectedProject.id); setSelectedProject(null); }}
                     className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 hover:text-red-500 transition-all border-none bg-transparent cursor-pointer">
                     <Trash2 size={14} />
                   </button>
@@ -359,7 +367,7 @@ export default function ProjectsPage() {
             {/* Footer */}
             {editMode && (
               <div className="px-5 py-3 border-t dark:border-white/10 border-gray-100 flex items-center justify-end gap-2">
-                <button onClick={() => setEditMode(false)} className="px-3 py-1.5 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 hover:bg-gray-100 dark:hover:bg-white/5 border-none bg-transparent cursor-pointer transition-colors">
+                <button onClick={() => isDirty ? setShowCancelConfirm(true) : setEditMode(false)} className="px-3 py-1.5 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 hover:bg-gray-100 dark:hover:bg-white/5 border-none bg-transparent cursor-pointer transition-colors">
                   Abbrechen
                 </button>
                 <button onClick={handleSave} disabled={isSaving}
@@ -374,10 +382,10 @@ export default function ProjectsPage() {
       )}
 
       {/* Delete Confirm */}
-      {deletingId && (
+      {deletingProjectId && (
         <ConfirmModal title="Projekt löschen" message="Möchtest du dieses Projekt wirklich löschen?" confirmLabel="Löschen" cancelLabel="Abbrechen" variant="danger"
-          onConfirm={() => { deleteProject(deletingId); setDeletingId(null); }}
-          onCancel={() => setDeletingId(null)} />
+          onConfirm={() => { deleteProject(deletingProjectId); setDeletingProjectId(null); }}
+          onCancel={() => setDeletingProjectId(null)} />
       )}
 
       {/* Create Modal */}

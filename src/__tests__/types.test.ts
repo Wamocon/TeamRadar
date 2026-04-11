@@ -25,10 +25,11 @@ import {
 describe('STATUS_CONFIG', () => {
   const ALL_STATUSES: AvailabilityStatus[] = [
     'available', 'busy', 'meeting', 'vacation', 'sick', 'remote', 'offline',
+    'extern-onsite', 'extern-remote',
   ];
 
-  it('enthält alle 7 Status-Typen', () => {
-    expect(Object.keys(STATUS_CONFIG)).toHaveLength(7);
+  it('enthält alle 9 Status-Typen', () => {
+    expect(Object.keys(STATUS_CONFIG)).toHaveLength(9);
     ALL_STATUSES.forEach((status) => {
       expect(STATUS_CONFIG[status]).toBeDefined();
     });
@@ -45,12 +46,12 @@ describe('STATUS_CONFIG', () => {
 
   it('alle Labels sind auf Deutsch', () => {
     expect(STATUS_CONFIG.available.label).toBe('Verfügbar');
-    expect(STATUS_CONFIG.busy.label).toBe('Beschäftigt');
+    expect(STATUS_CONFIG.busy.label).toBe('Büro intern');
     expect(STATUS_CONFIG.meeting.label).toBe('Im Meeting');
     expect(STATUS_CONFIG.vacation.label).toBe('Urlaub');
     expect(STATUS_CONFIG.sick.label).toBe('Krank');
-    expect(STATUS_CONFIG.remote.label).toBe('Remote');
-    expect(STATUS_CONFIG.offline.label).toBe('Offline');
+    expect(STATUS_CONFIG.remote.label).toBe('Homeoffice');
+    expect(STATUS_CONFIG.offline.label).toBe('Kein Status');
   });
 
   it('alle Farben sind einzigartig', () => {

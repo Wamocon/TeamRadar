@@ -354,7 +354,7 @@ function WamoBookContent() {
         </Modal>
       )}
       {deletingMemberId && (
-        <ConfirmModal title="Mitarbeiter entfernen"
+        <ConfirmModal isOpen={!!deletingMemberId} title="Mitarbeiter entfernen"
           message="Möchtest du diesen Mitarbeiter wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden."
           confirmLabel="Ja, entfernen" cancelLabel="Abbrechen" variant="danger"
           onConfirm={() => { deleteMember(deletingMemberId); setDeletingMemberId(null); }}

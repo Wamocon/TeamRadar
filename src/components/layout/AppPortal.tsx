@@ -84,7 +84,7 @@ export function AppPortal({ isOpen, onClose, url, title, icon: Icon, iconColor =
             src={url} 
             className="w-full h-full border-none"
             title={title}
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox allow-downloads"
+            sandbox="allow-scripts allow-forms allow-popups allow-modals allow-downloads"
             loading="lazy"
           />
         </div>

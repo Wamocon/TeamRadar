@@ -573,7 +573,7 @@ export default function AdminSettingsPage() {
                   <InputField label="Logo URL" value={orgLogoUrl} onChange={setOrgLogoUrl} placeholder="https://..." icon={ImageIcon} />
                   <InputField label="Support E-Mail" value={supportEmail} onChange={setSupportEmail} type="email" placeholder="support@firma.de" icon={Mail} />
                 </div>
-                {orgLogoUrl && <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.06] border-black/[0.06]"><img src={orgLogoUrl} alt="Logo" className="max-h-16 object-contain" /></div>}
+                {orgLogoUrl && /^https?:\/\//.test(orgLogoUrl) && <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.06] border-black/[0.06]"><img src={orgLogoUrl} alt="Logo" className="max-h-16 object-contain" /></div>}
               </div>
 
               <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5">

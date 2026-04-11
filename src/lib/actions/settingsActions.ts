@@ -17,11 +17,14 @@ export async function updateUserProfileAction(data: {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Nicht authentifiziert' };
 
+    const sanitizeUrl = (url: string | undefined) =>
+      url && /^https?:\/\//.test(url) ? url : undefined;
+
     const { error } = await supabase
       .from('profiles')
       .update({
         display_name: data.displayName,
-        avatar_url: data.avatarUrl,
+        avatar_url: sanitizeUrl(data.avatarUrl),
         status_message: data.statusMessage,
         phone: data.phone,
         preferences: data.preferences
@@ -63,11 +66,14 @@ export async function updateSystemSettingsAction(data: {
       return { error: 'Nicht autorisiert' };
     }
 
+    const sanitizeUrl = (url: string | undefined) =>
+      url && /^https?:\/\//.test(url) ? url : undefined;
+
     const { error } = await supabase
       .from('system_settings')
       .update({
         org_name: data.orgName,
-        org_logo_url: data.orgLogoUrl,
+        org_logo_url: sanitizeUrl(data.orgLogoUrl),
         support_email: data.supportEmail,
         maintenance_mode: data.maintenanceMode,
         updated_at: new Date().toISOString()

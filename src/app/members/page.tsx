@@ -259,7 +259,7 @@ function WamoBookContent() {
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 {/* Kontakt aufnehmen */}
-                <a href={`mailto:${selectedMember.email}`}
+                <a href={`mailto:${encodeURIComponent(selectedMember.email)}`}
                   className="p-2 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all" title="E-Mail senden">
                   <Mail size={16} />
                 </a>

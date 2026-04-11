@@ -806,11 +806,11 @@ describe('Store: Seed-Daten NIEMALS in Production (NODE_ENV Guard)', () => {
     expect(useAppStore.getState().allocations).toHaveLength(0);
   };
 
-  it('NODE_ENV=production + Schema=public → KEINE Seed-Daten', async () => {
+  it('NODE_ENV=production + Schema=teamradar-dev → KEINE Seed-Daten', async () => {
     const origNodeEnv = process.env.NODE_ENV;
     const origSchema = process.env.NEXT_PUBLIC_DB_SCHEMA;
     setNodeEnv('production');
-    process.env.NEXT_PUBLIC_DB_SCHEMA = 'public';
+    process.env.NEXT_PUBLIC_DB_SCHEMA = 'teamradar-dev';
 
     useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
     await useAppStore.getState().loadFromSupabase();
@@ -820,11 +820,11 @@ describe('Store: Seed-Daten NIEMALS in Production (NODE_ENV Guard)', () => {
     process.env.NEXT_PUBLIC_DB_SCHEMA = origSchema;
   });
 
-  it('NODE_ENV=production + Schema=test → KEINE Seed-Daten', async () => {
+  it('NODE_ENV=production + Schema=teamradar-test → KEINE Seed-Daten', async () => {
     const origNodeEnv = process.env.NODE_ENV;
     const origSchema = process.env.NEXT_PUBLIC_DB_SCHEMA;
     setNodeEnv('production');
-    process.env.NEXT_PUBLIC_DB_SCHEMA = 'test';
+    process.env.NEXT_PUBLIC_DB_SCHEMA = 'teamradar-test';
 
     useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
     await useAppStore.getState().loadFromSupabase();
@@ -834,11 +834,11 @@ describe('Store: Seed-Daten NIEMALS in Production (NODE_ENV Guard)', () => {
     process.env.NEXT_PUBLIC_DB_SCHEMA = origSchema;
   });
 
-  it('NODE_ENV=production + Schema=prod → KEINE Seed-Daten', async () => {
+  it('NODE_ENV=production + Schema=teamradar-prod → KEINE Seed-Daten', async () => {
     const origNodeEnv = process.env.NODE_ENV;
     const origSchema = process.env.NEXT_PUBLIC_DB_SCHEMA;
     setNodeEnv('production');
-    process.env.NEXT_PUBLIC_DB_SCHEMA = 'prod';
+    process.env.NEXT_PUBLIC_DB_SCHEMA = 'teamradar-prod';
 
     useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
     await useAppStore.getState().loadFromSupabase();
@@ -863,11 +863,11 @@ describe('Store: Seed-Daten NIEMALS in Production (NODE_ENV Guard)', () => {
   });
 
 
-  it('NODE_ENV=development + Schema=prod → KEINE Seed-Daten (doppelter Guard)', async () => {
+  it('NODE_ENV=development + Schema=teamradar-prod → KEINE Seed-Daten (doppelter Guard)', async () => {
     const origNodeEnv = process.env.NODE_ENV;
     const origSchema = process.env.NEXT_PUBLIC_DB_SCHEMA;
     setNodeEnv('development');
-    process.env.NEXT_PUBLIC_DB_SCHEMA = 'prod';
+    process.env.NEXT_PUBLIC_DB_SCHEMA = 'teamradar-prod';
 
     useAppStore.setState({ members: [], availabilities: [], teams: [], projects: [], allocations: [] });
     await useAppStore.getState().loadFromSupabase();

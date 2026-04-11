@@ -4,8 +4,14 @@ import { NextResponse, type NextRequest } from 'next/server';
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Auth- und API-Routen durchlassen
-  if (pathname.startsWith('/auth/') || pathname.startsWith('/api/')) {
+  // Auth-, API- und öffentliche Routen durchlassen
+  if (
+    pathname.startsWith('/auth/') ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/impressum') ||
+    pathname.startsWith('/datenschutz') ||
+    pathname.startsWith('/agb')
+  ) {
     return NextResponse.next({ request });
   }
 
@@ -30,7 +36,10 @@ export async function proxy(request: NextRequest) {
           );
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, {
+              ...options,
+              secure: process.env.NODE_ENV === 'production',
+            })
           );
         },
       },

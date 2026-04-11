@@ -350,7 +350,7 @@ function WamoBookContent() {
       {/* Modals */}
       {showMemberModal && (
         <Modal title={editingMemberId ? 'Mitarbeiter bearbeiten' : 'Neues Mitglied einladen'} onClose={() => setShowMemberModal(false)}>
-          <MemberForm memberId={editingMemberId} onSave={() => setShowMemberModal(false)} onCancel={() => setShowMemberModal(false)} />
+          <MemberForm memberId={editingMemberId ?? undefined} onSave={() => setShowMemberModal(false)} onCancel={() => setShowMemberModal(false)} />
         </Modal>
       )}
       {deletingMemberId && (

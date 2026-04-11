@@ -857,7 +857,7 @@ export default function YearOverviewPage() {
               <tbody>
                 {entryData.memberRows.map(({ member, categories, summary }) => {
                   const workDays = categories.filter((c) => c !== 'weekend' && c !== 'free').length;
-                  const editable = canEditRow(member.userId);
+                  const editable = canEditRow(member.email);
                   return (
                     <tr key={member.id} className={`border-b dark:border-white/[0.02] border-gray-50 ${editable ? 'hover:bg-black/[0.01] dark:hover:bg-white/[0.01]' : 'opacity-80'}`}>
                       <td className="px-3 py-1 sticky left-0 bg-white dark:bg-gray-900 z-10">

@@ -431,8 +431,8 @@ describe('Store: Projekte', () => {
     endDate: '2026-06-30',
   };
 
-  it('addProject: erstellt ein neues Projekt mit ID und Timestamp', () => {
-    const project = useAppStore.getState().addProject(projectData);
+  it('addProject: erstellt ein neues Projekt mit ID und Timestamp', async () => {
+    const project = await useAppStore.getState().addProject(projectData);
 
     expect(project.id).toBeTruthy();
     expect(project.name).toBe('Cloud-Migration');
@@ -442,8 +442,8 @@ describe('Store: Projekte', () => {
     expect(useAppStore.getState().projects).toHaveLength(1);
   });
 
-  it('addProject: internes Projekt ohne Kunde', () => {
-    const project = useAppStore.getState().addProject({
+  it('addProject: internes Projekt ohne Kunde', async () => {
+    const project = await useAppStore.getState().addProject({
       name: 'Interne Tools', type: 'internal', status: 'planned', memberIds: [],
     });
 
@@ -451,8 +451,8 @@ describe('Store: Projekte', () => {
     expect(project.client).toBeUndefined();
   });
 
-  it('updateProject: aktualisiert Projektdaten', () => {
-    const project = useAppStore.getState().addProject(projectData);
+  it('updateProject: aktualisiert Projektdaten', async () => {
+    const project = await useAppStore.getState().addProject(projectData);
     useAppStore.getState().updateProject(project.id, { name: 'Neuer Name', status: 'completed' });
 
     const updated = useAppStore.getState().projects.find((p) => p.id === project.id);
@@ -461,31 +461,31 @@ describe('Store: Projekte', () => {
     expect(updated!.client).toBe('BMW AG'); // unverändert
   });
 
-  it('deleteProject: entfernt Projekt', () => {
-    const project = useAppStore.getState().addProject(projectData);
+  it('deleteProject: entfernt Projekt', async () => {
+    const project = await useAppStore.getState().addProject(projectData);
     expect(useAppStore.getState().projects).toHaveLength(1);
 
     useAppStore.getState().deleteProject(project.id);
     expect(useAppStore.getState().projects).toHaveLength(0);
   });
 
-  it('deleteProject: entfernt nur das richtige Projekt', () => {
-    const p1 = useAppStore.getState().addProject(projectData);
-    const p2 = useAppStore.getState().addProject({ ...projectData, name: 'Projekt B' });
+  it('deleteProject: entfernt nur das richtige Projekt', async () => {
+    const p1 = await useAppStore.getState().addProject(projectData);
+    const p2 = await useAppStore.getState().addProject({ ...projectData, name: 'Projekt B' });
 
     useAppStore.getState().deleteProject(p1.id);
     expect(useAppStore.getState().projects).toHaveLength(1);
     expect(useAppStore.getState().projects[0].id).toBe(p2.id);
   });
 
-  it('getMemberProjects: gibt aktive Projekte eines Mitglieds zurück', () => {
-    useAppStore.getState().addProject({
+  it('getMemberProjects: gibt aktive Projekte eines Mitglieds zurück', async () => {
+    await useAppStore.getState().addProject({
       name: 'Aktiv', type: 'external', status: 'active', memberIds: ['m1'],
     });
-    useAppStore.getState().addProject({
+    await useAppStore.getState().addProject({
       name: 'Abgeschlossen', type: 'internal', status: 'completed', memberIds: ['m1'],
     });
-    useAppStore.getState().addProject({
+    await useAppStore.getState().addProject({
       name: 'Anderes', type: 'external', status: 'active', memberIds: ['m2'],
     });
 

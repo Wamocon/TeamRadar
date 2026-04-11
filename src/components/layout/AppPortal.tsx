@@ -7,7 +7,7 @@ interface AppPortalProps {
   onClose: () => void;
   url: string;
   title: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
   iconColor?: string;
 }
 

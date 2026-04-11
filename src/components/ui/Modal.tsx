@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 interface ModalProps {
-  isOpen: boolean;
+  isOpen?: boolean;
   onClose: () => void;
   title: string;
   subtitle?: string;

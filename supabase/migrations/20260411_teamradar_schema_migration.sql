@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS availabilities (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id    UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   member_id  UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
-  status     TEXT NOT NULL CHECK (status IN ('available','busy','meeting','vacation','sick','remote','offline')),
+  status     TEXT NOT NULL CHECK (status IN ('available','busy','meeting','vacation','sick','remote','offline','extern-onsite','extern-remote')),
   date       DATE NOT NULL,
   start_time TIME,
   end_time   TIME,
@@ -177,6 +177,14 @@ CREATE POLICY "RBAC Availabilities" ON availabilities FOR ALL USING (
 );
 
 GRANT ALL ON TABLE availabilities TO authenticated, service_role;
+
+-- Constraint auf neue Status erweitern (idempotent für bestehende Instanzen)
+DO $$ BEGIN
+  ALTER TABLE availabilities DROP CONSTRAINT IF EXISTS availabilities_status_check;
+  ALTER TABLE availabilities
+    ADD CONSTRAINT availabilities_status_check
+    CHECK (status IN ('available','busy','meeting','vacation','sick','remote','offline','extern-onsite','extern-remote'));
+END $$;
 
 -- ── Teams ────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS teams (
@@ -310,8 +318,9 @@ CREATE TABLE IF NOT EXISTS user_consents (
 
 ALTER TABLE user_consents ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can view own consents"  ON user_consents;
-DROP POLICY IF EXISTS "Admins can view all consents" ON user_consents;
+DROP POLICY IF EXISTS "Users can view own consents"   ON user_consents;
+DROP POLICY IF EXISTS "Users can insert own consents" ON user_consents;
+DROP POLICY IF EXISTS "Admins can view all consents"  ON user_consents;
 
 CREATE POLICY "Users can view own consents" ON user_consents FOR SELECT
   USING (auth.uid() = user_id);

@@ -63,7 +63,7 @@ interface AppStore {
   deleteTeam: (id: string) => void;
 
   /* ── Projekte ────────────────────────────── */
-  addProject: (project: Omit<Project, 'id' | 'createdAt'>) => Project;
+  addProject: (project: Omit<Project, 'id' | 'createdAt'>) => Promise<Project>;
   updateProject: (id: string, data: Partial<Project>) => void;
   deleteProject: (id: string) => void;
   getMemberProjects: (memberId: string) => Project[];
@@ -276,14 +276,23 @@ export const useAppStore = create<AppStore>()(
     },
 
     /* ── Projekte ──────────────────────────── */
-    addProject: (data) => {
+    addProject: async (data) => {
       const project: Project = {
         ...data,
         id: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
       };
       set((state) => ({ projects: [...state.projects, project] }));
-      void dbAddProject(project);
+      try {
+        await dbAddProject(project);
+      } catch (err: any) {
+        // Rollback: Projekt aus Store entfernen
+        set((state) => ({ projects: state.projects.filter((p) => p.id !== project.id) }));
+        const msg = err?.message || 'Datenbankfehler beim Speichern des Projekts';
+        set({ dbError: msg });
+        console.error('[addProject]', msg);
+        throw new Error(msg);
+      }
       return project;
     },
 
@@ -292,7 +301,7 @@ export const useAppStore = create<AppStore>()(
         projects: state.projects.map((p) => (p.id === id ? { ...p, ...data } : p)),
       }));
       const updated = get().projects.find((p) => p.id === id);
-      if (updated) void dbUpdateProject(updated);
+      if (updated) void dbUpdateProject(updated).catch((err) => console.error('[updateProject]', err));
     },
 
     deleteProject: (id) => {

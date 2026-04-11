@@ -1,7 +1,8 @@
 'use client';
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { useAppStore } from '@/stores/appStore';
-import { FileDown, FileSpreadsheet, Users, Briefcase, BarChart3, CalendarDays, Upload, Download, CheckCircle, AlertCircle } from 'lucide-react';
+import { FileDown, FileSpreadsheet, Users, Briefcase, BarChart3, CalendarDays, Upload, Download, CheckCircle, AlertCircle, Printer, Lock } from 'lucide-react';
+import Link from 'next/link';
 import { PROJECT_TYPE_CONFIG, type ProjectType } from '@/types';
 import { ProjectTypeFilter } from '@/components/ui/ProjectTypeFilter';
 import type { Member, Availability, Team, Project, Allocation } from '@/types';
@@ -23,6 +24,25 @@ export default function ReportsPage() {
   const teams = useAppStore((s) => s.teams);
   const getMemberUtilization = useAppStore((s) => s.getMemberUtilization);
   const getMemberAllocations = useAppStore((s) => s.getMemberAllocations);
+  const hasMinRole = useAppStore((s) => s.hasMinRole);
+
+  // ── RBAC Guard ────────────────────────────────────
+  if (!hasMinRole('department_lead')) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center h-full min-h-[60vh] gap-4 text-center p-8">
+        <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+          <Lock size={28} className="text-red-400" />
+        </div>
+        <h2 className="text-xl font-black dark:text-white text-gray-900">Kein Zugriff</h2>
+        <p className="text-sm dark:text-white/40 text-gray-500 max-w-xs">
+          Dieser Bereich ist nur für Team-Leads, CIOs und Administratoren zugänglich.
+        </p>
+        <Link href="/" className="px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity">
+          Zum Dashboard
+        </Link>
+      </div>
+    );
+  }
 
   const [selectedReport, setSelectedReport] = useState<ReportType>('utilization');
   const [filterType, setFilterType] = useState<'all' | ProjectType>('all');
@@ -309,7 +329,8 @@ export default function ReportsPage() {
   return (
     <div className="p-4 sm:p-6 w-full space-y-6 animate-fade-in">
       {/* Header */}
-      <div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
+        <div>
         <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-400/20 border border-violet-500/20 flex items-center justify-center">
             <FileDown size={20} className="text-violet-500" />
@@ -319,6 +340,11 @@ export default function ReportsPage() {
         <p className="text-sm dark:text-white/40 text-gray-500 mt-1">
           Daten exportieren, importieren und als Report herunterladen
         </p>
+      </div>
+      <button onClick={() => window.print()}
+        className="flex items-center gap-2 px-4 py-2 rounded-xl border dark:border-white/[0.08] border-black/[0.08] text-xs font-semibold dark:text-white/60 text-gray-600 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] hover:border-[rgba(99,102,241,0.3)] transition-all bg-transparent cursor-pointer shrink-0 print:hidden">
+        <Printer size={14} /> Als PDF drucken
+      </button>
       </div>
 
       {/* Feedback-Meldung (wie AppMonitor) */}

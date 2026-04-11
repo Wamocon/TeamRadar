@@ -10,6 +10,7 @@ import type { Member, Availability, Team, Project, Allocation } from '@/types';
 function rowToMember(row: Record<string, unknown>): Member {
   return {
     id: row.id as string,
+    userId: row.user_id as string | undefined,
     name: row.name as string,
     email: row.email as string,
     role: row.role as string,
@@ -215,9 +216,10 @@ export async function loadAllData() {
 export async function dbAddMember(member: Member) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
-  if (!userId) return;
+  if (!userId) throw new Error('Nicht eingeloggt.');
   const supabase = createClient();
-  await supabase.from('members').insert(memberToRow(member, userId));
+  const { error } = await supabase.from('members').insert(memberToRow(member, userId));
+  if (error) throw new Error(`Mitarbeiter konnte nicht gespeichert werden: ${error.message}`);
 }
 
 export async function dbUpdateMember(member: Member) {
@@ -241,9 +243,10 @@ export async function dbDeleteMember(id: string) {
 export async function dbAddAvailability(entry: Availability) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
-  if (!userId) return;
+  if (!userId) throw new Error('Nicht eingeloggt.');
   const supabase = createClient();
-  await supabase.from('availabilities').insert(availabilityToRow(entry, userId));
+  const { error } = await supabase.from('availabilities').insert(availabilityToRow(entry, userId));
+  if (error) throw new Error(`Verfügbarkeit konnte nicht gespeichert werden: ${error.message}`);
 }
 
 export async function dbUpdateAvailability(entry: Availability) {
@@ -289,17 +292,19 @@ export async function dbDeleteTeam(id: string) {
 export async function dbAddProject(project: Project) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
-  if (!userId) return;
+  if (!userId) throw new Error('Nicht eingeloggt – bitte neu anmelden.');
   const supabase = createClient();
-  await supabase.from('projects').insert(projectToRow(project, userId));
+  const { error } = await supabase.from('projects').insert(projectToRow(project, userId));
+  if (error) throw new Error(`Projekt konnte nicht gespeichert werden: ${error.message}`);
 }
 
 export async function dbUpdateProject(project: Project) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
-  if (!userId) return;
+  if (!userId) throw new Error('Nicht eingeloggt.');
   const supabase = createClient();
-  await supabase.from('projects').update(projectToRow(project, userId)).eq('id', project.id);
+  const { error } = await supabase.from('projects').update(projectToRow(project, userId)).eq('id', project.id);
+  if (error) throw new Error(`Projekt konnte nicht aktualisiert werden: ${error.message}`);
 }
 
 export async function dbDeleteProject(id: string) {

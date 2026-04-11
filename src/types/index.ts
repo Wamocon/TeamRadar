@@ -6,16 +6,20 @@ export type AvailabilityStatus =
   | 'vacation'
   | 'sick'
   | 'remote'
-  | 'offline';
+  | 'offline'
+  | 'extern-onsite'
+  | 'extern-remote';
 
 export const STATUS_CONFIG: Record<AvailabilityStatus, { label: string; color: string; bgClass: string }> = {
-  available: { label: 'Verfügbar',  color: '#22c55e', bgClass: 'bg-green-500' },
-  busy:      { label: 'Beschäftigt', color: '#ef4444', bgClass: 'bg-red-500' },
-  meeting:   { label: 'Im Meeting',  color: '#f59e0b', bgClass: 'bg-amber-500' },
-  vacation:  { label: 'Urlaub',      color: '#8b5cf6', bgClass: 'bg-violet-500' },
-  sick:      { label: 'Krank',       color: '#ec4899', bgClass: 'bg-pink-500' },
-  remote:    { label: 'Remote',      color: '#3b82f6', bgClass: 'bg-blue-500' },
-  offline:   { label: 'Offline',     color: '#6b7280', bgClass: 'bg-gray-500' },
+  available:      { label: 'Verfügbar',    color: '#22c55e', bgClass: 'bg-green-500' },
+  busy:           { label: 'Büro intern',  color: '#6366f1', bgClass: 'bg-indigo-500' },
+  meeting:        { label: 'Im Meeting',   color: '#f59e0b', bgClass: 'bg-amber-500' },
+  vacation:       { label: 'Urlaub',       color: '#8b5cf6', bgClass: 'bg-violet-500' },
+  sick:           { label: 'Krank',        color: '#ec4899', bgClass: 'bg-pink-500' },
+  remote:         { label: 'Homeoffice',   color: '#06b6d4', bgClass: 'bg-cyan-500' },
+  offline:        { label: 'Kein Status',  color: '#6b7280', bgClass: 'bg-gray-500' },
+  'extern-onsite':{ label: 'Ext. Projekt', color: '#f97316', bgClass: 'bg-orange-500' },
+  'extern-remote':{ label: 'Büro ext.',    color: '#fb923c', bgClass: 'bg-orange-400' },
 };
 
 /* ── Benutzerrollen ─────────────────────────────────────── */
@@ -31,6 +35,7 @@ export const USER_ROLE_HIERARCHY: Record<UserRole, number> = {
 /* ── Team-Mitglied ──────────────────────────────────────── */
 export interface Member {
   id: string;
+  userId?: string;        // Supabase Auth User ID
   name: string;
   email: string;
   role: string;           // Jobtitel/Position

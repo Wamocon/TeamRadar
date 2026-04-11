@@ -53,7 +53,6 @@ export default function OrganisationPage() {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [searchMember, setSearchMember] = useState('');
-  const [, setEditingMember] = useState<OrgMember | null>(null);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('employee');

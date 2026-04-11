@@ -2,8 +2,8 @@
 import { useState, useMemo, useCallback } from 'react';
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, BookOpen,
-  Clock, MapPin, Users, ExternalLink, Upload, Info,
-  Calendar as CalendarIcon, Loader, Trash2, Edit3, Save,
+  Clock, MapPin, Upload, Info,
+  Loader, Trash2, Edit3,
 } from 'lucide-react';
 import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval,

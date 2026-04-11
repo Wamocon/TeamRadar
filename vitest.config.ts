@@ -18,6 +18,7 @@ export default defineConfig({
       exclude: [
         'src/lib/supabase/client.ts',
         'src/lib/supabase/server.ts',
+        'src/lib/actions/**',  // Server Actions – erfordern Integration-Tests mit echter DB
       ],
       thresholds: {
         lines: 65,

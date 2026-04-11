@@ -27,13 +27,6 @@ import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { ExcelImportDialog } from '@/components/team/ExcelImportDialog';
 import { createClient } from '@/lib/supabase/client';
 
-const ROLE_LABELS: Record<string, string> = {
-  admin: 'Admin',
-  cio: 'CIO',
-  department_lead: 'Abteilungsleiter',
-  employee: 'Mitarbeiter',
-};
-
 const PRIVACY_FIELDS = [
   { key: 'phone', label: 'Telefonnummer' },
   { key: 'department', label: 'Abteilung' },

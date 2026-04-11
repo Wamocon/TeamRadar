@@ -24,6 +24,7 @@ vi.mock('@/lib/supabase/db', () => ({
   dbAddAllocation: vi.fn().mockResolvedValue(undefined),
   dbUpdateAllocation: vi.fn().mockResolvedValue(undefined),
   dbDeleteAllocation: vi.fn().mockResolvedValue(undefined),
+  dbGetUserProfile: vi.fn().mockResolvedValue(null),
 }));
 
 // Store vor jedem Test zurücksetzen

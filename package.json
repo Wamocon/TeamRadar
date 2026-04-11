@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit",
     "validate": "npm run typecheck && npm run test:coverage",
     "seed:supabase": "npx tsx scripts/seed-supabase.ts",
+    "migrate": "node scripts/migrate.mjs",
     "prepare": "node scripts/install-hooks.js"
   },
   "dependencies": {
@@ -43,6 +44,7 @@
     "dotenv": "^17.3.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.0.0",
+    "pg": "^8.20.0",
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.2",
     "tsx": "^4.21.0",

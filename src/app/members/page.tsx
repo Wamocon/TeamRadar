@@ -25,7 +25,6 @@ import { Modal } from '@/components/ui/Modal';
 import { MemberForm } from '@/components/team/MemberForm';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { ExcelImportDialog } from '@/components/team/ExcelImportDialog';
-import { updateUserProfileAction } from '@/lib/actions/settingsActions';
 import { createClient } from '@/lib/supabase/client';
 
 const ROLE_LABELS: Record<string, string> = {

@@ -345,39 +345,63 @@ BEGIN
              WHERE table_schema = 'public' AND table_name = 'members') THEN
 
     INSERT INTO "teamradar-dev".members
-    SELECT * FROM public.members
+      (id, user_id, name, email, role, department, avatar_url, phone, created_at)
+    SELECT id, user_id, name, email, role, department, avatar_url, phone, created_at
+    FROM public.members
     ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE 'members kopiert.';
 
     INSERT INTO "teamradar-dev".availabilities
-    SELECT * FROM public.availabilities
+      (id, user_id, member_id, status, date, start_time, end_time, note, created_at)
+    SELECT id, user_id, member_id, status, date, start_time, end_time, note, created_at
+    FROM public.availabilities
     ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE 'availabilities kopiert.';
 
     INSERT INTO "teamradar-dev".teams
-    SELECT * FROM public.teams
+      (id, user_id, name, description, member_ids, created_at)
+    SELECT id, user_id, name, description, member_ids, created_at
+    FROM public.teams
     ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE 'teams kopiert.';
 
     INSERT INTO "teamradar-dev".projects
-    SELECT * FROM public.projects
+      (id, user_id, name, type, status, client, description, member_ids, start_date, end_date, created_at)
+    SELECT id, user_id, name, type, status, client, description, member_ids, start_date, end_date, created_at
+    FROM public.projects
     ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE 'projects kopiert.';
 
     INSERT INTO "teamradar-dev".allocations
-    SELECT * FROM public.allocations
+      (id, user_id, member_id, project_id, percentage, start_date, end_date, created_at)
+    SELECT id, user_id, member_id, project_id, percentage, start_date, end_date, created_at
+    FROM public.allocations
     ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE 'allocations kopiert.';
 
     INSERT INTO "teamradar-dev".profiles
-    SELECT * FROM public.profiles
+      (id, email, display_name, role, department, avatar_url, status_message, phone, preferences, created_at)
+    SELECT
+      id,
+      email,
+      display_name,
+      role,
+      department,
+      avatar_url,
+      status_message,
+      phone,
+      preferences,
+      created_at
+    FROM public.profiles
     ON CONFLICT (id) DO NOTHING;
     RAISE NOTICE 'profiles kopiert.';
 
     IF EXISTS (SELECT 1 FROM information_schema.tables
                WHERE table_schema = 'public' AND table_name = 'user_consents') THEN
       INSERT INTO "teamradar-dev".user_consents
-      SELECT * FROM public.user_consents
+        (id, user_id, consent_type, status, version, ip_address, user_agent, accepted_at)
+      SELECT id, user_id, consent_type, status, version, ip_address, user_agent, accepted_at
+      FROM public.user_consents
       ON CONFLICT (user_id, consent_type, version) DO NOTHING;
       RAISE NOTICE 'user_consents kopiert.';
     END IF;

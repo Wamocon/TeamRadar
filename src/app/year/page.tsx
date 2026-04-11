@@ -87,7 +87,7 @@ export default function YearOverviewPage() {
 
   // Feiertage für aktuelles Jahr + Bundesland
   const holidays = useMemo(() => getHolidays(year, bundesland), [year, bundesland]);
-  const [filterType, setFilterType] = useState<'all' | ProjectType>('all');
+  const [filterType] = useState<'all' | ProjectType>('all');
   const [quickStatus, setQuickStatus] = useState<{ memberId: string; date: string } | null>(null);
   const [entryMonth, setEntryMonth] = useState(new Date().getMonth());
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);

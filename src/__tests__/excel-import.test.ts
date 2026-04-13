@@ -1,10 +1,11 @@
+// @vitest-environment jsdom
 /**
  * Tests für den Excel-Mitarbeiter-Import
  * Prüft: Template-Generierung, Validierung, Parsing, Fehlerbehandlung
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as XLSX from '@e965/xlsx';
-import { generateTemplate, parseExcelFile } from '@/lib/excel-import';
+import { generateTemplate, parseExcelFile, downloadTemplate } from '@/lib/excel-import';
 
 /* ── Hilfsfunktion: Erzeugt eine File-Instanz aus Excel-Daten ── */
 function createExcelFile(data: Record<string, unknown>[], sheetName = 'Mitarbeiter'): File {
@@ -259,5 +260,44 @@ describe('Excel: Validierung & Fehlerbehandlung', () => {
     const result = await parseExcelFile(file);
     expect(result.errors[0].row).toBe(3); // Zeile 3 (Header=1, erste Daten=2)
     expect(result.errors[1].row).toBe(4);
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   DOWNLOAD TEMPLATE
+   ═══════════════════════════════════════════════════════════════ */
+
+describe('Excel: downloadTemplate', () => {
+  beforeEach(() => {
+    // Browser-APIs simulieren
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn().mockReturnValue('blob:mock-url'),
+      revokeObjectURL: vi.fn(),
+    });
+    const mockAnchor = {
+      href: '',
+      download: '',
+      click: vi.fn(),
+    };
+    vi.spyOn(document, 'createElement').mockReturnValue(mockAnchor as unknown as HTMLElement);
+    vi.spyOn(document.body, 'appendChild').mockImplementation((el) => el);
+    vi.spyOn(document.body, 'removeChild').mockImplementation((el) => el);
+  });
+
+  it('ruft URL.createObjectURL auf', () => {
+    downloadTemplate();
+    expect(URL.createObjectURL).toHaveBeenCalled();
+  });
+
+  it('ruft URL.revokeObjectURL auf', () => {
+    downloadTemplate();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+  });
+
+  it('setzt den korrekten Dateinamen', () => {
+    const mockAnchor = { href: '', download: '', click: vi.fn() };
+    vi.spyOn(document, 'createElement').mockReturnValue(mockAnchor as unknown as HTMLElement);
+    downloadTemplate();
+    expect(mockAnchor.download).toBe('Mitarbeiter-Import-Vorlage.xlsx');
   });
 });

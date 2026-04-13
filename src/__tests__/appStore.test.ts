@@ -6,9 +6,16 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useAppStore } from '@/stores/appStore';
 import type { AvailabilityStatus } from '@/types';
 
-// Supabase DB-Funktionen mocken (kein Netzwerk in Tests)
+// vi.hoisted: Variablen müssen vor vi.mock-Factories verfügbar sein
+const { mockLoadAllData, mockDbGetUserProfile, mockDbAddProject } = vi.hoisted(() => {
+  const mockLoadAllData = vi.fn().mockResolvedValue(null);
+  const mockDbGetUserProfile = vi.fn().mockResolvedValue(null);
+  const mockDbAddProject = vi.fn().mockResolvedValue(undefined);
+  return { mockLoadAllData, mockDbGetUserProfile, mockDbAddProject };
+});
+
 vi.mock('@/lib/supabase/db', () => ({
-  loadAllData: vi.fn().mockResolvedValue(null),
+  loadAllData: mockLoadAllData,
   dbAddMember: vi.fn().mockResolvedValue(undefined),
   dbUpdateMember: vi.fn().mockResolvedValue(undefined),
   dbDeleteMember: vi.fn().mockResolvedValue(undefined),
@@ -18,13 +25,13 @@ vi.mock('@/lib/supabase/db', () => ({
   dbAddTeam: vi.fn().mockResolvedValue(undefined),
   dbUpdateTeam: vi.fn().mockResolvedValue(undefined),
   dbDeleteTeam: vi.fn().mockResolvedValue(undefined),
-  dbAddProject: vi.fn().mockResolvedValue(undefined),
+  dbAddProject: mockDbAddProject,
   dbUpdateProject: vi.fn().mockResolvedValue(undefined),
   dbDeleteProject: vi.fn().mockResolvedValue(undefined),
   dbAddAllocation: vi.fn().mockResolvedValue(undefined),
   dbUpdateAllocation: vi.fn().mockResolvedValue(undefined),
   dbDeleteAllocation: vi.fn().mockResolvedValue(undefined),
-  dbGetUserProfile: vi.fn().mockResolvedValue(null),
+  dbGetUserProfile: mockDbGetUserProfile,
 }));
 
 // Store vor jedem Test zurücksetzen
@@ -876,5 +883,235 @@ describe('Store: Seed-Daten NIEMALS in Production (NODE_ENV Guard)', () => {
 
     setNodeEnv(origNodeEnv);
     process.env.NEXT_PUBLIC_DB_SCHEMA = origSchema;
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   STORE: loadFromSupabase & loadUserProfile
+   ═══════════════════════════════════════════════════════════════ */
+
+describe('Store: loadFromSupabase', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockLoadAllData.mockResolvedValue(null);
+    mockDbGetUserProfile.mockResolvedValue(null);
+    useAppStore.setState({
+      members: [], availabilities: [], teams: [], projects: [], allocations: [], userProfile: null,
+      isLoading: false, dbError: null,
+    });
+  });
+
+  it('setzt isLoading auf false nach abgeschlossenem Laden', async () => {
+    await useAppStore.getState().loadFromSupabase();
+    expect(useAppStore.getState().isLoading).toBe(false);
+  });
+
+  it('lädt Daten wenn loadAllData Daten zurückgibt', async () => {
+    mockLoadAllData.mockResolvedValueOnce({
+      members: [{ id: 'm1', user_id: 'u1', name: 'Max', email: 'max@a.de', role: 'Dev', department: 'Eng', created_at: '2026-01-01' }],
+      availabilities: [],
+      teams: [],
+      projects: [],
+      allocations: [],
+    });
+
+    await useAppStore.getState().loadFromSupabase();
+    expect(useAppStore.getState().members).toHaveLength(1);
+    expect(useAppStore.getState().members[0].name).toBe('Max');
+    expect(useAppStore.getState().isLoading).toBe(false);
+  });
+
+  it('setzt dbError wenn loadAllData einen Fehler wirft', async () => {
+    mockLoadAllData.mockRejectedValueOnce(new Error('Verbindungsfehler'));
+    await useAppStore.getState().loadFromSupabase();
+    expect(useAppStore.getState().dbError).toBe('Verbindungsfehler');
+    expect(useAppStore.getState().isLoading).toBe(false);
+  });
+
+  it('macht nichts wenn loadAllData null zurückgibt (kein User)', async () => {
+    mockLoadAllData.mockResolvedValueOnce(null);
+    await useAppStore.getState().loadFromSupabase();
+    expect(useAppStore.getState().members).toHaveLength(0);
+    expect(useAppStore.getState().isLoading).toBe(false);
+  });
+});
+
+describe('Store: loadUserProfile', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockDbGetUserProfile.mockResolvedValue(null);
+    useAppStore.setState({ userProfile: null });
+  });
+
+  it('setzt userProfile wenn Profil gefunden', async () => {
+    mockDbGetUserProfile.mockResolvedValueOnce({
+      id: 'u1', email: 'max@a.de', displayName: 'Max', role: 'admin',
+      avatarUrl: null, statusMessage: null, phone: null, preferences: null,
+    });
+
+    await useAppStore.getState().loadUserProfile();
+    expect(useAppStore.getState().userProfile?.role).toBe('admin');
+    expect(useAppStore.getState().userProfile?.displayName).toBe('Max');
+  });
+
+  it('lässt userProfile unverändert wenn kein Profil', async () => {
+    mockDbGetUserProfile.mockResolvedValueOnce(null);
+    useAppStore.setState({ userProfile: { id: 'old', email: 'old@x.de', displayName: 'Old', role: 'employee' } });
+
+    await useAppStore.getState().loadUserProfile();
+    // Profil darf nicht auf null gesetzt werden wenn keines gefunden
+    expect(useAppStore.getState().userProfile?.id).toBe('old');
+  });
+});
+
+describe('Store: loadSystemSettings', () => {
+  it('setzt systemSettings nach erfolgreichem Laden', async () => {
+    vi.doMock('@/lib/actions/settingsActions', () => ({
+      getSystemSettingsAction: vi.fn().mockResolvedValue({
+        data: {
+          org_name: 'TestOrg GmbH',
+          org_logo_url: 'https://logo.test/img.png',
+          support_email: 'support@test.de',
+          maintenance_mode: false,
+        },
+      }),
+    }));
+
+    useAppStore.setState({ systemSettings: null });
+    await useAppStore.getState().loadSystemSettings();
+
+    const settings = useAppStore.getState().systemSettings;
+    expect(settings?.orgName).toBe('TestOrg GmbH');
+    expect(settings?.orgLogoUrl).toBe('https://logo.test/img.png');
+    expect(settings?.supportEmail).toBe('support@test.de');
+    expect(settings?.maintenanceMode).toBe(false);
+
+    vi.doUnmock('@/lib/actions/settingsActions');
+  });
+
+  it('ändert systemSettings nicht wenn data null', async () => {
+    vi.doMock('@/lib/actions/settingsActions', () => ({
+      getSystemSettingsAction: vi.fn().mockResolvedValue({ data: null }),
+    }));
+
+    useAppStore.setState({
+      systemSettings: { orgName: 'Bestehend', supportEmail: 'x@x.de', maintenanceMode: false },
+    });
+    await useAppStore.getState().loadSystemSettings();
+
+    // Darf nicht geändert werden
+    expect(useAppStore.getState().systemSettings?.orgName).toBe('Bestehend');
+
+    vi.doUnmock('@/lib/actions/settingsActions');
+  });
+});
+
+describe('Store: updateSystemSettings', () => {
+  it('setzt systemSettings wenn vorher null', () => {
+    useAppStore.setState({ systemSettings: null });
+    useAppStore.getState().updateSystemSettings({ orgName: 'NeuOrg', supportEmail: 'info@neu.de', maintenanceMode: false });
+    expect(useAppStore.getState().systemSettings?.orgName).toBe('NeuOrg');
+  });
+
+  it('merged systemSettings teilweise', () => {
+    useAppStore.setState({
+      systemSettings: { orgName: 'Alt', supportEmail: 'alt@x.de', maintenanceMode: false },
+    });
+    useAppStore.getState().updateSystemSettings({ orgName: 'Neu' });
+    expect(useAppStore.getState().systemSettings?.orgName).toBe('Neu');
+    expect(useAppStore.getState().systemSettings?.supportEmail).toBe('alt@x.de');
+  });
+
+  it('aktiviert maintenanceMode', () => {
+    useAppStore.setState({
+      systemSettings: { orgName: 'Org', supportEmail: 'x@x.de', maintenanceMode: false },
+    });
+    useAppStore.getState().updateSystemSettings({ maintenanceMode: true });
+    expect(useAppStore.getState().systemSettings?.maintenanceMode).toBe(true);
+  });
+});
+
+describe('Store: getMemberStatus mit Zeitfenstern', () => {
+  it('gibt letzten Eintrag zurück ohne aktiven Zeitbereich', () => {
+    // Stundenbasierter Eintrag in der Vergangenheit für heute
+    useAppStore.setState({
+      availabilities: [{
+        id: 'a1', memberId: 'm1', status: 'meeting',
+        date: new Date().toISOString().slice(0, 10),
+        startTime: '08:00', endTime: '09:00',
+      }],
+    });
+    // Aktuelle Zeit ist nach 09:00 → kein aktives Fenster → letzter Eintrag
+    const status = useAppStore.getState().getMemberStatus('m1');
+    expect(['meeting', 'offline']).toContain(status);
+  });
+
+  it('berücksichtigt Zeitfenster für heutigen Eintrag', () => {
+    const today = new Date().toISOString().slice(0, 10);
+    // Ganztagseintrag ohne Zeitbeschränkung
+    useAppStore.setState({
+      availabilities: [{
+        id: 'a1', memberId: 'm1', status: 'available', date: today,
+      }],
+    });
+    const status = useAppStore.getState().getMemberStatus('m1');
+    expect(status).toBe('available');
+  });
+});
+
+describe('Store: addProject Fehlerbehandlung', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockDbAddProject.mockResolvedValue(undefined);
+    useAppStore.setState({ projects: [], dbError: null });
+  });
+
+  it('wirft Fehler und macht Rollback wenn dbAddProject fehlschlägt', async () => {
+    mockDbAddProject.mockRejectedValueOnce(new Error('DB-Fehler beim Speichern'));
+
+    await expect(
+      useAppStore.getState().addProject({ name: 'Test', type: 'internal', status: 'active', memberIds: [] })
+    ).rejects.toThrow('DB-Fehler beim Speichern');
+
+    // Rollback: Projekt darf nicht im Store bleiben
+    expect(useAppStore.getState().projects).toHaveLength(0);
+    expect(useAppStore.getState().dbError).toBe('DB-Fehler beim Speichern');
+  });
+});
+
+describe('Store: super_admin Rolle', () => {
+  it('super_admin hat alle Rollen', () => {
+    useAppStore.setState({
+      userProfile: { id: '1', email: 'sa@b.de', displayName: 'SA', role: 'super_admin' },
+    });
+
+    expect(useAppStore.getState().hasMinRole('employee')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('department_lead')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('cio')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('admin')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('super_admin')).toBe(true);
+  });
+});
+
+describe('Store: getAlerts – Urlaubs-Konflikt', () => {
+  it('erkennt Urlaubs-Konflikt wenn Allocation während Urlaub', () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+
+    const member = useAppStore.getState().addMember({
+      name: 'Urlauber', email: 'urlaub@x.de', role: 'Dev', department: 'Eng',
+    });
+    useAppStore.getState().addAvailability({
+      memberId: member.id, status: 'vacation', date: tomorrow,
+    });
+    useAppStore.getState().addAllocation({
+      memberId: member.id, projectId: 'p1', percentage: 80,
+      startDate: today, endDate: new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10),
+    });
+
+    const alerts = useAppStore.getState().getAlerts();
+    const vacConflicts = alerts.filter((a) => a.type === 'vacation_conflict' && a.memberId === member.id);
+    expect(vacConflicts.length).toBeGreaterThanOrEqual(1);
+    expect(vacConflicts[0].severity).toBe('warning');
   });
 });

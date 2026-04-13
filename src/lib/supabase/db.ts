@@ -46,19 +46,6 @@ function rowToOrganization(row: Record<string, unknown>): Organization {
   };
 }
 
-function memberToRow(member: Member, userId: string) {
-  return {
-    id: member.id,
-    user_id: userId,
-    name: member.name,
-    email: member.email,
-    role: member.role,
-    department: member.department,
-    avatar_url: member.avatarUrl ?? null,
-    phone: member.phone ?? null,
-  };
-}
-
 function rowToAvailability(row: Record<string, unknown>): Availability {
   return {
     id: row.id as string,
@@ -71,35 +58,12 @@ function rowToAvailability(row: Record<string, unknown>): Availability {
   };
 }
 
-function availabilityToRow(entry: Availability, userId: string) {
-  return {
-    id: entry.id,
-    user_id: userId,
-    member_id: entry.memberId,
-    status: entry.status,
-    date: entry.date,
-    start_time: entry.startTime ?? null,
-    end_time: entry.endTime ?? null,
-    note: entry.note ?? null,
-  };
-}
-
 function rowToTeam(row: Record<string, unknown>): Team {
   return {
     id: row.id as string,
     name: row.name as string,
     description: row.description as string | undefined,
     memberIds: (row.member_ids as string[]) ?? [],
-  };
-}
-
-function teamToRow(team: Team, userId: string) {
-  return {
-    id: team.id,
-    user_id: userId,
-    name: team.name,
-    description: team.description ?? null,
-    member_ids: team.memberIds,
   };
 }
 
@@ -119,22 +83,6 @@ function rowToProject(row: Record<string, unknown>): Project {
   };
 }
 
-function projectToRow(project: Project, userId: string) {
-  return {
-    id: project.id,
-    user_id: userId,
-    name: project.name,
-    type: project.type,
-    status: project.status,
-    client: project.client ?? null,
-    description: project.description ?? null,
-    member_ids: project.memberIds,
-    start_date: project.startDate ?? null,
-    end_date: project.endDate ?? null,
-    max_days: project.maxDays ?? null,
-  };
-}
-
 function rowToAllocation(row: Record<string, unknown>): Allocation {
   return {
     id: row.id as string,
@@ -143,18 +91,6 @@ function rowToAllocation(row: Record<string, unknown>): Allocation {
     percentage: row.percentage as number,
     startDate: row.start_date as string,
     endDate: row.end_date as string,
-  };
-}
-
-function allocationToRow(alloc: Allocation, userId: string) {
-  return {
-    id: alloc.id,
-    user_id: userId,
-    member_id: alloc.memberId,
-    project_id: alloc.projectId,
-    percentage: alloc.percentage,
-    start_date: alloc.startDate,
-    end_date: alloc.endDate,
   };
 }
 

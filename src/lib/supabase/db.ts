@@ -6,7 +6,19 @@ import { createClient } from '@/lib/supabase/client';
 import type { Member, Availability, Team, Project, Allocation, Organization } from '@/types';
 // Statischer Import: Next.js ersetzt Server Actions im Client-Bundle durch RPC-Stubs.
 // Dynamischer Import (äawait import(...)ä) scheitert in Turbopack und verursacht Lock-Konflikte.
-import { loadAllDataAction, addAvailabilityAction } from '@/lib/actions/dataActions';
+import { loadAllDataAction } from '@/lib/actions/dataActions';
+import {
+  upsertAvailabilityAction,
+  deleteAvailabilityAction,
+  upsertMemberAction,
+  deleteMemberAction,
+  upsertTeamAction,
+  deleteTeamAction,
+  upsertProjectAction,
+  deleteProjectAction,
+  upsertAllocationAction,
+  deleteAllocationAction,
+} from '@/lib/actions/writeActions';
 
 /* ── Hilfsfunktionen: DB-Rows ↔ App-Typen ──────────────── */
 
@@ -217,48 +229,78 @@ export async function dbAddMember(member: Member) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
   if (!userId) throw new Error('Nicht eingeloggt.');
-  const supabase = createClient();
-  const { error } = await supabase.from('members').insert(memberToRow(member, userId));
-  if (error) throw new Error(`Mitarbeiter konnte nicht gespeichert werden: ${error.message}`);
+  await upsertMemberAction({
+    id: member.id,
+    user_id: userId,
+    name: member.name,
+    email: member.email,
+    role: member.role,
+    department: member.department,
+    organization_id: member.organizationId ?? null,
+    avatar_url: member.avatarUrl ?? null,
+    phone: member.phone ?? null,
+  });
 }
 
 export async function dbUpdateMember(member: Member) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
   if (!userId) return;
-  const supabase = createClient();
-  await supabase.from('members').update(memberToRow(member, userId)).eq('id', member.id);
+  await upsertMemberAction({
+    id: member.id,
+    user_id: userId,
+    name: member.name,
+    email: member.email,
+    role: member.role,
+    department: member.department,
+    organization_id: member.organizationId ?? null,
+    avatar_url: member.avatarUrl ?? null,
+    phone: member.phone ?? null,
+  });
 }
 
 export async function dbDeleteMember(id: string) {
   if (!isSupabaseConfigured()) return;
-  const supabase = createClient();
-  await supabase.from('availabilities').delete().eq('member_id', id);
-  await supabase.from('allocations').delete().eq('member_id', id);
-  await supabase.from('members').delete().eq('id', id);
+  await deleteMemberAction(id);
 }
 
 /* ── Availabilities ───────────────────────────────────────── */
 
 export async function dbAddAvailability(entry: Availability) {
   if (!isSupabaseConfigured()) return;
-  // Server Action statt Browser-Client: vermeidet Navigator-Lock-Konflikte
-  // (kein doppelter auth.getUser()-Aufruf in Browser + Server gleichzeitig).
-  await addAvailabilityAction(entry);
+  const userId = await getUserId();
+  if (!userId) return;
+  await upsertAvailabilityAction({
+    id: entry.id,
+    memberId: entry.memberId,
+    userId,
+    status: entry.status,
+    date: entry.date,
+    startTime: entry.startTime ?? null,
+    endTime: entry.endTime ?? null,
+    note: entry.note ?? null,
+  });
 }
 
 export async function dbUpdateAvailability(entry: Availability) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
   if (!userId) return;
-  const supabase = createClient();
-  await supabase.from('availabilities').update(availabilityToRow(entry, userId)).eq('id', entry.id);
+  await upsertAvailabilityAction({
+    id: entry.id,
+    memberId: entry.memberId,
+    userId,
+    status: entry.status,
+    date: entry.date,
+    startTime: entry.startTime ?? null,
+    endTime: entry.endTime ?? null,
+    note: entry.note ?? null,
+  });
 }
 
 export async function dbDeleteAvailability(id: string) {
   if (!isSupabaseConfigured()) return;
-  const supabase = createClient();
-  await supabase.from('availabilities').delete().eq('id', id);
+  await deleteAvailabilityAction(id);
 }
 
 /* ── Teams ────────────────────────────────────────────────── */
@@ -267,22 +309,31 @@ export async function dbAddTeam(team: Team) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
   if (!userId) return;
-  const supabase = createClient();
-  await supabase.from('teams').insert(teamToRow(team, userId));
+  await upsertTeamAction({
+    id: team.id,
+    user_id: userId,
+    name: team.name,
+    description: team.description ?? null,
+    member_ids: team.memberIds,
+  });
 }
 
 export async function dbUpdateTeam(team: Team) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
   if (!userId) return;
-  const supabase = createClient();
-  await supabase.from('teams').update(teamToRow(team, userId)).eq('id', team.id);
+  await upsertTeamAction({
+    id: team.id,
+    user_id: userId,
+    name: team.name,
+    description: team.description ?? null,
+    member_ids: team.memberIds,
+  });
 }
 
 export async function dbDeleteTeam(id: string) {
   if (!isSupabaseConfigured()) return;
-  const supabase = createClient();
-  await supabase.from('teams').delete().eq('id', id);
+  await deleteTeamAction(id);
 }
 
 /* ── Projects ─────────────────────────────────────────────── */
@@ -291,25 +342,43 @@ export async function dbAddProject(project: Project) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
   if (!userId) throw new Error('Nicht eingeloggt – bitte neu anmelden.');
-  const supabase = createClient();
-  const { error } = await supabase.from('projects').insert(projectToRow(project, userId));
-  if (error) throw new Error(`Projekt konnte nicht gespeichert werden: ${error.message}`);
+  await upsertProjectAction({
+    id: project.id,
+    user_id: userId,
+    name: project.name,
+    type: project.type,
+    status: project.status,
+    client: project.client ?? null,
+    description: project.description ?? null,
+    member_ids: project.memberIds,
+    start_date: project.startDate ?? null,
+    end_date: project.endDate ?? null,
+    max_days: project.maxDays ?? null,
+  });
 }
 
 export async function dbUpdateProject(project: Project) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
   if (!userId) throw new Error('Nicht eingeloggt.');
-  const supabase = createClient();
-  const { error } = await supabase.from('projects').update(projectToRow(project, userId)).eq('id', project.id);
-  if (error) throw new Error(`Projekt konnte nicht aktualisiert werden: ${error.message}`);
+  await upsertProjectAction({
+    id: project.id,
+    user_id: userId,
+    name: project.name,
+    type: project.type,
+    status: project.status,
+    client: project.client ?? null,
+    description: project.description ?? null,
+    member_ids: project.memberIds,
+    start_date: project.startDate ?? null,
+    end_date: project.endDate ?? null,
+    max_days: project.maxDays ?? null,
+  });
 }
 
 export async function dbDeleteProject(id: string) {
   if (!isSupabaseConfigured()) return;
-  const supabase = createClient();
-  await supabase.from('allocations').delete().eq('project_id', id);
-  await supabase.from('projects').delete().eq('id', id);
+  await deleteProjectAction(id);
 }
 
 /* ── Allocations ──────────────────────────────────────────── */
@@ -318,20 +387,33 @@ export async function dbAddAllocation(alloc: Allocation) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
   if (!userId) return;
-  const supabase = createClient();
-  await supabase.from('allocations').insert(allocationToRow(alloc, userId));
+  await upsertAllocationAction({
+    id: alloc.id,
+    user_id: userId,
+    member_id: alloc.memberId,
+    project_id: alloc.projectId,
+    percentage: alloc.percentage,
+    start_date: alloc.startDate,
+    end_date: alloc.endDate,
+  });
 }
 
 export async function dbUpdateAllocation(alloc: Allocation) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
   if (!userId) return;
-  const supabase = createClient();
-  await supabase.from('allocations').update(allocationToRow(alloc, userId)).eq('id', alloc.id);
+  await upsertAllocationAction({
+    id: alloc.id,
+    user_id: userId,
+    member_id: alloc.memberId,
+    project_id: alloc.projectId,
+    percentage: alloc.percentage,
+    start_date: alloc.startDate,
+    end_date: alloc.endDate,
+  });
 }
 
 export async function dbDeleteAllocation(id: string) {
   if (!isSupabaseConfigured()) return;
-  const supabase = createClient();
-  await supabase.from('allocations').delete().eq('id', id);
+  await deleteAllocationAction(id);
 }

@@ -5,7 +5,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // vi.hoisted stellt sicher, dass diese Variablen auch in vi.mock-Factories verfügbar sind
-const { mockInsert, mockUpdate, mockDelete, mockSelect, mockFrom, mockGetUser, mockUpsert, mockLoadAllDataAction, mockAddAvailabilityAction } = vi.hoisted(() => {
+const { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, mockLoadAllDataAction, mockAddAvailabilityAction } = vi.hoisted(() => {
   const mockInsert = vi.fn().mockReturnValue({ error: null });
   const mockUpdate = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
   const mockDelete = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
@@ -27,7 +27,7 @@ const { mockInsert, mockUpdate, mockDelete, mockSelect, mockFrom, mockGetUser, m
   });
   const mockLoadAllDataAction = vi.fn().mockResolvedValue(null);
   const mockAddAvailabilityAction = vi.fn().mockResolvedValue(undefined);
-  return { mockInsert, mockUpdate, mockDelete, mockSelect, mockFrom, mockGetUser, mockUpsert, mockLoadAllDataAction, mockAddAvailabilityAction };
+  return { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, mockLoadAllDataAction, mockAddAvailabilityAction };
 });
 
 vi.mock('@/lib/supabase/client', () => ({

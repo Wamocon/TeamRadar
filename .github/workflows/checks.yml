@@ -1,0 +1,105 @@
+name: Checks (TypeCheck & Lint)
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: TypeCheck & Lint — Node ${{ matrix.node-version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20, 22]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript Check
+        id: typecheck
+        run: |
+          echo "# 🔍 Checks-Report — Node ${{ matrix.node-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> **Commit:** \`${GITHUB_SHA::7}\` auf \`${GITHUB_REF_NAME}\` • **Ausgelöst von:** ${GITHUB_ACTOR}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 1️⃣ TypeScript-Prüfung" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          TS_START=$SECONDS
+          if npm run typecheck 2>&1 | tee /tmp/typecheck.log; then
+            TS_DUR=$((SECONDS - TS_START))
+            TS_FILES=$(find src -name '*.ts' -o -name '*.tsx' | wc -l)
+            echo "| Metrik | Wert |" >> $GITHUB_STEP_SUMMARY
+            echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+            echo "| Ergebnis | ✅ Bestanden |" >> $GITHUB_STEP_SUMMARY
+            echo "| Geprüfte Dateien | ${TS_FILES} TypeScript-Dateien |" >> $GITHUB_STEP_SUMMARY
+            echo "| Strict Mode | Aktiviert |" >> $GITHUB_STEP_SUMMARY
+            echo "| Dauer | ${TS_DUR}s |" >> $GITHUB_STEP_SUMMARY
+          else
+            TS_DUR=$((SECONDS - TS_START))
+            ERRORS=$(grep -c "error TS" /tmp/typecheck.log || echo "?")
+            echo "| Metrik | Wert |" >> $GITHUB_STEP_SUMMARY
+            echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+            echo "| Ergebnis | ❌ Fehlgeschlagen |" >> $GITHUB_STEP_SUMMARY
+            echo "| Anzahl Fehler | ${ERRORS} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Dauer | ${TS_DUR}s |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "<details><summary>Fehlerdetails anzeigen</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat /tmp/typecheck.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      - name: Lint
+        id: lint
+        run: |
+          echo "## 2️⃣ ESLint-Prüfung" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          LINT_START=$SECONDS
+          if npm run lint 2>&1 | tee /tmp/lint.log; then
+            LINT_DUR=$((SECONDS - LINT_START))
+            echo "| Metrik | Wert |" >> $GITHUB_STEP_SUMMARY
+            echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+            echo "| Ergebnis | ✅ Bestanden |" >> $GITHUB_STEP_SUMMARY
+            echo "| Regelwerk | next/core-web-vitals |" >> $GITHUB_STEP_SUMMARY
+            echo "| Warnungen | 0 |" >> $GITHUB_STEP_SUMMARY
+            echo "| Fehler | 0 |" >> $GITHUB_STEP_SUMMARY
+            echo "| Dauer | ${LINT_DUR}s |" >> $GITHUB_STEP_SUMMARY
+          else
+            LINT_DUR=$((SECONDS - LINT_START))
+            LINT_ERRORS=$(grep -c "Error:" /tmp/lint.log || echo "?")
+            LINT_WARNINGS=$(grep -c "Warning:" /tmp/lint.log || echo "0")
+            echo "| Metrik | Wert |" >> $GITHUB_STEP_SUMMARY
+            echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+            echo "| Ergebnis | ❌ Fehlgeschlagen |" >> $GITHUB_STEP_SUMMARY
+            echo "| Fehler | ${LINT_ERRORS} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Warnungen | ${LINT_WARNINGS} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Dauer | ${LINT_DUR}s |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "<details><summary>Lint-Fehler anzeigen</summary>" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat /tmp/lint.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi

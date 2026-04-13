@@ -51,6 +51,66 @@ type AdminTab =
   | 'advanced'
   | 'logs';
 
+// ── Helfer-Komponenten auf Modulebene (keine Remounts bei State-Updates) ──────
+
+function InputField({ label, value, onChange, type = 'text', placeholder, icon: Icon }: {
+  label: string; value: string; onChange: (v: string) => void;
+  type?: string; placeholder?: string; icon?: React.ElementType;
+}) {
+  return (
+    <div className="space-y-1">
+      <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">{label}</label>
+      <div className="relative">
+        {Icon && <Icon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />}
+        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
+          className={`w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 ${Icon ? 'pl-9' : 'pl-4'} pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all`} />
+      </div>
+    </div>
+  );
+}
+
+function Toggle({ label, value, onChange, desc }: {
+  label: string; value: boolean; onChange: (v: boolean) => void; desc?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between py-3 border-b dark:border-white/[0.04] border-black/[0.04] last:border-0">
+      <div>
+        <div className="text-sm font-semibold dark:text-white text-gray-900">{label}</div>
+        {desc && <div className="text-[10px] dark:text-white/30 text-gray-400 mt-0.5">{desc}</div>}
+      </div>
+      <button onClick={() => onChange(!value)}
+        className={`w-12 h-6 rounded-full transition-all relative shrink-0 border-none cursor-pointer ${value ? 'bg-[var(--primary)]' : 'bg-gray-200 dark:bg-white/10'}`}>
+        <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${value ? 'right-0.5' : 'left-0.5'}`} />
+      </button>
+    </div>
+  );
+}
+
+function AdminCard({ title, icon, children, defaultOpen = true, className = '' }: {
+  title: React.ReactNode; icon?: React.ReactNode; defaultOpen?: boolean;
+  children: React.ReactNode; className?: string;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className={`card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden ${className}`}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={`w-full flex items-center justify-between px-5 py-3.5 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${open ? 'border-b dark:border-white/[0.06] border-black/[0.06]' : ''}`}
+        aria-expanded={open}
+      >
+        <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 pointer-events-none">
+          {icon}
+          {title}
+        </h3>
+        <span className="dark:text-white/30 text-gray-400 shrink-0" style={{ transform: open ? 'none' : 'rotate(-90deg)', transition: 'transform 0.2s' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </span>
+      </button>
+      {open && <div className="p-5 space-y-4">{children}</div>}
+    </div>
+  );
+}
+
 export default function AdminSettingsPage() {
   const hasMinRole = useAppStore((s) => s.hasMinRole);
   const systemSettings = useAppStore((s) => s.systemSettings);
@@ -292,33 +352,6 @@ export default function AdminSettingsPage() {
     { id: 'logs', label: 'Aktivitätslog', icon: FileText },
   ];
 
-  const InputField = ({ label, value, onChange, type = 'text', placeholder, icon: Icon }: {
-    label: string; value: string; onChange: (v: string) => void;
-    type?: string; placeholder?: string; icon?: any;
-  }) => (
-    <div className="space-y-1">
-      <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">{label}</label>
-      <div className="relative">
-        {Icon && <Icon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />}
-        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-          className={`w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 ${Icon ? 'pl-9' : 'pl-4'} pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all`} />
-      </div>
-    </div>
-  );
-
-  const Toggle = ({ label, value, onChange, desc }: { label: string; value: boolean; onChange: (v: boolean) => void; desc?: string }) => (
-    <div className="flex items-center justify-between py-3 border-b dark:border-white/[0.04] border-black/[0.04] last:border-0">
-      <div>
-        <div className="text-sm font-semibold dark:text-white text-gray-900">{label}</div>
-        {desc && <div className="text-[10px] dark:text-white/30 text-gray-400 mt-0.5">{desc}</div>}
-      </div>
-      <button onClick={() => onChange(!value)}
-        className={`w-12 h-6 rounded-full transition-all relative shrink-0 border-none cursor-pointer ${value ? 'bg-[var(--primary)]' : 'bg-gray-200 dark:bg-white/10'}`}>
-        <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${value ? 'right-0.5' : 'left-0.5'}`} />
-      </button>
-    </div>
-  );
-
   return (
     <div className="p-4 sm:p-6 w-full animate-fade-in pb-20">
       {/* Header */}
@@ -379,8 +412,8 @@ export default function AdminSettingsPage() {
               </div>
 
               {/* Services */}
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-4 space-y-3">
-                <h3 className="text-sm font-black dark:text-white text-gray-900">System-Dienste</h3>
+              <AdminCard title="System-Dienste" icon={<Server size={14} className="text-[var(--primary)]" />}>
+                <div className="space-y-3">
                 {[
                   { name: 'Supabase Datenbank', status: 'OK', icon: Database, detail: 'PostgreSQL · teamradar-dev' },
                   { name: 'Authentifizierung', status: 'OK', icon: Key, detail: 'GoTrue / JWT' },
@@ -421,7 +454,8 @@ export default function AdminSettingsPage() {
                     <ChevronRight size={12} className="ml-auto dark:text-white/20 text-gray-300 group-hover:text-[var(--primary)] transition-colors" />
                   </Link>
                 ))}
-              </div>
+                </div>
+              </AdminCard>
             </div>
           )}
 
@@ -429,10 +463,7 @@ export default function AdminSettingsPage() {
           {activeTab === 'members' && (
             <div className="space-y-5">
               {/* Invite form */}
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2">
-                  <UserPlus size={14} className="text-[var(--primary)]" /> Neuen Mitarbeiter einladen
-                </h3>
+              <AdminCard title="Neuen Mitarbeiter einladen" icon={<UserPlus size={14} className="text-[var(--primary)]" />}>
                 {inviteMsg && (
                   <div className={`p-3 rounded-xl text-xs font-bold border ${inviteMsg.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
                     {inviteMsg.text}
@@ -469,13 +500,9 @@ export default function AdminSettingsPage() {
                   {inviteLoading ? <Loader size={14} className="animate-spin" /> : <UserPlus size={14} />}
                   Einladung senden
                 </button>
-              </div>
+              </AdminCard>
 
-              {/* Current members */}
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-3">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2">
-                  <Users size={14} className="text-[var(--primary)]" /> Aktuelle Mitarbeiter ({members.length})
-                </h3>
+              <AdminCard title={<>Aktuelle Mitarbeiter <span className="text-[var(--primary)] font-black">({members.length})</span></>} icon={<Users size={14} className="text-[var(--primary)]" />}>
                 <div className="space-y-1 max-h-[400px] overflow-y-auto">
                   {members.map((m) => (
                     <div key={m.id} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
@@ -493,17 +520,14 @@ export default function AdminSettingsPage() {
                   ))}
                   {members.length === 0 && <div className="text-center py-6 text-sm dark:text-white/30 text-gray-400">Keine Mitarbeiter vorhanden.</div>}
                 </div>
-              </div>
+              </AdminCard>
             </div>
           )}
 
           {/* ═══ ORGANISATION ══════════════════════════════ */}
           {activeTab === 'organisation' && (
             <div className="space-y-5">
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2">
-                  <Building2 size={14} className="text-[var(--primary)]" /> Allgemeine Informationen
-                </h3>
+              <AdminCard title="Allgemeine Informationen" icon={<Building2 size={14} className="text-[var(--primary)]" />}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <InputField label="Organisationsname" value={orgName} onChange={setOrgName} placeholder="Meine GmbH" icon={Building2} />
@@ -520,13 +544,9 @@ export default function AdminSettingsPage() {
                   {isSaving ? <Loader size={14} className="animate-spin" /> : <Save size={14} />}
                   Speichern
                 </button>
-              </div>
+              </AdminCard>
 
-              {/* Plan */}
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2">
-                  <CreditCard size={14} className="text-[var(--primary)]" /> Plan & Abrechnung
-                </h3>
+              <AdminCard title="Plan & Abrechnung" icon={<CreditCard size={14} className="text-[var(--primary)]" />}>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
                     { id: 'starter' as const, name: 'Starter', price: 'Kostenlos', features: ['Bis 5 Nutzer', 'Basis-Features'], color: '#6b7280' },
@@ -545,11 +565,9 @@ export default function AdminSettingsPage() {
                     </button>
                   ))}
                 </div>
-              </div>
+              </AdminCard>
 
-              {/* Danger zone */}
-              <div className="card-shimmer rounded-xl border border-red-500/20 p-5 space-y-3">
-                <h3 className="text-sm font-black text-red-500 flex items-center gap-2"><Trash size={14} /> Gefahrenzone</h3>
+              <AdminCard title="Gefahrenzone" icon={<Trash size={14} className="text-red-500" />} className="border-red-500/20">
                 <div className="flex items-center justify-between p-3 rounded-xl bg-red-500/5 border border-red-500/10">
                   <div>
                     <div className="text-xs font-bold dark:text-white text-gray-900">Organisation löschen</div>
@@ -559,25 +577,23 @@ export default function AdminSettingsPage() {
                     Löschen
                   </button>
                 </div>
-              </div>
+              </AdminCard>
             </div>
           )}
 
           {/* ═══ BRANDING ══════════════════════════════════ */}
           {activeTab === 'branding' && (
             <div className="space-y-5">
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Building size={14} /> Organisations-Branding</h3>
+              <AdminCard title="Organisations-Branding" icon={<Building size={14} className="text-[var(--primary)]" />}>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="col-span-2"><InputField label="Organisationsname" value={orgName} onChange={setOrgName} placeholder="Wamocon TeamRadar" icon={Building} /></div>
                   <InputField label="Logo URL" value={orgLogoUrl} onChange={setOrgLogoUrl} placeholder="https://..." icon={ImageIcon} />
                   <InputField label="Support E-Mail" value={supportEmail} onChange={setSupportEmail} type="email" placeholder="support@firma.de" icon={Mail} />
                 </div>
                 {orgLogoUrl && /^https?:\/\//.test(orgLogoUrl) && <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.06] border-black/[0.06]"><img src={orgLogoUrl} alt="Logo" className="max-h-16 object-contain" /></div>}
-              </div>
+              </AdminCard>
 
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 mb-4"><Power size={14} className="text-red-500" /> Wartungsmodus</h3>
+              <AdminCard title="Wartungsmodus" icon={<Power size={14} className="text-red-500" />}>
                 <div className="flex items-center justify-between p-4 rounded-xl bg-red-500/5 border border-red-500/10">
                   <div>
                     <div className="text-sm font-bold text-red-500">Wartungsmodus</div>
@@ -588,7 +604,7 @@ export default function AdminSettingsPage() {
                     <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${maintenanceMode ? 'right-1' : 'left-1'}`} />
                   </button>
                 </div>
-              </div>
+              </AdminCard>
 
               <button onClick={handleSaveBranding} disabled={isSaving}
                 className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--primary)] text-white text-sm font-bold cursor-pointer border-none hover:opacity-90 transition-opacity disabled:opacity-50">
@@ -600,15 +616,16 @@ export default function AdminSettingsPage() {
           {/* ═══ SICHERHEIT ════════════════════════════════ */}
           {activeTab === 'security' && (
             <div className="space-y-5">
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-0">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 mb-4"><Lock size={14} /> Sicherheitsrichtlinien</h3>
+              <AdminCard title="Sicherheitsrichtlinien" icon={<Lock size={14} className="text-[var(--primary)]" />}>
+                <div className="space-y-0">
                 <Toggle label="Zwei-Faktor-Authentifizierung (2FA) erzwingen" value={mfaRequired} onChange={setMfaRequired} desc="Alle Nutzer müssen 2FA aktivieren" />
                 <Toggle label="DSGVO-Modus" value={gdprMode} onChange={setGdprMode} desc="Datenschutz-Popups und Einwilligungen aktiv" />
                 <Toggle label="Analytics & Tracking" value={analyticsEnabled} onChange={setAnalyticsEnabled} desc="Anonymisierte Nutzungsstatistiken" />
-              </div>
+                </div>
+              </AdminCard>
 
-              <div className="grid grid-cols-2 gap-4 card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5">
-                <h3 className="col-span-2 text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Key size={14} /> Passwort & Session</h3>
+              <AdminCard title="Passwort & Session" icon={<Key size={14} className="text-[var(--primary)]" />}>
+                <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Min. Passwort-Länge</label>
                   <input type="number" value={passwordMinLength} onChange={(e) => setPasswordMinLength(parseInt(e.target.value) || 8)} min={6} max={32}
@@ -620,7 +637,7 @@ export default function AdminSettingsPage() {
                     className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
                 </div>
                 <div className="col-span-2 space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Erlaubte E-Mail-Domains (kommagetrennt)</label>
+                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Erlaubte E-Mail-Domains</label>
                   <input value={allowedDomains} onChange={(e) => setAllowedDomains(e.target.value)} placeholder="firma.de, partner.com"
                     className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
                 </div>
@@ -629,7 +646,8 @@ export default function AdminSettingsPage() {
                   <input value={ipWhitelist} onChange={(e) => setIpWhitelist(e.target.value)} placeholder="192.168.1.0/24, 10.0.0.0/8"
                     className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
                 </div>
-              </div>
+                </div>
+              </AdminCard>
 
               <div className="p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06] bg-amber-500/5 text-xs text-amber-600 dark:text-amber-400 flex items-start gap-2">
                 <Info size={13} className="shrink-0 mt-0.5" />
@@ -641,30 +659,29 @@ export default function AdminSettingsPage() {
           {/* ═══ BENACHRICHTIGUNGEN ════════════════════════ */}
           {activeTab === 'notifications' && (
             <div className="space-y-5">
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-0">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 mb-4"><Bell size={14} /> E-Mail-Benachrichtigungen</h3>
+              <AdminCard title="E-Mail-Benachrichtigungen" icon={<Bell size={14} className="text-[var(--primary)]" />}>
+                <div className="space-y-0">
                 <Toggle label="Neues Mitglied" value={emailNotifNew} onChange={setEmailNotifNew} desc="E-Mail bei Neuanmeldung eines Nutzers" />
                 <Toggle label="Abwesenheiten & Urlaub" value={emailNotifLeave} onChange={setEmailNotifLeave} desc="Eintragungen im Jahreskalender" />
                 <Toggle label="Reporte verfügbar" value={emailNotifReport} onChange={setEmailNotifReport} desc="Monatlicher Auslastungsbericht" />
-              </div>
+                </div>
+              </AdminCard>
 
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Zap size={14} /> Webhook-Integrationen</h3>
+              <AdminCard title="Webhook-Integrationen" icon={<Zap size={14} className="text-[var(--primary)]" />}>
                 <InputField label="Slack Webhook URL" value={slackWebhook} onChange={setSlackWebhook} placeholder="https://hooks.slack.com/..." icon={Globe} />
                 <InputField label="Microsoft Teams Webhook URL" value={teamsWebhook} onChange={setTeamsWebhook} placeholder="https://outlook.office.com/webhook/..." icon={Globe} />
                 <div className="p-3 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.15)] text-xs dark:text-white/60 text-gray-600 flex items-start gap-2">
                   <Info size={13} className="text-[var(--primary)] shrink-0 mt-0.5" />
                   Webhooks werden bei relevanten Events (neue Mitglieder, Abwesenheiten) ausgelöst.
                 </div>
-              </div>
+              </AdminCard>
             </div>
           )}
 
           {/* ═══ DARSTELLUNG ═══════════════════════════════ */}
           {activeTab === 'appearance' && (
             <div className="space-y-5">
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Palette size={14} /> Theme & Farben</h3>
+              <AdminCard title="Theme & Farben" icon={<Palette size={14} className="text-[var(--primary)]" />}>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Standard-Thema</label>
@@ -718,16 +735,15 @@ export default function AdminSettingsPage() {
                   </div>
                 </div>
                 <Toggle label="Kompakte Sidebar" value={sidebarCompact} onChange={setSidebarCompact} desc="Schmälere Navigation mit nur Icons" />
-              </div>
+              </AdminCard>
             </div>
           )}
 
           {/* ═══ KÜRZEL ════════════════════════════════════ */}
           {activeTab === 'kuerzel' && (
             <div className="space-y-5">
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Tag size={14} /> Tages-Kürzel</h3>
+              <AdminCard title="Tages-Kürzel" icon={<Tag size={14} className="text-[var(--primary)]" />}>
+                <div className="flex justify-end">
                   {categories.length === 0 && (
                     <button onClick={handleSeedDefaults} disabled={catLoading}
                       className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-500 text-white text-xs font-bold cursor-pointer border-none hover:opacity-90 transition-opacity disabled:opacity-50">
@@ -735,6 +751,7 @@ export default function AdminSettingsPage() {
                     </button>
                   )}
                 </div>
+                <div>
 
                 {catMsg && (
                   <div className={`p-3 rounded-xl text-xs font-bold border ${catMsg.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>{catMsg.text}</div>
@@ -828,32 +845,30 @@ export default function AdminSettingsPage() {
                     </button>
                   </div>
                 </div>
-              </div>
+                </div>
+              </AdminCard>
             </div>
           )}
 
           {/* ═══ INTEGRATIONEN ══════════════════════════════ */}
           {activeTab === 'integrations' && (
             <div className="space-y-5">
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Zap size={14} /> Kalender-Integration</h3>
+              <AdminCard title="Kalender-Integration" icon={<Zap size={14} className="text-[var(--primary)]" />}>
                 <Toggle label="Google Kalender (OAuth)" value={googleCalendarEnabled} onChange={setGoogleCalendarEnabled} desc="Termine aus Google Calendar synchronisieren" />
                 <Toggle label="Microsoft Outlook/Teams" value={outlookEnabled} onChange={setOutlookEnabled} desc="Exchange-Termine importieren" />
                 <div className="p-3 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.15)] text-xs dark:text-white/60 text-gray-600 flex items-start gap-2">
                   <Info size={13} className="text-[var(--primary)] shrink-0 mt-0.5" />
                   Für OAuth-Integration werden API-Credentials in den Umgebungsvariablen benötigt. Bitte die technische Dokumentation beachten. ICS-Import ist ohne Konfiguration verfügbar.
                 </div>
-              </div>
+              </AdminCard>
 
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Layers size={14} /> Projektmanagement</h3>
+              <AdminCard title="Projektmanagement" icon={<Layers size={14} className="text-[var(--primary)]" />}>
                 <Toggle label="Jira-Integration" value={jiraEnabled} onChange={setJiraEnabled} desc="Projekte und Tickets aus Jira synchronisieren" />
                 {jiraEnabled && <InputField label="Jira URL" value={jiraUrl} onChange={setJiraUrl} placeholder="https://firma.atlassian.net" icon={Globe} />}
                 <Toggle label="Confluence" value={confluenceEnabled} onChange={setConfluenceEnabled} desc="Dokumentation aus Confluence verlinken" />
-              </div>
+              </AdminCard>
 
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Key size={14} /> API-Zugang</h3>
+              <AdminCard title="API-Zugang" icon={<Key size={14} className="text-[var(--primary)]" />}>
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">API-Schlüssel (Read-Only)</label>
                   <div className="flex items-center gap-2">
@@ -868,33 +883,32 @@ export default function AdminSettingsPage() {
                     </button>
                   </div>
                 </div>
-              </div>
+              </AdminCard>
             </div>
           )}
 
           {/* ═══ ERWEITERT ══════════════════════════════════ */}
           {activeTab === 'advanced' && (
             <div className="space-y-5">
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-0">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 mb-4"><Settings2 size={14} /> Daten & System</h3>
+              <AdminCard title="Daten & System" icon={<Settings2 size={14} className="text-[var(--primary)]" />}>
+                <div className="space-y-0">
                 <Toggle label="Automatisches Backup" value={autoBackup} onChange={setAutoBackup} desc="Tägliche Sicherung aller Daten" />
                 <Toggle label="Debug-Modus" value={debugMode} onChange={setDebugMode} desc="Erweiterte Log-Ausgabe (nur für Entwickler)" />
                 <Toggle label="DSGVO-Modus" value={gdprMode} onChange={setGdprMode} desc="Datenschutz-Einwilligungen und Consent-Banner aktiv" />
                 <Toggle label="Analytics aktiviert" value={analyticsEnabled} onChange={setAnalyticsEnabled} desc="Anonymisierte Performance-Daten" />
-              </div>
+                </div>
+              </AdminCard>
 
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><HardDrive size={14} /> Datenaufbewahrung</h3>
+              <AdminCard title="Datenaufbewahrung" icon={<HardDrive size={14} className="text-[var(--primary)]" />}>
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Aufbewahrungszeitraum (Tage)</label>
                   <input type="number" value={dataRetentionDays} onChange={(e) => setDataRetentionDays(parseInt(e.target.value) || 365)} min={30} max={3650}
                     className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
                   <p className="text-[10px] dark:text-white/30 text-gray-400">Nach diesem Zeitraum werden inaktive Logs automatisch gelöscht.</p>
                 </div>
-              </div>
+              </AdminCard>
 
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-3">
-                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Database size={14} /> Datenbankübersicht</h3>
+              <AdminCard title="Datenbankübersicht" icon={<Database size={14} className="text-[var(--primary)]" />} defaultOpen={false}>
                 {[
                   { table: 'members', count: members.length },
                   { table: 'projects', count: projects.length },
@@ -905,7 +919,7 @@ export default function AdminSettingsPage() {
                     <span className="font-bold dark:text-white text-gray-900">{t.count} Einträge</span>
                   </div>
                 ))}
-              </div>
+              </AdminCard>
             </div>
           )}
 

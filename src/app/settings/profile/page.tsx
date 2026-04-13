@@ -13,6 +13,47 @@ import { useAppStore } from '@/stores/appStore';
 import { updateUserProfileAction } from '@/lib/actions/settingsActions';
 import { useTheme } from '@/components/ui/ThemeProvider';
 
+// ── Helfer-Komponenten außerhalb der Seite definieren,
+// damit React sie bei State-Änderungen NICHT unmountet ──────────────
+const Toggle = ({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) => (
+  <button onClick={() => onChange(!value)}
+    className={`w-11 h-6 rounded-full transition-all relative shrink-0 border-none cursor-pointer ${value ? 'bg-[var(--primary)]' : 'bg-gray-200 dark:bg-white/10'}`}>
+    <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${value ? 'right-0.5' : 'left-0.5'}`} />
+  </button>
+);
+
+const SectionCard = ({ title, icon: Icon, children, defaultOpen = true }: { title: string; icon: React.ElementType; children: React.ReactNode; defaultOpen?: boolean }) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={`w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${open ? 'border-b dark:border-white/[0.06] border-black/[0.06]' : ''}`}
+        aria-expanded={open}
+      >
+        <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 pointer-events-none">
+          <Icon size={14} className="text-[var(--primary)]" />
+          {title}
+        </h3>
+        <span className="dark:text-white/30 text-gray-400 shrink-0 transition-transform duration-200" style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </span>
+      </button>
+      {open && <div className="p-5 space-y-4">{children}</div>}
+    </div>
+  );
+};
+
+const ToggleRow = ({ label, desc, value, onChange }: { label: string; desc?: string; value: boolean; onChange: (v: boolean) => void }) => (
+  <div className="flex items-center justify-between py-3 border-b dark:border-white/[0.04] border-black/[0.04] last:border-0">
+    <div>
+      <div className="text-sm font-semibold dark:text-white text-gray-900">{label}</div>
+      {desc && <div className="text-[10px] dark:text-white/30 text-gray-400 mt-0.5">{desc}</div>}
+    </div>
+    <Toggle value={value} onChange={onChange} />
+  </div>
+);
+
 export default function ProfileSettingsPage() {
   const userProfile = useAppStore((s) => s.userProfile);
   const setUserProfile = useAppStore((s) => s.setUserProfile);
@@ -117,33 +158,6 @@ export default function ProfileSettingsPage() {
   };
 
   const inputCls = 'w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all';
-
-  const Toggle = ({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) => (
-    <button onClick={() => onChange(!value)}
-      className={`w-11 h-6 rounded-full transition-all relative shrink-0 border-none cursor-pointer ${value ? 'bg-[var(--primary)]' : 'bg-gray-200 dark:bg-white/10'}`}>
-      <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${value ? 'right-0.5' : 'left-0.5'}`} />
-    </button>
-  );
-
-  const SectionCard = ({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) => (
-    <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-      <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2">
-        <Icon size={14} className="text-[var(--primary)]" />
-        {title}
-      </h3>
-      {children}
-    </div>
-  );
-
-  const ToggleRow = ({ label, desc, value, onChange }: { label: string; desc?: string; value: boolean; onChange: (v: boolean) => void }) => (
-    <div className="flex items-center justify-between py-3 border-b dark:border-white/[0.04] border-black/[0.04] last:border-0">
-      <div>
-        <div className="text-sm font-semibold dark:text-white text-gray-900">{label}</div>
-        {desc && <div className="text-[10px] dark:text-white/30 text-gray-400 mt-0.5">{desc}</div>}
-      </div>
-      <Toggle value={value} onChange={onChange} />
-    </div>
-  );
 
   const TABS = [
     { id: 'profil' as const, label: 'Profil', icon: User },

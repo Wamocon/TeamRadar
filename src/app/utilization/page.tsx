@@ -1,10 +1,12 @@
 ﻿'use client';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Users,
   TrendingUp,
   AlertTriangle,
@@ -45,6 +47,14 @@ export default function UtilizationPage() {
   const hasMinRole = useAppStore((s) => s.hasMinRole);
 
   const [year, setYear] = useState(new Date().getFullYear());
+  const [collapsedMembers, setCollapsedMembers] = useState<Set<string>>(new Set());
+  const toggleMember = useCallback((id: string) => {
+    setCollapsedMembers((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }, []);
 
   if (!hasMinRole('department_lead')) {
     return (
@@ -194,13 +204,41 @@ export default function UtilizationPage() {
         ))}
       </div>
 
+      {/* Alle ein-/ausklappen */}
+      {memberData.length > 1 && (
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold dark:text-white/40 text-gray-500 uppercase tracking-wider">
+            {memberData.length - collapsedMembers.size} / {memberData.length} Berater sichtbar
+          </span>
+          <div className="flex gap-1.5">
+            <button
+              onClick={() => setCollapsedMembers(new Set())}
+              className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/40 text-gray-400 transition-all bg-transparent cursor-pointer"
+            >
+              Alle aufklappen
+            </button>
+            <button
+              onClick={() => setCollapsedMembers(new Set(memberData.map(m => m.member.id)))}
+              className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/40 text-gray-400 transition-all bg-transparent cursor-pointer"
+            >
+              Alle einklappen
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Pro Mitarbeiter */}
       <div className="space-y-5">
-        {memberData.map(({ member, monthGrids, avgUtil, extDays, intDays, vacDays, sickDays }) => (
+        {memberData.map(({ member, monthGrids, avgUtil, extDays, intDays, vacDays, sickDays }) => {
+          const isCollapsed = collapsedMembers.has(member.id);
+          return (
           <div key={member.id} className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
 
-            {/* Member Header */}
-            <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            {/* Member Header – klickbar zum Ein-/Ausklappen */}
+            <button
+              onClick={() => toggleMember(member.id)}
+              className={`w-full px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors text-left ${!isCollapsed ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+            >
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] font-black text-sm shrink-0">
                   {member.name.charAt(0)}
@@ -219,11 +257,14 @@ export default function UtilizationPage() {
                 {intDays  > 0 && <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500">{intDays}d int.</span>}
                 {vacDays  > 0 && <span className="px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-500">{vacDays}d Urlaub</span>}
                 {sickDays > 0 && <span className="px-2 py-0.5 rounded-full bg-pink-500/10 text-pink-500">{sickDays}d Krank</span>}
+                <span className="ml-1 dark:text-white/30 text-gray-400">
+                  {isCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                </span>
               </div>
-            </div>
+            </button>
 
             {/* 12-Monate Raster – volle Breite */}
-            <div className="w-full">
+            {!isCollapsed && <div className="w-full">
               <div className="flex w-full border-b dark:border-white/[0.04] border-black/[0.03]">
                 {monthGrids.map(({ month, days }) => {
                   const workdayCount = days.filter((d) => !d.isWeekend).length;
@@ -286,10 +327,11 @@ export default function UtilizationPage() {
                   );
                 })}
               </div>
-            </div>
+            </div>}
 
           </div>
-        ))}
+          );
+        })}
 
         {members.length === 0 && (
           <div className="text-center py-16 dark:text-white/30 text-gray-400">

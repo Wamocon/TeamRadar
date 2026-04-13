@@ -6,6 +6,7 @@ import { StatusDonut } from '@/components/dashboard/StatusDonut';
 import { DepartmentBars } from '@/components/dashboard/DepartmentBars';
 import { AvailabilityTimeline } from '@/components/dashboard/AvailabilityTimeline';
 import { SearchFilter } from '@/components/dashboard/SearchFilter';
+import { YearAvailabilityPanel } from '@/components/dashboard/YearAvailabilityPanel';
 import { Modal } from '@/components/ui/Modal';
 import { STATUS_CONFIG, type AvailabilityStatus, type ProjectType } from '@/types';
 import { Globe, CalendarClock, Plus, Clock, BarChart3, Users, LayoutGrid, List, LayoutDashboard } from 'lucide-react';
@@ -235,11 +236,27 @@ export default function DashboardPage() {
       {/* ── Content ────────────────────────────── */}
       {viewMode === 'grid' ? (
         <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Users size={14} className="dark:text-white/40 text-gray-400" />
-            <h2 className="text-xs font-bold dark:text-white/50 text-gray-600 uppercase tracking-wider">
-              Team ({filteredMembers.length})
-            </h2>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Users size={14} className="dark:text-white/40 text-gray-400" />
+              <h2 className="text-xs font-bold dark:text-white/50 text-gray-600 uppercase tracking-wider">
+                Team ({filteredMembers.length})
+              </h2>
+            </div>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => setExpandedGroups(Object.fromEntries(groupedMembers.map(g => [g.id, true])))}
+                className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-500 dark:text-white/40 text-gray-400 transition-all bg-transparent cursor-pointer"
+              >
+                Alle aufklappen
+              </button>
+              <button
+                onClick={() => setExpandedGroups(Object.fromEntries(groupedMembers.map(g => [g.id, false])))}
+                className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-blue-50 dark:hover:bg-blue-500/10 hover:text-blue-500 dark:text-white/40 text-gray-400 transition-all bg-transparent cursor-pointer"
+              >
+                Alle einklappen
+              </button>
+            </div>
           </div>
           
           {groupedMembers.map((group) => (
@@ -278,6 +295,9 @@ export default function DashboardPage() {
           <AvailabilityTimeline members={filteredMembers} date={today} />
         </div>
       )}
+
+      {/* ── Jahresverfügbarkeit (read-only) ───────────────── */}
+      <YearAvailabilityPanel />
     </div>
   );
 }

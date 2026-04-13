@@ -23,6 +23,8 @@ import {
   Trash2,
   Save,
   Loader,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { Modal } from '@/components/ui/Modal';
@@ -30,6 +32,46 @@ import { Modal } from '@/components/ui/Modal';
 function formatDateDE(dateStr?: string) {
   if (!dateStr) return '—';
   return new Date(dateStr).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function ProjectCard({ project, onOpen }: { project: Project; onOpen: (p: Project) => void }) {
+  const typeConf = PROJECT_TYPE_CONFIG[project.type];
+  const statusConf = PROJECT_STATUS_CONFIG[project.status];
+  const assignedCount = project.memberIds.length;
+  const isOverdue = project.endDate && project.endDate < new Date().toISOString().slice(0, 10) && project.status !== 'completed';
+
+  return (
+    <button onClick={() => onOpen(project)}
+      className="w-full text-left p-4 rounded-xl border dark:border-white/[0.06] border-black/[0.06] hover:border-[rgba(99,102,241,0.3)] hover:bg-[var(--primary-light)] transition-all cursor-pointer bg-transparent group relative overflow-hidden">
+      {/* Color bar */}
+      <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: typeConf.color }} />
+
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center" style={{ background: `${typeConf.color}20` }}>
+            <Briefcase size={13} style={{ color: typeConf.color }} />
+          </div>
+          <span className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-[var(--primary)] transition-colors">{project.name}</span>
+        </div>
+        <span className="px-1.5 py-0.5 rounded-md text-[8px] font-bold border ml-2 shrink-0" style={{ color: statusConf.color, borderColor: `${statusConf.color}40` }}>
+          {statusConf.label}
+        </span>
+      </div>
+
+      {project.client && (
+        <div className="text-[10px] dark:text-white/40 text-gray-500 truncate mb-2">{project.client}</div>
+      )}
+
+      <div className="flex items-center gap-3 text-[9px] dark:text-white/30 text-gray-400 mt-auto">
+        <span className="flex items-center gap-1"><Users size={9} />{assignedCount}</span>
+        {project.startDate && <span>{project.startDate.slice(0, 7)}</span>}
+        {project.type === 'external' && project.maxDays != null && (
+          <span className="ml-auto font-bold" style={{ color: '#f97316' }}>{project.maxDays}d</span>
+        )}
+        {isOverdue && <span className="text-red-400 font-bold flex items-center gap-0.5"><Clock size={9} /> Überfällig</span>}
+      </div>
+    </button>
+  );
 }
 
 export default function ProjectsPage() {
@@ -51,6 +93,8 @@ export default function ProjectsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [openInternal, setOpenInternal] = useState(true);
+  const [openExternal, setOpenExternal] = useState(true);
 
   // Edit form state
   const [editName, setEditName] = useState('');
@@ -60,6 +104,7 @@ export default function ProjectsPage() {
   const [editDescription, setEditDescription] = useState('');
   const [editStartDate, setEditStartDate] = useState('');
   const [editEndDate, setEditEndDate] = useState('');
+  const [editMaxDays, setEditMaxDays] = useState('');
 
   const openProject = (project: Project) => {
     setSelectedProject(project);
@@ -71,13 +116,15 @@ export default function ProjectsPage() {
     setEditDescription(project.description || '');
     setEditStartDate(project.startDate || '');
     setEditEndDate(project.endDate || '');
+    setEditMaxDays(project.maxDays != null ? String(project.maxDays) : '');
   };
 
   const isDirty = editMode && selectedProject && (
     editName !== selectedProject.name ||
     editType !== selectedProject.type ||
     editStatus !== selectedProject.status ||
-    editClient !== (selectedProject.client || '')
+    editClient !== (selectedProject.client || '') ||
+    editMaxDays !== String(selectedProject.maxDays ?? '')
   );
 
   const handleSave = async () => {
@@ -91,8 +138,9 @@ export default function ProjectsPage() {
       description: editDescription,
       startDate: editStartDate,
       endDate: editEndDate,
+      maxDays: editMaxDays ? parseInt(editMaxDays) : undefined,
     });
-    setSelectedProject((prev) => prev ? { ...prev, name: editName, type: editType, status: editStatus, client: editClient, description: editDescription, startDate: editStartDate, endDate: editEndDate } : null);
+    setSelectedProject((prev) => prev ? { ...prev, name: editName, type: editType, status: editStatus, client: editClient, description: editDescription, startDate: editStartDate, endDate: editEndDate, maxDays: editMaxDays ? parseInt(editMaxDays) : undefined } : null);
     setEditMode(false);
     setIsSaving(false);
   };
@@ -118,43 +166,6 @@ export default function ProjectsPage() {
 
   const internalFiltered = filtered.filter((p) => p.type === 'internal');
   const externalFiltered = filtered.filter((p) => p.type === 'external');
-
-  const ProjectCard = ({ project }: { project: Project }) => {
-    const typeConf = PROJECT_TYPE_CONFIG[project.type];
-    const statusConf = PROJECT_STATUS_CONFIG[project.status];
-    const assignedCount = project.memberIds.length;
-    const isOverdue = project.endDate && project.endDate < new Date().toISOString().slice(0, 10) && project.status !== 'completed';
-
-    return (
-      <button onClick={() => openProject(project)}
-        className="w-full text-left p-4 rounded-xl border dark:border-white/[0.06] border-black/[0.06] hover:border-[rgba(99,102,241,0.3)] hover:bg-[var(--primary-light)] transition-all cursor-pointer bg-transparent group relative overflow-hidden">
-        {/* Color bar */}
-        <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: typeConf.color }} />
-
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center" style={{ background: `${typeConf.color}20` }}>
-              <Briefcase size={13} style={{ color: typeConf.color }} />
-            </div>
-            <span className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-[var(--primary)] transition-colors">{project.name}</span>
-          </div>
-          <span className="px-1.5 py-0.5 rounded-md text-[8px] font-bold border ml-2 shrink-0" style={{ color: statusConf.color, borderColor: `${statusConf.color}40` }}>
-            {statusConf.label}
-          </span>
-        </div>
-
-        {project.client && (
-          <div className="text-[10px] dark:text-white/40 text-gray-500 truncate mb-2">{project.client}</div>
-        )}
-
-        <div className="flex items-center gap-3 text-[9px] dark:text-white/30 text-gray-400 mt-auto">
-          <span className="flex items-center gap-1"><Users size={9} />{assignedCount}</span>
-          {project.startDate && <span>{project.startDate.slice(0, 7)}</span>}
-          {isOverdue && <span className="text-red-400 font-bold flex items-center gap-0.5"><Clock size={9} /> Überfällig</span>}
-        </div>
-      </button>
-    );
-  };
 
   return (
     <div className="p-4 sm:p-6 w-full space-y-5 animate-fade-in">
@@ -213,40 +224,56 @@ export default function ProjectsPage() {
       <div className="grid lg:grid-cols-3 gap-5">
         {/* Interne Projekte (2/3 Breite) */}
         <div className="lg:col-span-2 card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
-          <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04] flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: PROJECT_TYPE_CONFIG.internal.color }} />
+          <button
+            onClick={() => setOpenInternal(v => !v)}
+            className={`w-full flex items-center gap-2 px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openInternal ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+          >
+            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: PROJECT_TYPE_CONFIG.internal.color }} />
             <h3 className="text-sm font-black dark:text-white text-gray-900">Interne Projekte</h3>
-            <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: `${PROJECT_TYPE_CONFIG.internal.color}15`, color: PROJECT_TYPE_CONFIG.internal.color }}>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: `${PROJECT_TYPE_CONFIG.internal.color}15`, color: PROJECT_TYPE_CONFIG.internal.color }}>
               {internalFiltered.length}
             </span>
-          </div>
-          <div className="p-3 grid sm:grid-cols-2 gap-2">
-            {internalFiltered.map((p) => <ProjectCard key={p.id} project={p} />)}
-            {internalFiltered.length === 0 && (
-              <div className="col-span-2 text-center py-10 text-xs dark:text-white/30 text-gray-400">
-                Keine internen Projekte {search || filterStatus !== 'all' ? 'für diesen Filter' : ''}
-              </div>
-            )}
-          </div>
+            <span className="ml-auto dark:text-white/30 text-gray-400">
+              {openInternal ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+            </span>
+          </button>
+          {openInternal && (
+            <div className="p-3 grid sm:grid-cols-2 gap-2">
+              {internalFiltered.map((p) => <ProjectCard key={p.id} project={p} onOpen={openProject} />)}
+              {internalFiltered.length === 0 && (
+                <div className="col-span-2 text-center py-10 text-xs dark:text-white/30 text-gray-400">
+                  Keine internen Projekte {search || filterStatus !== 'all' ? 'für diesen Filter' : ''}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Externe Projekte (1/3 Breite) */}
         <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
-          <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04] flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ background: PROJECT_TYPE_CONFIG.external.color }} />
+          <button
+            onClick={() => setOpenExternal(v => !v)}
+            className={`w-full flex items-center gap-2 px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openExternal ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+          >
+            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: PROJECT_TYPE_CONFIG.external.color }} />
             <h3 className="text-sm font-black dark:text-white text-gray-900">Externe Projekte</h3>
-            <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: `${PROJECT_TYPE_CONFIG.external.color}15`, color: PROJECT_TYPE_CONFIG.external.color }}>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: `${PROJECT_TYPE_CONFIG.external.color}15`, color: PROJECT_TYPE_CONFIG.external.color }}>
               {externalFiltered.length}
             </span>
-          </div>
-          <div className="p-3 space-y-2">
-            {externalFiltered.map((p) => <ProjectCard key={p.id} project={p} />)}
-            {externalFiltered.length === 0 && (
-              <div className="text-center py-10 text-xs dark:text-white/30 text-gray-400">
-                Keine externen Projekte {search || filterStatus !== 'all' ? 'für diesen Filter' : ''}
-              </div>
-            )}
-          </div>
+            <span className="ml-auto dark:text-white/30 text-gray-400">
+              {openExternal ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+            </span>
+          </button>
+          {openExternal && (
+            <div className="p-3 space-y-2">
+              {externalFiltered.map((p) => <ProjectCard key={p.id} project={p} onOpen={openProject} />)}
+              {externalFiltered.length === 0 && (
+                <div className="text-center py-10 text-xs dark:text-white/30 text-gray-400">
+                  Keine externen Projekte {search || filterStatus !== 'all' ? 'für diesen Filter' : ''}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -339,6 +366,13 @@ export default function ProjectsPage() {
                     <input type="date" value={editEndDate} onChange={(e) => setEditEndDate(e.target.value)}
                       className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2 text-xs dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
                   </div>
+                  {editType === 'external' && (
+                    <div className="col-span-2 space-y-1">
+                      <label className="text-[9px] font-bold uppercase tracking-wide" style={{ color: '#f97316' }}>Max. Beauftragungstage / Jahr</label>
+                      <input type="number" min={0} value={editMaxDays} onChange={(e) => setEditMaxDays(e.target.value)} placeholder="z.B. 220"
+                        className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2 text-xs dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3 text-xs">
@@ -346,6 +380,12 @@ export default function ProjectsPage() {
                   {selectedProject.client && <div><span className="dark:text-white/40 text-gray-500">Kunde</span><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{selectedProject.client}</div></div>}
                   <div><span className="dark:text-white/40 text-gray-500">Laufzeit</span><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{formatDateDE(selectedProject.startDate)} – {formatDateDE(selectedProject.endDate)}</div></div>
                   <div><span className="dark:text-white/40 text-gray-500">Berater</span><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{selectedProject.memberIds.length} Personen</div></div>
+                  {selectedProject.type === 'external' && selectedProject.maxDays != null && (
+                    <div className="col-span-2">
+                      <span className="text-[9px] font-bold uppercase" style={{ color: '#f97316' }}>Max. Beauftragungstage / Jahr</span>
+                      <div className="font-bold mt-0.5" style={{ color: '#f97316' }}>{selectedProject.maxDays} Tage</div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -407,6 +447,7 @@ function ProjectCreateForm({ onSave, onCancel }: { onSave: () => void; onCancel:
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [maxDays, setMaxDays] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -415,7 +456,7 @@ function ProjectCreateForm({ onSave, onCancel }: { onSave: () => void; onCancel:
     setSaving(true);
     setSaveError(null);
     try {
-      await addProject({ name: name.trim(), type, status, client, description, startDate: startDate || undefined, endDate: endDate || undefined, memberIds: [] });
+      await addProject({ name: name.trim(), type, status, client, description, startDate: startDate || undefined, endDate: endDate || undefined, memberIds: [], maxDays: maxDays ? parseInt(maxDays) : undefined });
       onSave();
     } catch (err: any) {
       setSaveError(err?.message || 'Unbekannter Fehler beim Speichern');
@@ -470,6 +511,13 @@ function ProjectCreateForm({ onSave, onCancel }: { onSave: () => void; onCancel:
           <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
             className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
         </div>
+        {type === 'external' && (
+          <div className="col-span-2 space-y-1">
+            <label className="text-[9px] font-bold uppercase tracking-wide" style={{ color: '#f97316' }}>Max. Beauftragungstage / Jahr</label>
+            <input type="number" min={0} value={maxDays} onChange={(e) => setMaxDays(e.target.value)} placeholder="z.B. 220"
+              className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+          </div>
+        )}
       </div>
       <div className="flex gap-2 justify-end pt-2">
         <button onClick={onCancel} className="px-4 py-2 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 border dark:border-white/10 border-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer bg-transparent transition-colors">Abbrechen</button>

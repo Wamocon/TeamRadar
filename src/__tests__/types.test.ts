@@ -61,8 +61,8 @@ describe('STATUS_CONFIG', () => {
 });
 
 describe('USER_ROLE_HIERARCHY', () => {
-  it('enthält alle 4 Rollen', () => {
-    expect(Object.keys(USER_ROLE_HIERARCHY)).toHaveLength(4);
+  it('enthält alle 5 Rollen', () => {
+    expect(Object.keys(USER_ROLE_HIERARCHY)).toHaveLength(5);
   });
 
   it('admin > cio > department_lead > employee', () => {

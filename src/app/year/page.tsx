@@ -8,11 +8,14 @@ import {
   type AvailabilityStatus,
   type ProjectType,
   type Project,
+  type UserRole,
 } from '@/types';
 import {
   CalendarRange,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Briefcase,
   Eye,
   CalendarDays,
@@ -50,6 +53,29 @@ const DAY_CATEGORY_CONFIG: Record<DayCategory, { label: string; short: string; c
   free:          { label: 'Kein Status',        short: '',    color: '#d1d5db', bg: 'transparent' },
 };
 
+// ── Monats-Statistikspalten ───────────────────────────────────────────────────
+interface StatCol { key: string; title: string; color: string; cat: DayCategory | null }
+const MONTH_STATS_COLS: StatCol[] = [
+  { key: 'Σ',   title: 'Arbeitstage gesamt',       color: '#374151', cat: null },
+  { key: 'eP',  title: 'Ext. Präsenz',             color: '#f97316', cat: 'extern-onsite' },
+  { key: 'BeP', title: 'Ext. HomeOffice',          color: '#fb923c', cat: 'extern-remote' },
+  { key: 'B',   title: 'Büro intern',              color: '#6366f1', cat: 'intern-onsite' },
+  { key: 'H',   title: 'HomeOffice intern',        color: '#06b6d4', cat: 'intern-remote' },
+  { key: 'K',   title: 'Krank',                    color: '#ec4899', cat: 'sick' },
+  { key: 'U',   title: 'Urlaub',                   color: '#8b5cf6', cat: 'vacation' },
+];
+
+// Module-level constant – not recreated on every render
+const STATUS_PICKER_OPTIONS: { key: AvailabilityStatus; cat: DayCategory }[] = [
+  { key: 'vacation',      cat: 'vacation' },
+  { key: 'sick',          cat: 'sick' },
+  { key: 'extern-onsite', cat: 'extern-onsite' },
+  { key: 'extern-remote', cat: 'extern-remote' },
+  { key: 'busy',          cat: 'intern-onsite' },
+  { key: 'remote',        cat: 'intern-remote' },
+  { key: 'offline',       cat: 'free' },
+];
+
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
 }
@@ -59,6 +85,349 @@ function formatDate(year: number, month: number, day: number) {
 function formatDateDisplay(dateStr: string) {
   const d = new Date(dateStr);
   return `${d.getDate()}. ${MONTH_NAMES_LONG[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sub-components auf Modulebene → stabile Funktionsidentität → kein ungewolltes
+// Unmount/Remount bei jedem State-Update → kein Scroll-Jump mehr
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface DayCellProps {
+  memberId: string; memberEmail: string; memberUserId?: string;
+  dateStr: string; category: DayCategory; isWeekend: boolean;
+  dayNum: number; holiday: Holiday | null;
+  today: string;
+  quickStatus: { memberId: string; date: string } | null;
+  canEdit: boolean;
+  onSelect: (memberId: string, date: string, x: number, y: number) => void;
+  onDeselect: () => void;
+}
+
+function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, today, quickStatus, canEdit, onSelect, onDeselect }: DayCellProps) {
+  const conf = DAY_CATEGORY_CONFIG[category];
+  const isToday = dateStr === today;
+  const isSelected = quickStatus?.memberId === memberId && quickStatus?.date === dateStr;
+
+  if (isWeekend) {
+    return (
+      <td className="p-0" style={{ background: 'rgba(156,163,175,0.07)' }}>
+        <div className="w-full h-12" />
+      </td>
+    );
+  }
+
+  const isHoliday = !!holiday;
+  const cellBg = isHoliday && category === 'free' ? 'rgba(239,68,68,0.09)' : conf.bg;
+  const cellShadow = isHoliday && category === 'free'
+    ? 'inset 0 0 0 1px rgba(239,68,68,0.35)'
+    : category !== 'free' ? 'inset 0 0 0 1.5px rgba(0,0,0,0.15)' : 'inset 0 0 0 1px rgba(0,0,0,0.06)';
+  const titleText = isHoliday
+    ? `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} — 🎉 ${holiday!.name}${getHolidayStatesLabel(holiday!) ? ` (${getHolidayStatesLabel(holiday!)})` : ''}${category !== 'free' ? ` · ${conf.label}` : ''}`
+    : `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} — ${conf.label}`;
+
+  return (
+    <td className="text-center relative p-1">
+      <button
+        disabled={!canEdit}
+        onClick={(e) => {
+          if (!canEdit) return;
+          e.stopPropagation();
+          if (isSelected) {
+            onDeselect();
+          } else {
+            const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+            onSelect(memberId, dateStr, rect.left, rect.bottom);
+          }
+        }}
+        className={`w-11 h-11 rounded-md flex items-center justify-center text-[11px] font-bold transition-all mx-auto relative ${
+          isToday ? 'ring-2 ring-[var(--primary)] ring-offset-1' : ''
+        } ${canEdit ? 'hover:scale-105 hover:brightness-110 cursor-pointer' : 'cursor-default'} border-none`}
+        style={{
+          background: cellBg,
+          color: category === 'free' ? 'transparent' : conf.color,
+          boxShadow: isSelected ? `0 0 0 2px var(--primary)` : cellShadow,
+        }}
+        title={titleText}
+      >
+        {conf.short}
+        {isHoliday && (
+          <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-red-400" />
+        )}
+      </button>
+    </td>
+  );
+}
+
+type MemberRow = { member: { id: string; name: string; email: string; userId?: string }; categories: DayCategory[] };
+type DayInfo = { day: number; dateStr: string; weekday: string; isWeekend: boolean; holiday: Holiday | null };
+
+interface MonthMatrixProps {
+  monthData: { month: number; days: DayInfo[]; memberRows: MemberRow[] };
+  year: number;
+  currentMonth: number;
+  currentYear: number;
+  bundesland: Bundesland;
+  today: string;
+  quickStatus: { memberId: string; date: string; x: number; y: number } | null;
+  setQuickStatus: (v: { memberId: string; date: string; x: number; y: number } | null) => void;
+  bulkFill: { month: number; year: number; x: number; y: number } | null;
+  setBulkFill: (v: { month: number; year: number; x: number; y: number } | null) => void;
+  canEditRow: (email: string, userId?: string) => boolean;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
+}
+
+function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, today, quickStatus, setQuickStatus, bulkFill, setBulkFill, canEditRow, isCollapsed, onToggleCollapse }: MonthMatrixProps) {
+  const { month, days, memberRows } = monthData;
+  const isCurrent = month === currentMonth && year === currentYear;
+
+  return (
+    <div className={`card-shimmer rounded-xl border overflow-hidden ${isCurrent ? 'border-[var(--primary)]/30 ring-1 ring-[var(--primary)]/20' : 'border-black/10 dark:border-white/10'}`}>
+      <div className={`px-3 py-2 flex items-center justify-between border-b border-black/10 dark:border-white/10 ${isCurrent ? 'bg-[var(--primary-light)]' : ''}`}>
+        <button
+          onClick={onToggleCollapse}
+          className="flex items-center gap-2 bg-transparent border-none cursor-pointer p-0 hover:opacity-70 transition-opacity"
+        >
+          {isCollapsed
+            ? <ChevronDown size={14} className="dark:text-white/40 text-gray-400" />
+            : <ChevronUp size={14} className="dark:text-white/40 text-gray-400" />}
+          <span className={`text-sm font-black ${isCurrent ? 'text-[var(--primary)]' : 'dark:text-white text-gray-900'}`}>
+            {MONTH_NAMES_LONG[month]} {year}
+          </span>
+        </button>
+        <div className="flex items-center gap-2">
+          {isCurrent && <span className="px-1.5 py-0.5 rounded-full bg-[var(--primary)] text-white text-[8px] font-bold">AKTUELL</span>}
+          {!isCollapsed && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (bulkFill?.month === month) {
+                  setBulkFill(null);
+                } else {
+                  const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                  setBulkFill({ month, year, x: rect.right, y: rect.bottom });
+                }
+              }}
+              className="px-2 py-1 rounded-lg text-[9px] font-bold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
+              title="Ganzen Monat mit Status füllen"
+            >
+              Monat füllen ▾
+            </button>
+          )}
+        </div>
+      </div>
+      {!isCollapsed && (
+        <div className="overflow-x-auto w-full">
+          <table className="text-[10px] border-collapse w-full" style={{ borderSpacing: 0 }}>
+            <colgroup>
+              <col style={{ minWidth: '140px', width: '160px' }} />
+              {days.map((d) => <col key={d.day} style={{ minWidth: d.isWeekend ? '34px' : '46px' }} />)}
+              {MONTH_STATS_COLS.map((s) => <col key={s.key} style={{ width: '38px', minWidth: '38px' }} />)}
+            </colgroup>
+            <thead>
+              <tr className="border-b dark:border-white/10 border-gray-200">
+                <th className="text-left px-2 py-2 font-black dark:text-white/40 text-gray-500 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/10 border-gray-200" style={{ fontSize: '10px' }}>
+                  Berater
+                </th>
+                {days.map((d) => (
+                  <th key={d.day}
+                    className={`text-center font-black pb-0.5 pt-1.5 ${
+                      d.isWeekend ? 'dark:text-white/15 text-gray-300' :
+                      d.holiday ? 'text-red-400 dark:text-red-400' :
+                      d.dateStr === today ? 'text-[var(--primary)]' :
+                      'dark:text-white/40 text-gray-500'
+                    }`}
+                    style={{ fontSize: '11px', background: d.holiday && !d.isWeekend ? 'rgba(239,68,68,0.04)' : undefined }}
+                    title={d.holiday ? `🎉 ${d.holiday.name}` : undefined}>
+                    {d.day}
+                  </th>
+                ))}
+                {MONTH_STATS_COLS.map((s, i) => (
+                  <th key={s.key} rowSpan={2} title={s.title}
+                    className={`text-center font-black align-middle ${i === 0 ? 'border-l-2 dark:border-white/[0.15] border-black/[0.08]' : ''}`}
+                    style={{ fontSize: '9px', color: s.color, verticalAlign: 'middle' }}>
+                    {s.key}
+                  </th>
+                ))}
+              </tr>
+              <tr className="border-b-2 dark:border-white/10 border-gray-200">
+                <th className="sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/10 border-gray-200" />
+                {days.map((d) => (
+                  <th key={d.day}
+                    className={`text-center font-medium pb-1 ${
+                      d.isWeekend ? 'dark:text-white/15 text-gray-300' : 'dark:text-white/20 text-gray-400'
+                    }`}
+                    style={{ fontSize: '9px', background: d.holiday && !d.isWeekend ? 'rgba(239,68,68,0.04)' : undefined }}>
+                    {d.isWeekend ? d.weekday : (
+                      <>
+                        {d.weekday}
+                        {d.holiday && !d.holiday.nationwide && bundesland === 'ALL' && (
+                          <span className="block text-[5px] text-red-400 leading-none font-bold">
+                            {getHolidayStatesLabel(d.holiday)}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {memberRows.map(({ member, categories }) => (
+                <tr key={member.id} className="border-b dark:border-white/[0.06] border-gray-150 hover:bg-black/[0.01] dark:hover:bg-white/[0.01]">
+                  <td className="px-2 py-1.5 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/10 border-gray-200">
+                    <div className="font-bold dark:text-white/80 text-gray-700 truncate" style={{ fontSize: '11px', maxWidth: 140 }}>
+                      {member.name}
+                    </div>
+                  </td>
+                  {days.map((d, i) => (
+                    <DayCell key={d.dateStr}
+                      memberId={member.id} memberEmail={member.email} memberUserId={member.userId}
+                      dateStr={d.dateStr} category={categories[i]} isWeekend={d.isWeekend} dayNum={d.day} holiday={d.holiday}
+                      today={today}
+                      quickStatus={quickStatus}
+                      canEdit={!d.isWeekend && canEditRow(member.email, member.userId)}
+                      onSelect={(mId, date, x, y) => setQuickStatus({ memberId: mId, date, x, y })}
+                      onDeselect={() => setQuickStatus(null)}
+                    />
+                  ))}
+                  {MONTH_STATS_COLS.map((s, i) => {
+                    const val = s.cat === null
+                      ? categories.filter(c => c !== 'weekend' && c !== 'free').length
+                      : categories.filter(c => c === s.cat).length;
+                    return (
+                      <td key={s.key}
+                        className={`text-center font-bold py-1 ${i === 0 ? 'border-l-2 dark:border-white/[0.15] border-black/[0.08]' : ''}`}
+                        style={{ fontSize: '11px', color: val > 0 ? s.color : '#d1d5db' }}>
+                        {val > 0 ? val : '–'}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Module-level ProjectPopup ─────────────────────────────────────────────────
+interface ProjectPopupProps {
+  project: Project;
+  members: { id: string; name: string }[];
+  hasMinRole: (role: UserRole) => boolean;
+  onClose: () => void;
+}
+
+function ProjectPopup({ project, members, hasMinRole, onClose }: ProjectPopupProps) {
+  const typeConf = PROJECT_TYPE_CONFIG[project.type];
+  const statusConf = PROJECT_STATUS_CONFIG[project.status];
+  const assignedMembers = members.filter((m) => project.memberIds.includes(m.id));
+  const canManage = hasMinRole('department_lead');
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="relative w-full max-w-lg mx-4 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border dark:border-white/10 border-gray-200 overflow-hidden animate-scale-up"
+        onClick={e => e.stopPropagation()}>
+        <div className="p-5 border-b dark:border-white/10 border-gray-100 flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"
+              style={{ background: `linear-gradient(135deg, ${typeConf.color}, ${typeConf.color}99)` }}>
+              <Briefcase size={18} />
+            </div>
+            <div>
+              <h2 className="text-base font-black dark:text-white text-gray-900">{project.name}</h2>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white" style={{ background: typeConf.color }}>
+                  {typeConf.label}
+                </span>
+                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold border" style={{ color: statusConf.color, borderColor: `${statusConf.color}40` }}>
+                  {statusConf.label}
+                </span>
+              </div>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-all border-none bg-transparent cursor-pointer dark:text-white/50 text-gray-500">
+            <X size={16} />
+          </button>
+        </div>
+        <div className="p-5 space-y-4">
+          {project.description && (
+            <p className="text-sm dark:text-white/60 text-gray-600">{project.description}</p>
+          )}
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            {project.client && (
+              <div><span className="dark:text-white/40 text-gray-500">Kunde/Auftraggeber</span><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{project.client}</div></div>
+            )}
+            {project.startDate && (
+              <div><span className="dark:text-white/40 text-gray-500">Start</span><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{formatDateDisplay(project.startDate)}</div></div>
+            )}
+            {project.endDate && (
+              <div><span className="dark:text-white/40 text-gray-500">Ende</span><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{formatDateDisplay(project.endDate)}</div></div>
+            )}
+            <div>
+              <span className="dark:text-white/40 text-gray-500">Berater</span>
+              <div className="font-semibold dark:text-white text-gray-900 mt-0.5">{assignedMembers.length} Personen</div>
+            </div>
+          </div>
+          {assignedMembers.length > 0 && (
+            <div>
+              <div className="text-xs dark:text-white/40 text-gray-500 mb-2">Zugewiesene Berater</div>
+              <div className="flex flex-wrap gap-1.5">
+                {assignedMembers.map((m) => (
+                  <span key={m.id} className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--primary-light)] text-[var(--primary)] border border-[rgba(99,102,241,0.2)]">
+                    {m.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        {canManage && (
+          <div className="px-5 py-3 border-t dark:border-white/10 border-gray-100 flex justify-end gap-2">
+            <Link href={`/projects`} onClick={onClose}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--primary)] text-white text-xs font-semibold no-underline hover:opacity-90 transition-opacity">
+              <ExternalLink size={12} /> Verwalten
+            </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Module-level ProjectCard ──────────────────────────────────────────────────
+interface ProjectCardProps {
+  project: Project;
+  onSelect: (project: Project) => void;
+}
+
+function ProjectCard({ project, onSelect }: ProjectCardProps) {
+  const typeConf = PROJECT_TYPE_CONFIG[project.type];
+  const statusConf = PROJECT_STATUS_CONFIG[project.status];
+  const assignedCount = project.memberIds.length;
+
+  return (
+    <button onClick={() => onSelect(project)}
+      className="w-full text-left p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06] hover:border-[var(--primary)]/30 hover:bg-[var(--primary-light)] transition-all cursor-pointer bg-transparent group">
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <div className="w-2 h-2 rounded-full shrink-0" style={{ background: typeConf.color }} />
+          <span className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-[var(--primary)] transition-colors">{project.name}</span>
+        </div>
+        <span className="px-1.5 py-0.5 rounded-md text-[8px] font-bold border ml-2 shrink-0" style={{ color: statusConf.color, borderColor: `${statusConf.color}40` }}>
+          {statusConf.label}
+        </span>
+      </div>
+      {project.client && <div className="text-[10px] dark:text-white/40 text-gray-500 truncate">{project.client}</div>}
+      <div className="flex items-center gap-3 mt-2 text-[9px] dark:text-white/30 text-gray-400">
+        <span className="flex items-center gap-1"><Users size={9} />{assignedCount} Berater</span>
+        {project.startDate && <span>{project.startDate.slice(0, 7)}</span>}
+      </div>
+    </button>
+  );
 }
 
 export default function YearOverviewPage() {
@@ -88,10 +457,10 @@ export default function YearOverviewPage() {
   // Feiertage für aktuelles Jahr + Bundesland
   const holidays = useMemo(() => getHolidays(year, bundesland), [year, bundesland]);
   const [filterType] = useState<'all' | ProjectType>('all');
-  const [quickStatus, setQuickStatus] = useState<{ memberId: string; date: string } | null>(null);
+  const [quickStatus, setQuickStatus] = useState<{ memberId: string; date: string; x: number; y: number } | null>(null);
   const [entryMonth, setEntryMonth] = useState(new Date().getMonth());
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [bulkFill, setBulkFill] = useState<{ month: number; year: number } | null>(null);
+  const [bulkFill, setBulkFill] = useState<{ month: number; year: number; x: number; y: number } | null>(null);
   const quickRef = useRef<HTMLDivElement>(null);
   const bulkRef = useRef<HTMLDivElement>(null);
 
@@ -140,13 +509,16 @@ export default function YearOverviewPage() {
     return 'free';
   }, [availabilities, allocations, projects]);
 
-  // ── canEditRow ── Nur eigener Account darf bearbeitet werden ───────
-  // member.userId speichert die Eigentümer-UUID (RLS), nicht die persönliche Auth-ID.
-  // Stattdessen: E-Mail-Vergleich mit dem eingeloggten UserProfile.
-  const canEditRow = useCallback((memberEmail: string) => {
-    if (!userProfile?.email || !memberEmail) return false;
-    return userProfile.email.toLowerCase() === memberEmail.toLowerCase();
-  }, [userProfile]);
+  // ── canEditRow ── Admins können alle Zeilen bearbeiten, Mitarbeiter nur ihre eigene Zeile
+  // Primär: E-Mail-Vergleich (zuverlässig). Sekundär: userId-UUID als Fallback.
+  const canEditRow = useCallback((memberEmail: string, memberUserId?: string) => {
+    if (hasMinRole('admin')) return true;
+    if (!userProfile) return false;
+    if (userProfile.email && memberEmail &&
+        userProfile.email.toLowerCase() === memberEmail.toLowerCase()) return true;
+    if (userProfile.id && memberUserId && userProfile.id === memberUserId) return true;
+    return false;
+  }, [userProfile, hasMinRole]);
 
   // ── Yearly matrix data (all 12 months) ───────────────
   const yearlyMatrixData = useMemo(() => {
@@ -181,9 +553,16 @@ export default function YearOverviewPage() {
           else if (cat === 'intern-onsite' || cat === 'intern-remote') intDays++;
         });
       });
-      return { member, extDays, intDays, sickDays, vacationDays };
+      // Externes Budget: Summe der maxDays aller zugewiesenen ext. Projekte mit gesetztem Limit
+      const assignedExtProjects = projects.filter(
+        (p) => p.type === 'external' && p.memberIds.includes(member.id) && p.maxDays != null
+      );
+      const extBudget = assignedExtProjects.length > 0
+        ? assignedExtProjects.reduce((sum, p) => sum + (p.maxDays ?? 0), 0)
+        : null;
+      return { member, extDays, intDays, sickDays, vacationDays, extBudget };
     });
-  }, [yearlyMatrixData, members]);
+  }, [yearlyMatrixData, members, projects]);
 
   // ── Entry month data ──────────────────────────────────
   const entryData = useMemo(() => {
@@ -234,17 +613,7 @@ export default function YearOverviewPage() {
   const internalProjects = projects.filter((p) => p.type === 'internal');
   const externalProjects = projects.filter((p) => p.type === 'external');
 
-  // ── Status Picker ─────────────────────────────────────
-  const STATUS_PICKER_OPTIONS: { key: AvailabilityStatus; cat: DayCategory }[] = [
-    { key: 'vacation',      cat: 'vacation' },
-    { key: 'sick',          cat: 'sick' },
-    { key: 'extern-onsite', cat: 'extern-onsite' },
-    { key: 'extern-remote', cat: 'extern-remote' },
-    { key: 'busy',          cat: 'intern-onsite' },
-    { key: 'remote',        cat: 'intern-remote' },
-    { key: 'offline',       cat: 'free' },
-  ];
-
+  // ── Status Picker & Bulk Fill ─────────────────────────
   const handleSetStatus = (memberId: string, date: string, status: AvailabilityStatus) => {
     addAvailability({ memberId, date, status });
     setQuickStatus(null);
@@ -252,8 +621,10 @@ export default function YearOverviewPage() {
 
   const handleBulkFillMonth = (month: number, yr: number, status: AvailabilityStatus) => {
     if (!userProfile) return;
-    // Bulk-Fill nur für den eigenen Account – nie für andere Mitarbeiter
-    const ownMember = members.find((m) => m.userId === userProfile.id);
+    // Bulk-Fill: eigenen Member per Email finden (zuverlässiger als userId-Vergleich)
+    const ownMember = members.find((m) =>
+      userProfile.email && m.email.toLowerCase() === userProfile.email.toLowerCase()
+    ) ?? members.find((m) => m.userId === userProfile.id);
     if (!ownMember) return;
     const daysInMonth = getDaysInMonth(yr, month);
     for (let d = 1; d <= daysInMonth; d++) {
@@ -266,299 +637,15 @@ export default function YearOverviewPage() {
     setBulkFill(null);
   };
 
-  // ── Day Cell Component ────────────────────────────────
-  const DayCell = ({ memberId, memberEmail, dateStr, category, isWeekend, dayNum, holiday }: {
-    memberId: string; memberEmail: string; dateStr: string;
-    category: DayCategory; isWeekend: boolean; dayNum: number; holiday: Holiday | null;
-  }) => {
-    const conf = DAY_CATEGORY_CONFIG[category];
-    const isToday = dateStr === today;
-    const isSelected = quickStatus?.memberId === memberId && quickStatus?.date === dateStr;
-    const editable = !isWeekend && canEditRow(memberEmail);
-
-    // Wochenende: schlichter grauer Streifen, keine Interaktion
-    if (isWeekend) {
-      return (
-        <td className="p-0" style={{ background: 'rgba(156,163,175,0.07)' }}>
-          <div className="w-full h-7" />
-        </td>
-      );
-    }
-
-    const isHoliday = !!holiday;
-    const cellBg = isHoliday && category === 'free' ? 'rgba(239,68,68,0.09)' : conf.bg;
-    const cellShadow = isHoliday && category === 'free'
-      ? 'inset 0 0 0 1px rgba(239,68,68,0.35)'
-      : category !== 'free' ? 'inset 0 0 0 1.5px rgba(0,0,0,0.15)' : 'inset 0 0 0 1px rgba(0,0,0,0.06)';
-    const titleText = isHoliday
-      ? `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} — 🎉 ${holiday!.name}${getHolidayStatesLabel(holiday!) ? ` (${getHolidayStatesLabel(holiday!)})` : ''}${category !== 'free' ? ` · ${conf.label}` : ''}`
-      : `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} — ${conf.label}`;
-
-    return (
-      <td className="text-center relative p-0.5">
-        <button
-          disabled={!editable}
-          onClick={() => editable && setQuickStatus(isSelected ? null : { memberId, date: dateStr })}
-          className={`w-7 h-7 rounded flex items-center justify-center text-[8px] font-bold transition-all mx-auto relative ${
-            isToday ? 'ring-2 ring-[var(--primary)] ring-offset-1' : ''
-          } ${editable ? 'hover:scale-105 hover:brightness-110 cursor-pointer' : 'cursor-default'} border-none`}
-          style={{
-            background: cellBg,
-            color: category === 'free' ? 'transparent' : conf.color,
-            boxShadow: cellShadow,
-          }}
-          title={titleText}
-        >
-          {conf.short}
-          {isHoliday && (
-            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-red-400" />
-          )}
-        </button>
-
-        {isSelected && (
-          <div ref={quickRef} className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-900 shadow-2xl border dark:border-white/10 border-gray-200 rounded-xl p-2 grid grid-cols-2 gap-1 min-w-[160px]"
-            onClick={e => e.stopPropagation()}>
-            {STATUS_PICKER_OPTIONS.map(({ key, cat }) => {
-              const c = DAY_CATEGORY_CONFIG[cat];
-              return (
-                <button key={key} onClick={() => handleSetStatus(memberId, dateStr, key)}
-                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[9px] font-semibold text-left hover:bg-gray-50 dark:hover:bg-white/5 border-none cursor-pointer w-full transition-colors bg-transparent dark:text-white/70 text-gray-700">
-                  <div className="w-3 h-3 rounded-sm shrink-0 flex items-center justify-center text-[6px] font-bold"
-                    style={{ background: c.bg, color: c.color }}>{c.short}</div>
-                  {c.label.replace(/ \(.*\)/, '')}
-                </button>
-              );
-            })}
-            <button onClick={() => setQuickStatus(null)}
-              className="col-span-2 pt-1 text-[8px] font-bold uppercase tracking-wide text-gray-400 hover:text-gray-600 border-none cursor-pointer bg-transparent text-center">
-              Schließen
-            </button>
-          </div>
-        )}
-      </td>
-    );
-  };
-
-  // ── Month Matrix Component ────────────────────────────
-  const MonthMatrix = ({ monthData }: { monthData: typeof yearlyMatrixData[0] }) => {
-    const { month, days, memberRows } = monthData;
-    const isCurrent = month === currentMonth && year === currentYear;
-
-    return (
-      <div className={`card-shimmer rounded-xl border overflow-hidden ${isCurrent ? 'border-[var(--primary)]/30 ring-1 ring-[var(--primary)]/20' : 'border-black/10 dark:border-white/10'}`}>
-        <div className={`px-3 py-2 flex items-center justify-between border-b border-black/10 dark:border-white/10 ${isCurrent ? 'bg-[var(--primary-light)]' : ''}`}>
-          <span className={`text-sm font-black ${isCurrent ? 'text-[var(--primary)]' : 'dark:text-white text-gray-900'}`}>
-            {MONTH_NAMES_LONG[month]} {year}
-          </span>
-          <div className="flex items-center gap-2">
-            {isCurrent && <span className="px-1.5 py-0.5 rounded-full bg-[var(--primary)] text-white text-[8px] font-bold">AKTUELL</span>}
-            {/* Bulk-fill button */}
-            <div className="relative">
-              <button
-                onClick={() => setBulkFill(bulkFill?.month === month ? null : { month, year })}
-                className="px-2 py-1 rounded-lg text-[9px] font-bold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
-                title="Ganzen Monat mit Status füllen"
-              >
-                Monat füllen ▾
-              </button>
-              {bulkFill?.month === month && bulkFill?.year === year && (
-                <div ref={bulkRef} className="absolute top-full right-0 mt-1 z-50 bg-white dark:bg-gray-900 shadow-2xl border dark:border-white/10 border-gray-200 rounded-xl p-2 grid grid-cols-2 gap-1 min-w-[170px]"
-                  onClick={(e) => e.stopPropagation()}>
-                  <div className="col-span-2 text-[9px] font-black uppercase tracking-wide dark:text-white/40 text-gray-400 px-1 pb-1 border-b dark:border-white/10 border-gray-100 mb-1">
-                    Alle Werktage auf:
-                  </div>
-                  {STATUS_PICKER_OPTIONS.map(({ key, cat }) => {
-                    const c = DAY_CATEGORY_CONFIG[cat];
-                    return (
-                      <button key={key} onClick={() => handleBulkFillMonth(month, year, key)}
-                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[9px] font-semibold text-left hover:bg-gray-50 dark:hover:bg-white/5 border-none cursor-pointer w-full transition-colors bg-transparent dark:text-white/70 text-gray-700">
-                        <div className="w-4 h-4 rounded flex items-center justify-center text-[7px] font-bold shrink-0"
-                          style={{ background: c.bg, color: c.color, boxShadow: 'inset 0 0 0 1.5px rgba(0,0,0,0.15)' }}>{c.short}</div>
-                        {c.label.replace(/ \(.*\)/, '')}
-                      </button>
-                    );
-                  })}
-                  <button onClick={() => setBulkFill(null)}
-                    className="col-span-2 pt-1 text-[8px] font-bold uppercase tracking-wide text-gray-400 hover:text-gray-600 border-none cursor-pointer bg-transparent text-center">
-                    Abbrechen
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="overflow-x-auto w-full">
-          <table className="text-[10px] border-collapse w-full" style={{ borderSpacing: 0 }}>
-            <colgroup>
-              <col style={{ minWidth: '130px', width: '150px' }} />
-              {days.map((d) => <col key={d.day} style={{ minWidth: d.isWeekend ? '20px' : '28px' }} />)}
-            </colgroup>
-            <thead>
-              <tr className="border-b dark:border-white/10 border-gray-200">
-                <th className="text-left px-2 py-1.5 font-black dark:text-white/40 text-gray-500 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/10 border-gray-200" style={{ fontSize: '9px' }}>
-                  Berater
-                </th>
-                {days.map((d) => (
-                  <th key={d.day}
-                    className={`text-center font-black pb-0.5 pt-1 ${
-                      d.isWeekend ? 'dark:text-white/15 text-gray-300' :
-                      d.holiday ? 'text-red-400 dark:text-red-400' :
-                      d.dateStr === today ? 'text-[var(--primary)]' :
-                      'dark:text-white/40 text-gray-500'
-                    }`}
-                    style={{ fontSize: '9px', background: d.holiday && !d.isWeekend ? 'rgba(239,68,68,0.04)' : undefined }}
-                    title={d.holiday ? `🎉 ${d.holiday.name}` : undefined}>
-                    {d.day}
-                  </th>
-                ))}
-              </tr>
-              <tr className="border-b-2 dark:border-white/10 border-gray-200">
-                <th className="sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/10 border-gray-200" />
-                {days.map((d) => (
-                  <th key={d.day}
-                    className={`text-center font-medium pb-1 ${
-                      d.isWeekend ? 'dark:text-white/15 text-gray-300' : 'dark:text-white/20 text-gray-400'
-                    }`}
-                    style={{ fontSize: '7px', background: d.holiday && !d.isWeekend ? 'rgba(239,68,68,0.04)' : undefined }}>
-                    {d.isWeekend ? d.weekday : (
-                      <>
-                        {d.weekday}
-                        {d.holiday && !d.holiday.nationwide && bundesland === 'ALL' && (
-                          <span className="block text-[5px] text-red-400 leading-none font-bold">
-                            {getHolidayStatesLabel(d.holiday)}
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {memberRows.map(({ member, categories }) => (
-                <tr key={member.id} className="border-b dark:border-white/[0.06] border-gray-150 hover:bg-black/[0.01] dark:hover:bg-white/[0.01]">
-                  <td className="px-2 py-1 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/10 border-gray-200">
-                    <div className="font-bold dark:text-white/80 text-gray-700 truncate" style={{ fontSize: '10px', maxWidth: 130 }}>
-                      {member.name}
-                    </div>
-                  </td>
-                  {days.map((d, i) => (
-                    <DayCell key={d.dateStr} memberId={member.id} memberEmail={member.email}
-                      dateStr={d.dateStr} category={categories[i]} isWeekend={d.isWeekend} dayNum={d.day} holiday={d.holiday} />
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
-  // ── Project Popup ─────────────────────────────────────
-  const ProjectPopup = ({ project, onClose }: { project: Project; onClose: () => void }) => {
-    const typeConf = PROJECT_TYPE_CONFIG[project.type];
-    const statusConf = PROJECT_STATUS_CONFIG[project.status];
-    const assignedMembers = members.filter((m) => project.memberIds.includes(m.id));
-    const canManage = hasMinRole('department_lead');
-
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-        <div className="relative w-full max-w-lg mx-4 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border dark:border-white/10 border-gray-200 overflow-hidden animate-scale-up"
-          onClick={e => e.stopPropagation()}>
-          <div className="p-5 border-b dark:border-white/10 border-gray-100 flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"
-                style={{ background: `linear-gradient(135deg, ${typeConf.color}, ${typeConf.color}99)` }}>
-                <Briefcase size={18} />
-              </div>
-              <div>
-                <h2 className="text-base font-black dark:text-white text-gray-900">{project.name}</h2>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white" style={{ background: typeConf.color }}>
-                    {typeConf.label}
-                  </span>
-                  <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold border" style={{ color: statusConf.color, borderColor: `${statusConf.color}40` }}>
-                    {statusConf.label}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-all border-none bg-transparent cursor-pointer dark:text-white/50 text-gray-500">
-              <X size={16} />
-            </button>
-          </div>
-          <div className="p-5 space-y-4">
-            {project.description && (
-              <p className="text-sm dark:text-white/60 text-gray-600">{project.description}</p>
-            )}
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              {project.client && (
-                <div><span className="dark:text-white/40 text-gray-500">Kunde/Auftraggeber</span><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{project.client}</div></div>
-              )}
-              {project.startDate && (
-                <div><span className="dark:text-white/40 text-gray-500">Start</span><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{formatDateDisplay(project.startDate)}</div></div>
-              )}
-              {project.endDate && (
-                <div><span className="dark:text-white/40 text-gray-500">Ende</span><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{formatDateDisplay(project.endDate)}</div></div>
-              )}
-              <div>
-                <span className="dark:text-white/40 text-gray-500">Berater</span>
-                <div className="font-semibold dark:text-white text-gray-900 mt-0.5">{assignedMembers.length} Personen</div>
-              </div>
-            </div>
-            {assignedMembers.length > 0 && (
-              <div>
-                <div className="text-xs dark:text-white/40 text-gray-500 mb-2">Zugewiesene Berater</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {assignedMembers.map((m) => (
-                    <span key={m.id} className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--primary-light)] text-[var(--primary)] border border-[rgba(99,102,241,0.2)]">
-                      {m.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          {canManage && (
-            <div className="px-5 py-3 border-t dark:border-white/10 border-gray-100 flex justify-end gap-2">
-              <Link href={`/projects`} onClick={onClose}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--primary)] text-white text-xs font-semibold no-underline hover:opacity-90 transition-opacity">
-                <ExternalLink size={12} /> Verwalten
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // ── Project Card ──────────────────────────────────────
-  const ProjectCard = ({ project }: { project: Project }) => {
-    const typeConf = PROJECT_TYPE_CONFIG[project.type];
-    const statusConf = PROJECT_STATUS_CONFIG[project.status];
-    const assignedCount = project.memberIds.length;
-
-    return (
-      <button onClick={() => setSelectedProject(project)}
-        className="w-full text-left p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06] hover:border-[var(--primary)]/30 hover:bg-[var(--primary-light)] transition-all cursor-pointer bg-transparent group">
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className="w-2 h-2 rounded-full shrink-0" style={{ background: typeConf.color }} />
-            <span className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-[var(--primary)] transition-colors">{project.name}</span>
-          </div>
-          <span className="px-1.5 py-0.5 rounded-md text-[8px] font-bold border ml-2 shrink-0" style={{ color: statusConf.color, borderColor: `${statusConf.color}40` }}>
-            {statusConf.label}
-          </span>
-        </div>
-        {project.client && <div className="text-[10px] dark:text-white/40 text-gray-500 truncate">{project.client}</div>}
-        <div className="flex items-center gap-3 mt-2 text-[9px] dark:text-white/30 text-gray-400">
-          <span className="flex items-center gap-1"><Users size={9} />{assignedCount} Berater</span>
-          {project.startDate && <span>{project.startDate.slice(0, 7)}</span>}
-        </div>
-      </button>
-    );
-  };
+  // ── Collapsible months ────────────────────────────────
+  const [collapsedMonths, setCollapsedMonths] = useState<Set<number>>(new Set());
+  const toggleMonth = useCallback((month: number) => {
+    setCollapsedMonths((prev) => {
+      const next = new Set(prev);
+      next.has(month) ? next.delete(month) : next.add(month);
+      return next;
+    });
+  }, []);
 
   const tabs: { mode: ViewMode; label: string; icon: React.ElementType }[] = [
     { mode: 'overview', label: 'Übersicht', icon: Eye },
@@ -567,7 +654,68 @@ export default function YearOverviewPage() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 w-full space-y-5 animate-fade-in" onClick={() => quickStatus && setQuickStatus(null)}>
+    <div className="p-4 sm:p-6 w-full space-y-5 animate-fade-in" onClick={() => { if (quickStatus) setQuickStatus(null); if (bulkFill) setBulkFill(null); }}>
+
+      {/* ── Quick-Status Picker (fixed, außerhalb jedes overflow-Containers) ── */}
+      {quickStatus && (
+        <div
+          ref={quickRef}
+          className="fixed z-[200] bg-white dark:bg-gray-900 shadow-2xl border dark:border-white/10 border-gray-200 rounded-xl p-2 grid grid-cols-2 gap-1 min-w-[160px]"
+          style={{
+            top: Math.min(quickStatus.y + 4, window.innerHeight - 200),
+            left: Math.min(quickStatus.x, window.innerWidth - 175),
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {STATUS_PICKER_OPTIONS.map(({ key, cat }) => {
+            const c = DAY_CATEGORY_CONFIG[cat];
+            return (
+              <button key={key} onClick={() => handleSetStatus(quickStatus.memberId, quickStatus.date, key)}
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[9px] font-semibold text-left hover:bg-gray-50 dark:hover:bg-white/5 border-none cursor-pointer w-full transition-colors bg-transparent dark:text-white/70 text-gray-700">
+                <div className="w-3 h-3 rounded-sm shrink-0 flex items-center justify-center text-[6px] font-bold"
+                  style={{ background: c.bg, color: c.color }}>{c.short}</div>
+                {c.label.replace(/ \(.*\)/, '')}
+              </button>
+            );
+          })}
+          <button onClick={() => setQuickStatus(null)}
+            className="col-span-2 pt-1 text-[8px] font-bold uppercase tracking-wide text-gray-400 hover:text-gray-600 border-none cursor-pointer bg-transparent text-center">
+            Schließen
+          </button>
+        </div>
+      )}
+
+      {/* ── Bulk-Fill Picker (fixed, außerhalb jedes overflow-Containers) ── */}
+      {bulkFill && (
+        <div
+          ref={bulkRef}
+          className="fixed z-[200] bg-white dark:bg-gray-900 shadow-2xl border dark:border-white/10 border-gray-200 rounded-xl p-2 grid grid-cols-2 gap-1 min-w-[170px]"
+          style={{
+            top: Math.min(bulkFill.y + 4, window.innerHeight - 240),
+            left: Math.min(bulkFill.x - 170, window.innerWidth - 185),
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="col-span-2 text-[9px] font-black uppercase tracking-wide dark:text-white/40 text-gray-400 px-1 pb-1 border-b dark:border-white/10 border-gray-100 mb-1">
+            Alle Werktage auf:
+          </div>
+          {STATUS_PICKER_OPTIONS.map(({ key, cat }) => {
+            const c = DAY_CATEGORY_CONFIG[cat];
+            return (
+              <button key={key} onClick={() => handleBulkFillMonth(bulkFill.month, bulkFill.year, key)}
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[9px] font-semibold text-left hover:bg-gray-50 dark:hover:bg-white/5 border-none cursor-pointer w-full transition-colors bg-transparent dark:text-white/70 text-gray-700">
+                <div className="w-4 h-4 rounded flex items-center justify-center text-[7px] font-bold shrink-0"
+                  style={{ background: c.bg, color: c.color, boxShadow: 'inset 0 0 0 1.5px rgba(0,0,0,0.15)' }}>{c.short}</div>
+                {c.label.replace(/ \(.*\)/, '')}
+              </button>
+            );
+          })}
+          <button onClick={() => setBulkFill(null)}
+            className="col-span-2 pt-1 text-[8px] font-bold uppercase tracking-wide text-gray-400 hover:text-gray-600 border-none cursor-pointer bg-transparent text-center">
+            Abbrechen
+          </button>
+        </div>
+      )}
       {/* ── Header ───────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -626,10 +774,11 @@ export default function YearOverviewPage() {
                     <th className="text-center px-3 py-2 font-semibold text-[#6366f1] min-w-[90px]">Int. Projekt</th>
                     <th className="text-center px-3 py-2 font-semibold text-[#ec4899] min-w-[80px]">Krank</th>
                     <th className="text-center px-3 py-2 font-semibold text-[#8b5cf6] min-w-[80px]">Urlaub</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#f97316] min-w-[110px] border-l dark:border-white/[0.06] border-black/[0.04]">Ext. Budget</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {memberYearKPIs.map(({ member, extDays, intDays, sickDays, vacationDays }) => (
+                  {memberYearKPIs.map(({ member, extDays, intDays, sickDays, vacationDays, extBudget }) => (
                     <tr key={member.id} className="border-b dark:border-white/[0.03] border-black/[0.02] hover:bg-black/[0.01] dark:hover:bg-white/[0.01]">
                       <td className="px-4 py-2 font-semibold dark:text-white/80 text-gray-800">{member.name}</td>
                       <td className="text-center px-3 py-2">
@@ -651,6 +800,19 @@ export default function YearOverviewPage() {
                         <span className="text-[10px] font-bold" style={{ color: vacationDays > 0 ? '#8b5cf6' : '#9ca3af' }}>
                           {vacationDays}d
                         </span>
+                      </td>
+                      <td className="text-center px-3 py-2 border-l dark:border-white/[0.06] border-black/[0.04]">
+                        {extBudget != null ? (() => {
+                          const over = extDays > extBudget;
+                          const under = extDays < extBudget;
+                          const color = over ? '#ef4444' : under ? '#f59e0b' : '#22c55e';
+                          return (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold" style={{ color }}>
+                              {over && <AlertCircle size={10} />}
+                              {extDays}/{extBudget}d
+                            </span>
+                          );
+                        })() : <span className="text-[10px] text-gray-400">—</span>}
                       </td>
                     </tr>
                   ))}
@@ -696,9 +858,43 @@ export default function YearOverviewPage() {
           </div>
 
           {/* 12 Monate scrollbar */}
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-bold dark:text-white/40 text-gray-500 uppercase tracking-wider">
+              {12 - collapsedMonths.size} / 12 Monate sichtbar
+            </span>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => setCollapsedMonths(new Set())}
+                className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
+              >
+                Alle aufklappen
+              </button>
+              <button
+                onClick={() => setCollapsedMonths(new Set([0,1,2,3,4,5,6,7,8,9,10,11]))}
+                className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
+              >
+                Alle einklappen
+              </button>
+            </div>
+          </div>
           <div className="space-y-4">
             {yearlyMatrixData.map((monthData) => (
-              <MonthMatrix key={monthData.month} monthData={monthData} />
+              <MonthMatrix
+                key={monthData.month}
+                monthData={monthData}
+                year={year}
+                currentMonth={currentMonth}
+                currentYear={currentYear}
+                bundesland={bundesland}
+                today={today}
+                quickStatus={quickStatus}
+                setQuickStatus={setQuickStatus}
+                bulkFill={bulkFill}
+                setBulkFill={setBulkFill}
+                canEditRow={canEditRow}
+                isCollapsed={collapsedMonths.has(monthData.month)}
+                onToggleCollapse={() => toggleMonth(monthData.month)}
+              />
             ))}
           </div>
         </div>
@@ -770,7 +966,7 @@ export default function YearOverviewPage() {
               </div>
               {/* Tile Grid für interne Projekte */}
               <div className="px-4 pb-4 grid sm:grid-cols-2 gap-2">
-                {internalProjects.filter(p => !p.startDate && !p.endDate).map(p => <ProjectCard key={p.id} project={p} />)}
+                {internalProjects.filter(p => !p.startDate && !p.endDate).map(p => <ProjectCard key={p.id} project={p} onSelect={setSelectedProject} />)}
               </div>
             </div>
 
@@ -782,7 +978,7 @@ export default function YearOverviewPage() {
                 <span className="ml-auto px-2 py-0.5 rounded-full bg-[#f97316]/10 text-[#f97316] text-[10px] font-bold">{externalProjects.length}</span>
               </div>
               <div className="p-3 space-y-2">
-                {externalProjects.map(p => <ProjectCard key={p.id} project={p} />)}
+                {externalProjects.map(p => <ProjectCard key={p.id} project={p} onSelect={setSelectedProject} />)}
                 {externalProjects.length === 0 && <div className="text-center py-8 text-xs dark:text-white/30 text-gray-400">Keine externen Projekte</div>}
               </div>
             </div>
@@ -867,8 +1063,14 @@ export default function YearOverviewPage() {
                         </div>
                       </td>
                       {entryData.days.map((d, i) => (
-                        <DayCell key={d.dateStr} memberId={member.id} memberEmail={member.email}
-                          dateStr={d.dateStr} category={categories[i]} isWeekend={d.isWeekend} dayNum={d.day} holiday={d.holiday} />
+                        <DayCell key={d.dateStr} memberId={member.id} memberEmail={member.email} memberUserId={member.userId}
+                          dateStr={d.dateStr} category={categories[i]} isWeekend={d.isWeekend} dayNum={d.day} holiday={d.holiday}
+                          today={today}
+                          quickStatus={quickStatus}
+                          canEdit={!d.isWeekend && canEditRow(member.email, member.userId)}
+                          onSelect={(mId, date, x, y) => setQuickStatus({ memberId: mId, date, x, y })}
+                          onDeselect={() => setQuickStatus(null)}
+                        />
                       ))}
                       <td className="text-center px-2 font-bold dark:text-white/50 text-gray-600 sticky right-0 bg-white dark:bg-gray-900 z-10 text-[10px]">
                         {workDays}
@@ -902,7 +1104,7 @@ export default function YearOverviewPage() {
       )}
 
       {/* Project Popup */}
-      {selectedProject && <ProjectPopup project={selectedProject} onClose={() => setSelectedProject(null)} />}
+      {selectedProject && <ProjectPopup project={selectedProject} members={members} hasMinRole={hasMinRole} onClose={() => setSelectedProject(null)} />}
     </div>
   );
 }

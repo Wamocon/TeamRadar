@@ -24,9 +24,8 @@ import {
   LogOut,
   Building2,
   X,
-  ToggleLeft,
-  ToggleRight,
   BookOpen,
+  User,
 } from 'lucide-react';
 
 import { AppPortal } from './AppPortal';
@@ -72,12 +71,7 @@ function SidebarContent({
     if (saved === 'employee') setIsElevatedMode(false);
   }, []);
 
-  const toggleMode = () => {
-    const next = !isElevatedMode;
-    setIsElevatedMode(next);
-    localStorage.setItem('tr-role-mode', next ? 'elevated' : 'employee');
-    window.dispatchEvent(new CustomEvent('tr-role-mode-change', { detail: { elevated: next } }));
-  };
+  // toggleMode wird vom Dual-Role-Switcher direkt inline aufgerufen (kein separates toggleMode mehr)
 
   const [orgName, setOrgName] = useState('TeamRadar');
   useEffect(() => {
@@ -194,21 +188,45 @@ function SidebarContent({
           <div className="flex-1 min-w-0">
             <div className="text-[11px] font-bold text-[var(--sidebar-text)] truncate">{orgName}</div>
             {mounted && hasMinRole('department_lead') && (
-              <div className="text-[9px] text-[var(--primary)] font-semibold capitalize">{userProfile?.role || 'employee'}</div>
+              <div className="text-[9px] text-[var(--primary)] font-semibold capitalize">
+                {isElevatedMode ? (userProfile?.role || 'admin') : 'employee'}
+              </div>
             )}
           </div>
-          {mounted && hasMinRole('department_lead') && (
-            <button onClick={toggleMode} title={isElevatedMode ? 'Zur Mitarbeiter-Ansicht' : 'Zur Admin-Ansicht'} className="p-1 rounded-lg hover:bg-[var(--sidebar-item-hover)] text-[var(--sidebar-text-muted)] hover:text-[var(--primary)] transition-all border-none bg-transparent cursor-pointer shrink-0">
-              {isElevatedMode ? <ToggleRight size={16} className="text-[var(--primary)]" /> : <ToggleLeft size={16} />}
-            </button>
-          )}
         </div>
-        {mounted && hasMinRole('department_lead') && (
-          <div className="mt-0.5 text-center text-[9px] text-[var(--sidebar-text-muted)] opacity-40">
-            {isElevatedMode ? 'Erweiterte Ansicht aktiv' : 'Mitarbeiter-Ansicht aktiv'}
-          </div>
-        )}
       </div>
+
+      {/* Dual-Role-Switcher: nur für privilegierte User (department_lead+) */}
+      {mounted && hasMinRole('department_lead') && (
+        <div className="shrink-0 mx-3 mt-2">
+          <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--sidebar-item-hover)' }}>
+            <button
+              onClick={() => { setIsElevatedMode(true); localStorage.setItem('tr-role-mode', 'elevated'); window.dispatchEvent(new CustomEvent('tr-role-mode-change', { detail: { elevated: true } })); }}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-bold transition-all border-none cursor-pointer ${
+                isElevatedMode
+                  ? 'bg-[var(--primary)] text-white shadow-sm'
+                  : 'text-[var(--sidebar-text-muted)] bg-transparent hover:bg-[var(--sidebar-item-hover)]'
+              }`}
+              title={`Als ${userProfile?.role} arbeiten`}
+            >
+              <Shield size={10} />
+              {userProfile?.role === 'admin' || userProfile?.role === 'super_admin' ? 'Admin' : userProfile?.role === 'cio' ? 'CIO' : 'Lead'}
+            </button>
+            <button
+              onClick={() => { setIsElevatedMode(false); localStorage.setItem('tr-role-mode', 'employee'); window.dispatchEvent(new CustomEvent('tr-role-mode-change', { detail: { elevated: false } })); }}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-bold transition-all border-none cursor-pointer ${
+                !isElevatedMode
+                  ? 'bg-[var(--primary)] text-white shadow-sm'
+                  : 'text-[var(--sidebar-text-muted)] bg-transparent hover:bg-[var(--sidebar-item-hover)]'
+              }`}
+              title="Als normaler Mitarbeiter arbeiten"
+            >
+              <User size={10} />
+              Mitarbeiter
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* App Switcher */}
       <div className="shrink-0 grid grid-cols-2 gap-1.5 mx-3 mt-3">
@@ -248,21 +266,10 @@ function SidebarContent({
 
       {/* Footer */}
       <div className="shrink-0 p-3 border-t space-y-3" style={{ borderColor: 'var(--sidebar-border)', background: 'var(--bg-elevated, rgba(255,255,255,0.02))' }}>
-        {process.env.NODE_ENV !== 'production' && (
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-1 p-1 rounded-xl border" style={{ borderColor: 'var(--sidebar-border)' }}>
-              <button onClick={() => setTheme('light')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'light' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-[var(--sidebar-text-muted)]'}`}><Sun size={12} /></button>
-              <button onClick={() => setTheme('dark')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'dark' ? 'bg-[#1a2236] text-white shadow-lg' : 'text-[var(--sidebar-text-muted)]'}`}><Moon size={12} /></button>
-            </div>
-            <div className="grid grid-cols-3 gap-1">
-              {(['admin', 'department_lead', 'employee'] as const).map((r) => (
-                <button key={r} onClick={() => userProfile && setUserProfile({ ...userProfile, role: r })} className={`text-[8px] font-bold py-1 px-1 rounded border-none cursor-pointer truncate ${userProfile?.role === r ? 'text-[var(--primary)] bg-[var(--primary-light)]' : 'text-[var(--sidebar-text-muted)]'}`}>
-                  {r === 'department_lead' ? 'DL' : r.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <div className="flex items-center gap-1 p-1 rounded-xl border" style={{ borderColor: 'var(--sidebar-border)' }}>
+          <button onClick={() => setTheme('light')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'light' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-[var(--sidebar-text-muted)]'}`}><Sun size={12} /></button>
+          <button onClick={() => setTheme('dark')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'dark' ? 'bg-[#1a2236] text-white shadow-lg' : 'text-[var(--sidebar-text-muted)]'}`}><Moon size={12} /></button>
+        </div>
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center overflow-hidden shrink-0 border" style={{ background: 'var(--primary-light)', borderColor: 'rgba(99,102,241,0.2)' }}>
             {userProfile?.avatarUrl ? (

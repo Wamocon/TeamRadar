@@ -2,30 +2,32 @@
  * Tests für die Supabase DB-Schicht
  * Prüft: Mapping-Funktionen, Guard-Checks, API-Aufrufe
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock des Supabase-Clients
-const mockInsert = vi.fn().mockReturnValue({ error: null });
-const mockUpdate = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
-const mockDelete = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
-const mockOrder = vi.fn().mockReturnValue({ data: [], error: null });
-const mockSelect = vi.fn().mockReturnValue({
-  // Unterstützt sowohl .select().order() als auch .select().eq().order()
-  order: mockOrder,
-  eq: vi.fn().mockReturnValue({
+// vi.hoisted stellt sicher, dass diese Variablen auch in vi.mock-Factories verfügbar sind
+const { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, mockLoadAllDataAction, mockAddAvailabilityAction } = vi.hoisted(() => {
+  const mockInsert = vi.fn().mockReturnValue({ error: null });
+  const mockUpdate = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
+  const mockDelete = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
+  const mockOrder = vi.fn().mockReturnValue({ data: [], error: null });
+  const mockSelect = vi.fn().mockReturnValue({
     order: mockOrder,
-  }),
-});
-
-const mockFrom = vi.fn().mockReturnValue({
-  insert: mockInsert,
-  update: mockUpdate,
-  delete: mockDelete,
-  select: mockSelect,
-});
-
-const mockGetUser = vi.fn().mockResolvedValue({
-  data: { user: { id: 'user-123' } },
+    eq: vi.fn().mockReturnValue({ order: mockOrder }),
+  });
+  const mockUpsert = vi.fn().mockReturnValue({ error: null });
+  const mockFrom = vi.fn().mockReturnValue({
+    insert: mockInsert,
+    update: mockUpdate,
+    delete: mockDelete,
+    select: mockSelect,
+    upsert: mockUpsert,
+  });
+  const mockGetUser = vi.fn().mockResolvedValue({
+    data: { user: { id: 'user-123' } },
+  });
+  const mockLoadAllDataAction = vi.fn().mockResolvedValue(null);
+  const mockAddAvailabilityAction = vi.fn().mockResolvedValue(undefined);
+  return { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, mockLoadAllDataAction, mockAddAvailabilityAction };
 });
 
 vi.mock('@/lib/supabase/client', () => ({
@@ -33,6 +35,18 @@ vi.mock('@/lib/supabase/client', () => ({
     from: mockFrom,
     auth: { getUser: mockGetUser },
   }),
+}));
+
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn().mockResolvedValue({
+    from: mockFrom,
+    auth: { getUser: mockGetUser },
+  }),
+}));
+
+vi.mock('@/lib/actions/dataActions', () => ({
+  loadAllDataAction: mockLoadAllDataAction,
+  addAvailabilityAction: mockAddAvailabilityAction,
 }));
 
 // Import NACH dem Mock
@@ -52,9 +66,12 @@ import {
   dbAddProject,
   dbUpdateProject,
   dbDeleteProject,
+  dbAddAllocation,
+  dbUpdateAllocation,
+  dbDeleteAllocation,
 } from '@/lib/supabase/db';
 
-import type { Member, Availability, Team, Project } from '@/types';
+import type { Member, Availability, Team, Project, Allocation } from '@/types';
 
 describe('DB: Guard-Checks (ohne Supabase)', () => {
   beforeEach(() => {
@@ -111,6 +128,17 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-key';
     vi.clearAllMocks();
+    // Defaults nach clearAllMocks wiederherstellen
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-123' } } });
+    mockInsert.mockReturnValue({ error: null });
+    mockUpdate.mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
+    mockDelete.mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
+    mockUpsert.mockReturnValue({ error: null });
+    mockFrom.mockReturnValue({ insert: mockInsert, update: mockUpdate, delete: mockDelete, select: vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue({ data: [], error: null }), eq: vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue({ data: [], error: null }) }) }), upsert: mockUpsert });
+    mockLoadAllDataAction.mockResolvedValue({
+      memberRows: [], availabilityRows: [], teamRows: [], projectRows: [], allocationRows: [],
+    });
+    mockAddAvailabilityAction.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -190,19 +218,14 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(mockFrom).toHaveBeenCalledWith('members');
   });
 
-  it('dbAddAvailability ruft from("availabilities").insert auf', async () => {
+  it('dbAddAvailability ruft addAvailabilityAction auf', async () => {
     const entry: Availability = {
       id: 'a1', memberId: 'm1', status: 'available', date: '2026-03-20',
       startTime: '09:00', endTime: '17:00',
     };
     await dbAddAvailability(entry);
 
-    expect(mockFrom).toHaveBeenCalledWith('availabilities');
-    expect(mockInsert).toHaveBeenCalled();
-    const row = mockInsert.mock.calls[0][0];
-    expect(row.member_id).toBe('m1');
-    expect(row.status).toBe('available');
-    expect(row.start_time).toBe('09:00');
+    expect(mockAddAvailabilityAction).toHaveBeenCalledWith(entry);
   });
 
   it('dbAddTeam ruft from("teams").insert auf', async () => {
@@ -289,9 +312,84 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
   });
 
   it('loadAllData gibt null wenn kein User eingeloggt', async () => {
-    mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+    mockLoadAllDataAction.mockResolvedValueOnce(null);
     const data = await loadAllData();
     expect(data).toBeNull();
+  });
+
+  it('loadAllData mappt alle Felder korrekt (inkl. optionale Felder)', async () => {
+    mockLoadAllDataAction.mockResolvedValueOnce({
+      memberRows: [{
+        id: 'm1', user_id: 'u1', name: 'Max', email: 'max@a.de',
+        role: 'Dev', department: 'Eng',
+        avatar_url: 'https://a.com/img.png', phone: '+49 123', created_at: '2026-01-01',
+      }],
+      availabilityRows: [{
+        id: 'av1', member_id: 'm1', status: 'available', date: '2026-03-20',
+        start_time: '09:00', end_time: '17:00', note: 'Homeoffice',
+      }],
+      teamRows: [{
+        id: 't1', name: 'Frontend', description: 'Web-Team', member_ids: ['m1'],
+      }],
+      projectRows: [{
+        id: 'p1', name: 'Cloud', type: 'external', status: 'active',
+        client: 'BMW', description: 'Projekt A', member_ids: ['m1'],
+        start_date: '2026-01-01', end_date: '2026-12-31',
+        max_days: 220, created_at: '2026-01-01',
+      }],
+      allocationRows: [{
+        id: 'al1', member_id: 'm1', project_id: 'p1',
+        percentage: 80, start_date: '2026-01-01', end_date: '2026-12-31', user_id: 'u1',
+      }],
+    });
+
+    const data = await loadAllData();
+    expect(data).not.toBeNull();
+
+    // Member-Mapping
+    const member = data!.members[0];
+    expect(member.id).toBe('m1');
+    expect(member.userId).toBe('u1');
+    expect(member.avatarUrl).toBe('https://a.com/img.png');
+    expect(member.phone).toBe('+49 123');
+
+    // Availability-Mapping
+    const av = data!.availabilities[0];
+    expect(av.memberId).toBe('m1');
+    expect(av.startTime).toBe('09:00');
+    expect(av.endTime).toBe('17:00');
+    expect(av.note).toBe('Homeoffice');
+
+    // Team-Mapping
+    const team = data!.teams[0];
+    expect(team.description).toBe('Web-Team');
+    expect(team.memberIds).toEqual(['m1']);
+
+    // Project-Mapping
+    const project = data!.projects[0];
+    expect(project.client).toBe('BMW');
+    expect(project.description).toBe('Projekt A');
+    expect(project.startDate).toBe('2026-01-01');
+    expect(project.maxDays).toBe(220);
+
+    // Allocation-Mapping
+    const alloc = data!.allocations[0];
+    expect(alloc.memberId).toBe('m1');
+    expect(alloc.projectId).toBe('p1');
+    expect(alloc.percentage).toBe(80);
+  });
+
+  it('loadAllData: leere member_ids werden als [] gemappt', async () => {
+    mockLoadAllDataAction.mockResolvedValueOnce({
+      memberRows: [],
+      availabilityRows: [],
+      teamRows: [{ id: 't1', name: 'Leer', description: null, member_ids: null }],
+      projectRows: [{ id: 'p1', name: 'X', type: 'internal', status: 'active', client: null, description: null, member_ids: null, start_date: null, end_date: null, max_days: null, created_at: '2026-01-01' }],
+      allocationRows: [],
+    });
+    const data = await loadAllData();
+    expect(data!.teams[0].memberIds).toEqual([]);
+    expect(data!.projects[0].memberIds).toEqual([]);
   });
 });
 
@@ -351,6 +449,132 @@ describe('DB: Guard-Checks weitere Funktionen (ohne Supabase)', () => {
 
   it('dbDeleteProject tut nichts ohne Supabase-Config', async () => {
     await dbDeleteProject('p1');
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+});
+
+describe('DB: Allocation-Funktionen mit Supabase konfiguriert', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-key';
+    vi.clearAllMocks();
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-123' } } });
+    mockInsert.mockReturnValue({ error: null });
+    mockUpdate.mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
+    mockDelete.mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
+    mockFrom.mockReturnValue({ insert: mockInsert, update: mockUpdate, delete: mockDelete, select: vi.fn(), upsert: mockUpsert });
+  });
+
+  afterEach(() => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = '';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
+  });
+
+  it('dbAddAllocation ruft from("allocations").insert auf', async () => {
+    const alloc: Allocation = {
+      id: 'al1', memberId: 'm1', projectId: 'p1',
+      percentage: 60, startDate: '2026-01-01', endDate: '2026-06-30',
+    };
+    await dbAddAllocation(alloc);
+    expect(mockFrom).toHaveBeenCalledWith('allocations');
+    expect(mockInsert).toHaveBeenCalled();
+    const row = mockInsert.mock.calls[0][0];
+    expect(row.member_id).toBe('m1');
+    expect(row.project_id).toBe('p1');
+    expect(row.percentage).toBe(60);
+  });
+
+  it('dbUpdateAllocation ruft from("allocations").update auf', async () => {
+    const alloc: Allocation = {
+      id: 'al1', memberId: 'm1', projectId: 'p1',
+      percentage: 80, startDate: '2026-01-01', endDate: '2026-06-30',
+    };
+    await dbUpdateAllocation(alloc);
+    expect(mockFrom).toHaveBeenCalledWith('allocations');
+    expect(mockUpdate).toHaveBeenCalled();
+  });
+
+  it('dbDeleteAllocation ruft from("allocations").delete auf', async () => {
+    await dbDeleteAllocation('al1');
+    expect(mockFrom).toHaveBeenCalledWith('allocations');
+    expect(mockDelete).toHaveBeenCalled();
+  });
+
+  it('dbDeleteMember löscht auch allocations', async () => {
+    await dbDeleteMember('m1');
+    const calls = mockFrom.mock.calls.map((c: unknown[]) => c[0]);
+    expect(calls).toContain('availabilities');
+    expect(calls).toContain('allocations');
+    expect(calls).toContain('members');
+  });
+
+  it('dbGetUserProfile gibt null zurück wenn kein User eingeloggt', async () => {
+    mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+    const result = await dbGetUserProfile();
+    expect(result).toBeNull();
+  });
+
+  it('dbGetUserProfile gibt null zurück bei DB-Fehler', async () => {
+    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } });
+    const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
+    const mockSelectInternal = vi.fn().mockReturnValue({ eq: mockEq });
+    mockFrom.mockReturnValueOnce({ select: mockSelectInternal });
+
+    const result = await dbGetUserProfile();
+    expect(result).toBeNull();
+  });
+
+  it('dbGetUserProfile gibt null zurück wenn Profil nicht vorhanden', async () => {
+    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+    const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
+    const mockSelectInternal = vi.fn().mockReturnValue({ eq: mockEq });
+    mockFrom.mockReturnValueOnce({ select: mockSelectInternal });
+
+    const result = await dbGetUserProfile();
+    expect(result).toBeNull();
+  });
+
+  it('rowToAllocation: Felder werden korrekt gemappt (via dbAddAllocation)', async () => {
+    const alloc: Allocation = {
+      id: 'al2', memberId: 'm2', projectId: 'p2',
+      percentage: 100, startDate: '2026-03-01', endDate: '2026-12-31',
+    };
+    await dbAddAllocation(alloc);
+    const row = mockInsert.mock.calls[0][0];
+    expect(row.id).toBe('al2');
+    expect(row.user_id).toBe('user-123');
+    expect(row.start_date).toBe('2026-03-01');
+    expect(row.end_date).toBe('2026-12-31');
+  });
+});
+
+describe('DB: Guard-Checks Allocation (ohne Supabase)', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = '';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
+    vi.clearAllMocks();
+  });
+
+  it('dbAddAllocation tut nichts ohne Supabase-Config', async () => {
+    const alloc: Allocation = {
+      id: 'al1', memberId: 'm1', projectId: 'p1',
+      percentage: 60, startDate: '2026-01-01', endDate: '2026-06-30',
+    };
+    await dbAddAllocation(alloc);
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it('dbUpdateAllocation tut nichts ohne Supabase-Config', async () => {
+    const alloc: Allocation = {
+      id: 'al1', memberId: 'm1', projectId: 'p1',
+      percentage: 60, startDate: '2026-01-01', endDate: '2026-06-30',
+    };
+    await dbUpdateAllocation(alloc);
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it('dbDeleteAllocation tut nichts ohne Supabase-Config', async () => {
+    await dbDeleteAllocation('al1');
     expect(mockFrom).not.toHaveBeenCalled();
   });
 });

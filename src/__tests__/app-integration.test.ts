@@ -22,12 +22,12 @@ describe('App Integration Configuration', () => {
     const portalPath = path.resolve(__dirname, '../components/layout/AppPortal.tsx');
     const content = fs.readFileSync(portalPath, 'utf-8');
     
-    expect(content).toContain('allow-same-origin');
+    // allow-same-origin + allow-scripts together defeats the sandbox (security fix)
+    expect(content).not.toContain('allow-same-origin');
     expect(content).toContain('allow-scripts');
     expect(content).toContain('allow-forms');
     expect(content).toContain('allow-popups');
     expect(content).toContain('allow-modals');
-    expect(content).toContain('allow-popups-to-escape-sandbox');
     expect(content).toContain('allow-downloads');
   });
 });

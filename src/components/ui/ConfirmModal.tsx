@@ -4,8 +4,9 @@ import { Modal } from './Modal';
 import { AlertTriangle, Info } from 'lucide-react';
 
 interface ConfirmModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onCancel?: () => void;
   onConfirm: () => void;
   title: string;
   message: string | ReactNode;
@@ -17,7 +18,8 @@ interface ConfirmModalProps {
 
 export function ConfirmModal({
   isOpen,
-  onClose,
+  onClose: onCloseProp,
+  onCancel,
   onConfirm,
   title,
   message,
@@ -26,6 +28,7 @@ export function ConfirmModal({
   variant = 'danger',
   isLoading = false
 }: ConfirmModalProps) {
+  const onClose = onCloseProp ?? onCancel ?? (() => undefined);
   
   const getIcon = () => {
     switch (variant) {

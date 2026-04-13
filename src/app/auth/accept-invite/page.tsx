@@ -60,7 +60,8 @@ function AcceptInviteContent() {
         const accessToken = params.get('access_token');
         const refreshToken = params.get('refresh_token');
 
-        if (accessToken && refreshToken) {
+        const isJwt = (t: string) => /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(t);
+        if (accessToken && refreshToken && isJwt(accessToken) && isJwt(refreshToken)) {
           const { data: { session: newSession }, error: setSessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,

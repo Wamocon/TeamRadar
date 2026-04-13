@@ -1,165 +1,550 @@
-'use client';
-import { useState } from 'react';
-import { useAppStore } from '@/stores/appStore';
-import { STATUS_CONFIG, type AvailabilityStatus } from '@/types';
-import { AvailabilityForm } from '@/components/team/AvailabilityForm';
-import { AvailabilityTimeline } from '@/components/dashboard/AvailabilityTimeline';
-import { CalendarDays, ChevronLeft, ChevronRight, Plus, Clock } from 'lucide-react';
+﻿'use client';
+import { useState, useMemo, useCallback } from 'react';
+import {
+  CalendarDays, ChevronLeft, ChevronRight, Plus, X, BookOpen,
+  Clock, MapPin, Upload, Info,
+  Loader, Trash2, Edit3,
+} from 'lucide-react';
 import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval,
-  format, addMonths, subMonths, isSameMonth, isToday,
+  format, addMonths, subMonths, isSameMonth, isToday, parseISO,
+  isSameDay, addDays,
 } from 'date-fns';
 import { de } from 'date-fns/locale';
 
+// ── Types ─────────────────────────────────────────────────
+interface CalendarEvent {
+  id: string;
+  title: string;
+  date: string;       // YYYY-MM-DD
+  startTime?: string; // HH:MM
+  endTime?: string;
+  location?: string;
+  description?: string;
+  attendees?: string[];
+  color?: string;
+  source?: 'manual' | 'ics_import' | 'google' | 'outlook';
+}
+
+const EVENT_COLORS = [
+  '#6366f1', '#8b5cf6', '#ec4899', '#f97316', '#22c55e', '#0ea5e9', '#f59e0b',
+];
+
+// ── ICS Parser (minimal) ──────────────────────────────────
+function parseICS(text: string): CalendarEvent[] {
+  const events: CalendarEvent[] = [];
+  const blocks = text.split('BEGIN:VEVENT');
+  for (let i = 1; i < blocks.length; i++) {
+    const block = blocks[i];
+    const get = (key: string) => {
+      const m = block.match(new RegExp(`${key}[^:]*:([^\r\n]+)`));
+      return m ? m[1].trim() : '';
+    };
+    const dtstart = get('DTSTART');
+    if (!dtstart) continue;
+    const dateStr = dtstart.replace(/T.*/, '').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+    const startTime = dtstart.includes('T') ? dtstart.replace(/.*T(\d{2})(\d{2}).*/, '$1:$2') : undefined;
+    const dtend = get('DTEND');
+    const endTime = dtend && dtend.includes('T') ? dtend.replace(/.*T(\d{2})(\d{2}).*/, '$1:$2') : undefined;
+    const summary = get('SUMMARY').replace(/\\,/g, ',').replace(/\\n/g, ' ').replace(/\\;/g, ';');
+    const location = get('LOCATION').replace(/\\,/g, ',');
+    const description = get('DESCRIPTION').replace(/\\n/g, '\n').replace(/\\,/g, ',').slice(0, 300);
+    events.push({
+      id: `ics-${Date.now()}-${i}`,
+      title: summary || '(Kein Titel)',
+      date: dateStr,
+      startTime,
+      endTime,
+      location: location || undefined,
+      description: description || undefined,
+      source: 'ics_import',
+      color: '#6366f1',
+    });
+  }
+  return events;
+}
+
+// ── How-To Popup ──────────────────────────────────────────
+function HowToPopup({ onClose }: { onClose: () => void }) {
+  const [tab, setTab] = useState<'google' | 'outlook'>('google');
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border dark:border-white/10 border-gray-200 w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto animate-scale-up"
+        onClick={(e) => e.stopPropagation()}>
+        <div className="p-5 border-b dark:border-white/10 border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+              <BookOpen size={17} className="text-indigo-500" />
+            </div>
+            <div>
+              <h2 className="text-base font-black dark:text-white text-gray-900">Kalender synchronisieren</h2>
+              <p className="text-[10px] dark:text-white/40 text-gray-500">Anleitung für Google & Outlook</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 border-none bg-transparent cursor-pointer dark:text-white/50 text-gray-500 transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="flex gap-1 p-4 pb-0">
+          {(['google', 'outlook'] as const).map((t) => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border-none cursor-pointer ${tab === t ? 'bg-[var(--primary)] text-white' : 'dark:text-white/40 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5 bg-transparent'}`}>
+              {t === 'google' ? '🔵 Google' : '🟫 Outlook'}
+            </button>
+          ))}
+        </div>
+
+        <div className="p-5 space-y-4">
+          {tab === 'google' ? (
+            <>
+              <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 text-xs dark:text-white/70 text-gray-700 leading-relaxed">
+                <strong className="text-blue-500">Option A – ICS-Import (empfohlen):</strong>
+                <ol className="mt-2 space-y-1.5 list-decimal list-inside">
+                  <li>Öffne <strong>calendar.google.com</strong></li>
+                  <li>Klicke rechts oben auf das Zahnrad → <strong>Einstellungen</strong></li>
+                  <li>Links unter "Einstellungen für meine Kalender" deinen Kalender wählen</li>
+                  <li>Ganz unten: <strong>"Kalender exportieren"</strong> → .ics herunterladen</li>
+                  <li>Zurück in TeamRadar: Schaltfläche <strong>"ICS importieren"</strong> klicken und Datei wählen</li>
+                </ol>
+              </div>
+              <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 text-xs dark:text-white/70 text-gray-700 leading-relaxed">
+                <strong className="text-blue-500">Option B – Direkt-Link (read-only):</strong>
+                <ol className="mt-2 space-y-1.5 list-decimal list-inside">
+                  <li>Kalender-Einstellungen → "Im iCal-Format" → ICAL-Link kopieren</li>
+                  <li>Den Link dem Administrator mitteilen für die Kalender-Integration</li>
+                </ol>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10 text-xs dark:text-white/70 text-gray-700 leading-relaxed">
+                <strong className="text-orange-500">Outlook Desktop (Export):</strong>
+                <ol className="mt-2 space-y-1.5 list-decimal list-inside">
+                  <li>Outlook öffnen → <strong>Datei → Öffnen und Exportieren → Importieren/Exportieren</strong></li>
+                  <li>Wähle <strong>"In Datei exportieren"</strong> → <strong>iCalendar-Format (.ics)"</strong></li>
+                  <li>Kalender und Zeitraum wählen → Speichern</li>
+                  <li>Zurück in TeamRadar: <strong>"ICS importieren"</strong> klicken und die .ics-Datei wählen</li>
+                </ol>
+              </div>
+              <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10 text-xs dark:text-white/70 text-gray-700 leading-relaxed">
+                <strong className="text-orange-500">Outlook Web (OWA):</strong>
+                <ol className="mt-2 space-y-1.5 list-decimal list-inside">
+                  <li>Auf <strong>outlook.office.com</strong> anmelden → Kalender-Ansicht</li>
+                  <li>Oben rechts: Zahnrad → <strong>Kalendereinstellungen</strong></li>
+                  <li>ICS → "Kalender veröffentlichen" → Link generieren und hier einfügen</li>
+                </ol>
+              </div>
+            </>
+          )}
+
+          <div className="p-3 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] text-xs dark:text-white/70 text-gray-700 flex items-start gap-2">
+            <Info size={13} className="text-[var(--primary)] shrink-0 mt-0.5" />
+            Importierte Termine werden lokal gespeichert. Für Live-Sync bitte den Administrator kontaktieren.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Event Form ────────────────────────────────────────────
+function EventForm({ initial, onSave, onCancel }: {
+  initial?: Partial<CalendarEvent>;
+  onSave: (ev: CalendarEvent) => void;
+  onCancel: () => void;
+}) {
+  const [title, setTitle] = useState(initial?.title || '');
+  const [date, setDate] = useState(initial?.date || new Date().toISOString().slice(0, 10));
+  const [startTime, setStartTime] = useState(initial?.startTime || '');
+  const [endTime, setEndTime] = useState(initial?.endTime || '');
+  const [location, setLocation] = useState(initial?.location || '');
+  const [description, setDescription] = useState(initial?.description || '');
+  const [color, setColor] = useState(initial?.color || EVENT_COLORS[0]);
+
+  const handleSave = () => {
+    if (!title.trim()) return;
+    onSave({
+      id: initial?.id || `ev-${Date.now()}`,
+      title: title.trim(),
+      date,
+      startTime: startTime || undefined,
+      endTime: endTime || undefined,
+      location: location || undefined,
+      description: description || undefined,
+      color,
+      source: initial?.source || 'manual',
+    });
+  };
+
+  return (
+    <div className="space-y-3 p-1">
+      <div className="space-y-1">
+        <label className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Titel *</label>
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Termintitel"
+          className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        <div className="col-span-1 space-y-1">
+          <label className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Datum</label>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+            className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-xs dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Von</label>
+          <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)}
+            className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-xs dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+        </div>
+        <div className="space-y-1">
+          <label className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Bis</label>
+          <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)}
+            className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-xs dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+        </div>
+      </div>
+      <div className="space-y-1">
+        <label className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Ort</label>
+        <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="z.B. Besprechungsraum A"
+          className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+      </div>
+      <div className="space-y-1">
+        <label className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Notiz</label>
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2}
+          className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] resize-none" />
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Farbe</span>
+        {EVENT_COLORS.map((c) => (
+          <button key={c} onClick={() => setColor(c)}
+            className={`w-5 h-5 rounded-full border-2 transition-all cursor-pointer ${color === c ? 'border-gray-900 dark:border-white scale-110' : 'border-transparent'}`}
+            style={{ background: c }} />
+        ))}
+      </div>
+      <div className="flex items-center justify-end gap-2 pt-2">
+        <button onClick={onCancel} className="px-4 py-2 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 border dark:border-white/10 border-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer bg-transparent transition-colors">Abbrechen</button>
+        <button onClick={handleSave} disabled={!title.trim()} className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 disabled:opacity-50 transition-opacity">
+          {initial?.id ? 'Speichern' : 'Erstellen'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Event Detail Popup ────────────────────────────────────
+function EventDetailPopup({ event, onClose, onEdit, onDelete }: {
+  event: CalendarEvent;
+  onClose: () => void;
+  onEdit: (ev: CalendarEvent) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const sourceLabel = { manual: 'Manuell', ics_import: 'ICS Import', google: 'Google', outlook: 'Outlook' };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border dark:border-white/10 border-gray-200 w-full max-w-md mx-4 animate-scale-up"
+        onClick={(e) => e.stopPropagation()}>
+        {/* Color bar */}
+        <div className="h-1 rounded-t-2xl" style={{ background: event.color || '#6366f1' }} />
+        <div className="p-5">
+          <div className="flex items-start justify-between mb-4">
+            <h2 className="text-lg font-black dark:text-white text-gray-900 leading-tight pr-2">{event.title}</h2>
+            <div className="flex items-center gap-1 shrink-0">
+              <button onClick={() => onEdit(event)} className="p-2 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all border-none bg-transparent cursor-pointer">
+                <Edit3 size={14} />
+              </button>
+              <button onClick={() => setConfirmDelete(true)} className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 hover:text-red-500 transition-all border-none bg-transparent cursor-pointer">
+                <Trash2 size={14} />
+              </button>
+              <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 border-none bg-transparent cursor-pointer dark:text-white/50 text-gray-500 transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-2 text-sm dark:text-white/70 text-gray-700">
+              <CalendarDays size={14} className="text-[var(--primary)] shrink-0" />
+              <span className="font-semibold">
+                {new Date(event.date).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+              </span>
+            </div>
+            {(event.startTime || event.endTime) && (
+              <div className="flex items-center gap-2 text-sm dark:text-white/60 text-gray-600">
+                <Clock size={14} className="text-[var(--primary)] shrink-0" />
+                <span>{event.startTime || '—'}{event.endTime ? ` – ${event.endTime}` : ''}</span>
+              </div>
+            )}
+            {event.location && (
+              <div className="flex items-center gap-2 text-sm dark:text-white/60 text-gray-600">
+                <MapPin size={14} className="text-[var(--primary)] shrink-0" />
+                <span>{event.location}</span>
+              </div>
+            )}
+            {event.description && (
+              <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.06] border-black/[0.06] text-xs dark:text-white/60 text-gray-600 whitespace-pre-line">
+                {event.description}
+              </div>
+            )}
+            {event.source && (
+              <div className="text-[10px] dark:text-white/30 text-gray-400">
+                Quelle: {sourceLabel[event.source] ?? event.source}
+              </div>
+            )}
+          </div>
+
+          {confirmDelete && (
+            <div className="mt-4 p-3 rounded-xl bg-red-500/5 border border-red-500/10 flex items-center gap-3">
+              <span className="text-xs text-red-500 flex-1">Termin wirklich löschen?</span>
+              <button onClick={() => { onDelete(event.id); onClose(); }} className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold cursor-pointer border-none hover:bg-red-600 transition-colors">Löschen</button>
+              <button onClick={() => setConfirmDelete(false)} className="px-3 py-1.5 rounded-lg bg-transparent text-gray-500 text-xs font-semibold cursor-pointer border dark:border-white/10 border-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Abbrechen</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Calendar Page ────────────────────────────────────
 export default function CalendarPage() {
-  const members = useAppStore((s) => s.members);
-  const availabilities = useAppStore((s) => s.availabilities);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'month' | 'timeline'>('month');
+  const [showHowTo, setShowHowTo] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState<string | null>(null);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
-  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
-  const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+  const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+  const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  const days = eachDayOfInterval({ start: calStart, end: calEnd });
   const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
-  const getStatusesForDay = (dateStr: string) => {
-    const entries = availabilities.filter((a) => a.date === dateStr);
-    const statuses: Partial<Record<AvailabilityStatus, number>> = {};
-    entries.forEach((e) => { statuses[e.status] = (statuses[e.status] || 0) + 1; });
-    return statuses;
+  const getEventsForDay = useCallback((dateStr: string) =>
+    events.filter((e) => e.date === dateStr),
+  [events]);
+
+  const handleAddEvent = (ev: CalendarEvent) => {
+    setEvents((prev) => {
+      const exists = prev.find((e) => e.id === ev.id);
+      return exists ? prev.map((e) => e.id === ev.id ? ev : e) : [...prev, ev];
+    });
+    setShowForm(false);
+    setEditingEvent(null);
   };
 
-  const timelineDate = selectedDate || new Date().toISOString().slice(0, 10);
+  const handleDeleteEvent = (id: string) => {
+    setEvents((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  const handleDayClick = (dateStr: string) => {
+    setSelectedDate(dateStr);
+    setShowForm(true);
+  };
+
+  const handleICSImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const imported = parseICS(text);
+      setEvents((prev) => [...prev, ...imported]);
+      setImportMsg(`${imported.length} Termin${imported.length !== 1 ? 'e' : ''} importiert.`);
+      setTimeout(() => setImportMsg(null), 3000);
+    } catch {
+      setImportMsg('Fehler beim Importieren.');
+    }
+    setImporting(false);
+    e.target.value = '';
+  };
+
+  const upcomingEvents = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    return events
+      .filter((e) => e.date >= today)
+      .sort((a, b) => a.date.localeCompare(b.date) || (a.startTime || '').localeCompare(b.startTime || ''))
+      .slice(0, 5);
+  }, [events]);
 
   return (
-    <div className="p-4 sm:p-6 w-full space-y-6">
+    <div className="p-4 sm:p-6 w-full space-y-5 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-fade-in">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-              <CalendarDays size={20} className="text-blue-500" />
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+              <CalendarDays size={20} className="text-indigo-500" />
             </div>
             Kalender
           </h1>
-          <p className="text-sm dark:text-white/40 text-gray-500 mt-1">Verfügbarkeiten im Monatsüberblick</p>
+          <p className="text-sm dark:text-white/40 text-gray-500 mt-1">Termine und Meetings im Überblick</p>
         </div>
-        <div className="flex gap-2">
-          <div className="flex gap-1 p-1 rounded-lg bg-slate-100 dark:bg-white/5">
-            <button onClick={() => setViewMode('month')}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors border-none cursor-pointer ${viewMode === 'month' ? 'bg-blue-500 text-white shadow-sm' : 'bg-transparent dark:text-white/40 text-gray-400'}`}>
-              Monat
-            </button>
-            <button onClick={() => setViewMode('timeline')}
-              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors border-none cursor-pointer ${viewMode === 'timeline' ? 'bg-blue-500 text-white shadow-sm' : 'bg-transparent dark:text-white/40 text-gray-400'}`}>
-              Timeline
-            </button>
-          </div>
-          <button onClick={() => { setSelectedDate(null); setShowForm(!showForm); }}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-md shadow-blue-500/20">
-            <Plus size={14} /> Eintragen
+
+        <div className="flex items-center gap-2">
+          {importMsg && (
+            <span className="text-xs text-green-500 font-semibold px-3 py-1.5 bg-green-500/10 rounded-lg">{importMsg}</span>
+          )}
+          <label className={`flex items-center gap-2 px-3 py-2 rounded-xl border dark:border-white/[0.08] border-black/[0.08] text-xs font-semibold dark:text-white/60 text-gray-600 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] hover:border-[rgba(99,102,241,0.3)] cursor-pointer transition-all ${importing ? 'opacity-50' : ''}`}>
+            {importing ? <Loader size={13} className="animate-spin" /> : <Upload size={13} />}
+            ICS importieren
+            <input type="file" accept=".ics,text/calendar" className="hidden" onChange={handleICSImport} disabled={importing} />
+          </label>
+          <button onClick={() => setShowHowTo(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border dark:border-white/[0.08] border-black/[0.08] text-xs font-semibold dark:text-white/60 text-gray-600 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] hover:border-[rgba(99,102,241,0.3)] cursor-pointer transition-all bg-transparent">
+            <BookOpen size={13} /> Anleitung
+          </button>
+          <button onClick={() => { setSelectedDate(null); setEditingEvent(null); setShowForm(true); }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none">
+            <Plus size={14} /> Neuer Termin
           </button>
         </div>
       </div>
 
-      {showForm && (
-        <div className="card-shimmer rounded-xl p-5 animate-fade-in">
-          <AvailabilityForm date={selectedDate ?? undefined} onClose={() => setShowForm(false)} />
-        </div>
-      )}
+      <div className="grid lg:grid-cols-4 gap-5">
+        {/* Calendar Grid */}
+        <div className="lg:col-span-3 card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+          {/* Month Nav */}
+          <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04] flex items-center justify-between">
+            <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+              className="p-2 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all border-none bg-transparent cursor-pointer">
+              <ChevronLeft size={16} />
+            </button>
+            <h2 className="text-base font-black dark:text-white text-gray-900">
+              {format(currentMonth, 'MMMM yyyy', { locale: de })}
+            </h2>
+            <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+              className="p-2 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all border-none bg-transparent cursor-pointer">
+              <ChevronRight size={16} />
+            </button>
+          </div>
 
-      {/* Month Navigation */}
-      <div className="flex items-center justify-center gap-4 animate-fade-in-delay-1">
-        <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="p-2 rounded-lg dark:text-white/40 text-gray-400 hover:bg-blue-500/10 hover:text-blue-500 transition-colors bg-transparent border-none cursor-pointer">
-          <ChevronLeft size={18} />
-        </button>
-        <h2 className="text-lg font-bold dark:text-white text-gray-900 min-w-[180px] text-center">
-          {format(currentMonth, 'MMMM yyyy', { locale: de })}
-        </h2>
-        <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          className="p-2 rounded-lg dark:text-white/40 text-gray-400 hover:bg-blue-500/10 hover:text-blue-500 transition-colors bg-transparent border-none cursor-pointer">
-          <ChevronRight size={18} />
-        </button>
-      </div>
-
-      {viewMode === 'month' ? (
-        /* ── Month Grid ──────────────────────── */
-        <div className="card-shimmer rounded-xl overflow-hidden animate-fade-in-delay-2">
-          <div className="grid grid-cols-7 border-b" style={{ borderColor: 'var(--border)' }}>
+          {/* Weekday header */}
+          <div className="grid grid-cols-7 border-b dark:border-white/[0.04] border-black/[0.04]">
             {weekdays.map((d) => (
-              <div key={d} className="text-center text-[10px] font-bold uppercase tracking-widest py-2.5 dark:text-white/25 text-gray-400">{d}</div>
+              <div key={d} className="text-center text-[10px] font-bold dark:text-white/30 text-gray-400 py-2 uppercase tracking-wide">{d}</div>
             ))}
           </div>
+
+          {/* Day cells */}
           <div className="grid grid-cols-7">
             {days.map((day) => {
               const dateStr = format(day, 'yyyy-MM-dd');
+              const dayEvents = getEventsForDay(dateStr);
               const inMonth = isSameMonth(day, currentMonth);
-              const todayFlag = isToday(day);
-              const statuses = getStatusesForDay(dateStr);
-              const entries = Object.entries(statuses) as [AvailabilityStatus, number][];
-              const totalEntries = entries.reduce((sum, [, c]) => sum + c, 0);
+              const today = isToday(day);
 
               return (
-                <button key={dateStr}
-                  onClick={() => { setSelectedDate(dateStr); setShowForm(true); }}
-                  className={`relative p-2 min-h-[80px] border-b border-r text-left transition-all bg-transparent cursor-pointer ${
-                    inMonth ? 'text-gray-700 dark:text-white/70' : 'text-gray-300 dark:text-white/15'
-                  } hover:bg-blue-500/5`}
-                  style={{ borderColor: 'var(--border)' }}>
-                  <div className={`text-xs font-bold ${
-                    todayFlag ? 'w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center' : ''
-                  }`}>
+                <div
+                  key={dateStr}
+                  onClick={() => inMonth && handleDayClick(dateStr)}
+                  className={`min-h-[80px] p-1.5 border-b border-r dark:border-white/[0.03] border-black/[0.03] transition-colors
+                    ${inMonth ? 'hover:bg-[var(--primary-light)] cursor-pointer' : 'opacity-30 cursor-default'}
+                    ${today ? 'bg-[var(--primary-light)]' : ''}`}
+                >
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mb-1 mx-auto
+                    ${today ? 'bg-[var(--primary)] text-white' : 'dark:text-white/50 text-gray-600'}`}>
                     {format(day, 'd')}
                   </div>
-                  {entries.length > 0 && (
-                    <div className="mt-1.5 space-y-0.5">
-                      {entries.slice(0, 3).map(([status, count]) => (
-                        <div key={status} className="flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: STATUS_CONFIG[status].color }} />
-                          <span className="text-[8px] dark:text-white/30 text-gray-400 truncate">
-                            {count}× {STATUS_CONFIG[status].label}
-                          </span>
-                        </div>
-                      ))}
-                      {entries.length > 3 && (
-                        <span className="text-[8px] dark:text-white/20 text-gray-300">+{entries.length - 3} mehr</span>
-                      )}
-                    </div>
-                  )}
-                </button>
+                  <div className="space-y-0.5">
+                    {dayEvents.slice(0, 3).map((ev) => (
+                      <div key={ev.id}
+                        onClick={(e) => { e.stopPropagation(); setSelectedEvent(ev); }}
+                        className="text-[9px] font-semibold text-white rounded px-1 py-0.5 truncate cursor-pointer hover:opacity-80 transition-opacity"
+                        style={{ background: ev.color || '#6366f1' }}>
+                        {ev.startTime ? `${ev.startTime} ` : ''}{ev.title}
+                      </div>
+                    ))}
+                    {dayEvents.length > 3 && (
+                      <div className="text-[9px] dark:text-white/30 text-gray-400 pl-1">+{dayEvents.length - 3} mehr</div>
+                    )}
+                  </div>
+                </div>
               );
             })}
           </div>
         </div>
-      ) : (
-        /* ── Timeline View ────────────────────── */
-        <div className="card-shimmer rounded-xl p-5 animate-fade-in-delay-2">
-          <div className="flex items-center gap-2 mb-4">
-            <Clock size={14} className="dark:text-white/40 text-gray-400" />
-            <h2 className="text-xs font-bold dark:text-white/50 text-gray-600 uppercase tracking-wider">
-              Timeline — {format(new Date(timelineDate), 'EEEE, d. MMMM', { locale: de })}
-            </h2>
+
+        {/* Sidebar: Upcoming Events */}
+        <div className="space-y-4">
+          <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+            <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04]">
+              <h3 className="text-sm font-black dark:text-white text-gray-900">Nächste Termine</h3>
+            </div>
+            <div className="p-3 space-y-2">
+              {upcomingEvents.length === 0 && (
+                <p className="text-xs dark:text-white/30 text-gray-400 text-center py-6">Keine bevorstehenden Termine</p>
+              )}
+              {upcomingEvents.map((ev) => (
+                <button key={ev.id} onClick={() => setSelectedEvent(ev)}
+                  className="w-full text-left p-2.5 rounded-xl border dark:border-white/[0.05] border-black/[0.04] hover:bg-[var(--primary-light)] transition-all cursor-pointer bg-transparent group relative overflow-hidden">
+                  <div className="absolute left-0 top-0 bottom-0 w-0.5" style={{ background: ev.color || '#6366f1' }} />
+                  <div className="pl-2">
+                    <div className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-[var(--primary)] transition-colors">{ev.title}</div>
+                    <div className="text-[10px] dark:text-white/40 text-gray-500 mt-0.5">
+                      {new Date(ev.date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short' })}
+                      {ev.startTime ? ` · ${ev.startTime}` : ''}
+                    </div>
+                    {ev.location && <div className="text-[10px] dark:text-white/30 text-gray-400 truncate">{ev.location}</div>}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-          <AvailabilityTimeline members={members} date={timelineDate} />
+
+          {/* Stats */}
+          <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-4 space-y-2">
+            <h3 className="text-xs font-black dark:text-white/40 text-gray-500 uppercase tracking-wide">Statistik</h3>
+            {[
+              { label: 'Termine gesamt', value: events.length },
+              { label: 'Diesen Monat', value: events.filter((e) => e.date.startsWith(format(currentMonth, 'yyyy-MM'))).length },
+              { label: 'Importiert (ICS)', value: events.filter((e) => e.source === 'ics_import').length },
+            ].map((s) => (
+              <div key={s.label} className="flex items-center justify-between text-xs">
+                <span className="dark:text-white/40 text-gray-500">{s.label}</span>
+                <span className="font-black text-[var(--primary)]">{s.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* New/Edit Termin Modal */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => { setShowForm(false); setEditingEvent(null); }}>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border dark:border-white/10 border-gray-200 w-full max-w-md mx-4 animate-scale-up"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="p-5 border-b dark:border-white/10 border-gray-100 flex items-center justify-between">
+              <h2 className="text-base font-black dark:text-white text-gray-900">{editingEvent ? 'Termin bearbeiten' : 'Neuer Termin'}</h2>
+              <button onClick={() => { setShowForm(false); setEditingEvent(null); }} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 border-none bg-transparent cursor-pointer dark:text-white/50 text-gray-500 transition-colors"><X size={16} /></button>
+            </div>
+            <div className="p-5">
+              <EventForm
+                initial={editingEvent ? editingEvent : (selectedDate ? { date: selectedDate } : undefined)}
+                onSave={handleAddEvent}
+                onCancel={() => { setShowForm(false); setEditingEvent(null); }}
+              />
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3 justify-center animate-fade-in-delay-3">
-        {(Object.entries(STATUS_CONFIG) as [AvailabilityStatus, typeof STATUS_CONFIG[AvailabilityStatus]][]).map(
-          ([key, config]) => (
-            <div key={key} className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: config.color }} />
-              <span className="text-[10px] dark:text-white/35 text-gray-500">{config.label}</span>
-            </div>
-          )
-        )}
-      </div>
+      {/* Event Detail */}
+      {selectedEvent && (
+        <EventDetailPopup
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          onEdit={(ev) => { setEditingEvent(ev); setSelectedEvent(null); setShowForm(true); }}
+          onDelete={handleDeleteEvent}
+        />
+      )}
+
+      {/* How-To */}
+      {showHowTo && <HowToPopup onClose={() => setShowHowTo(false)} />}
     </div>
   );
 }

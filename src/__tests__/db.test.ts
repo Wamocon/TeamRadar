@@ -8,9 +8,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mockInsert = vi.fn().mockReturnValue({ error: null });
 const mockUpdate = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
 const mockDelete = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
+const mockOrder = vi.fn().mockReturnValue({ data: [], error: null });
 const mockSelect = vi.fn().mockReturnValue({
+  // Unterstützt sowohl .select().order() als auch .select().eq().order()
+  order: mockOrder,
   eq: vi.fn().mockReturnValue({
-    order: vi.fn().mockReturnValue({ data: [], error: null }),
+    order: mockOrder,
   }),
 });
 

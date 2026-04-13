@@ -1,40 +1,159 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Shield, 
-  Database, 
-  Users, 
-  PlusCircle, 
-  Building, 
-  Mail, 
-  Image as ImageIcon,
-  Power,
-  Save,
-  Loader,
-  ChevronRight,
-  Layout
+import {
+  Shield, Database, Users, PlusCircle, Building, Mail, Image as ImageIcon,
+  Power, Save, Loader, ChevronRight, Tag, Trash2, Plus, Edit3,
+  Activity, Bell, Lock, Key, Palette, Globe, Zap, Server, Eye,
+  EyeOff, RefreshCw, Download, AlertTriangle, CheckCircle, Info,
+  ToggleLeft, ToggleRight, Cpu, HardDrive, Wifi, Clock, BarChart3,
+  FileText, Settings2, Moon, Sun, Layers, UserPlus, Building2,
+  MapPin, Phone, CreditCard, Crown, Trash,
 } from 'lucide-react';
 import { useAppStore } from '@/stores/appStore';
 import { STATUS_CONFIG } from '@/types';
 import Link from 'next/link';
 import { updateSystemSettingsAction } from '@/lib/actions/settingsActions';
+import { createClient } from '@/lib/supabase/client';
+
+interface DayCategory {
+  id: string;
+  kuerzel: string;
+  label: string;
+  color: string;
+  bg_color: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+const DEFAULT_KUERZEL = [
+  { kuerzel: 'U',   label: 'Urlaub',        color: '#ffffff', bg_color: '#8b5cf6', sort_order: 1,  is_active: true },
+  { kuerzel: 'K',   label: 'Krank',          color: '#ffffff', bg_color: '#ec4899', sort_order: 2,  is_active: true },
+  { kuerzel: 'eP',  label: 'Ext. Projekt',   color: '#ffffff', bg_color: '#f97316', sort_order: 3,  is_active: true },
+  { kuerzel: 'BeP', label: 'Büro ext.',       color: '#ffffff', bg_color: '#fb923c', sort_order: 4,  is_active: true },
+  { kuerzel: 'B',   label: 'Büro intern',    color: '#ffffff', bg_color: '#6366f1', sort_order: 5,  is_active: true },
+  { kuerzel: 'H',   label: 'Homeoffice',     color: '#ffffff', bg_color: '#06b6d4', sort_order: 6,  is_active: true },
+  { kuerzel: 'V',   label: 'Verfügbar',       color: '#166534', bg_color: '#bbf7d0', sort_order: 7,  is_active: true },
+  { kuerzel: 'S',   label: 'Schulung',        color: '#ffffff', bg_color: '#a855f7', sort_order: 8,  is_active: true },
+  { kuerzel: 'P',   label: 'Presales',        color: '#ffffff', bg_color: '#0ea5e9', sort_order: 9,  is_active: true },
+];
+
+type AdminTab =
+  | 'overview'
+  | 'members'
+  | 'organisation'
+  | 'branding'
+  | 'security'
+  | 'notifications'
+  | 'appearance'
+  | 'kuerzel'
+  | 'integrations'
+  | 'advanced'
+  | 'logs';
 
 export default function AdminSettingsPage() {
   const hasMinRole = useAppStore((s) => s.hasMinRole);
   const systemSettings = useAppStore((s) => s.systemSettings);
   const updateSystemSettings = useAppStore((s) => s.updateSystemSettings);
   const loadSystemSettings = useAppStore((s) => s.loadSystemSettings);
-  
+  const members = useAppStore((s) => s.members);
+  const projects = useAppStore((s) => s.projects);
   const isAdmin = hasMinRole('admin');
 
-  // Form states
+  const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+
+  // Branding
   const [orgName, setOrgName] = useState('');
   const [orgLogoUrl, setOrgLogoUrl] = useState('');
   const [supportEmail, setSupportEmail] = useState('');
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Security
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [sessionTimeout, setSessionTimeout] = useState(60);
+  const [passwordMinLength, setPasswordMinLength] = useState(8);
+  const [allowedDomains, setAllowedDomains] = useState('');
+  const [ipWhitelist, setIpWhitelist] = useState('');
+
+  // Notifications
+  const [emailNotifNew, setEmailNotifNew] = useState(true);
+  const [emailNotifLeave, setEmailNotifLeave] = useState(true);
+  const [emailNotifReport, setEmailNotifReport] = useState(false);
+  const [slackWebhook, setSlackWebhook] = useState('');
+  const [teamsWebhook, setTeamsWebhook] = useState('');
+
+  // Appearance
+  const [primaryColor, setPrimaryColor] = useState('#6366f1');
+  const [companyFont, setCompanyFont] = useState('Inter');
+  const [defaultTheme, setDefaultTheme] = useState<'light' | 'dark' | 'system'>('system');
+  const [sidebarCompact, setSidebarCompact] = useState(false);
+  const [dateFormat, setDateFormat] = useState('DD.MM.YYYY');
+  const [language, setLanguage] = useState('de');
+  const [timezone, setTimezone] = useState('Europe/Berlin');
+
+  // Integrations
+  const [googleCalendarEnabled, setGoogleCalendarEnabled] = useState(false);
+  const [outlookEnabled, setOutlookEnabled] = useState(false);
+  const [jiraEnabled, setJiraEnabled] = useState(false);
+  const [jiraUrl, setJiraUrl] = useState('');
+  const [confluenceEnabled, setConfluenceEnabled] = useState(false);
+  const [apiKeyVisible, setApiKeyVisible] = useState(false);
+  const [apiKey] = useState(() => {
+    const arr = new Uint8Array(12);
+    crypto.getRandomValues(arr);
+    return 'tr-' + Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('');
+  });
+
+  // Advanced
+  const [dataRetentionDays, setDataRetentionDays] = useState(365);
+  const [autoBackup, setAutoBackup] = useState(true);
+  const [debugMode, setDebugMode] = useState(false);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
+  const [gdprMode, setGdprMode] = useState(true);
+
+  // Organisation
+  const [orgAddress, setOrgAddress] = useState('');
+  const [orgCity, setOrgCity] = useState('');
+  const [orgCountry, setOrgCountry] = useState('Deutschland');
+  const [orgPhone, setOrgPhone] = useState('');
+  const [orgWebsite, setOrgWebsite] = useState('');
+  const [orgPlan, setOrgPlan] = useState<'starter' | 'pro' | 'enterprise'>('pro');
+
+  // Mitarbeiter einladen
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<'employee' | 'department_lead' | 'cio'>('employee');
+  const [inviteDepartment, setInviteDepartment] = useState('');
+  const [inviteMsg, setInviteMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [inviteLoading, setInviteLoading] = useState(false);
+
+  // Kürzel
+  const [categories, setCategories] = useState<DayCategory[]>([]);
+  const [catLoading, setCatLoading] = useState(false);
+  const [newKuerzel, setNewKuerzel] = useState('');
+  const [newLabel, setNewLabel] = useState('');
+  const [newBgColor, setNewBgColor] = useState('#6366f1');
+  const [newTextColor, setNewTextColor] = useState('#ffffff');
+  const [catMsg, setCatMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [editingCat, setEditingCat] = useState<DayCategory | null>(null);
+
+  const loadCategories = async () => {
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.from('day_categories').select('*').order('sort_order');
+      if (error) {
+        setCatMsg({ type: 'error', text: `DB-Fehler: ${error.message} — Bitte Migration ausführen: npx supabase migration up` });
+      } else if (data) {
+        setCategories(data);
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setCatMsg({ type: 'error', text: `Verbindungsfehler: ${msg}` });
+    }
+  };
+
+  useEffect(() => { loadCategories(); }, []);
 
   useEffect(() => {
     if (!systemSettings) {
@@ -51,248 +170,773 @@ export default function AdminSettingsPage() {
     return (
       <div className="p-6 w-full flex items-center justify-center min-h-[50vh]">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto text-red-500">
-            <Shield size={32} />
-          </div>
+          <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto text-red-500"><Shield size={32} /></div>
           <h2 className="text-xl font-bold dark:text-white">Zugriff verweigert</h2>
-          <p className="text-sm dark:text-white/40 text-gray-500 max-w-xs font-medium">
-            Diese Seite ist nur für Administratoren zugänglich. Bitte wende dich an deinen IT-Verantwortlichen.
-          </p>
-          <Link href="/settings" className="inline-flex items-center gap-2 text-blue-500 text-sm font-bold no-underline hover:underline pt-4">
-            Zurück zur Übersicht <ChevronRight size={14} />
+          <p className="text-sm dark:text-white/40 text-gray-500 max-w-xs font-medium">Diese Seite ist nur für Administratoren zugänglich.</p>
+          <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-[var(--primary)] no-underline hover:underline pt-4">
+            Zum Dashboard <ChevronRight size={14} />
           </Link>
         </div>
       </div>
     );
   }
 
-  const handleSave = async () => {
+  const handleSaveBranding = async () => {
     setIsSaving(true);
     setMsg(null);
-
-    const result = await updateSystemSettingsAction({
-      orgName,
-      orgLogoUrl,
-      supportEmail,
-      maintenanceMode
-    });
-
+    const result = await updateSystemSettingsAction({ orgName, orgLogoUrl, supportEmail, maintenanceMode });
     if (result.success) {
       updateSystemSettings({ orgName, orgLogoUrl, supportEmail, maintenanceMode });
-      setMsg({ type: 'success', text: 'Systemeinstellungen erfolgreich gespeichert.' });
+      setMsg({ type: 'success', text: 'Einstellungen gespeichert.' });
     } else {
       setMsg({ type: 'error', text: result.error || 'Fehler beim Speichern.' });
     }
-    
     setIsSaving(false);
     setTimeout(() => setMsg(null), 3000);
   };
 
+  const handleSeedDefaults = async () => {
+    setCatLoading(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.from('day_categories').insert(DEFAULT_KUERZEL);
+      if (!error) {
+        setCatMsg({ type: 'success', text: 'Standard-Kürzel eingefügt.' });
+        await loadCategories();
+      } else {
+        setCatMsg({ type: 'error', text: error.message });
+      }
+    } catch (e: any) { setCatMsg({ type: 'error', text: e.message }); }
+    setCatLoading(false);
+    setTimeout(() => setCatMsg(null), 3000);
+  };
+
+  const handleAddCategory = async () => {
+    if (!newKuerzel.trim() || !newLabel.trim()) return;
+    setCatLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.from('day_categories').insert({
+      kuerzel: newKuerzel.trim().slice(0, 4),
+      label: newLabel.trim(),
+      color: newTextColor,
+      bg_color: newBgColor,
+      sort_order: categories.length + 1,
+      is_active: true,
+    });
+    if (!error) {
+      setNewKuerzel(''); setNewLabel('');
+      setCatMsg({ type: 'success', text: 'Kürzel gespeichert.' });
+      await loadCategories();
+    } else {
+      setCatMsg({ type: 'error', text: error.message });
+    }
+    setCatLoading(false);
+    setTimeout(() => setCatMsg(null), 3000);
+  };
+
+  const handleUpdateCategory = async (cat: DayCategory, updates: Partial<DayCategory>) => {
+    const supabase = createClient();
+    const { error } = await supabase.from('day_categories').update(updates).eq('id', cat.id);
+    if (!error) {
+      setCategories((prev) => prev.map((c) => c.id === cat.id ? { ...c, ...updates } : c));
+      setEditingCat(null);
+      setCatMsg({ type: 'success', text: 'Kürzel aktualisiert.' });
+      setTimeout(() => setCatMsg(null), 2000);
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    const supabase = createClient();
+    await supabase.from('day_categories').delete().eq('id', id);
+    setCategories((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const handleToggleActive = async (cat: DayCategory) => {
+    const supabase = createClient();
+    await supabase.from('day_categories').update({ is_active: !cat.is_active }).eq('id', cat.id);
+    setCategories((prev) => prev.map((c) => c.id === cat.id ? { ...c, is_active: !c.is_active } : c));
+  };
+
+  const handleInvite = async () => {
+    if (!inviteEmail.trim()) return;
+    setInviteLoading(true);
+    setInviteMsg(null);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.admin.inviteUserByEmail(inviteEmail.trim(), {
+        data: { role: inviteRole, department: inviteDepartment.trim() || undefined },
+      });
+      if (error) throw error;
+      setInviteMsg({ type: 'success', text: `Einladung an ${inviteEmail} gesendet.` });
+      setInviteEmail('');
+      setInviteDepartment('');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setInviteMsg({ type: 'error', text: msg });
+    }
+    setInviteLoading(false);
+    setTimeout(() => setInviteMsg(null), 4000);
+  };
+
+  const TABS: { id: AdminTab; label: string; icon: any; badge?: number }[] = [
+    { id: 'overview', label: 'Übersicht', icon: BarChart3 },
+    { id: 'members', label: 'Mitarbeiter', icon: UserPlus },
+    { id: 'organisation', label: 'Organisation', icon: Building2 },
+    { id: 'branding', label: 'Branding', icon: Building },
+    { id: 'security', label: 'Sicherheit', icon: Lock },
+    { id: 'notifications', label: 'Benachrichtigungen', icon: Bell },
+    { id: 'appearance', label: 'Darstellung', icon: Palette },
+    { id: 'kuerzel', label: 'Kürzel', icon: Tag },
+    { id: 'integrations', label: 'Integrationen', icon: Zap },
+    { id: 'advanced', label: 'Erweitert', icon: Settings2 },
+    { id: 'logs', label: 'Aktivitätslog', icon: FileText },
+  ];
+
+  const InputField = ({ label, value, onChange, type = 'text', placeholder, icon: Icon }: {
+    label: string; value: string; onChange: (v: string) => void;
+    type?: string; placeholder?: string; icon?: any;
+  }) => (
+    <div className="space-y-1">
+      <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">{label}</label>
+      <div className="relative">
+        {Icon && <Icon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />}
+        <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
+          className={`w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 ${Icon ? 'pl-9' : 'pl-4'} pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all`} />
+      </div>
+    </div>
+  );
+
+  const Toggle = ({ label, value, onChange, desc }: { label: string; value: boolean; onChange: (v: boolean) => void; desc?: string }) => (
+    <div className="flex items-center justify-between py-3 border-b dark:border-white/[0.04] border-black/[0.04] last:border-0">
+      <div>
+        <div className="text-sm font-semibold dark:text-white text-gray-900">{label}</div>
+        {desc && <div className="text-[10px] dark:text-white/30 text-gray-400 mt-0.5">{desc}</div>}
+      </div>
+      <button onClick={() => onChange(!value)}
+        className={`w-12 h-6 rounded-full transition-all relative shrink-0 border-none cursor-pointer ${value ? 'bg-[var(--primary)]' : 'bg-gray-200 dark:bg-white/10'}`}>
+        <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${value ? 'right-0.5' : 'left-0.5'}`} />
+      </button>
+    </div>
+  );
+
   return (
-    <div className="p-6 w-full space-y-10 max-w-6xl mx-auto animate-fade-in pb-20">
+    <div className="p-4 sm:p-6 w-full animate-fade-in pb-20">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-4xl font-black dark:text-white text-gray-900 flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-xl shadow-indigo-500/20">
-              <Shield size={30} className="text-indigo-500" />
+          <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-lg shadow-indigo-500/10">
+              <Shield size={20} className="text-indigo-500" />
             </div>
             Administration
           </h1>
-          <p className="text-base dark:text-white/40 text-gray-500 mt-2 font-medium">
-            Zentrale Steuerung der TeamRadar Plattform und globales Branding.
-          </p>
+          <p className="text-sm dark:text-white/40 text-gray-500 mt-1">Systemkonfiguration, Sicherheit und Plattformsteuerung</p>
         </div>
-
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50"
-        >
-          {isSaving ? <Loader size={18} className="animate-spin" /> : <Save size={18} />}
-          {isSaving ? 'Speichere...' : 'System speichern'}
-        </button>
       </div>
 
       {msg && (
-        <div className={`p-4 rounded-xl text-sm font-bold border animate-slide-up ${
-          msg.type === 'success' 
-          ? 'bg-green-500/10 text-green-500 border-green-500/20' 
-          : 'bg-red-500/10 text-red-500 border-red-500/20'
-        }`}>
+        <div className={`mb-4 flex items-center gap-2 p-3 rounded-xl text-sm font-semibold border ${msg.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+          {msg.type === 'success' ? <CheckCircle size={16} /> : <AlertTriangle size={16} />}
           {msg.text}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left: Branding & Core Settings */}
-        <div className="lg:col-span-8 space-y-8">
-          <div className="card-shimmer rounded-3xl border border-slate-100 dark:border-white/5 p-8 space-y-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                <Building size={20} className="text-indigo-500" />
-              </div>
-              <h2 className="text-xl font-black dark:text-white">Organisations-Branding</h2>
-            </div>
+      <div className="flex gap-6">
+        {/* Sidebar nav */}
+        <nav className="shrink-0 w-44 space-y-0.5">
+          {TABS.map((tab) => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left text-xs font-semibold transition-all border-none cursor-pointer ${activeTab === tab.id ? 'bg-[var(--primary-light)] text-[var(--primary)] border border-[rgba(99,102,241,0.2)]' : 'dark:text-white/50 text-gray-600 hover:bg-black/[0.03] dark:hover:bg-white/[0.03] bg-transparent'}`}>
+              <tab.icon size={14} />
+              {tab.label}
+              {tab.badge ? <span className="ml-auto px-1.5 py-0.5 rounded-full bg-red-500 text-white text-[9px] font-black">{tab.badge}</span> : null}
+            </button>
+          ))}
+        </nav>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Name der Organisation</label>
-                <div className="relative">
-                  <Building size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={orgName}
-                    onChange={(e) => setOrgName(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/[0.1] rounded-xl py-3 pl-10 pr-4 text-sm font-medium focus:border-indigo-500 outline-none transition-all"
-                    placeholder="Wamocon TeamRadar"
-                  />
-                </div>
-              </div>
+        {/* Content */}
+        <div className="flex-1 min-w-0">
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Logo URL</label>
-                <div className="relative">
-                  <ImageIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={orgLogoUrl}
-                    onChange={(e) => setOrgLogoUrl(e.target.value)}
-                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.1] dark:border-white/[0.1] rounded-xl py-3 pl-10 pr-4 text-sm font-medium focus:border-indigo-500 outline-none transition-all"
-                    placeholder="https://..."
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Support E-Mail</label>
-                <div className="relative">
-                  <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="email"
-                    value={supportEmail}
-                    onChange={(e) => setSupportEmail(e.target.value)}
-                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border border-black/[0.1] dark:border-white/[0.1] rounded-xl py-3 pl-10 pr-4 text-sm font-medium focus:border-indigo-500 outline-none transition-all"
-                    placeholder="support@firma.de"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-6 border-t border-slate-100 dark:border-white/5">
-              <div className="flex items-center justify-between p-6 rounded-2xl bg-red-500/5 border border-red-500/10">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center">
-                    <Power size={24} className="text-red-500" />
+          {/* ═══ ÜBERSICHT ═════════════════════════════════ */}
+          {activeTab === 'overview' && (
+            <div className="space-y-5">
+              {/* System Health */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { label: 'Mitglieder', value: members.length, icon: Users, color: '#6366f1' },
+                  { label: 'Projekte', value: projects.length, icon: Layers, color: '#8b5cf6' },
+                  { label: 'Kürzel', value: categories.length, icon: Tag, color: '#f97316' },
+                  { label: 'Status', value: 'OK', icon: Activity, color: '#22c55e' },
+                ].map((s) => (
+                  <div key={s.label} className="card-shimmer rounded-xl p-4 border dark:border-white/[0.06] border-black/[0.06]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <s.icon size={14} style={{ color: s.color }} />
+                      <span className="text-[10px] dark:text-white/40 text-gray-500">{s.label}</span>
+                    </div>
+                    <div className="text-2xl font-black" style={{ color: s.color }}>{s.value}</div>
                   </div>
-                  <div>
-                    <div className="text-base font-black text-red-500">Wartungsmodus</div>
-                    <div className="text-xs text-red-500/60 font-medium">Deaktiviert den Zugriff für alle Nicht-Admins</div>
+                ))}
+              </div>
+
+              {/* Services */}
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-4 space-y-3">
+                <h3 className="text-sm font-black dark:text-white text-gray-900">System-Dienste</h3>
+                {[
+                  { name: 'Supabase Datenbank', status: 'OK', icon: Database, detail: 'PostgreSQL · teamradar-dev' },
+                  { name: 'Authentifizierung', status: 'OK', icon: Key, detail: 'GoTrue / JWT' },
+                  { name: 'Next.js App Router', status: 'OK', icon: Server, detail: 'v15 · React 19' },
+                  { name: 'Wartungsmodus', status: maintenanceMode ? 'AKTIV' : 'Inaktiv', icon: Power, detail: maintenanceMode ? 'Nur Admins haben Zugriff' : 'Alle Nutzer aktiv', statusColor: maintenanceMode ? '#f59e0b' : '#22c55e' },
+                ].map((s) => (
+                  <div key={s.name} className="flex items-center justify-between p-3 rounded-xl bg-black/[0.01] dark:bg-white/[0.01] border dark:border-white/[0.04] border-black/[0.04]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-[var(--primary-light)] flex items-center justify-center">
+                        <s.icon size={14} className="text-[var(--primary)]" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-semibold dark:text-white text-gray-900">{s.name}</div>
+                        <div className="text-[10px] dark:text-white/30 text-gray-400">{s.detail}</div>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black" style={{ background: `${(s as any).statusColor || '#22c55e'}15`, color: (s as any).statusColor || '#22c55e' }}>{s.status}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick links */}
+              <div className="grid sm:grid-cols-3 gap-3">
+                {[
+                  { href: '/admin/organisation', label: 'Organisation verwalten', icon: Building, color: '#6366f1' },
+                  { href: '/members', label: 'Mitglieder & Rollen', icon: Users, color: '#8b5cf6' },
+                  { href: '/reports', label: 'System-Reports', icon: BarChart3, color: '#06b6d4' },
+                  { href: '/utilization', label: 'Auslastungsanalyse', icon: Activity, color: '#f97316' },
+                  { href: '/members?action=invite', label: 'Nutzer einladen', icon: PlusCircle, color: '#22c55e' },
+                  { href: '/year', label: 'Jahresübersicht', icon: Layers, color: '#f59e0b' },
+                ].map((q) => (
+                  <Link key={q.href} href={q.href}
+                    className="flex items-center gap-3 p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06] hover:border-[rgba(99,102,241,0.3)] hover:bg-[var(--primary-light)] transition-all no-underline group">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${q.color}15` }}>
+                      <q.icon size={14} style={{ color: q.color }} />
+                    </div>
+                    <span className="text-xs font-semibold dark:text-white text-gray-900 group-hover:text-[var(--primary)] transition-colors">{q.label}</span>
+                    <ChevronRight size={12} className="ml-auto dark:text-white/20 text-gray-300 group-hover:text-[var(--primary)] transition-colors" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ═══ MITARBEITER EINLADEN ══════════════════════ */}
+          {activeTab === 'members' && (
+            <div className="space-y-5">
+              {/* Invite form */}
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2">
+                  <UserPlus size={14} className="text-[var(--primary)]" /> Neuen Mitarbeiter einladen
+                </h3>
+                {inviteMsg && (
+                  <div className={`p-3 rounded-xl text-xs font-bold border ${inviteMsg.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
+                    {inviteMsg.text}
+                  </div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2 space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">E-Mail-Adresse *</label>
+                    <div className="relative">
+                      <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
+                      <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)}
+                        placeholder="mitarbeiter@firma.de"
+                        className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Rolle</label>
+                    <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as typeof inviteRole)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all">
+                      <option value="employee">Mitarbeiter</option>
+                      <option value="department_lead">Abteilungsleiter</option>
+                      <option value="cio">CIO</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Abteilung (optional)</label>
+                    <input value={inviteDepartment} onChange={(e) => setInviteDepartment(e.target.value)}
+                      placeholder="z.B. Beratung, IT..."
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
                   </div>
                 </div>
-                <button 
-                  onClick={() => setMaintenanceMode(!maintenanceMode)}
-                  className={`w-14 h-7 rounded-full transition-all relative ${maintenanceMode ? 'bg-red-500 shadow-lg shadow-red-500/30' : 'bg-slate-300 dark:bg-white/10'}`}
-                >
-                  <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${maintenanceMode ? 'right-1' : 'left-1'}`} />
+                <button onClick={handleInvite} disabled={inviteLoading || !inviteEmail.trim()}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold border-none cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity">
+                  {inviteLoading ? <Loader size={14} className="animate-spin" /> : <UserPlus size={14} />}
+                  Einladung senden
                 </button>
               </div>
-            </div>
-          </div>
 
-          {/* Quick Shortcuts */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="card-shimmer rounded-3xl border border-slate-100 dark:border-white/5 p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-                  <Users size={20} />
+              {/* Current members */}
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-3">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2">
+                  <Users size={14} className="text-[var(--primary)]" /> Aktuelle Mitarbeiter ({members.length})
+                </h3>
+                <div className="space-y-1 max-h-[400px] overflow-y-auto">
+                  {members.map((m) => (
+                    <div key={m.id} className="flex items-center justify-between p-2.5 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] font-black text-xs shrink-0">
+                          {m.name.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold dark:text-white text-gray-900">{m.name}</div>
+                          <div className="text-[10px] dark:text-white/30 text-gray-400">{m.department || 'Keine Abteilung'}</div>
+                        </div>
+                      </div>
+                      <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-[var(--primary-light)] text-[var(--primary)]">{m.role || 'employee'}</span>
+                    </div>
+                  ))}
+                  {members.length === 0 && <div className="text-center py-6 text-sm dark:text-white/30 text-gray-400">Keine Mitarbeiter vorhanden.</div>}
                 </div>
-                <h3 className="text-lg font-black dark:text-white">Benutzerverwaltung</h3>
-              </div>
-              <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                Verwalte Teammitglieder, bearbeite Rollen und lade neue Personen ein.
-              </p>
-              <div className="pt-2">
-                <Link href="/members" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-blue-500 text-white text-xs font-bold uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg shadow-blue-500/20">
-                  Mitglieder ansehen <ChevronRight size={14} />
-                </Link>
               </div>
             </div>
+          )}
 
-            <div className="card-shimmer rounded-3xl border border-black/[0.06] dark:border-white/[0.06] p-6 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                  <Layout size={20} />
-                </div>
-                <h3 className="text-lg font-black dark:text-white">Organisation</h3>
-              </div>
-              <p className="text-xs text-slate-500 font-medium leading-relaxed">
-                Strukturieren Sie Teams und definieren Sie Verantwortlichkeiten.
-              </p>
-              <div className="pt-2">
-                <Link href="/teams" className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-emerald-500 text-white text-xs font-bold uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20">
-                  Teams verwalten <ChevronRight size={14} />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right: System Status & Metrics */}
-        <div className="lg:col-span-4 space-y-8">
-          <div className="card-shimmer rounded-3xl border border-slate-100 dark:border-white/5 p-6 space-y-6">
-            <h3 className="text-sm font-black uppercase tracking-widest text-slate-400">System Gesundheit</h3>
-            
-            <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/[0.05]">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Database size={14} className="text-indigo-500" />
-                    <span className="text-xs font-bold dark:text-white">Datenbank</span>
+          {/* ═══ ORGANISATION ══════════════════════════════ */}
+          {activeTab === 'organisation' && (
+            <div className="space-y-5">
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2">
+                  <Building2 size={14} className="text-[var(--primary)]" /> Allgemeine Informationen
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2">
+                    <InputField label="Organisationsname" value={orgName} onChange={setOrgName} placeholder="Meine GmbH" icon={Building2} />
                   </div>
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-green-500/10 text-green-500 tracking-widest">OK</span>
+                  <InputField label="Telefon" value={orgPhone} onChange={setOrgPhone} placeholder="+49 30 12345678" icon={Phone} />
+                  <InputField label="Website" value={orgWebsite} onChange={setOrgWebsite} placeholder="https://firma.de" icon={Globe} />
+                  <InputField label="Adresse" value={orgAddress} onChange={setOrgAddress} placeholder="Musterstraße 1" icon={MapPin} />
+                  <InputField label="Stadt" value={orgCity} onChange={setOrgCity} placeholder="Berlin" icon={MapPin} />
+                  <InputField label="Land" value={orgCountry} onChange={setOrgCountry} placeholder="Deutschland" icon={Globe} />
+                  <InputField label="Support E-Mail" value={supportEmail} onChange={setSupportEmail} type="email" placeholder="support@firma.de" icon={Mail} />
                 </div>
-                <div className="text-[10px] text-slate-500 font-mono truncate">Supabase Cloud / PostgreSQL</div>
+                <button onClick={handleSaveBranding} disabled={isSaving}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold border-none cursor-pointer hover:opacity-90 disabled:opacity-50 transition-opacity">
+                  {isSaving ? <Loader size={14} className="animate-spin" /> : <Save size={14} />}
+                  Speichern
+                </button>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/[0.05]">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Shield size={14} className="text-purple-500" />
-                    <span className="text-xs font-bold dark:text-white">Auth-Dienste</span>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-green-500/10 text-green-500 tracking-widest">OK</span>
+              {/* Plan */}
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2">
+                  <CreditCard size={14} className="text-[var(--primary)]" /> Plan & Abrechnung
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    { id: 'starter' as const, name: 'Starter', price: 'Kostenlos', features: ['Bis 5 Nutzer', 'Basis-Features'], color: '#6b7280' },
+                    { id: 'pro' as const, name: 'Pro', price: '€29 / Monat', features: ['Bis 50 Nutzer', 'Alle Features', 'Support'], color: '#6366f1', recommended: true },
+                    { id: 'enterprise' as const, name: 'Enterprise', price: 'Auf Anfrage', features: ['Unbegrenzte Nutzer', 'SLA', 'Dedicated Support'], color: '#8b5cf6' },
+                  ].map((plan) => (
+                    <button key={plan.id} onClick={() => setOrgPlan(plan.id)}
+                      className={`relative p-4 rounded-xl border-2 text-left transition-all cursor-pointer bg-transparent ${orgPlan === plan.id ? 'border-[var(--primary)] bg-[var(--primary-light)]' : 'dark:border-white/10 border-gray-200 hover:border-[rgba(99,102,241,0.3)]'}`}>
+                      {plan.recommended && <span className="absolute top-2 right-2 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-[var(--primary)] text-white">EMPFOHLEN</span>}
+                      <Crown size={16} style={{ color: plan.color }} className="mb-2" />
+                      <div className="font-black dark:text-white text-gray-900 text-sm">{plan.name}</div>
+                      <div className="font-bold text-[var(--primary)] text-xs mt-0.5">{plan.price}</div>
+                      <ul className="mt-2 space-y-0.5">
+                        {plan.features.map((f) => <li key={f} className="text-[10px] dark:text-white/50 text-gray-500">✓ {f}</li>)}
+                      </ul>
+                    </button>
+                  ))}
                 </div>
-                <div className="text-[10px] text-slate-500 font-mono truncate">GoTrue / JWT Verification</div>
+              </div>
+
+              {/* Danger zone */}
+              <div className="card-shimmer rounded-xl border border-red-500/20 p-5 space-y-3">
+                <h3 className="text-sm font-black text-red-500 flex items-center gap-2"><Trash size={14} /> Gefahrenzone</h3>
+                <div className="flex items-center justify-between p-3 rounded-xl bg-red-500/5 border border-red-500/10">
+                  <div>
+                    <div className="text-xs font-bold dark:text-white text-gray-900">Organisation löschen</div>
+                    <div className="text-[10px] dark:text-white/40 text-gray-400">Alle Daten werden unwiderruflich gelöscht.</div>
+                  </div>
+                  <button className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500/10 text-red-500 hover:bg-red-500/20 border-none cursor-pointer transition-colors">
+                    Löschen
+                  </button>
+                </div>
               </div>
             </div>
+          )}
 
-            <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-white/5">
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status Legende</h4>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(STATUS_CONFIG).slice(0, 4).map(([key, conf]) => (
-                  <div key={key} className="flex items-center gap-2 p-2 rounded-lg bg-black/[0.01] dark:bg-white/[0.01]">
-                    <div className="w-2 h-2 rounded-full" style={{ background: conf.color }} />
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">{conf.label}</span>
+          {/* ═══ BRANDING ══════════════════════════════════ */}
+          {activeTab === 'branding' && (
+            <div className="space-y-5">
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Building size={14} /> Organisations-Branding</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2"><InputField label="Organisationsname" value={orgName} onChange={setOrgName} placeholder="Wamocon TeamRadar" icon={Building} /></div>
+                  <InputField label="Logo URL" value={orgLogoUrl} onChange={setOrgLogoUrl} placeholder="https://..." icon={ImageIcon} />
+                  <InputField label="Support E-Mail" value={supportEmail} onChange={setSupportEmail} type="email" placeholder="support@firma.de" icon={Mail} />
+                </div>
+                {orgLogoUrl && /^https?:\/\//.test(orgLogoUrl) && <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.06] border-black/[0.06]"><img src={orgLogoUrl} alt="Logo" className="max-h-16 object-contain" /></div>}
+              </div>
+
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 mb-4"><Power size={14} className="text-red-500" /> Wartungsmodus</h3>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-red-500/5 border border-red-500/10">
+                  <div>
+                    <div className="text-sm font-bold text-red-500">Wartungsmodus</div>
+                    <div className="text-xs text-red-400/70 mt-0.5">Deaktiviert den Zugriff für alle Nicht-Admins</div>
+                  </div>
+                  <button onClick={() => setMaintenanceMode(!maintenanceMode)}
+                    className={`w-14 h-7 rounded-full transition-all relative border-none cursor-pointer ${maintenanceMode ? 'bg-red-500' : 'bg-gray-300 dark:bg-white/10'}`}>
+                    <div className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${maintenanceMode ? 'right-1' : 'left-1'}`} />
+                  </button>
+                </div>
+              </div>
+
+              <button onClick={handleSaveBranding} disabled={isSaving}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--primary)] text-white text-sm font-bold cursor-pointer border-none hover:opacity-90 transition-opacity disabled:opacity-50">
+                {isSaving ? <Loader size={15} className="animate-spin" /> : <Save size={15} />} Branding speichern
+              </button>
+            </div>
+          )}
+
+          {/* ═══ SICHERHEIT ════════════════════════════════ */}
+          {activeTab === 'security' && (
+            <div className="space-y-5">
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-0">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 mb-4"><Lock size={14} /> Sicherheitsrichtlinien</h3>
+                <Toggle label="Zwei-Faktor-Authentifizierung (2FA) erzwingen" value={mfaRequired} onChange={setMfaRequired} desc="Alle Nutzer müssen 2FA aktivieren" />
+                <Toggle label="DSGVO-Modus" value={gdprMode} onChange={setGdprMode} desc="Datenschutz-Popups und Einwilligungen aktiv" />
+                <Toggle label="Analytics & Tracking" value={analyticsEnabled} onChange={setAnalyticsEnabled} desc="Anonymisierte Nutzungsstatistiken" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5">
+                <h3 className="col-span-2 text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Key size={14} /> Passwort & Session</h3>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Min. Passwort-Länge</label>
+                  <input type="number" value={passwordMinLength} onChange={(e) => setPasswordMinLength(parseInt(e.target.value) || 8)} min={6} max={32}
+                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Session-Timeout (Minuten)</label>
+                  <input type="number" value={sessionTimeout} onChange={(e) => setSessionTimeout(parseInt(e.target.value) || 60)} min={5} max={1440}
+                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                </div>
+                <div className="col-span-2 space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Erlaubte E-Mail-Domains (kommagetrennt)</label>
+                  <input value={allowedDomains} onChange={(e) => setAllowedDomains(e.target.value)} placeholder="firma.de, partner.com"
+                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                </div>
+                <div className="col-span-2 space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">IP-Whitelist (optional, kommagetrennt)</label>
+                  <input value={ipWhitelist} onChange={(e) => setIpWhitelist(e.target.value)} placeholder="192.168.1.0/24, 10.0.0.0/8"
+                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06] bg-amber-500/5 text-xs text-amber-600 dark:text-amber-400 flex items-start gap-2">
+                <Info size={13} className="shrink-0 mt-0.5" />
+                Sicherheitsrichtlinien werden lokal gespeichert und erfordern ggf. einen Backend-Neustart für volle Wirksamkeit.
+              </div>
+            </div>
+          )}
+
+          {/* ═══ BENACHRICHTIGUNGEN ════════════════════════ */}
+          {activeTab === 'notifications' && (
+            <div className="space-y-5">
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-0">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 mb-4"><Bell size={14} /> E-Mail-Benachrichtigungen</h3>
+                <Toggle label="Neues Mitglied" value={emailNotifNew} onChange={setEmailNotifNew} desc="E-Mail bei Neuanmeldung eines Nutzers" />
+                <Toggle label="Abwesenheiten & Urlaub" value={emailNotifLeave} onChange={setEmailNotifLeave} desc="Eintragungen im Jahreskalender" />
+                <Toggle label="Reporte verfügbar" value={emailNotifReport} onChange={setEmailNotifReport} desc="Monatlicher Auslastungsbericht" />
+              </div>
+
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Zap size={14} /> Webhook-Integrationen</h3>
+                <InputField label="Slack Webhook URL" value={slackWebhook} onChange={setSlackWebhook} placeholder="https://hooks.slack.com/..." icon={Globe} />
+                <InputField label="Microsoft Teams Webhook URL" value={teamsWebhook} onChange={setTeamsWebhook} placeholder="https://outlook.office.com/webhook/..." icon={Globe} />
+                <div className="p-3 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.15)] text-xs dark:text-white/60 text-gray-600 flex items-start gap-2">
+                  <Info size={13} className="text-[var(--primary)] shrink-0 mt-0.5" />
+                  Webhooks werden bei relevanten Events (neue Mitglieder, Abwesenheiten) ausgelöst.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══ DARSTELLUNG ═══════════════════════════════ */}
+          {activeTab === 'appearance' && (
+            <div className="space-y-5">
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Palette size={14} /> Theme & Farben</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Standard-Thema</label>
+                    <div className="flex gap-2">
+                      {(['light','dark','system'] as const).map((t) => (
+                        <button key={t} onClick={() => setDefaultTheme(t)}
+                          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${defaultTheme === t ? 'border-[rgba(99,102,241,0.4)] bg-[var(--primary-light)] text-[var(--primary)]' : 'dark:border-white/[0.08] border-black/[0.08] dark:text-white/50 text-gray-600 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] bg-transparent'}`}>
+                          {t === 'light' ? <Sun size={12} /> : t === 'dark' ? <Moon size={12} /> : <Layers size={12} />}
+                          {t === 'light' ? 'Hell' : t === 'dark' ? 'Dunkel' : 'System'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Primärfarbe</label>
+                    <div className="flex items-center gap-2">
+                      <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)}
+                        className="w-10 h-10 rounded-lg border dark:border-white/10 border-gray-200 cursor-pointer bg-transparent p-0.5" />
+                      <input value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)}
+                        className="flex-1 bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-3 text-sm font-mono dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Schriftart</label>
+                    <select value={companyFont} onChange={(e) => setCompanyFont(e.target.value)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all">
+                      {['Inter', 'Roboto', 'Open Sans', 'Poppins', 'Nunito', 'IBM Plex Sans'].map((f) => <option key={f}>{f}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Datumsformat</label>
+                    <select value={dateFormat} onChange={(e) => setDateFormat(e.target.value)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all">
+                      {['DD.MM.YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'].map((f) => <option key={f}>{f}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Sprache</label>
+                    <select value={language} onChange={(e) => setLanguage(e.target.value)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all">
+                      <option value="de">Deutsch</option>
+                      <option value="en">English</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Zeitzone</label>
+                    <select value={timezone} onChange={(e) => setTimezone(e.target.value)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all">
+                      {['Europe/Berlin', 'Europe/Vienna', 'Europe/Zurich', 'UTC', 'America/New_York', 'America/Los_Angeles'].map((tz) => <option key={tz}>{tz}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <Toggle label="Kompakte Sidebar" value={sidebarCompact} onChange={setSidebarCompact} desc="Schmälere Navigation mit nur Icons" />
+              </div>
+            </div>
+          )}
+
+          {/* ═══ KÜRZEL ════════════════════════════════════ */}
+          {activeTab === 'kuerzel' && (
+            <div className="space-y-5">
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Tag size={14} /> Tages-Kürzel</h3>
+                  {categories.length === 0 && (
+                    <button onClick={handleSeedDefaults} disabled={catLoading}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-violet-500 text-white text-xs font-bold cursor-pointer border-none hover:opacity-90 transition-opacity disabled:opacity-50">
+                      {catLoading ? <Loader size={12} className="animate-spin" /> : <Plus size={12} />} Standard einfügen
+                    </button>
+                  )}
+                </div>
+
+                {catMsg && (
+                  <div className={`p-3 rounded-xl text-xs font-bold border ${catMsg.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>{catMsg.text}</div>
+                )}
+
+                {categories.length === 0 && !catMsg && (
+                  <div className="text-center py-8 space-y-2">
+                    <div className="text-sm dark:text-white/30 text-gray-400">Noch keine Kürzel konfiguriert.</div>
+                    <div className="text-[11px] dark:text-white/20 text-gray-400">
+                      Falls die DB-Tabelle fehlt, bitte in der Supabase-Shell ausführen:
+                      <code className="ml-1 px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/10 font-mono">npx supabase migration up</code>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  {categories.map((cat) => (
+                    <div key={cat.id}>
+                      {editingCat?.id === cat.id ? (
+                        <div className="p-3 rounded-xl border border-[rgba(99,102,241,0.3)] bg-[var(--primary-light)] space-y-3">
+                          <div className="grid grid-cols-4 gap-2">
+                            <div className="space-y-1"><label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">Kürzel</label>
+                              <input value={editingCat.kuerzel} onChange={(e) => setEditingCat({ ...editingCat, kuerzel: e.target.value.slice(0, 4) })}
+                                className="w-full bg-white dark:bg-black border dark:border-white/20 border-gray-200 rounded-lg py-1.5 px-2 text-sm font-bold outline-none focus:border-[var(--primary)]" /></div>
+                            <div className="space-y-1"><label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">Bezeichnung</label>
+                              <input value={editingCat.label} onChange={(e) => setEditingCat({ ...editingCat, label: e.target.value })}
+                                className="w-full bg-white dark:bg-black border dark:border-white/20 border-gray-200 rounded-lg py-1.5 px-2 text-sm outline-none focus:border-[var(--primary)]" /></div>
+                            <div className="space-y-1"><label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">Hintergrund</label>
+                              <div className="flex items-center gap-1">
+                                <input type="color" value={editingCat.bg_color} onChange={(e) => setEditingCat({ ...editingCat, bg_color: e.target.value })} className="w-8 h-8 rounded cursor-pointer bg-transparent p-0.5 border dark:border-white/10 border-gray-200" />
+                                <input value={editingCat.bg_color} onChange={(e) => setEditingCat({ ...editingCat, bg_color: e.target.value })} className="flex-1 bg-white dark:bg-black border dark:border-white/20 border-gray-200 rounded-lg p-1.5 text-xs font-mono outline-none" /></div></div>
+                            <div className="space-y-1"><label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">Textfarbe</label>
+                              <div className="flex items-center gap-1">
+                                <input type="color" value={editingCat.color} onChange={(e) => setEditingCat({ ...editingCat, color: e.target.value })} className="w-8 h-8 rounded cursor-pointer bg-transparent p-0.5 border dark:border-white/10 border-gray-200" />
+                                <input value={editingCat.color} onChange={(e) => setEditingCat({ ...editingCat, color: e.target.value })} className="flex-1 bg-white dark:bg-black border dark:border-white/20 border-gray-200 rounded-lg p-1.5 text-xs font-mono outline-none" /></div></div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-10 h-8 rounded-md flex items-center justify-center text-xs font-black" style={{ background: editingCat.bg_color, color: editingCat.color }}>{editingCat.kuerzel}</div>
+                            <button onClick={() => handleUpdateCategory(cat, { kuerzel: editingCat.kuerzel, label: editingCat.label, bg_color: editingCat.bg_color, color: editingCat.color })}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--primary)] text-white text-xs font-bold cursor-pointer border-none hover:opacity-90 transition-opacity">
+                              <Save size={12} /> Speichern
+                            </button>
+                            <button onClick={() => setEditingCat(null)} className="px-3 py-1.5 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 cursor-pointer border dark:border-white/10 border-gray-200 bg-transparent hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Abbrechen</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${cat.is_active ? 'dark:border-white/[0.06] border-black/[0.06]' : 'border-dashed dark:border-white/[0.04] border-black/[0.04] opacity-50'}`}>
+                          <div className="w-10 h-8 rounded-md flex items-center justify-center text-xs font-black shrink-0" style={{ background: cat.bg_color, color: cat.color }}>{cat.kuerzel}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold dark:text-white text-gray-900">{cat.label}</div>
+                            <div className="text-[10px] dark:text-white/30 text-gray-400 font-mono">{cat.kuerzel}</div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button onClick={() => handleToggleActive(cat)}
+                              className={`text-[9px] font-bold px-2 py-0.5 rounded-full border-none cursor-pointer ${cat.is_active ? 'bg-green-500/10 text-green-500' : 'bg-gray-100 dark:bg-white/5 text-gray-400'}`}>
+                              {cat.is_active ? 'Aktiv' : 'Inaktiv'}
+                            </button>
+                            <button onClick={() => setEditingCat({ ...cat })} className="p-1.5 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] border-none bg-transparent cursor-pointer transition-all"><Edit3 size={13} /></button>
+                            <button onClick={() => handleDeleteCategory(cat.id)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-400 hover:text-red-500 border-none bg-transparent cursor-pointer transition-all"><Trash2 size={13} /></button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Neues Kürzel */}
+                <div className="pt-4 border-t dark:border-white/[0.06] border-black/[0.06] space-y-3">
+                  <h4 className="text-xs font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Neues Kürzel</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="space-y-1"><label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">Kürzel (max. 4)</label>
+                      <input value={newKuerzel} onChange={(e) => setNewKuerzel(e.target.value.slice(0, 4))} placeholder="z.B. eP"
+                        className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg py-2 px-3 text-sm font-bold focus:border-[var(--primary)] outline-none dark:text-white text-gray-900" /></div>
+                    <div className="space-y-1"><label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">Bezeichnung</label>
+                      <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="z.B. Ext. Projekt"
+                        className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg py-2 px-3 text-sm focus:border-[var(--primary)] outline-none dark:text-white text-gray-900" /></div>
+                    <div className="space-y-1"><label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">Hintergrund</label>
+                      <div className="flex items-center gap-2">
+                        <input type="color" value={newBgColor} onChange={(e) => setNewBgColor(e.target.value)} className="w-9 h-9 rounded-lg border dark:border-white/10 border-gray-200 cursor-pointer bg-transparent p-0.5" />
+                        <input value={newBgColor} onChange={(e) => setNewBgColor(e.target.value)} className="flex-1 bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg py-2 px-2 text-xs font-mono focus:border-[var(--primary)] outline-none dark:text-white text-gray-900" /></div></div>
+                    <div className="space-y-1"><label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">Textfarbe</label>
+                      <div className="flex items-center gap-2">
+                        <input type="color" value={newTextColor} onChange={(e) => setNewTextColor(e.target.value)} className="w-9 h-9 rounded-lg border dark:border-white/10 border-gray-200 cursor-pointer bg-transparent p-0.5" />
+                        <input value={newTextColor} onChange={(e) => setNewTextColor(e.target.value)} className="flex-1 bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg py-2 px-2 text-xs font-mono focus:border-[var(--primary)] outline-none dark:text-white text-gray-900" /></div></div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {newKuerzel && <div className="w-10 h-8 rounded-md flex items-center justify-center text-xs font-black" style={{ background: newBgColor, color: newTextColor }}>{newKuerzel}</div>}
+                    <button onClick={handleAddCategory} disabled={catLoading || !newKuerzel.trim() || !newLabel.trim()}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold disabled:opacity-50 cursor-pointer border-none hover:opacity-90 transition-opacity">
+                      {catLoading ? <Loader size={13} className="animate-spin" /> : <Plus size={13} />} Kürzel hinzufügen
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══ INTEGRATIONEN ══════════════════════════════ */}
+          {activeTab === 'integrations' && (
+            <div className="space-y-5">
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Zap size={14} /> Kalender-Integration</h3>
+                <Toggle label="Google Kalender (OAuth)" value={googleCalendarEnabled} onChange={setGoogleCalendarEnabled} desc="Termine aus Google Calendar synchronisieren" />
+                <Toggle label="Microsoft Outlook/Teams" value={outlookEnabled} onChange={setOutlookEnabled} desc="Exchange-Termine importieren" />
+                <div className="p-3 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.15)] text-xs dark:text-white/60 text-gray-600 flex items-start gap-2">
+                  <Info size={13} className="text-[var(--primary)] shrink-0 mt-0.5" />
+                  Für OAuth-Integration werden API-Credentials in den Umgebungsvariablen benötigt. Bitte die technische Dokumentation beachten. ICS-Import ist ohne Konfiguration verfügbar.
+                </div>
+              </div>
+
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Layers size={14} /> Projektmanagement</h3>
+                <Toggle label="Jira-Integration" value={jiraEnabled} onChange={setJiraEnabled} desc="Projekte und Tickets aus Jira synchronisieren" />
+                {jiraEnabled && <InputField label="Jira URL" value={jiraUrl} onChange={setJiraUrl} placeholder="https://firma.atlassian.net" icon={Globe} />}
+                <Toggle label="Confluence" value={confluenceEnabled} onChange={setConfluenceEnabled} desc="Dokumentation aus Confluence verlinken" />
+              </div>
+
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Key size={14} /> API-Zugang</h3>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">API-Schlüssel (Read-Only)</label>
+                  <div className="flex items-center gap-2">
+                    <input type={apiKeyVisible ? 'text' : 'password'} value={apiKey} readOnly
+                      className="flex-1 bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm font-mono dark:text-white text-gray-900 outline-none" />
+                    <button onClick={() => setApiKeyVisible(!apiKeyVisible)} className="p-2 rounded-xl border dark:border-white/10 border-gray-200 dark:text-white/50 text-gray-500 hover:bg-black/[0.03] dark:hover:bg-white/[0.03] cursor-pointer bg-transparent border-solid transition-colors">
+                      {apiKeyVisible ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                    <button onClick={() => navigator.clipboard.writeText(apiKey)}
+                      className="p-2 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] text-[var(--primary)] hover:opacity-80 cursor-pointer border-solid transition-opacity">
+                      <Download size={14} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═══ ERWEITERT ══════════════════════════════════ */}
+          {activeTab === 'advanced' && (
+            <div className="space-y-5">
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-0">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 mb-4"><Settings2 size={14} /> Daten & System</h3>
+                <Toggle label="Automatisches Backup" value={autoBackup} onChange={setAutoBackup} desc="Tägliche Sicherung aller Daten" />
+                <Toggle label="Debug-Modus" value={debugMode} onChange={setDebugMode} desc="Erweiterte Log-Ausgabe (nur für Entwickler)" />
+                <Toggle label="DSGVO-Modus" value={gdprMode} onChange={setGdprMode} desc="Datenschutz-Einwilligungen und Consent-Banner aktiv" />
+                <Toggle label="Analytics aktiviert" value={analyticsEnabled} onChange={setAnalyticsEnabled} desc="Anonymisierte Performance-Daten" />
+              </div>
+
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><HardDrive size={14} /> Datenaufbewahrung</h3>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Aufbewahrungszeitraum (Tage)</label>
+                  <input type="number" value={dataRetentionDays} onChange={(e) => setDataRetentionDays(parseInt(e.target.value) || 365)} min={30} max={3650}
+                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                  <p className="text-[10px] dark:text-white/30 text-gray-400">Nach diesem Zeitraum werden inaktive Logs automatisch gelöscht.</p>
+                </div>
+              </div>
+
+              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-3">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><Database size={14} /> Datenbankübersicht</h3>
+                {[
+                  { table: 'members', count: members.length },
+                  { table: 'projects', count: projects.length },
+                  { table: 'day_categories', count: categories.length },
+                ].map((t) => (
+                  <div key={t.table} className="flex items-center justify-between text-xs p-2 rounded-lg bg-black/[0.01] dark:bg-white/[0.01]">
+                    <span className="font-mono dark:text-white/50 text-gray-500">{t.table}</span>
+                    <span className="font-bold dark:text-white text-gray-900">{t.count} Einträge</span>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Quick Action Box */}
-          <div className="rounded-3xl p-6 bg-gradient-to-br from-indigo-600 to-purple-700 text-white shadow-xl">
-            <h4 className="font-black text-sm uppercase flex items-center gap-2 mb-2">
-              <PlusCircle size={18} />
-              Neuer User?
-            </h4>
-            <p className="text-xs opacity-70 font-medium leading-relaxed mb-4">
-              Du kannst neue Teamkollegen direkt zur Plattform einladen. Sie erhalten eine E-Mail zur Registrierung.
-            </p>
-            <Link href="/members/new" className="flex items-center justify-center py-2 px-4 bg-white text-indigo-600 rounded-xl text-xs font-bold hover:bg-slate-100 transition-colors">
-              Jetzt Einladen
-            </Link>
-          </div>
+          {/* ═══ LOGS ═══════════════════════════════════════ */}
+          {activeTab === 'logs' && (
+            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+              <div className="p-4 border-b dark:border-white/[0.06] border-black/[0.04] flex items-center justify-between">
+                <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2"><FileText size={14} /> Aktivitätslog</h3>
+                <span className="text-[10px] dark:text-white/30 text-gray-400">Simulated – wird bei Datenbankanbindung live</span>
+              </div>
+              <div className="divide-y dark:divide-white/[0.03] divide-black/[0.03]">
+                {[
+                  { time: '11.04.2026 09:44', user: 'n.schefner@wamocon.de', action: 'System-Einstellungen geändert', type: 'info' },
+                  { time: '11.04.2026 09:30', user: 'n.kukeyev@wamocon.de', action: 'Kürzel "eP" hinzugefügt', type: 'success' },
+                  { time: '11.04.2026 08:15', user: 'System', action: 'Tägliches Backup abgeschlossen', type: 'success' },
+                  { time: '10.04.2026 17:22', user: 'w.moretz@wamocon.de', action: 'Anmeldung', type: 'info' },
+                  { time: '10.04.2026 16:10', user: 'n.schefner@wamocon.de', action: 'Wartungsmodus aktiviert', type: 'warning' },
+                  { time: '10.04.2026 15:45', user: 'System', action: 'Migration 20260411 ausgeführt', type: 'success' },
+                  { time: '10.04.2026 14:22', user: 'n.kukeyev@wamocon.de', action: 'Neues Mitglied eingeladen: y.bhesaniya@wamocon.de', type: 'info' },
+                ].map((log, i) => (
+                  <div key={i} className="flex items-center gap-3 px-4 py-3 text-xs">
+                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${log.type === 'success' ? 'bg-green-500' : log.type === 'warning' ? 'bg-amber-500' : log.type === 'error' ? 'bg-red-500' : 'bg-blue-500'}`} />
+                    <span className="dark:text-white/30 text-gray-400 shrink-0 font-mono">{log.time}</span>
+                    <span className="dark:text-white/60 text-gray-600 truncate">{log.user}</span>
+                    <span className="dark:text-white/80 text-gray-800 font-medium flex-1 truncate">{log.action}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </div>

@@ -17,9 +17,11 @@
     "typecheck": "tsc --noEmit",
     "validate": "npm run typecheck && npm run test:coverage",
     "seed:supabase": "npx tsx scripts/seed-supabase.ts",
+    "migrate": "node scripts/migrate.mjs",
     "prepare": "node scripts/install-hooks.js"
   },
   "dependencies": {
+    "@e965/xlsx": "^0.20.3",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.0",
     "clsx": "^2.1.0",
@@ -29,7 +31,6 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^2.2.0",
-    "xlsx": "^0.18.5",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
@@ -38,15 +39,16 @@
     "@types/node": "^20.11.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/coverage-v8": "^4.1.4",
     "autoprefixer": "^10.4.27",
     "dotenv": "^17.3.1",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.0.0",
+    "pg": "^8.20.0",
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.2",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
-    "vitest": "^2.1.9"
+    "vitest": "^4.1.4"
   }
 }

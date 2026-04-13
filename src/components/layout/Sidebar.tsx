@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,254 +8,292 @@ import { useTheme } from '@/components/ui/ThemeProvider';
 import { createClient } from '@/lib/supabase/client';
 import {
   LayoutDashboard,
-  Users,
   CalendarDays,
   FolderKanban,
   Briefcase,
   Settings,
-  X,
   Sun,
   Moon,
   UserPlus,
   BarChart3,
-  AlertTriangle,
   FileDown,
   CalendarRange,
-  ChevronDown,
-  ChevronRight,
   Shield,
   Plane,
   Clock,
   LogOut,
-  Building,
-  Menu
+  Building2,
+  X,
+  ToggleLeft,
+  ToggleRight,
+  BookOpen,
 } from 'lucide-react';
 
-import { STATUS_CONFIG, PROJECT_TYPE_CONFIG } from '@/types';
 import { AppPortal } from './AppPortal';
 
-function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
+interface NavItem {
+  href: string;
+  icon: React.ElementType;
+  label: string;
+  exact?: boolean;
+  badge?: number;
+  activeColor?: string; // Override für aktive Farbe
+}
+
+function SidebarContent({
+  onNavigate,
+  isMobile,
+}: {
+  onNavigate?: () => void;
+  isMobile?: boolean;
+}) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
   const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  
-  const members = useAppStore((s) => s.members);
-  const teams = useAppStore((s) => s.teams);
-  const projects = useAppStore((s) => s.projects);
-  const getMemberStatus = useAppStore((s) => s.getMemberStatus);
+
   const getAlerts = useAppStore((s) => s.getAlerts);
   const hasMinRole = useAppStore((s) => s.hasMinRole);
   const userProfile = useAppStore((s) => s.userProfile);
   const setUserProfile = useAppStore((s) => s.setUserProfile);
 
-  const [isTodayOpen, setIsTodayOpen] = useState(false);
-  const [isProjectsOpen, setIsProjectsOpen] = useState(false);
-  const [activePortal, setActivePortal] = useState<{ url: string; title: string; icon: any; color: string } | null>(null);
+  const [activePortal, setActivePortal] = useState<{
+    url: string;
+    title: string;
+    icon: React.ElementType;
+    color: string;
+  } | null>(null);
 
-  const alertCount = getAlerts().filter((a) => a.severity === 'error').length;
+  const [isElevatedMode, setIsElevatedMode] = useState(true);
+  useEffect(() => {
+    const saved = localStorage.getItem('tr-role-mode');
+    if (saved === 'employee') setIsElevatedMode(false);
+  }, []);
+
+  const toggleMode = () => {
+    const next = !isElevatedMode;
+    setIsElevatedMode(next);
+    localStorage.setItem('tr-role-mode', next ? 'elevated' : 'employee');
+    window.dispatchEvent(new CustomEvent('tr-role-mode-change', { detail: { elevated: next } }));
+  };
+
+  const [orgName, setOrgName] = useState('TeamRadar');
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.from('system_settings').select('org_name').eq('id', 'global').single();
+        if (data?.org_name) setOrgName(data.org_name);
+      } catch { /* Fallback */ }
+    };
+    load();
+  }, []);
+
+  const alertCount = mounted ? getAlerts().filter((a) => a.severity === 'error').length : 0;
 
   const handleLogout = async () => {
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
-    } catch {
-      // Supabase nicht konfiguriert
-    }
+    } catch { /* ignore */ }
     router.push('/auth/login');
   };
 
   const apps = [
-    { id: 'away', title: 'AWAY Urlaubsplaner', label: 'AWAY', url: process.env.NEXT_PUBLIC_AWAY_URL || 'http://localhost:3001', icon: Plane, color: 'text-blue-400' },
-    { id: 'trace', title: 'TRACE Zeiterfassung', label: 'TRACE', url: process.env.NEXT_PUBLIC_TRACE_URL || 'http://localhost:3002', icon: Clock, color: 'text-teal-400' }
+    { id: 'away', title: 'AWAY Urlaubsplaner', label: 'AWAY', url: process.env.NEXT_PUBLIC_AWAY_URL || 'http://localhost:3001', icon: Plane, color: 'text-indigo-400' },
+    { id: 'trace', title: 'TRACE Zeiterfassung', label: 'TRACE', url: process.env.NEXT_PUBLIC_TRACE_URL || 'http://localhost:3002', icon: Clock, color: 'text-violet-400' },
   ];
 
-  const mainNav = [
+  const mainNav: NavItem[] = [
     { href: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-    { href: '/members', icon: Users, label: 'Mitarbeiter', exact: false },
-    { href: '/calendar', icon: CalendarDays, label: 'Kalender', exact: true },
-    { href: '/teams', icon: FolderKanban, label: 'Teams', exact: false },
+    { href: '/members', icon: BookOpen, label: 'WamoBook', exact: false },
+    { href: '/year', icon: CalendarRange, label: 'Jahres\u00fcbersicht', exact: true },
     { href: '/projects', icon: Briefcase, label: 'Projekte', exact: false },
-    { href: '/utilization', icon: BarChart3, label: 'Auslastung', exact: true },
-    { href: '/year', icon: CalendarRange, label: 'Jahresübersicht', exact: true },
-    { href: '/alerts', icon: AlertTriangle, label: 'Alerts', exact: true, badge: mounted && alertCount > 0 ? alertCount : undefined },
+    { href: '/calendar', icon: CalendarDays, label: 'Kalender', exact: true },
+  ];
+
+  const privilegedNav: NavItem[] = [
+    { href: '/members?action=invite', icon: UserPlus, label: 'Mitglied einladen', exact: false, activeColor: 'bg-blue-500/10 text-blue-500' },
+    { href: '/utilization', icon: BarChart3, label: 'Auslastung', exact: true, badge: mounted && alertCount > 0 ? alertCount : undefined, activeColor: 'bg-purple-500/10 text-purple-500' },
     { href: '/reports', icon: FileDown, label: 'Reports', exact: true },
   ];
 
-  const adminNav = [
-    { href: '/members?action=invite', icon: UserPlus, label: 'Mitarbeiter einladen', exact: true },
+  const adminNav: NavItem[] = [
     { href: '/settings/admin', icon: Shield, label: 'Administration', exact: true },
   ];
 
+  const isActive = (href: string, exact?: boolean) =>
+    exact ? pathname === href : pathname.startsWith(href.split('?')[0]);
+
+  const showPrivileged = isElevatedMode && hasMinRole('department_lead');
+  const showAdmin = isElevatedMode && hasMinRole('admin');
+
+  const NavLink = ({ item }: { item: NavItem }) => {
+    const active = isActive(item.href, item.exact);
+    const activeClass = item.activeColor ?? 'bg-[var(--primary-light)] border-[rgba(99,102,241,0.2)]';
+    return (
+      <Link
+        href={item.href}
+        onClick={onNavigate}
+        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium no-underline transition-all duration-150 group ${
+          active
+            ? `${activeClass} border`
+            : 'text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-item-hover)] border border-transparent'
+        }`}
+        style={active && !item.activeColor ? { color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : '#374151' } : {}}
+      >
+        <item.icon size={15} className={`shrink-0 transition-colors ${active ? 'text-[var(--primary)]' : 'opacity-50 group-hover:opacity-80'}`} />
+        <span className="flex-1">{item.label}</span>
+        {item.badge !== undefined && item.badge > 0 && (
+          <span className="text-[10px] font-bold bg-[var(--warning)] text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+            {item.badge}
+          </span>
+        )}
+        {active && <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] shrink-0" />}
+      </Link>
+    );
+  };
+
+  const SectionLabel = ({ label }: { label: string }) => (
+    <div className="text-[9px] font-black uppercase tracking-[0.18em] px-3 mb-2 text-[var(--sidebar-text-muted)] opacity-40">
+      {label}
+    </div>
+  );
+
   return (
-    <div className="flex flex-col h-full bg-[var(--sidebar-bg)] text-[var(--sidebar-text-muted)] transition-colors duration-300">
-      {/* 1. Header & Organization */}
-      <div className="p-6 pb-2">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
-            <LayoutDashboard size={20} />
+    <div className="flex flex-col h-full bg-[var(--sidebar-bg)] text-[var(--sidebar-text-muted)] transition-colors duration-300" style={{ borderRight: '1px solid var(--sidebar-border)' }}>
+
+      {/* Header */}
+      <div className="shrink-0 flex items-center justify-between px-4 py-4 border-b" style={{ borderColor: 'var(--sidebar-border)' }}>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-lg">
+            <LayoutDashboard size={15} className="text-white" />
           </div>
           <div>
-            <div className="text-sm font-black text-[var(--sidebar-text)] tracking-tight">TeamRadar</div>
-            <div className="text-[10px] font-bold text-[var(--sidebar-text-muted)] opacity-60 uppercase tracking-widest">Verfügbarkeit</div>
+            <div className="text-sm font-black tracking-tight text-[var(--sidebar-text)]">
+              <span className="text-[var(--primary)]">Team</span>Radar
+            </div>
+            <div className="text-[9px] uppercase tracking-widest text-[var(--sidebar-text-muted)] opacity-60">Verfügbarkeit</div>
           </div>
         </div>
+        {isMobile && (
+          <button onClick={onNavigate} className="p-1.5 rounded-lg hover:bg-[var(--sidebar-item-hover)] text-[var(--sidebar-text-muted)] transition-all border-none bg-transparent cursor-pointer" aria-label="Menü schließen">
+            <X size={16} />
+          </button>
+        )}
+      </div>
 
-        {/* Org Box */}
-        <div className="p-3 rounded-2xl bg-[var(--bg-ghost)] border border-[var(--sidebar-border)] flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-              <Building size={16} />
-            </div>
-            <div className="text-[11px] font-bold text-[var(--sidebar-text)] opacity-90">WAMOCON GmbH</div>
+      {/* Org Box */}
+      <div className="shrink-0 mx-3 mt-3">
+        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border" style={{ background: 'var(--bg-elevated, rgba(255,255,255,0.03))', borderColor: 'var(--sidebar-border)' }}>
+          <div className="w-7 h-7 rounded-lg bg-[var(--primary-light)] flex items-center justify-center shrink-0">
+            <Building2 size={13} className="text-[var(--primary)]" />
           </div>
-          {hasMinRole('admin') && (
-            <div className="px-2 py-0.5 rounded-md bg-red-500/10 text-red-500 text-[9px] font-black uppercase tracking-widest">
-              Admin
-            </div>
-          )}
-        </div>
-
-        {/* App Switcher */}
-        <div className="grid grid-cols-2 gap-2 mb-6">
-          {apps.map((app) => (
-            <button
-              key={app.id}
-              onClick={() => setActivePortal(app)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--bg-ghost)] border border-[var(--sidebar-border)] hover:bg-blue-500/5 hover:border-blue-500/20 transition-all text-[10px] font-bold text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text)]"
-            >
-              <app.icon size={12} className={app.color} />
-              {app.label}
+          <div className="flex-1 min-w-0">
+            <div className="text-[11px] font-bold text-[var(--sidebar-text)] truncate">{orgName}</div>
+            {mounted && hasMinRole('department_lead') && (
+              <div className="text-[9px] text-[var(--primary)] font-semibold capitalize">{userProfile?.role || 'employee'}</div>
+            )}
+          </div>
+          {mounted && hasMinRole('department_lead') && (
+            <button onClick={toggleMode} title={isElevatedMode ? 'Zur Mitarbeiter-Ansicht' : 'Zur Admin-Ansicht'} className="p-1 rounded-lg hover:bg-[var(--sidebar-item-hover)] text-[var(--sidebar-text-muted)] hover:text-[var(--primary)] transition-all border-none bg-transparent cursor-pointer shrink-0">
+              {isElevatedMode ? <ToggleRight size={16} className="text-[var(--primary)]" /> : <ToggleLeft size={16} />}
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 2. Navigation Section */}
-      <div className="flex-1 overflow-y-auto px-4 pb-8 sidebar-scroll">
-        <div className="space-y-6">
-          {/* Main Nav */}
-          <div>
-            <div className="text-[9px] font-black uppercase tracking-[0.2em] px-3 mb-3 text-[var(--sidebar-text-muted)] opacity-40">Navigation</div>
-            <div className="flex flex-col gap-1">
-              {mainNav.map((item) => {
-                const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onNavigate}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all no-underline ${
-                      active 
-                        ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20 shadow-sm' 
-                        : 'hover:bg-[var(--sidebar-item-hover)] text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text)] border border-transparent'
-                    }`}
-                  >
-                    <item.icon size={15} className={active ? 'text-blue-500' : 'opacity-50'} />
-                    {item.label}
-                    {item.badge && <span className="ml-auto text-[9px] bg-red-500 text-white px-1.5 py-0.5 rounded-full">{item.badge}</span>}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Admin Nav */}
-          {hasMinRole('admin') && (
-            <div>
-              <div className="text-[9px] font-black uppercase tracking-[0.2em] px-3 mb-3 text-[var(--sidebar-text-muted)] opacity-40">Administration</div>
-              <div className="flex flex-col gap-1">
-                {adminNav.map((item) => {
-                  const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={onNavigate}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all no-underline ${
-                        active 
-                          ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20' 
-                          : 'hover:bg-[var(--sidebar-item-hover)] text-[var(--sidebar-text-muted)] hover:text-[var(--sidebar-text)] border border-transparent'
-                      }`}
-                    >
-                      <item.icon size={15} className={active ? 'text-purple-500' : 'opacity-50'} />
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
           )}
         </div>
+        {mounted && hasMinRole('department_lead') && (
+          <div className="mt-0.5 text-center text-[9px] text-[var(--sidebar-text-muted)] opacity-40">
+            {isElevatedMode ? 'Erweiterte Ansicht aktiv' : 'Mitarbeiter-Ansicht aktiv'}
+          </div>
+        )}
       </div>
 
-      {/* 3. Footer Section (User & Config) */}
-      <div className="p-4 bg-[var(--bg-ghost)] border-t border-[var(--sidebar-border)]">
-        {/* Dev Tools (only dev) */}
-        {process.env.NODE_ENV !== 'production' && (
-          <div className="mb-4 space-y-2">
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[var(--bg-ghost)] border border-[var(--sidebar-border)]">
-              <button onClick={() => setTheme('light')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'light' ? 'bg-white shadow-sm text-blue-600' : 'text-[var(--sidebar-text-muted)]'}`}><Sun size={12} /></button>
-              <button onClick={() => setTheme('dark')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'dark' ? 'bg-[#1a2236] text-white shadow-lg' : 'text-[var(--sidebar-text-muted)]'}`}><Moon size={12} /></button>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-1 px-1">
-               {['admin', 'employee'].map(r => (
-                 <button key={r} onClick={() => userProfile && setUserProfile({...userProfile, role: r as any})} className={`text-[9px] font-bold py-1 rounded border-none cursor-pointer ${userProfile?.role === r ? 'text-blue-500 bg-blue-500/10' : 'text-slate-600'}`}>
-                   Dev: {r.toUpperCase()}
-                 </button>
-               ))}
+      {/* App Switcher */}
+      <div className="shrink-0 grid grid-cols-2 gap-1.5 mx-3 mt-3">
+        {apps.map((app) => (
+          <button key={app.id} onClick={() => setActivePortal(app)} className="flex items-center gap-2 px-2.5 py-2 rounded-xl border transition-all text-[10px] font-semibold cursor-pointer bg-transparent hover:border-[rgba(99,102,241,0.3)] hover:bg-[var(--primary-light)]" style={{ borderColor: 'var(--sidebar-border)', color: 'var(--sidebar-text-muted)' }}>
+            <app.icon size={12} className={app.color} />
+            {app.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4 sidebar-scroll space-y-4">
+        <div>
+          <SectionLabel label="Hauptmenü" />
+          <div className="flex flex-col gap-0.5">
+            {mainNav.map((item) => <NavLink key={item.href} item={item} />)}
+          </div>
+        </div>
+        {showPrivileged && (
+          <div>
+            <SectionLabel label="Analyse" />
+            <div className="flex flex-col gap-0.5">
+              {privilegedNav.map((item) => <NavLink key={item.href} item={item} />)}
             </div>
           </div>
         )}
+        {showAdmin && (
+          <div>
+            <SectionLabel label="Administration" />
+            <div className="flex flex-col gap-0.5">
+              {adminNav.map((item) => <NavLink key={item.href} item={item} />)}
+            </div>
+          </div>
+        )}
+      </nav>
 
-        {/* User Profile Bar */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center overflow-hidden">
+      {/* Footer */}
+      <div className="shrink-0 p-3 border-t space-y-3" style={{ borderColor: 'var(--sidebar-border)', background: 'var(--bg-elevated, rgba(255,255,255,0.02))' }}>
+        {process.env.NODE_ENV !== 'production' && (
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1 p-1 rounded-xl border" style={{ borderColor: 'var(--sidebar-border)' }}>
+              <button onClick={() => setTheme('light')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'light' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-[var(--sidebar-text-muted)]'}`}><Sun size={12} /></button>
+              <button onClick={() => setTheme('dark')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'dark' ? 'bg-[#1a2236] text-white shadow-lg' : 'text-[var(--sidebar-text-muted)]'}`}><Moon size={12} /></button>
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              {(['admin', 'department_lead', 'employee'] as const).map((r) => (
+                <button key={r} onClick={() => userProfile && setUserProfile({ ...userProfile, role: r })} className={`text-[8px] font-bold py-1 px-1 rounded border-none cursor-pointer truncate ${userProfile?.role === r ? 'text-[var(--primary)] bg-[var(--primary-light)]' : 'text-[var(--sidebar-text-muted)]'}`}>
+                  {r === 'department_lead' ? 'DL' : r.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center overflow-hidden shrink-0 border" style={{ background: 'var(--primary-light)', borderColor: 'rgba(99,102,241,0.2)' }}>
             {userProfile?.avatarUrl ? (
               <div className="relative w-full h-full">
-                <Image 
-                  src={userProfile.avatarUrl} 
-                  alt="User Avatar" 
-                  fill 
-                  className="object-cover" 
-                  sizes="40px"
-                />
+                <Image src={userProfile.avatarUrl} alt="User Avatar" fill className="object-cover" sizes="32px" />
               </div>
             ) : (
-              <div className="text-blue-500 font-black text-xs">
-                {userProfile?.displayName?.charAt(0) || userProfile?.email?.charAt(0)}
-              </div>
+              <span className="text-[var(--primary)] font-black text-xs">
+                {userProfile?.displayName?.charAt(0) || userProfile?.email?.charAt(0) || '?'}
+              </span>
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[11px] font-black text-[var(--sidebar-text)] truncate">{userProfile?.displayName || 'User'}</div>
-            <div className="text-[9px] font-medium text-[var(--sidebar-text-muted)] flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              Angemeldet
+            <div className="text-[11px] font-bold text-[var(--sidebar-text)] truncate">{userProfile?.displayName || userProfile?.email || 'Nutzer'}</div>
+            <div className="text-[9px] text-[var(--sidebar-text-muted)] flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />Online
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Link href="/settings" className="p-2 rounded-lg hover:bg-blue-500/10 text-[var(--sidebar-text-muted)] hover:text-blue-500 transition-all">
-              <Settings size={16} />
+          <div className="flex items-center gap-0.5 shrink-0">
+            <Link href="/settings" onClick={onNavigate} className="p-1.5 rounded-lg hover:bg-[var(--primary-light)] text-[var(--sidebar-text-muted)] hover:text-[var(--primary)] transition-all no-underline">
+              <Settings size={14} />
             </Link>
-            <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-red-500/10 text-[var(--sidebar-text-muted)] hover:text-red-500 transition-all bg-transparent border-none cursor-pointer">
-              <LogOut size={16} />
+            <button onClick={handleLogout} className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--sidebar-text-muted)] hover:text-red-500 transition-all border-none bg-transparent cursor-pointer">
+              <LogOut size={14} />
             </button>
           </div>
         </div>
       </div>
 
       {activePortal && (
-        <AppPortal
-          isOpen={!!activePortal}
-          onClose={() => setActivePortal(null)}
-          url={activePortal.url}
-          title={activePortal.title}
-          icon={activePortal.icon}
-          iconColor={activePortal.color}
-        />
+        <AppPortal isOpen={!!activePortal} onClose={() => setActivePortal(null)} url={activePortal.url} title={activePortal.title} icon={activePortal.icon} iconColor={activePortal.color} />
       )}
     </div>
   );
@@ -264,17 +302,14 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   return (
     <>
-      {/* Desktop */}
-      <aside className="hidden md:flex flex-col w-64 border-r border-[var(--sidebar-border)] h-screen">
+      <aside className="hidden md:flex flex-col w-64 h-screen shrink-0">
         <SidebarContent />
       </aside>
-
-      {/* Mobile Overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
-          <aside className="relative flex flex-col w-72 h-full shadow-2xl animate-slide-right">
-            <SidebarContent onNavigate={onClose} />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+          <aside className="relative flex flex-col w-72 h-full shadow-2xl animate-fade-in">
+            <SidebarContent onNavigate={onClose} isMobile />
           </aside>
         </div>
       )}

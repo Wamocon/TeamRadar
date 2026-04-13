@@ -26,7 +26,7 @@ export default function SettingsHubPage() {
   ];
 
   return (
-    <div className="p-6 w-full space-y-12 max-w-4xl mx-auto animate-fade-in">
+    <div className="p-4 sm:p-6 w-full space-y-12 animate-fade-in">
       {/* Header */}
       <div className="text-center space-y-2">
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-xl shadow-blue-500/20 mx-auto mb-6">

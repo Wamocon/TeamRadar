@@ -431,8 +431,10 @@ export const useAppStore = create<AppStore>()(
     hasMinRole: (minRole) => {
       const profile = get().userProfile;
       if (!profile) return false;
-      const hierarchy: Record<UserRole, number> = { admin: 4, cio: 3, department_lead: 2, employee: 1 };
-      return hierarchy[profile.role] >= hierarchy[minRole];
+      const hierarchy: Record<UserRole, number> = { super_admin: 5, admin: 4, cio: 3, department_lead: 2, employee: 1 };
+      const userLevel = hierarchy[profile.role as UserRole] ?? 1;
+      const minLevel = hierarchy[minRole] ?? 1;
+      return userLevel >= minLevel;
     },
   })
 );

@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import {
   Building2, Plus, Edit3, Trash2, Users, Mail, Globe, Phone,
   Save, Loader, Lock, X, Check, Shield, CreditCard,
-  Image as ImageIcon, AlertCircle, CheckCircle,
+  Image as ImageIcon, AlertCircle, CheckCircle, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -57,6 +57,10 @@ export default function OrganisationPage() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('employee');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [openIdentity, setOpenIdentity] = useState(true);
+  const [openAddress, setOpenAddress] = useState(true);
+  const [openQuickInfo, setOpenQuickInfo] = useState(true);
+  const [openBillingInfo, setOpenBillingInfo] = useState(true);
 
   useEffect(() => {
     const supabase = createClient();
@@ -194,8 +198,16 @@ export default function OrganisationPage() {
         <div className="grid lg:grid-cols-3 gap-5">
           {/* Main settings */}
           <div className="lg:col-span-2 space-y-5">
-            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-              <h3 className="text-sm font-black dark:text-white text-gray-900">Organisations-Identität</h3>
+            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+              <button
+                onClick={() => setOpenIdentity(v => !v)}
+                className={`w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openIdentity ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+              >
+                <h3 className="text-sm font-black dark:text-white text-gray-900">Organisations-Identität</h3>
+                <span className="dark:text-white/30 text-gray-400">{openIdentity ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</span>
+              </button>
+              {openIdentity && (
+              <div className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Organisationsname</label>
@@ -238,10 +250,20 @@ export default function OrganisationPage() {
                   </div>
                 </div>
               </div>
+              </div>
+              )}
             </div>
 
-            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-5 space-y-4">
-              <h3 className="text-sm font-black dark:text-white text-gray-900">Adresse</h3>
+            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+              <button
+                onClick={() => setOpenAddress(v => !v)}
+                className={`w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openAddress ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+              >
+                <h3 className="text-sm font-black dark:text-white text-gray-900">Adresse</h3>
+                <span className="dark:text-white/30 text-gray-400">{openAddress ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</span>
+              </button>
+              {openAddress && (
+              <div className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Straße & Hausnummer</label>
@@ -263,6 +285,8 @@ export default function OrganisationPage() {
                   </select>
                 </div>
               </div>
+              </div>
+              )}
             </div>
           </div>
 
@@ -274,8 +298,16 @@ export default function OrganisationPage() {
                 <img src={settings.org_logo_url} alt="Logo" className="max-h-20 object-contain" />
               </div>
             )}
-            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-4 space-y-3">
-              <h4 className="text-xs font-black dark:text-white/40 text-gray-500 uppercase tracking-wide">Schnellinfo</h4>
+            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+              <button
+                onClick={() => setOpenQuickInfo(v => !v)}
+                className={`w-full flex items-center justify-between px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openQuickInfo ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+              >
+                <h4 className="text-xs font-black dark:text-white/40 text-gray-500 uppercase tracking-wide">Schnellinfo</h4>
+                <span className="dark:text-white/30 text-gray-400">{openQuickInfo ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</span>
+              </button>
+              {openQuickInfo && (
+              <div className="p-4 space-y-3">
               {[
                 { label: 'Mitglieder', value: members.length, icon: Users },
                 { label: 'Aktiver Plan', value: PLAN_CONFIG[settings.plan as keyof typeof PLAN_CONFIG]?.label || settings.plan || 'Team', icon: CreditCard },
@@ -287,6 +319,8 @@ export default function OrganisationPage() {
                   <span className="font-bold dark:text-white text-gray-900">{s.value}</span>
                 </div>
               ))}
+              </div>
+              )}
             </div>
           </div>
         </div>
@@ -428,7 +462,16 @@ export default function OrganisationPage() {
           {/* Billing info */}
           <div className="space-y-4">
             <h3 className="text-sm font-black dark:text-white text-gray-900">Rechnungsdetails</h3>
-            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-4 space-y-3">
+            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+              <button
+                onClick={() => setOpenBillingInfo(v => !v)}
+                className={`w-full flex items-center justify-between px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openBillingInfo ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+              >
+                <span className="text-xs font-bold dark:text-white/50 text-gray-600">Rechnungsfelder</span>
+                <span className="dark:text-white/30 text-gray-400">{openBillingInfo ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</span>
+              </button>
+              {openBillingInfo && (
+              <div className="p-4 space-y-3">
               <div className="space-y-1">
                 <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Rechnungs-E-Mail</label>
                 <input type="email" value={settings.billing_email || ''} onChange={(e) => setSettings({ ...settings, billing_email: e.target.value })} placeholder="billing@firma.de"
@@ -448,6 +491,8 @@ export default function OrganisationPage() {
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none disabled:opacity-50">
                 {saving ? <Loader size={13} className="animate-spin" /> : <Save size={13} />} Abrechnungsdaten speichern
               </button>
+              </div>
+              )}
             </div>
           </div>
         </div>

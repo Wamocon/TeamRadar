@@ -1,7 +1,7 @@
 'use client';
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { useAppStore } from '@/stores/appStore';
-import { FileDown, FileSpreadsheet, Users, Briefcase, BarChart3, CalendarDays, Upload, Download, CheckCircle, AlertCircle, Printer, Lock } from 'lucide-react';
+import { FileDown, FileSpreadsheet, Users, Briefcase, BarChart3, CalendarDays, Upload, Download, CheckCircle, AlertCircle, Printer, Lock, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 import { PROJECT_TYPE_CONFIG, type ProjectType } from '@/types';
 import { ProjectTypeFilter } from '@/components/ui/ProjectTypeFilter';
@@ -47,6 +47,8 @@ export default function ReportsPage() {
   const [selectedReport, setSelectedReport] = useState<ReportType>('utilization');
   const [filterType, setFilterType] = useState<'all' | ProjectType>('all');
   const [exportFormat, setExportFormat] = useState<ExportFormat>('csv');
+  const [openExportImport, setOpenExportImport] = useState(true);
+  const [openPreview, setOpenPreview] = useState(true);
 
   // Export/Import states (wie AppMonitor)
   const [exporting, setExporting] = useState(false);
@@ -360,16 +362,25 @@ export default function ReportsPage() {
         </div>
       )}
 
-      {/* ═══ Export & Import (wie AppMonitor Settings) ═══ */}
-      <div className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06]">
-        <div className="p-4 border-b border-black/[0.06] dark:border-white/[0.06]">
-          <h2 className="text-sm font-bold dark:text-white text-gray-900 flex items-center gap-2">
-            <Download size={14} className="text-cyan-500" /> Daten-Export & Import
-          </h2>
-          <p className="text-[10px] dark:text-white/30 text-gray-400 mt-1">
-            Exportiere alle TeamRadar-Daten als JSON oder importiere aus einer früheren Sicherung.
-          </p>
-        </div>
+      {/* ═══ Export & Import ═══ */}
+      <div className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] overflow-hidden">
+        <button
+          onClick={() => setOpenExportImport(v => !v)}
+          className={`w-full flex items-center justify-between p-4 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openExportImport ? 'border-b border-black/[0.06] dark:border-white/[0.06]' : ''}`}
+        >
+          <div>
+            <h2 className="text-sm font-bold dark:text-white text-gray-900 flex items-center gap-2">
+              <Download size={14} className="text-cyan-500" /> Daten-Export & Import
+            </h2>
+            <p className="text-[10px] dark:text-white/30 text-gray-400 mt-0.5">
+              Exportiere alle TeamRadar-Daten als JSON oder importiere aus einer früheren Sicherung.
+            </p>
+          </div>
+          <span className="dark:text-white/30 text-gray-400 ml-4 shrink-0">
+            {openExportImport ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </span>
+        </button>
+        {openExportImport && (
         <div className="p-4 space-y-3">
           <div className="flex flex-wrap gap-3">
             <button onClick={handleJsonExport} disabled={exporting}
@@ -417,9 +428,8 @@ export default function ReportsPage() {
             </div>
           )}
         </div>
+        )}
       </div>
-
-      {/* Intern/Extern Filter */}
       <ProjectTypeFilter value={filterType} onChange={setFilterType} counts={projectTypeCounts} />
 
       {/* Report Type Selection */}
@@ -441,13 +451,19 @@ export default function ReportsPage() {
 
       {/* Preview Table */}
       <div className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] overflow-hidden">
-        <div className="p-4 border-b border-black/[0.06] dark:border-white/[0.06] flex items-center justify-between">
+        <button
+          onClick={() => setOpenPreview(v => !v)}
+          className={`w-full flex items-center justify-between p-4 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openPreview ? 'border-b border-black/[0.06] dark:border-white/[0.06]' : ''}`}
+        >
           <h2 className="text-sm font-bold dark:text-white text-gray-900 flex items-center gap-2">
             <FileSpreadsheet size={14} /> Vorschau
           </h2>
-          <span className="text-[10px] dark:text-white/30 text-gray-400">Erste 8 Einträge</span>
-        </div>
-        <div className="overflow-x-auto">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] dark:text-white/30 text-gray-400">Erste 8 Einträge</span>
+            <span className="dark:text-white/30 text-gray-400">{openPreview ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</span>
+          </div>
+        </button>
+        {openPreview && <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-black/[0.04] dark:border-white/[0.04]">
@@ -496,10 +512,8 @@ export default function ReportsPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </div>}
       </div>
-
-      {/* Export Controls */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
         {/* Format-Toggle */}
         <div className="flex gap-1 p-1 bg-black/[0.04] dark:bg-white/[0.04] rounded-xl">

@@ -4,6 +4,9 @@
  */
 import { createClient } from '@/lib/supabase/client';
 import type { Member, Availability, Team, Project, Allocation } from '@/types';
+// Statischer Import: Next.js ersetzt Server Actions im Client-Bundle durch RPC-Stubs.
+// Dynamischer Import (äawait import(...)ä) scheitert in Turbopack und verursacht Lock-Konflikte.
+import { loadAllDataAction, addAvailabilityAction } from '@/lib/actions/dataActions';
 
 /* ── Hilfsfunktionen: DB-Rows ↔ App-Typen ──────────────── */
 
@@ -89,6 +92,7 @@ function rowToProject(row: Record<string, unknown>): Project {
     memberIds: (row.member_ids as string[]) ?? [],
     startDate: row.start_date as string | undefined,
     endDate: row.end_date as string | undefined,
+    maxDays: row.max_days as number | undefined,
     createdAt: row.created_at as string,
   };
 }
@@ -105,6 +109,7 @@ function projectToRow(project: Project, userId: string) {
     member_ids: project.memberIds,
     start_date: project.startDate ?? null,
     end_date: project.endDate ?? null,
+    max_days: project.maxDays ?? null,
   };
 }
 
@@ -178,38 +183,21 @@ export async function dbGetUserProfile() {
 
 export async function loadAllData() {
   if (!isSupabaseConfigured()) return null;
-  const supabase = createClient();
-  const userId = await getUserId();
-  if (!userId) return null;
+  // Kein getUserId()-Aufruf hier! Die Server Action prüft Auth selbst.
+  // Doppelter Auth-Aufruf (getUserId hier + getUser in der Action) führt zu
+  // Navigator-Lock-Konflikten (‚Lock stolen‘-Fehler in der Konsole).
+  const rawData = await loadAllDataAction();
+  if (!rawData) return null;
 
-  const [
-    { data: memberRows, error: mError },
-    { data: availabilityRows, error: aError },
-    { data: teamRows, error: tError },
-    { data: projectRows, error: pError },
-    { data: allocationRows, error: alError },
-  ] = await Promise.all([
-    // Kein user_id-Filter: RLS-Policies steuern Sichtbarkeit (alle Teammitglieder sichtbar)
-    supabase.from('members').select('*').order('created_at', { ascending: true }),
-    supabase.from('availabilities').select('*').order('date', { ascending: true }),
-    supabase.from('teams').select('*').order('name', { ascending: true }),
-    supabase.from('projects').select('*').order('name', { ascending: true }),
-    supabase.from('allocations').select('*'),
-  ]);
+  const { memberRows, availabilityRows, teamRows, projectRows, allocationRows } = rawData;
 
-  if (mError) throw mError;
-  if (aError) throw aError;
-  if (tError) throw tError;
-  if (pError) throw pError;
-  if (alError) throw alError;
-
-  const members = (memberRows ?? []).map(rowToMember);
-  const availabilities = (availabilityRows ?? []).map(rowToAvailability);
-  const teams = (teamRows ?? []).map(rowToTeam);
-  const projects = (projectRows ?? []).map(rowToProject);
-  const allocations = (allocationRows ?? []).map(rowToAllocation);
-
-  return { members, availabilities, teams, projects, allocations };
+  return {
+    members: memberRows.map(rowToMember),
+    availabilities: availabilityRows.map(rowToAvailability),
+    teams: teamRows.map(rowToTeam),
+    projects: projectRows.map(rowToProject),
+    allocations: allocationRows.map(rowToAllocation),
+  };
 }
 
 /* ── Members ──────────────────────────────────────────────── */
@@ -243,11 +231,9 @@ export async function dbDeleteMember(id: string) {
 
 export async function dbAddAvailability(entry: Availability) {
   if (!isSupabaseConfigured()) return;
-  const userId = await getUserId();
-  if (!userId) throw new Error('Nicht eingeloggt.');
-  const supabase = createClient();
-  const { error } = await supabase.from('availabilities').insert(availabilityToRow(entry, userId));
-  if (error) throw new Error(`Verfügbarkeit konnte nicht gespeichert werden: ${error.message}`);
+  // Server Action statt Browser-Client: vermeidet Navigator-Lock-Konflikte
+  // (kein doppelter auth.getUser()-Aufruf in Browser + Server gleichzeitig).
+  await addAvailabilityAction(entry);
 }
 
 export async function dbUpdateAvailability(entry: Availability) {

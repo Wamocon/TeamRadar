@@ -3,7 +3,7 @@ import { useState, useMemo, useCallback } from 'react';
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, BookOpen,
   Clock, MapPin, Upload, Info,
-  Loader, Trash2, Edit3,
+  Loader, Trash2, Edit3, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval,
@@ -316,6 +316,9 @@ export default function CalendarPage() {
   const [showHowTo, setShowHowTo] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState<string | null>(null);
+  const [openCalendar, setOpenCalendar] = useState(true);
+  const [openUpcoming, setOpenUpcoming] = useState(true);
+  const [openStats, setOpenStats] = useState(true);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -414,15 +417,24 @@ export default function CalendarPage() {
               className="p-2 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all border-none bg-transparent cursor-pointer">
               <ChevronLeft size={16} />
             </button>
-            <h2 className="text-base font-black dark:text-white text-gray-900">
-              {format(currentMonth, 'MMMM yyyy', { locale: de })}
-            </h2>
+            <button
+              onClick={() => setOpenCalendar(v => !v)}
+              className="flex items-center gap-2 bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+            >
+              <h2 className="text-base font-black dark:text-white text-gray-900">
+                {format(currentMonth, 'MMMM yyyy', { locale: de })}
+              </h2>
+              <span className="dark:text-white/30 text-gray-400">
+                {openCalendar ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </span>
+            </button>
             <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
               className="p-2 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all border-none bg-transparent cursor-pointer">
               <ChevronRight size={16} />
             </button>
           </div>
 
+          {openCalendar && (<>
           {/* Weekday header */}
           <div className="grid grid-cols-7 border-b dark:border-white/[0.04] border-black/[0.04]">
             {weekdays.map((d) => (
@@ -467,48 +479,69 @@ export default function CalendarPage() {
               );
             })}
           </div>
+          </>)}
         </div>
 
         {/* Sidebar: Upcoming Events */}
         <div className="space-y-4">
           <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
-            <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04]">
+            <button
+              onClick={() => setOpenUpcoming(v => !v)}
+              className={`w-full flex items-center justify-between px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openUpcoming ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+            >
               <h3 className="text-sm font-black dark:text-white text-gray-900">Nächste Termine</h3>
-            </div>
-            <div className="p-3 space-y-2">
-              {upcomingEvents.length === 0 && (
-                <p className="text-xs dark:text-white/30 text-gray-400 text-center py-6">Keine bevorstehenden Termine</p>
-              )}
-              {upcomingEvents.map((ev) => (
-                <button key={ev.id} onClick={() => setSelectedEvent(ev)}
-                  className="w-full text-left p-2.5 rounded-xl border dark:border-white/[0.05] border-black/[0.04] hover:bg-[var(--primary-light)] transition-all cursor-pointer bg-transparent group relative overflow-hidden">
-                  <div className="absolute left-0 top-0 bottom-0 w-0.5" style={{ background: ev.color || '#6366f1' }} />
-                  <div className="pl-2">
-                    <div className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-[var(--primary)] transition-colors">{ev.title}</div>
-                    <div className="text-[10px] dark:text-white/40 text-gray-500 mt-0.5">
-                      {new Date(ev.date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short' })}
-                      {ev.startTime ? ` · ${ev.startTime}` : ''}
+              <span className="dark:text-white/30 text-gray-400">
+                {openUpcoming ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+              </span>
+            </button>
+            {openUpcoming && (
+              <div className="p-3 space-y-2">
+                {upcomingEvents.length === 0 && (
+                  <p className="text-xs dark:text-white/30 text-gray-400 text-center py-6">Keine bevorstehenden Termine</p>
+                )}
+                {upcomingEvents.map((ev) => (
+                  <button key={ev.id} onClick={() => setSelectedEvent(ev)}
+                    className="w-full text-left p-2.5 rounded-xl border dark:border-white/[0.05] border-black/[0.04] hover:bg-[var(--primary-light)] transition-all cursor-pointer bg-transparent group relative overflow-hidden">
+                    <div className="absolute left-0 top-0 bottom-0 w-0.5" style={{ background: ev.color || '#6366f1' }} />
+                    <div className="pl-2">
+                      <div className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-[var(--primary)] transition-colors">{ev.title}</div>
+                      <div className="text-[10px] dark:text-white/40 text-gray-500 mt-0.5">
+                        {new Date(ev.date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short' })}
+                        {ev.startTime ? ` · ${ev.startTime}` : ''}
+                      </div>
+                      {ev.location && <div className="text-[10px] dark:text-white/30 text-gray-400 truncate">{ev.location}</div>}
                     </div>
-                    {ev.location && <div className="text-[10px] dark:text-white/30 text-gray-400 truncate">{ev.location}</div>}
-                  </div>
-                </button>
-              ))}
-            </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Stats */}
-          <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-4 space-y-2">
-            <h3 className="text-xs font-black dark:text-white/40 text-gray-500 uppercase tracking-wide">Statistik</h3>
-            {[
-              { label: 'Termine gesamt', value: events.length },
-              { label: 'Diesen Monat', value: events.filter((e) => e.date.startsWith(format(currentMonth, 'yyyy-MM'))).length },
-              { label: 'Importiert (ICS)', value: events.filter((e) => e.source === 'ics_import').length },
-            ].map((s) => (
-              <div key={s.label} className="flex items-center justify-between text-xs">
-                <span className="dark:text-white/40 text-gray-500">{s.label}</span>
-                <span className="font-black text-[var(--primary)]">{s.value}</span>
+          <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+            <button
+              onClick={() => setOpenStats(v => !v)}
+              className={`w-full flex items-center justify-between px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openStats ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+            >
+              <h3 className="text-xs font-black dark:text-white/40 text-gray-500 uppercase tracking-wide">Statistik</h3>
+              <span className="dark:text-white/30 text-gray-400">
+                {openStats ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+              </span>
+            </button>
+            {openStats && (
+              <div className="p-4 space-y-2">
+                {[
+                  { label: 'Termine gesamt', value: events.length },
+                  { label: 'Diesen Monat', value: events.filter((e) => e.date.startsWith(format(currentMonth, 'yyyy-MM'))).length },
+                  { label: 'Importiert (ICS)', value: events.filter((e) => e.source === 'ics_import').length },
+                ].map((s) => (
+                  <div key={s.label} className="flex items-center justify-between text-xs">
+                    <span className="dark:text-white/40 text-gray-500">{s.label}</span>
+                    <span className="font-black text-[var(--primary)]">{s.value}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>

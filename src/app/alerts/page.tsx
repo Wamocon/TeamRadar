@@ -4,7 +4,7 @@ import { useAppStore } from '@/stores/appStore';
 import { ALERT_TYPE_CONFIG, PROJECT_TYPE_CONFIG, type AlertType, type ProjectType } from '@/types';
 import { ProjectTypeFilter } from '@/components/ui/ProjectTypeFilter';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
-import { AlertTriangle, CheckCircle, Users, Briefcase } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Users, Briefcase, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AlertsPage() {
@@ -14,6 +14,7 @@ export default function AlertsPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [filterType, setFilterType] = useState<'all' | ProjectType>('all');
+  const [collapsedAlertTypes, setCollapsedAlertTypes] = useState<Set<string>>(new Set());
 
   const allAlerts = useMemo(() => getAlerts(), [getAlerts]);
 
@@ -107,16 +108,29 @@ export default function AlertsPage() {
       {/* Alerts grouped by type */}
       {(Object.entries(alertsByType) as [AlertType, typeof alerts][]).map(([type, typeAlerts]) => {
         const conf = ALERT_TYPE_CONFIG[type];
+        const isCollapsed = collapsedAlertTypes.has(type);
         return (
-          <div key={type}>
-            <h2 className="text-sm font-bold dark:text-white text-gray-900 mb-3 flex items-center gap-2">
-              <span>{conf.icon}</span> {conf.label}
+          <div key={type} className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+            <button
+              onClick={() => setCollapsedAlertTypes((prev) => {
+                const next = new Set(prev);
+                if (next.has(type)) next.delete(type); else next.add(type);
+                return next;
+              })}
+              className={`w-full flex items-center gap-2 px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors text-left ${!isCollapsed ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+            >
+              <span>{conf.icon}</span>
+              <span className="text-sm font-bold dark:text-white text-gray-900">{conf.label}</span>
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                 style={{ color: conf.color, background: `${conf.color}15` }}>
                 {typeAlerts.length}
               </span>
-            </h2>
-            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-3' : 'space-y-2'}>
+              <span className="ml-auto dark:text-white/30 text-gray-400">
+                {isCollapsed ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
+              </span>
+            </button>
+            {!isCollapsed && (
+              <div className={`p-3 ${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-3' : 'space-y-2'}`}>
               {typeAlerts.map((alert) => {
                 const member = members.find((m) => m.id === alert.memberId);
                 const relatedProjects = (alert.projectIds ?? [])
@@ -167,6 +181,7 @@ export default function AlertsPage() {
                 );
               })}
             </div>
+            )}
           </div>
         );
       })}

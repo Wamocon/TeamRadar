@@ -23,9 +23,10 @@ export const STATUS_CONFIG: Record<AvailabilityStatus, { label: string; color: s
 };
 
 /* ── Benutzerrollen ─────────────────────────────────────── */
-export type UserRole = 'admin' | 'cio' | 'department_lead' | 'employee';
+export type UserRole = 'super_admin' | 'admin' | 'cio' | 'department_lead' | 'employee';
 
 export const USER_ROLE_HIERARCHY: Record<UserRole, number> = {
+  super_admin: 5,
   admin: 4,
   cio: 3,
   department_lead: 2,
@@ -91,6 +92,7 @@ export interface Project {
   startDate?: string;       // ISO-Datum YYYY-MM-DD
   endDate?: string;         // ISO-Datum YYYY-MM-DD
   budgetHours?: number;     // Geplantes Stundenkontingent
+  maxDays?: number;         // Max. Beauftragungstage pro Jahr (nur externe Projekte)
   createdAt: string;
 }
 

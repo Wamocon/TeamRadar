@@ -136,7 +136,7 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     mockUpsert.mockReturnValue({ error: null });
     mockFrom.mockReturnValue({ insert: mockInsert, update: mockUpdate, delete: mockDelete, select: vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue({ data: [], error: null }), eq: vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue({ data: [], error: null }) }) }), upsert: mockUpsert });
     mockLoadAllDataAction.mockResolvedValue({
-      memberRows: [], availabilityRows: [], teamRows: [], projectRows: [], allocationRows: [],
+      memberRows: [], availabilityRows: [], teamRows: [], projectRows: [], allocationRows: [], organizationRows: [],
     });
     mockAddAvailabilityAction.mockResolvedValue(undefined);
   });
@@ -341,6 +341,9 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
         id: 'al1', member_id: 'm1', project_id: 'p1',
         percentage: 80, start_date: '2026-01-01', end_date: '2026-12-31', user_id: 'u1',
       }],
+      organizationRows: [{
+        id: 'org1', name: 'WAMOCON GmbH', slug: 'wamocon-gmbh', created_at: '2026-01-01',
+      }],
     });
 
     const data = await loadAllData();
@@ -377,6 +380,12 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(alloc.memberId).toBe('m1');
     expect(alloc.projectId).toBe('p1');
     expect(alloc.percentage).toBe(80);
+
+    // Organization-Mapping
+    const org = data!.organizations[0];
+    expect(org.id).toBe('org1');
+    expect(org.name).toBe('WAMOCON GmbH');
+    expect(org.slug).toBe('wamocon-gmbh');
   });
 
   it('loadAllData: leere member_ids werden als [] gemappt', async () => {
@@ -386,6 +395,7 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
       teamRows: [{ id: 't1', name: 'Leer', description: null, member_ids: null }],
       projectRows: [{ id: 'p1', name: 'X', type: 'internal', status: 'active', client: null, description: null, member_ids: null, start_date: null, end_date: null, max_days: null, created_at: '2026-01-01' }],
       allocationRows: [],
+      organizationRows: [],
     });
     const data = await loadAllData();
     expect(data!.teams[0].memberIds).toEqual([]);

@@ -4,32 +4,39 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock des Supabase-Clients
-const mockInsert = vi.fn().mockReturnValue({ error: null });
-const mockUpdate = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
-const mockDelete = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
-const mockOrder = vi.fn().mockReturnValue({ data: [], error: null });
-const mockSelect = vi.fn().mockReturnValue({
-  // Unterstützt sowohl .select().order() als auch .select().eq().order()
-  order: mockOrder,
-  eq: vi.fn().mockReturnValue({
+// vi.hoisted stellt sicher, dass diese Variablen auch in vi.mock-Factories verfügbar sind
+const { mockInsert, mockUpdate, mockDelete, mockOrder, mockSelect, mockFrom, mockGetUser, mockUpsert } = vi.hoisted(() => {
+  const mockInsert = vi.fn().mockReturnValue({ error: null });
+  const mockUpdate = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
+  const mockDelete = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
+  const mockOrder = vi.fn().mockReturnValue({ data: [], error: null });
+  const mockSelect = vi.fn().mockReturnValue({
     order: mockOrder,
-  }),
-});
-
-const mockFrom = vi.fn().mockReturnValue({
-  insert: mockInsert,
-  update: mockUpdate,
-  delete: mockDelete,
-  select: mockSelect,
-});
-
-const mockGetUser = vi.fn().mockResolvedValue({
-  data: { user: { id: 'user-123' } },
+    eq: vi.fn().mockReturnValue({ order: mockOrder }),
+  });
+  const mockUpsert = vi.fn().mockReturnValue({ error: null });
+  const mockFrom = vi.fn().mockReturnValue({
+    insert: mockInsert,
+    update: mockUpdate,
+    delete: mockDelete,
+    select: mockSelect,
+    upsert: mockUpsert,
+  });
+  const mockGetUser = vi.fn().mockResolvedValue({
+    data: { user: { id: 'user-123' } },
+  });
+  return { mockInsert, mockUpdate, mockDelete, mockOrder, mockSelect, mockFrom, mockGetUser, mockUpsert };
 });
 
 vi.mock('@/lib/supabase/client', () => ({
   createClient: () => ({
+    from: mockFrom,
+    auth: { getUser: mockGetUser },
+  }),
+}));
+
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn().mockResolvedValue({
     from: mockFrom,
     auth: { getUser: mockGetUser },
   }),
@@ -190,7 +197,7 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(mockFrom).toHaveBeenCalledWith('members');
   });
 
-  it('dbAddAvailability ruft from("availabilities").insert auf', async () => {
+  it('dbAddAvailability ruft from("availabilities").upsert auf', async () => {
     const entry: Availability = {
       id: 'a1', memberId: 'm1', status: 'available', date: '2026-03-20',
       startTime: '09:00', endTime: '17:00',
@@ -198,8 +205,8 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     await dbAddAvailability(entry);
 
     expect(mockFrom).toHaveBeenCalledWith('availabilities');
-    expect(mockInsert).toHaveBeenCalled();
-    const row = mockInsert.mock.calls[0][0];
+    expect(mockUpsert).toHaveBeenCalled();
+    const row = mockUpsert.mock.calls[0][0];
     expect(row.member_id).toBe('m1');
     expect(row.status).toBe('available');
     expect(row.start_time).toBe('09:00');

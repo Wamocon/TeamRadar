@@ -3,7 +3,7 @@
  * Alle Funktionen spiegeln die Store-Aktionen, persistieren aber in Supabase.
  */
 import { createClient } from '@/lib/supabase/client';
-import type { Member, Availability, Team, Project, Allocation } from '@/types';
+import type { Member, Availability, Team, Project, Allocation, Organization } from '@/types';
 // Statischer Import: Next.js ersetzt Server Actions im Client-Bundle durch RPC-Stubs.
 // Dynamischer Import (äawait import(...)ä) scheitert in Turbopack und verursacht Lock-Konflikte.
 import { loadAllDataAction, addAvailabilityAction } from '@/lib/actions/dataActions';
@@ -18,8 +18,18 @@ function rowToMember(row: Record<string, unknown>): Member {
     email: row.email as string,
     role: row.role as string,
     department: row.department as string,
+    organizationId: row.organization_id as string | undefined,
     avatarUrl: row.avatar_url as string | undefined,
     phone: row.phone as string | undefined,
+    createdAt: row.created_at as string,
+  };
+}
+
+function rowToOrganization(row: Record<string, unknown>): Organization {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    slug: row.slug as string,
     createdAt: row.created_at as string,
   };
 }
@@ -189,7 +199,7 @@ export async function loadAllData() {
   const rawData = await loadAllDataAction();
   if (!rawData) return null;
 
-  const { memberRows, availabilityRows, teamRows, projectRows, allocationRows } = rawData;
+  const { memberRows, availabilityRows, teamRows, projectRows, allocationRows, organizationRows } = rawData;
 
   return {
     members: memberRows.map(rowToMember),
@@ -197,6 +207,7 @@ export async function loadAllData() {
     teams: teamRows.map(rowToTeam),
     projects: projectRows.map(rowToProject),
     allocations: allocationRows.map(rowToAllocation),
+    organizations: organizationRows.map(rowToOrganization),
   };
 }
 

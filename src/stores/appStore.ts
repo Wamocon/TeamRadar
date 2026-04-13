@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Member, Availability, Team, Project, AvailabilityStatus, UserProfile, UserRole, Allocation, Alert, ProjectType } from '@/types';
+import type { Member, Availability, Team, Project, AvailabilityStatus, UserProfile, UserRole, Allocation, Alert, ProjectType, Organization } from '@/types';
 import {
   loadAllData,
   dbAddMember,
@@ -26,8 +26,7 @@ interface AppStore {
   availabilities: Availability[];
   teams: Team[];
   projects: Project[];
-  allocations: Allocation[];
-  userProfile: UserProfile | null;
+  allocations: Allocation[];  organizations: Organization[];  userProfile: UserProfile | null;
   systemSettings: {
     orgName: string;
     orgLogoUrl?: string;
@@ -90,6 +89,7 @@ export const useAppStore = create<AppStore>()(
     teams: [],
     projects: [],
     allocations: [],
+    organizations: [],
     userProfile: process.env.NODE_ENV !== 'production' 
       ? { 
           id: 'mock-1', 
@@ -127,6 +127,7 @@ export const useAppStore = create<AppStore>()(
             teams: data.teams,
             projects: data.projects,
             allocations: data.allocations,
+            organizations: data.organizations,
             isLoading: false,
           });
         } else {

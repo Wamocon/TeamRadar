@@ -33,7 +33,15 @@ export const USER_ROLE_HIERARCHY: Record<UserRole, number> = {
   employee: 1,
 };
 
-/* ── Team-Mitglied ──────────────────────────────────────── */
+/* ── Organisation ───────────────────────────────────────────── */
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  createdAt: string;
+}
+
+/* ── Team-Mitglied ──────────────────────────────────────────── */
 export interface Member {
   id: string;
   userId?: string;        // Supabase Auth User ID
@@ -41,6 +49,7 @@ export interface Member {
   email: string;
   role: string;           // Jobtitel/Position
   department: string;
+  organizationId?: string; // optional – App nutzbar ohne Org
   avatarUrl?: string;
   phone?: string;
   skills?: Skill[];

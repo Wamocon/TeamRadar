@@ -5,7 +5,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // vi.hoisted stellt sicher, dass diese Variablen auch in vi.mock-Factories verfügbar sind
-const { mockInsert, mockUpdate, mockDelete, mockOrder, mockSelect, mockFrom, mockGetUser, mockUpsert } = vi.hoisted(() => {
+const { mockInsert, mockUpdate, mockDelete, mockSelect, mockFrom, mockGetUser, mockUpsert } = vi.hoisted(() => {
   const mockInsert = vi.fn().mockReturnValue({ error: null });
   const mockUpdate = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
   const mockDelete = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
@@ -25,7 +25,7 @@ const { mockInsert, mockUpdate, mockDelete, mockOrder, mockSelect, mockFrom, moc
   const mockGetUser = vi.fn().mockResolvedValue({
     data: { user: { id: 'user-123' } },
   });
-  return { mockInsert, mockUpdate, mockDelete, mockOrder, mockSelect, mockFrom, mockGetUser, mockUpsert };
+  return { mockInsert, mockUpdate, mockDelete, mockSelect, mockFrom, mockGetUser, mockUpsert };
 });
 
 vi.mock('@/lib/supabase/client', () => ({

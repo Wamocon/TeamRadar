@@ -1616,7 +1616,7 @@ describe('Store: updateProject – map-Ternary Zweig + Fallback-String', () => {
 
   it('updateProject Rollback-map + Fallback-Fehler bei null-Error und 2 Projekten', async () => {
     const p1 = await useAppStore.getState().addProject({ name: 'Projekt A', type: 'internal', status: 'active', memberIds: [] });
-    const p2 = await useAppStore.getState().addProject({ name: 'Projekt B', type: 'internal', status: 'active', memberIds: [] });
+    await useAppStore.getState().addProject({ name: 'Projekt B', type: 'internal', status: 'active', memberIds: [] });
     mockDbUpdateProject.mockRejectedValueOnce(null);
     useAppStore.getState().updateProject(p1.id, { name: 'Projekt A Neu' });
     await flushMicroTasks();

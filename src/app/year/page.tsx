@@ -114,8 +114,12 @@ function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, toda
 
   if (isWeekend) {
     return (
-      <td className="p-0" style={{ background: 'rgba(156,163,175,0.07)' }}>
+      <td className="p-0 relative"
+        style={{ background: holiday ? 'rgba(239,68,68,0.07)' : 'rgba(156,163,175,0.07)' }}
+        title={holiday ? `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} – 🗓️ ${holiday.name}` : undefined}
+      >
         <div className="w-full h-12" />
+        {holiday && <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-red-400" />}
       </td>
     );
   }
@@ -249,8 +253,8 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                       d.dateStr === today ? 'text-[var(--primary)]' :
                       'dark:text-white/40 text-gray-500'
                     }`}
-                    style={{ fontSize: '11px', background: d.holiday && !d.isWeekend ? 'rgba(239,68,68,0.04)' : undefined }}
-                    title={d.holiday ? `?? ${d.holiday.name}` : undefined}>
+                    style={{ fontSize: '11px', background: d.holiday ? 'rgba(239,68,68,0.04)' : undefined }}
+                    title={d.holiday ? `🗓️ ${d.holiday.name}` : undefined}>
                     {d.day}
                   </th>
                 ))}
@@ -552,7 +556,7 @@ export default function YearOverviewPage() {
         const dateStr = formatDate(year, month, d);
         const dow = new Date(dateStr).getDay();
         const isWeekend = dow === 0 || dow === 6;
-        const holiday = !isWeekend ? (holidays.get(dateStr) ?? null) : null;
+        const holiday = holidays.get(dateStr) ?? null;
         return { day: d, dateStr, weekday: WEEKDAY_SHORT[dow], isWeekend, holiday };
       });
       const memberRows = members.map((member) => {
@@ -626,7 +630,7 @@ export default function YearOverviewPage() {
       const dateStr = formatDate(year, entryMonth, d);
       const dow = new Date(dateStr).getDay();
       const isWeekend = dow === 0 || dow === 6;
-      const holiday = !isWeekend ? (holidays.get(dateStr) ?? null) : null;
+      const holiday = holidays.get(dateStr) ?? null;
       return { day: d, dateStr, weekday: WEEKDAY_SHORT[dow], isWeekend, holiday };
     });
     const memberRows = members.map((member) => {

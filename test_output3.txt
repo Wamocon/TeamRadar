@@ -1,0 +1,448 @@
+﻿
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.4 [39m[90mD:/IDEA/Projekt/TeamRadar[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [32mÔ£ô[39m src/__tests__/sidebar-theme.test.ts[2m > [22mSidebar Theme-Awareness Check[2m > [22mshould use CSS variables for theme-aware backgrounds[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/sidebar-theme.test.ts[2m > [22mSidebar Theme-Awareness Check[2m > [22mshould use CSS variables for theme-aware text colors[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/sidebar-theme.test.ts[2m > [22mSidebar Theme-Awareness Check[2m > [22mshould use CSS variables for theme-aware borders[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/sidebar-theme.test.ts[2m > [22mSidebar Theme-Awareness Check[2m > [22mshould use theme-adaptive active item classes[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/sidebar-theme.test.ts[2m > [22mSidebar Theme-Awareness Check[2m > [22mshould use theme-adaptive hover item classes[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/sidebar-theme.test.ts[2m > [22mSidebar Theme-Awareness Check[2m > [22mshould have alt prop for user avatar for accessibility (lint-fix check)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/sidebar-theme.test.ts[2m > [22mSidebar Theme-Awareness Check[2m > [22mshould use the Image component with fill and cover for the avatar[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/app-integration.test.ts[2m > [22mApp Integration Configuration[2m > [22mshould have NEXT_PUBLIC_AWAY_URL configured[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/app-integration.test.ts[2m > [22mApp Integration Configuration[2m > [22mshould have NEXT_PUBLIC_TRACE_URL configured[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/app-integration.test.ts[2m > [22mApp Integration Configuration[2m > [22mshould use localhost ports by default in test env[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/app-integration.test.ts[2m > [22mApp Integration Configuration[2m > [22mshould have correct sandbox permissions in AppPortal[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/confirm-modal.test.ts[2m > [22mConfirmModal System & Form Protection Integration Check[2m > [22mConfirmModal component should have TRACE-style design and use generic Modal[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/confirm-modal.test.ts[2m > [22mConfirmModal System & Form Protection Integration Check[2m > [22mModal component should support showCloseButton prop[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/confirm-modal.test.ts[2m > [22mConfirmModal System & Form Protection Integration Check[2m > [22mMembersPage should use ConfirmModal for member deletion[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/confirm-modal.test.ts[2m > [22mConfirmModal System & Form Protection Integration Check[2m > [22mMemberForm should have unsaved changes (isDirty) protection[32m 0[2mms[22m[39m
+ [2m[90mÔåô[39m[22m src/__tests__/confirm-modal.test.ts[2m > [22mConfirmModal System & Form Protection Integration Check[2m > [22mTeamsPage should have unsaved changes (isDirty) protection ÔÇö Teams-Seite ist derzeit ein Redirect
+ [32mÔ£ô[39m src/__tests__/confirm-modal.test.ts[2m > [22mConfirmModal System & Form Protection Integration Check[2m > [22mProjectsPage should have unsaved changes (isDirty) protection[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/confirm-modal.test.ts[2m > [22mConfirmModal System & Form Protection Integration Check[2m > [22mDeletions in all pages should be migrated from native confirm[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/config.test.ts[2m > [22mNext.js Image Configuration Check[2m > [22mshould allow images.unsplash.com in remotePatterns[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/config.test.ts[2m > [22mNext.js Image Configuration Check[2m > [22mshould allow the Supabase project domain in remotePatterns[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/config.test.ts[2m > [22mNext.js Image Configuration Check[2m > [22mshould include the protocol for remotePatterns[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/modal-system.test.ts[2m > [22mModal System Integration Check[2m > [22mSidebar should use the query parameter for member invitations[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/modal-system.test.ts[2m > [22mModal System Integration Check[2m > [22mMembersPage should handle the action=invite search parameter[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/modal-system.test.ts[2m > [22mModal System Integration Check[2m > [22mDashboardPage should use the Modal component for status entry[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/modal-system.test.ts[2m > [22mModal System Integration Check[2m > [22mModal component should have TRACE-style design elements[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/modal-system.test.ts[2m > [22mModal System Integration Check[2m > [22mLegacy New Member page should redirect to the modal version[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mSTATUS_CONFIG[2m > [22menth├ñlt alle 9 Status-Typen[32m 3[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mSTATUS_CONFIG[2m > [22mjeder Status hat label, color und bgClass[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mSTATUS_CONFIG[2m > [22malle Labels sind auf Deutsch[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mSTATUS_CONFIG[2m > [22malle Farben sind einzigartig[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mUSER_ROLE_HIERARCHY[2m > [22menth├ñlt alle 5 Rollen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mUSER_ROLE_HIERARCHY[2m > [22madmin > cio > department_lead > employee[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mType-Safety: Interface-Shapes[2m > [22mMember hat alle erforderlichen Felder[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mType-Safety: Interface-Shapes[2m > [22mAvailability hat alle erforderlichen Felder[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mType-Safety: Interface-Shapes[2m > [22mTeam hat alle erforderlichen Felder[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mType-Safety: Interface-Shapes[2m > [22mUserProfile hat alle erforderlichen Felder[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mType-Safety: Interface-Shapes[2m > [22mMember kann optionale Skills haben[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mType-Safety: Interface-Shapes[2m > [22mAllocation hat alle erforderlichen Felder[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mType-Safety: Interface-Shapes[2m > [22mAlert hat alle erforderlichen Felder[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mType-Safety: Interface-Shapes[2m > [22mProject kann optionale budgetHours haben[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mSKILL_LEVEL_CONFIG[2m > [22menth├ñlt alle 4 Skill-Level[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mSKILL_LEVEL_CONFIG[2m > [22mjedes Level hat label, color und aufsteigenden value[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mSKILL_CATEGORIES[2m > [22menth├ñlt mindestens 8 Kategorien[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mSKILL_CATEGORIES[2m > [22menth├ñlt g├ñngige Kategorien[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mALERT_TYPE_CONFIG[2m > [22menth├ñlt alle 4 Alert-Typen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mALERT_TYPE_CONFIG[2m > [22mjeder Alert-Typ hat label, icon und color[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mPROJECT_TYPE_CONFIG[2m > [22menth├ñlt internal und external[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mPROJECT_TYPE_CONFIG[2m > [22mjeder Typ hat label, color und bgClass[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mPROJECT_TYPE_CONFIG[2m > [22mintern ist auf Deutsch, extern auch[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mPROJECT_TYPE_CONFIG[2m > [22mFarben sind unterschiedlich[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mPROJECT_STATUS_CONFIG[2m > [22menth├ñlt alle 3 Status[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/types.test.ts[2m > [22mPROJECT_STATUS_CONFIG[2m > [22mjeder Status hat label und color[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/branding.test.ts[2m > [22mBranding Assets[2m > [22mshould have the favicon.svg in the public directory[32m 3[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/branding.test.ts[2m > [22mBranding Assets[2m > [22mshould have the logo.png in the public directory[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesweite Feiertage[2m > [22menth├ñlt Neujahr (1. Januar)[32m 4[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesweite Feiertage[2m > [22menth├ñlt Tag der Arbeit (1. Mai)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesweite Feiertage[2m > [22menth├ñlt Tag der Deutschen Einheit (3. Oktober)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesweite Feiertage[2m > [22menth├ñlt 1. Weihnachtstag (25. Dezember)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesweite Feiertage[2m > [22menth├ñlt 2. Weihnachtstag (26. Dezember)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesweite Feiertage[2m > [22mberechnet Karfreitag korrekt (2 Tage vor Ostersonntag)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesweite Feiertage[2m > [22mberechnet Ostermontag korrekt (1 Tag nach Ostersonntag)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesweite Feiertage[2m > [22mberechnet Christi Himmelfahrt korrekt (39 Tage nach Ostern)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesweite Feiertage[2m > [22mberechnet Pfingstmontag korrekt (50 Tage nach Ostern)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesweite Feiertage[2m > [22mgibt eine Map zur├╝ck, keine Liste[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mHeilige Drei K├Ânige (6. Jan) nur in BW, BY, ST[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mHeilige Drei K├Ânige (6. Jan) enthalten in BY[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mHeilige Drei K├Ânige (6. Jan) enthalten in ST[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mInternationaler Frauentag (8. M├ñrz) nur in BE und MV[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mMari├ñ Himmelfahrt (15. Aug) nur in BY und SL[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mReformationstag (31. Okt) in BB, HB, HH, MV, NI, SH, SN, ST, TH[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mAllerheiligen (1. Nov) in BW, BY, NW, RP, SL[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mBu├ƒ- und Bettag nur in SN (Mittwoch vor 23. November)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mBu├ƒ- und Bettag 2022: 23. Nov ist Mittwoch ÔåÆ liegt direkt auf dem 23.11.[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mGr├╝ndonnerstag ist kein gesetzlicher Feiertag in Deutschland[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mOstersonntag nur in BB (Brandenburg)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mPfingstsonntag nur in BB (Brandenburg)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: Bundesland-spezifische Feiertage[2m > [22mWeltkindertag (20. Sep) nur in TH[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: ALL-Modus[2m > [22mALL enth├ñlt bundeslandspezifische Feiertage aller L├ñnder[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: ALL-Modus[2m > [22mALL enth├ñlt mehr Eintr├ñge als ein einzelnes Bundesland[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: verschiedene Jahreszahlen[2m > [22mberechnet Ostern 2025 korrekt (20. April)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: verschiedene Jahreszahlen[2m > [22mberechnet Ostern 2024 korrekt (31. M├ñrz)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: BUNDESLAENDER-Konstante[2m > [22menth├ñlt ALL und alle 16 Bundesl├ñnder[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mFeiertage: BUNDESLAENDER-Konstante[2m > [22mBundesland-K├╝rzel sind korrekt[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mgetHolidayStatesLabel[2m > [22mgibt leeren String f├╝r bundesweite Feiertage[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mgetHolidayStatesLabel[2m > [22mgibt leeren String wenn states undefined[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mgetHolidayStatesLabel[2m > [22mgibt Bundesland-K├╝rzel f├╝r regionale Feiertage zur├╝ck[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/holidays.test.ts[2m > [22mgetHolidayStatesLabel[2m > [22mgibt K├╝rzel als Slash-getrennte Liste zur├╝ck[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/utils.test.ts[2m > [22mcn() Utility[2m > [22mmerged einzelne Klasse[32m 6[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/utils.test.ts[2m > [22mcn() Utility[2m > [22mmerged mehrere Klassen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/utils.test.ts[2m > [22mcn() Utility[2m > [22mentfernt Duplikate via tailwind-merge[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/utils.test.ts[2m > [22mcn() Utility[2m > [22mhandled conditional Klassen (clsx)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/utils.test.ts[2m > [22mcn() Utility[2m > [22mhandled undefined und null[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/utils.test.ts[2m > [22mcn() Utility[2m > [22mhandled leere Eingabe[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/utils.test.ts[2m > [22mcn() Utility[2m > [22mhandled Arrays[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/utils.test.ts[2m > [22mcn() Utility[2m > [22mmerged Tailwind-Konflikte korrekt[32m 0[2mms[22m[39m
+node.exe : [90mstderr[2m | src/__tests__/db.test.ts[2m > [22m[2mDB: 
+Allocation-Funktionen mit Supabase konfiguriert[2m > 
+[22m[2mdbGetUserProfile gibt null zur├╝ck bei DB-Fehler
+In Zeile:1 Zeichen:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\Nurzhan Kukeyev\AppDat ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([90mstderr[2m...k bei DB-Fehler 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[22m[39mdbGetUserProfile error: { message: [32m'DB error'[39m }
+
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS[2m > [22menth├ñlt genau 20 Mitarbeiter[32m 3[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS[2m > [22malle IDs sind einzigartig[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS[2m > [22malle E-Mails sind einzigartig[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS[2m > [22malle E-Mails haben g├╝ltiges Format[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS[2m > [22mjeder Mitarbeiter hat einen nicht-leeren Namen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS[2m > [22mjeder Mitarbeiter hat eine Abteilung[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS[2m > [22mjeder Mitarbeiter hat einen createdAt-Timestamp[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS[2m > [22menth├ñlt verschiedene Abteilungen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_AVAILABILITIES[2m > [22menth├ñlt mindestens 20 Eintr├ñge[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_AVAILABILITIES[2m > [22malle IDs sind einzigartig[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_AVAILABILITIES[2m > [22malle memberIds verweisen auf existierende Mitarbeiter[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_AVAILABILITIES[2m > [22malle Status-Werte sind g├╝ltig[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_AVAILABILITIES[2m > [22malle Datumsangaben haben ISO-Format YYYY-MM-DD[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_AVAILABILITIES[2m > [22mUhrzeiten haben HH:mm-Format wenn vorhanden[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_AVAILABILITIES[2m > [22mendTime ist nach startTime wenn beide vorhanden[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_AVAILABILITIES[2m > [22menth├ñlt verschiedene Status-Typen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_TEAMS[2m > [22menth├ñlt mindestens 3 Teams[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_TEAMS[2m > [22malle IDs sind einzigartig[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_TEAMS[2m > [22malle Team-Namen sind einzigartig[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_TEAMS[2m > [22malle memberIds in Teams verweisen auf existierende Mitarbeiter[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_TEAMS[2m > [22mkein Team hat doppelte Mitglieder[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_TEAMS[2m > [22mjedes Team hat mindestens ein Mitglied[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_PROJECTS[2m > [22menth├ñlt mindestens 8 Projekte[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_PROJECTS[2m > [22malle IDs sind einzigartig[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_PROJECTS[2m > [22malle Projektnamen sind einzigartig[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_PROJECTS[2m > [22malle Projekt-Typen sind g├╝ltig[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_PROJECTS[2m > [22malle Projekt-Status sind g├╝ltig[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_PROJECTS[2m > [22menth├ñlt sowohl interne als auch externe Projekte[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_PROJECTS[2m > [22mexterne Projekte haben einen Kundennamen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_PROJECTS[2m > [22mProjektverteilung: mindestens 3 interne und 3 externe[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_PROJECTS[2m > [22malle memberIds verweisen auf existierende Mitarbeiter[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_PROJECTS[2m > [22mjedes Projekt hat einen createdAt-Timestamp[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_PROJECTS[2m > [22mDatumsangaben haben ISO-Format wenn vorhanden[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS: Skills[2m > [22mdie meisten Mitarbeiter haben Skills[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS: Skills[2m > [22malle Skill-Level sind g├╝ltig[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS: Skills[2m > [22malle Skill-Kategorien sind g├╝ltig[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS: Skills[2m > [22malle Skill-Namen sind nicht-leer[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS: Skills[2m > [22mkein Mitarbeiter hat doppelte Skill-Namen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_MEMBERS: Skills[2m > [22menth├ñlt verschiedene Skill-Kategorien quer ├╝ber alle Mitarbeiter[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_ALLOCATIONS[2m > [22menth├ñlt mindestens 20 Zuweisungen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_ALLOCATIONS[2m > [22malle IDs sind einzigartig[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_ALLOCATIONS[2m > [22malle memberIds verweisen auf existierende Mitarbeiter[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_ALLOCATIONS[2m > [22malle projectIds verweisen auf existierende Projekte[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_ALLOCATIONS[2m > [22malle Prozents├ñtze sind zwischen 1 und 100[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_ALLOCATIONS[2m > [22malle Datumsangaben haben ISO-Format[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_ALLOCATIONS[2m > [22mendDate ist nach startDate[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_ALLOCATIONS[2m > [22mverschiedene Projekte sind abgedeckt[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_ALLOCATIONS[2m > [22mZuweisungen decken interne und externe Projekte ab[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/seed-data.test.ts[2m > [22mSEED_ALLOCATIONS[2m > [22meinige Mitarbeiter haben ├£berbuchung (> 100%)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks (ohne Supabase)[2m > [22mgetUserId gibt null ohne Supabase-Config[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks (ohne Supabase)[2m > [22mloadAllData gibt null ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks (ohne Supabase)[2m > [22mdbAddMember tut nichts ohne Supabase-Config[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks (ohne Supabase)[2m > [22mdbAddAvailability tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks (ohne Supabase)[2m > [22mdbAddTeam tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks (ohne Supabase)[2m > [22mdbAddProject tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mgetUserId gibt User-ID zur├╝ck[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbAddMember ruft upsertMemberAction auf[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbUpdateMember ruft upsertMemberAction auf[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbGetUserProfile mapping: snake_case -> camelCase inkl. neuer Felder[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbDeleteMember ruft deleteMemberAction auf[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbAddAvailability ruft from().upsert() auf (Browser-Client)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbAddTeam ruft upsertTeamAction auf[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbDeleteAvailability ruft from().delete() auf (Browser-Client)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbUpdateTeam ruft upsertTeamAction auf[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbDeleteTeam ruft deleteTeamAction auf[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbUpdateAvailability ruft from().upsert() auf (Browser-Client)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbAddProject ruft upsertProjectAction auf[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbUpdateProject ruft upsertProjectAction auf[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mdbDeleteProject ruft deleteProjectAction auf[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mloadAllData gibt Daten zur├╝ck wenn Supabase konfiguriert[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mloadAllData gibt null wenn kein User eingeloggt[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mloadAllData mappt alle Felder korrekt (inkl. optionale Felder)[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Funktionen mit Supabase konfiguriert[2m > [22mloadAllData: leere member_ids werden als [] gemappt[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks weitere Funktionen (ohne Supabase)[2m > [22mdbUpdateMember tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks weitere Funktionen (ohne Supabase)[2m > [22mdbDeleteMember tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks weitere Funktionen (ohne Supabase)[2m > [22mdbUpdateAvailability tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks weitere Funktionen (ohne Supabase)[2m > [22mdbDeleteAvailability tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks weitere Funktionen (ohne Supabase)[2m > [22mdbUpdateTeam tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks weitere Funktionen (ohne Supabase)[2m > [22mdbDeleteTeam tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks weitere Funktionen (ohne Supabase)[2m > [22mdbUpdateProject tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks weitere Funktionen (ohne Supabase)[2m > [22mdbDeleteProject tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Allocation-Funktionen mit Supabase konfiguriert[2m > [22mdbAddAllocation ruft upsertAllocationAction auf[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Allocation-Funktionen mit Supabase konfiguriert[2m > [22mdbUpdateAllocation ruft upsertAllocationAction auf[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Allocation-Funktionen mit Supabase konfiguriert[2m > [22mdbDeleteAllocation ruft deleteAllocationAction auf[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Allocation-Funktionen mit Supabase konfiguriert[2m > [22mdbDeleteMember ruft deleteMemberAction auf (inkl. allocations)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Allocation-Funktionen mit Supabase konfiguriert[2m > [22mdbGetUserProfile gibt null zur├╝ck wenn kein User eingeloggt[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Allocation-Funktionen mit Supabase konfiguriert[2m > [22mdbGetUserProfile gibt null zur├╝ck bei DB-Fehler[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Allocation-Funktionen mit Supabase konfiguriert[2m > [22mdbGetUserProfile gibt null zur├╝ck wenn Profil nicht vorhanden[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Allocation-Funktionen mit Supabase konfiguriert[2m > [22mrowToAllocation: Felder werden korrekt gemappt (via dbAddAllocation)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks Allocation (ohne Supabase)[2m > [22mdbAddAllocation tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks Allocation (ohne Supabase)[2m > [22mdbUpdateAllocation tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Guard-Checks Allocation (ohne Supabase)[2m > [22mdbDeleteAllocation tut nichts ohne Supabase-Config[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Kein eingeloggter User (Supabase konfiguriert)[2m > [22mgetUserId gibt null zur├╝ck wenn kein User eingeloggt[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Kein eingeloggter User (Supabase konfiguriert)[2m > [22mdbGetUserProfile gibt null zur├╝ck wenn kein User[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Kein eingeloggter User (Supabase konfiguriert)[2m > [22mdbAddMember wirft Fehler wenn kein User[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Kein eingeloggter User (Supabase konfiguriert)[2m > [22mdbUpdateMember tut nichts wenn kein User[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Kein eingeloggter User (Supabase konfiguriert)[2m > [22mdbAddAvailability tut nichts wenn kein User[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Kein eingeloggter User (Supabase konfiguriert)[2m > [22mdbUpdateAvailability tut nichts wenn kein User[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Kein eingeloggter User (Supabase konfiguriert)[2m > [22mdbAddTeam tut nichts wenn kein User[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Kein eingeloggter User (Supabase konfiguriert)[2m > [22mdbUpdateTeam tut nichts wenn kein User[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Kein eingeloggter User (Supabase konfiguriert)[2m > [22mdbAddProject wirft Fehler wenn kein User[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Kein eingeloggter User (Supabase konfiguriert)[2m > [22mdbUpdateProject wirft Fehler wenn kein User[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Kein eingeloggter User (Supabase konfiguriert)[2m > [22mdbAddAllocation tut nichts wenn kein User[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Kein eingeloggter User (Supabase konfiguriert)[2m > [22mdbUpdateAllocation tut nichts wenn kein User[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Fehler-Pfade Availability (upsert/delete Fehler)[2m > [22mdbAddAvailability wirft bei upsert-Fehler[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Fehler-Pfade Availability (upsert/delete Fehler)[2m > [22mdbUpdateAvailability wirft bei upsert-Fehler[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Fehler-Pfade Availability (upsert/delete Fehler)[2m > [22mdbDeleteAvailability wirft bei delete-Fehler[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Optionale Felder werden als null gespeichert[2m > [22mdbAddAvailability: optionale Felder (startTime, endTime, note) ÔåÆ null[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Optionale Felder werden als null gespeichert[2m > [22mdbUpdateAvailability: optionale Felder (startTime, endTime, note) ÔåÆ null[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Optionale Felder werden als null gespeichert[2m > [22mdbAddProject: optionale Felder (client, description, startDate, endDate, maxDays) ÔåÆ null[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/db.test.ts[2m > [22mDB: Optionale Felder werden als null gespeichert[2m > [22mdbUpdateProject: optionale Felder ÔåÆ null[32m 0[2mms[22m[39m
+[90mstderr[2m | src/__tests__/appStore.test.ts[2m > [22m[2mStore: 
+loadFromSupabase[2m > [22m[2msetzt dbError wenn loadAllData einen Fehler 
+wirft
+[22m[39mloadFromSupabase error: Error: Verbindungsfehler
+    at D:/IDEA/Projekt/TeamRadar/src/__tests__/appStore.test.ts:949:43
+    at [90mfile:///D:/IDEA/Projekt/TeamRadar/[39mnode_modules/[4m@vitest/run
+ner[24m/dist/chunk-artifact.js:302:11
+    at [90mfile:///D:/IDEA/Projekt/TeamRadar/[39mnode_modules/[4m@vitest/run
+ner[24m/dist/chunk-artifact.js:1903:26
+    at [90mfile:///D:/IDEA/Projekt/TeamRadar/[39mnode_modules/[4m@vitest/run
+ner[24m/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel [90m(file:///D:/IDEA/Projekt/TeamRadar/[39mnode_modules/
+[4m@vitest/runner[24m/dist/chunk-artifact.js:2323:10[90m)[39m
+    at [90mfile:///D:/IDEA/Projekt/TeamRadar/[39mnode_modules/[4m@vitest/run
+ner[24m/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///D:/IDEA/Projekt/TeamRadar/[39mnode_modules
+/[4m@vitest/runner[24m/dist/chunk-artifact.js:2272:10[90m)[39m
+    at [90mfile:///D:/IDEA/Projekt/TeamRadar/[39mnode_modules/[4m@vitest/run
+ner[24m/dist/chunk-artifact.js:2955:64
+
+[90mstderr[2m | src/__tests__/appStore.test.ts[2m > [22m[2mStore: 
+addProject Fehlerbehandlung[2m > [22m[2mwirft Fehler und macht Rollback 
+wenn dbAddProject fehlschl├ñgt
+[22m[39m[addProject] DB-Fehler beim Speichern
+
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Mitarbeiter[2m > [22maddMember: erstellt einen neuen Mitarbeiter mit ID und Timestamp[32m 6[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Mitarbeiter[2m > [22maddMember: mehrere Mitarbeiter bekommen unterschiedliche IDs[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Mitarbeiter[2m > [22mupdateMember: aktualisiert vorhandenen Mitarbeiter[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Mitarbeiter[2m > [22mupdateMember: ignoriert nicht-existierende ID[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Mitarbeiter[2m > [22mdeleteMember: entfernt Mitarbeiter[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Mitarbeiter[2m > [22mdeleteMember: entfernt auch zugeh├Ârige Verf├╝gbarkeiten[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Mitarbeiter[2m > [22mdeleteMember: entfernt Member-ID aus Teams[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Mitarbeiter[2m > [22mdeleteMember: entfernt Member-ID aus Projekten[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Verf├╝gbarkeit[2m > [22maddAvailability: erstellt einen neuen Eintrag[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Verf├╝gbarkeit[2m > [22maddAvailability: aktualisiert bestehenden Ganztages-Eintrag (Upsert)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Verf├╝gbarkeit[2m > [22maddAvailability: mit optionalem Note[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Verf├╝gbarkeit[2m > [22mupdateAvailability: aktualisiert Status[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Verf├╝gbarkeit[2m > [22mdeleteAvailability: entfernt Eintrag[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberStatus[2m > [22mgibt "offline" zur├╝ck wenn keine Eintr├ñge vorhanden[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberStatus[2m > [22mgibt Status f├╝r ganzt├ñgigen Eintrag zur├╝ck[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberStatus[2m > [22mgibt "offline" f├╝r falsches Datum zur├╝ck[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberStatus[2m > [22maktualisiert den Status bei mehrmaligem Hinzuf├╝gen (Upsert-Verhalten)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberStatus[2m > [22mverschiedene Mitarbeiter haben unabh├ñngige Status[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Teams[2m > [22maddTeam: erstellt ein neues Team[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Teams[2m > [22maddTeam: Team ohne Beschreibung[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Teams[2m > [22mupdateTeam: aktualisiert Teamname[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Teams[2m > [22mdeleteTeam: entfernt Team[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Teams[2m > [22mdeleteTeam: entfernt nur das richtige Team[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: hasMinRole[2m > [22mgibt false zur├╝ck ohne Profil[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: hasMinRole[2m > [22madmin hat alle Rollen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: hasMinRole[2m > [22mcio hat employee + lead + cio, nicht admin[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: hasMinRole[2m > [22mdepartment_lead hat employee + lead, nicht cio/admin[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: hasMinRole[2m > [22memployee hat nur employee[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Profil & Mocking[2m > [22msetUserProfile: aktualisiert das UserProfile[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Profil & Mocking[2m > [22mInitialzustand: hat Mock-Admin in Development[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Profil & Mocking[2m > [22msetUserProfile: unterst├╝tzt neue Felder (avatarUrl, statusMessage, phone, preferences)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Projekte[2m > [22maddProject: erstellt ein neues Projekt mit ID und Timestamp[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Projekte[2m > [22maddProject: internes Projekt ohne Kunde[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Projekte[2m > [22mupdateProject: aktualisiert Projektdaten[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Projekte[2m > [22mdeleteProject: entfernt Projekt[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Projekte[2m > [22mdeleteProject: entfernt nur das richtige Projekt[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Projekte[2m > [22mgetMemberProjects: gibt aktive Projekte eines Mitglieds zur├╝ck[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Allocations[2m > [22maddAllocation: erstellt eine neue Zuweisung mit ID[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Allocations[2m > [22maddAllocation: mehrere Zuweisungen f├╝r denselben Mitarbeiter[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Allocations[2m > [22mupdateAllocation: aktualisiert Prozentsatz[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Allocations[2m > [22mdeleteAllocation: entfernt Zuweisung[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Allocations[2m > [22mdeleteAllocation: entfernt nur die richtige Zuweisung[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberUtilization[2m > [22mgibt 0 zur├╝ck wenn keine Zuweisungen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberUtilization[2m > [22mgibt korrekten Prozentsatz f├╝r eine Zuweisung[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberUtilization[2m > [22msummiert mehrere Zuweisungen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberUtilization[2m > [22mber├╝cksichtigt nur Zuweisungen in der Zeitspanne[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberUtilization[2m > [22mverschiedene Mitarbeiter haben unabh├ñngige Auslastung[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberUtilization[2m > [22mfiltert nach projectType "external"[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberUtilization[2m > [22mprojectType-Filter gibt 0 wenn kein Projekt dieses Typs[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberAllocations[2m > [22mgibt nur aktive Zuweisungen zur├╝ck[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberAllocations[2m > [22mfiltert nach projectType[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getProjectAllocations[2m > [22mgibt alle Zuweisungen eines Projekts zur├╝ck[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getAlerts[2m > [22merkennt ├£berbuchung (>100%)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getAlerts[2m > [22merkennt keine Warnung f├╝r zul├ñssige Zuweisung (<= 100%)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getAlerts[2m > [22merkennt "keine Zuweisung" f├╝r verf├╝gbare Mitarbeiter[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getAlerts[2m > [22mgibt leeres Array f├╝r leeren Store[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Seed-Daten NIEMALS in Production (NODE_ENV Guard)[2m > [22mNODE_ENV=production + Schema=teamradar-dev ÔåÆ KEINE Seed-Daten[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Seed-Daten NIEMALS in Production (NODE_ENV Guard)[2m > [22mNODE_ENV=production + Schema=teamradar-test ÔåÆ KEINE Seed-Daten[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Seed-Daten NIEMALS in Production (NODE_ENV Guard)[2m > [22mNODE_ENV=production + Schema=teamradar-prod ÔåÆ KEINE Seed-Daten[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Seed-Daten NIEMALS in Production (NODE_ENV Guard)[2m > [22mNODE_ENV=production + Schema NICHT gesetzt ÔåÆ KEINE Seed-Daten[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Seed-Daten NIEMALS in Production (NODE_ENV Guard)[2m > [22mNODE_ENV=development + Schema=teamradar-prod ÔåÆ KEINE Seed-Daten (doppelter Guard)[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: loadFromSupabase[2m > [22msetzt isLoading auf false nach abgeschlossenem Laden[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: loadFromSupabase[2m > [22ml├ñdt Daten wenn loadAllData Daten zur├╝ckgibt[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: loadFromSupabase[2m > [22msetzt dbError wenn loadAllData einen Fehler wirft[32m 7[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: loadFromSupabase[2m > [22mmacht nichts wenn loadAllData null zur├╝ckgibt (kein User)[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: loadUserProfile[2m > [22msetzt userProfile wenn Profil gefunden[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: loadUserProfile[2m > [22ml├ñsst userProfile unver├ñndert wenn kein Profil[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: loadSystemSettings[2m > [22msetzt systemSettings nach erfolgreichem Laden[32m 8[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: loadSystemSettings[2m > [22m├ñndert systemSettings nicht wenn data null[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateSystemSettings[2m > [22msetzt systemSettings wenn vorher null[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateSystemSettings[2m > [22mmerged systemSettings teilweise[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateSystemSettings[2m > [22maktiviert maintenanceMode[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberStatus mit Zeitfenstern[2m > [22mgibt letzten Eintrag zur├╝ck ohne aktiven Zeitbereich[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberStatus mit Zeitfenstern[2m > [22mber├╝cksichtigt Zeitfenster f├╝r heutigen Eintrag[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: addProject Fehlerbehandlung[2m > [22mwirft Fehler und macht Rollback wenn dbAddProject fehlschl├ñgt[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: super_admin Rolle[2m > [22msuper_admin hat alle Rollen[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getAlerts ÔÇô Urlaubs-Konflikt[2m > [22merkennt Urlaubs-Konflikt wenn Allocation w├ñhrend Urlaub[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: clearWriteError[2m > [22msetzt writeError auf null[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Mitarbeiter ÔÇô Fehlerbehandlung[2m > [22maddMember: Rollback und writeError bei DB-Fehler[32m 7[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Mitarbeiter ÔÇô Fehlerbehandlung[2m > [22mupdateMember: Rollback auf urspr├╝nglichen Wert bei DB-Fehler[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Mitarbeiter ÔÇô Fehlerbehandlung[2m > [22mdeleteMember: Rollback bei DB-Fehler[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Mitarbeiter ÔÇô Fehlerbehandlung[2m > [22mdeleteMember: Rollback stellt auch Verf├╝gbarkeiten wieder her[32m 15[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Verf├╝gbarkeit ÔÇô Fehlerbehandlung[2m > [22maddAvailability: Rollback und writeError bei DB-Fehler[32m 16[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Verf├╝gbarkeit ÔÇô Fehlerbehandlung[2m > [22mupdateAvailability: Rollback auf urspr├╝nglichen Status bei DB-Fehler[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Verf├╝gbarkeit ÔÇô Fehlerbehandlung[2m > [22mdeleteAvailability: Rollback bei DB-Fehler[32m 15[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Teams ÔÇô Fehlerbehandlung[2m > [22maddTeam: Rollback und writeError bei DB-Fehler[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Teams ÔÇô Fehlerbehandlung[2m > [22mupdateTeam: Rollback auf urspr├╝nglichen Namen bei DB-Fehler[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Teams ÔÇô Fehlerbehandlung[2m > [22mdeleteTeam: Rollback bei DB-Fehler[32m 13[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Projekte ÔÇô Fehlerbehandlung (Update/Delete)[2m > [22mupdateProject: Rollback auf urspr├╝nglichen Namen bei DB-Fehler[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Projekte ÔÇô Fehlerbehandlung (Update/Delete)[2m > [22mdeleteProject: Rollback bei DB-Fehler[32m 15[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Allocations ÔÇô Fehlerbehandlung[2m > [22maddAllocation: Rollback und writeError bei DB-Fehler[32m 17[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Allocations ÔÇô Fehlerbehandlung[2m > [22mupdateAllocation: Rollback auf urspr├╝nglichen Prozentsatz bei DB-Fehler[32m 16[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Allocations ÔÇô Fehlerbehandlung[2m > [22mdeleteAllocation: Rollback bei DB-Fehler[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getAlerts ÔÇô Krank-Konflikt[2m > [22merkennt Krank-Konflikt wenn Allocation w├ñhrend Krankheit[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: hasMinRole ÔÇô unbekannte Rolle[2m > [22mbehandelt unbekannte Rolle wie employee[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: hasMinRole ÔÇô unbekannte Rolle[2m > [22mbehandelt unbekannte minRole wie employee-Level[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberUtilization/getMemberAllocations ohne Datum[2m > [22mgetMemberUtilization: nutzt heutiges Datum als Fallback wenn kein Datum ├╝bergeben[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getMemberUtilization/getMemberAllocations ohne Datum[2m > [22mgetMemberAllocations: nutzt heutiges Datum als Fallback wenn kein Datum ├╝bergeben[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: getAlerts ÔÇô Urlaub ohne Konflikt[2m > [22mgeneriert keinen Urlaubs-Konflikt wenn keine Allocation vorhanden[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Delete mit nicht-existierender ID (original = undefined)[2m > [22mdeleteMember: setzt nur writeError ohne Rollback wenn Member nicht existiert[32m 14[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Delete mit nicht-existierender ID (original = undefined)[2m > [22mdeleteAvailability: setzt nur writeError ohne Rollback wenn Verf├╝gbarkeit nicht existiert[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Delete mit nicht-existierender ID (original = undefined)[2m > [22mdeleteTeam: setzt nur writeError ohne Rollback wenn Team nicht existiert[32m 15[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Delete mit nicht-existierender ID (original = undefined)[2m > [22mdeleteProject: setzt nur writeError ohne Rollback wenn Projekt nicht existiert[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/metadata.test.ts[2m > [22mRoot Layout Metadata[2m > [22mshould have the correct application title[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/metadata.test.ts[2m > [22mRoot Layout Metadata[2m > [22mshould have common metadata description[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/metadata.test.ts[2m > [22mRoot Layout Metadata[2m > [22mshould have configured favicon icons[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Delete mit nicht-existierender ID (original = undefined)[2m > [22mdeleteAllocation: setzt nur writeError ohne Rollback wenn Zuweisung nicht existiert[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Update mit nicht-existierender ID (early return)[2m > [22mupdateMember: tut nichts wenn Member nicht existiert[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Update mit nicht-existierender ID (early return)[2m > [22mupdateAvailability: tut nichts wenn Verf├╝gbarkeit nicht existiert[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Update mit nicht-existierender ID (early return)[2m > [22mupdateTeam: tut nichts wenn Team nicht existiert[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Update mit nicht-existierender ID (early return)[2m > [22mupdateProject: tut nichts wenn Projekt nicht existiert[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Update mit nicht-existierender ID (early return)[2m > [22mupdateAllocation: tut nichts wenn Zuweisung nicht existiert[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Fehlerbehandlung mit Fallback-Fehlermeldung (err ohne message)[2m > [22maddMember: nutzt Fallback-Fehlermeldung wenn err kein Message hat[32m 12[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Fehlerbehandlung mit Fallback-Fehlermeldung (err ohne message)[2m > [22mdeleteProject: nutzt Fallback-Fehlermeldung wenn err kein Message hat[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Fehlerbehandlung mit Fallback-Fehlermeldung (err ohne message)[2m > [22maddAllocation: nutzt Fallback-Fehlermeldung wenn err kein Message hat[32m 15[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Fehlerbehandlung mit Fallback-Fehlermeldung (err ohne message)[2m > [22mupdateAllocation: nutzt Fallback-Fehlermeldung wenn err kein Message hat[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Fehlerbehandlung mit Fallback-Fehlermeldung (err ohne message)[2m > [22mdeleteAllocation: nutzt Fallback-Fehlermeldung wenn err kein Message hat[32m 16[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateMember ÔÇô map-Ternary Zweig + Fallback-String[2m > [22mupdateMember mit 2 Membern deckt den unver├ñnderten Member-Zweig (":m") ab[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateMember ÔÇô map-Ternary Zweig + Fallback-String[2m > [22mupdateMember Rollback-map + Fallback-Fehler bei null-Error und 2 Membern[32m 16[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateMember ÔÇô map-Ternary Zweig + Fallback-String[2m > [22mdeleteMember nutzt Fallback-Fehlermeldung wenn err kein Message hat[32m 16[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateAvailability ÔÇô map-Ternary Zweig + Fallback-String[2m > [22mupdateAvailability mit 2 Eintr├ñgen deckt den unver├ñnderten Eintrag-Zweig (":a") ab[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateAvailability ÔÇô map-Ternary Zweig + Fallback-String[2m > [22mupdateAvailability Rollback-map + Fallback-Fehler bei null-Error und 2 Eintr├ñgen[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateAvailability ÔÇô map-Ternary Zweig + Fallback-String[2m > [22maddAvailability nutzt Fallback-Fehlermeldung wenn err kein Message hat[32m 16[2mms[22m[39m
+[90mstderr[2m | src/__tests__/appStore.test.ts[2m > [22m[2mStore: 
+updateProject ÔÇô map-Ternary Zweig + Fallback-String[2m > 
+[22m[2maddProject nutzt Fallback-Fehlermeldung wenn err kein Message hat
+[22m[39m[addProject] Datenbankfehler beim Speichern des Projekts
+
+[90mstderr[2m | src/__tests__/appStore.test.ts[2m > [22m[2mStore: 
+loadFromSupabase ÔÇô catch-Zweige (err-Typen)[2m > [22m[2msetzt dbError mit 
+string-Wert wenn string geworfen wird
+[22m[39mloadFromSupabase error: Netzwerkfehler
+
+[90mstderr[2m | src/__tests__/appStore.test.ts[2m > [22m[2mStore: 
+loadFromSupabase ÔÇô catch-Zweige (err-Typen)[2m > [22m[2msetzt dbError auf 
+"Datenbankfehler" wenn err kein string und kein message hat
+[22m[39mloadFromSupabase error: { code: [33m500[39m }
+
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateAvailability ÔÇô map-Ternary Zweig + Fallback-String[2m > [22mdeleteAvailability nutzt Fallback-Fehlermeldung wenn err kein Message hat[32m 17[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateTeam ÔÇô map-Ternary Zweig + Fallback-String[2m > [22mupdateTeam mit 2 Teams deckt den unver├ñnderten Team-Zweig (":t") ab[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateTeam ÔÇô map-Ternary Zweig + Fallback-String[2m > [22mupdateTeam Rollback-map + Fallback-Fehler bei null-Error und 2 Teams[32m 16[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateTeam ÔÇô map-Ternary Zweig + Fallback-String[2m > [22maddTeam nutzt Fallback-Fehlermeldung wenn err kein Message hat[32m 17[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateTeam ÔÇô map-Ternary Zweig + Fallback-String[2m > [22mdeleteTeam nutzt Fallback-Fehlermeldung wenn err kein Message hat[32m 15[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateProject ÔÇô map-Ternary Zweig + Fallback-String[2m > [22mupdateProject mit 2 Projekten deckt den unver├ñnderten Projekt-Zweig (":p") ab[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateProject ÔÇô map-Ternary Zweig + Fallback-String[2m > [22mupdateProject Rollback-map + Fallback-Fehler bei null-Error und 2 Projekten[32m 15[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateProject ÔÇô map-Ternary Zweig + Fallback-String[2m > [22maddProject nutzt Fallback-Fehlermeldung wenn err kein Message hat[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateAllocation ÔÇô map-Ternary Zweig[2m > [22mupdateAllocation mit 2 Zuweisungen deckt den unver├ñnderten Zuweisung-Zweig (":a") ab[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: updateAllocation ÔÇô map-Ternary Zweig[2m > [22mupdateAllocation Rollback-map deckt den unver├ñnderten Zuweisung-Zweig (":a") ab bei Fehler[32m 17[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: loadFromSupabase ÔÇô catch-Zweige (err-Typen)[2m > [22msetzt dbError mit string-Wert wenn string geworfen wird[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: loadFromSupabase ÔÇô catch-Zweige (err-Typen)[2m > [22msetzt dbError auf "Datenbankfehler" wenn err kein string und kein message hat[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/appStore.test.ts[2m > [22mStore: Initialzustand im Production-Modus[2m > [22muserProfile und systemSettings sind null in production[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Template-Generierung[2m > [22mgeneriert einen g├╝ltigen Blob[32m 7[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Template-Generierung[2m > [22mTemplate enth├ñlt korrektes Arbeitsblatt "Mitarbeiter"[32m 9[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Template-Generierung[2m > [22mTemplate enth├ñlt alle Pflichtspalten[32m 3[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Template-Generierung[2m > [22mTemplate enth├ñlt Beispieldaten[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Erfolgreiches Parsing[2m > [22mparst g├╝ltige Mitarbeiter-Daten korrekt[32m 3[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Erfolgreiches Parsing[2m > [22mgibt korrekte Member-Objekte zur├╝ck[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Erfolgreiches Parsing[2m > [22msetzt optionale Felder auf undefined wenn leer[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Erfolgreiches Parsing[2m > [22mtrimmt Whitespace aus allen Feldern[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Erfolgreiches Parsing[2m > [22mnormalisiert E-Mail auf Kleinbuchstaben[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Erfolgreiches Parsing[2m > [22mfunktioniert nur mit Pflichtspalten (Name, E-Mail)[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Erfolgreiches Parsing[2m > [22mverarbeitet gro├ƒe Importlisten (100 Mitarbeiter)[32m 9[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Validierung & Fehlerbehandlung[2m > [22merkennt leere Datei (keine Daten)[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Validierung & Fehlerbehandlung[2m > [22merkennt fehlende Pflichtspalte "Name"[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Validierung & Fehlerbehandlung[2m > [22merkennt fehlende Pflichtspalte "E-Mail"[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Validierung & Fehlerbehandlung[2m > [22merkennt leeren Namen in einer Zeile[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Validierung & Fehlerbehandlung[2m > [22merkennt leere E-Mail in einer Zeile[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Validierung & Fehlerbehandlung[2m > [22merkennt ung├╝ltige E-Mail-Adresse[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Validierung & Fehlerbehandlung[2m > [22merkennt doppelte E-Mails innerhalb der Datei[32m 1[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Validierung & Fehlerbehandlung[2m > [22mimportiert g├╝ltige Zeilen und meldet ung├╝ltige separat[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Validierung & Fehlerbehandlung[2m > [22mgibt korrekte Zeilennummern in Fehlern an (ab Zeile 2)[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Validierung & Fehlerbehandlung[2m > [22merkennt Excel-Datei ohne Arbeitsbl├ñtter (leere SheetNames)[32m 0[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: Validierung & Fehlerbehandlung[2m > [22mbehandelt null-Werte in Name- und E-Mail-Spalten (?? Fallback)[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: downloadTemplate[2m > [22mruft URL.createObjectURL auf[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: downloadTemplate[2m > [22mruft URL.revokeObjectURL auf[32m 2[2mms[22m[39m
+ [32mÔ£ô[39m src/__tests__/excel-import.test.ts[2m > [22mExcel: downloadTemplate[2m > [22msetzt den korrekten Dateinamen[32m 1[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m14 passed[39m[22m[90m (14)[39m
+[2m      Tests [22m [1m[32m366 passed[39m[22m[2m | [22m[33m1 skipped[39m[90m (367)[39m
+[2m   Start at [22m 17:18:07
+[2m   Duration [22m 1.02s[2m (transform 1.38s, setup 530ms, import 1.78s, tests 595ms, environment 576ms)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+------------------|---------|----------|---------|---------|-------------------
+File              | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+------------------|---------|----------|---------|---------|-------------------
+All files         |   99.42 |    99.67 |   98.88 |     100 |                   
+ lib              |     100 |      100 |     100 |     100 |                   
+  excel-import.ts |     100 |      100 |     100 |     100 |                   
+  holidays.ts     |     100 |      100 |     100 |     100 |                   
+  seed-data.ts    |     100 |      100 |     100 |     100 |                   
+  utils.ts        |     100 |      100 |     100 |     100 |                   
+ lib/supabase     |   99.13 |     99.2 |     100 |     100 |                   
+  db.ts           |   99.13 |     99.2 |     100 |     100 | 109               
+ stores           |   99.25 |      100 |   98.58 |     100 |                   
+  appStore.ts     |   99.25 |      100 |   98.58 |     100 |                   
+ types            |     100 |      100 |     100 |     100 |                   
+  index.ts        |     100 |      100 |     100 |     100 |                   
+------------------|---------|----------|---------|---------|-------------------

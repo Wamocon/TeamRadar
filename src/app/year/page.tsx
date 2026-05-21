@@ -25,6 +25,7 @@ import {
   TrendingUp,
   AlertCircle,
   CheckCircle2,
+  CheckSquare,
   Clock,
   MapPin,
 } from 'lucide-react';
@@ -101,9 +102,12 @@ interface DayCellProps {
   canEdit: boolean;
   onSelect: (memberId: string, date: string, x: number, y: number) => void;
   onDeselect: () => void;
+  selectMode: boolean;
+  isMultiSelected: boolean;
+  onMultiToggle: (memberId: string, date: string) => void;
 }
 
-function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, today, quickStatus, canEdit, onSelect, onDeselect }: DayCellProps) {
+function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, today, quickStatus, canEdit, onSelect, onDeselect, selectMode, isMultiSelected, onMultiToggle }: DayCellProps) {
   const conf = DAY_CATEGORY_CONFIG[category];
   const isToday = dateStr === today;
   const isSelected = quickStatus?.memberId === memberId && quickStatus?.date === dateStr;
@@ -132,6 +136,10 @@ function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, toda
         onClick={(e) => {
           if (!canEdit) return;
           e.stopPropagation();
+          if (selectMode) {
+            onMultiToggle(memberId, dateStr);
+            return;
+          }
           if (isSelected) {
             onDeselect();
           } else {
@@ -145,7 +153,7 @@ function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, toda
         style={{
           background: cellBg,
           color: category === 'free' ? 'transparent' : conf.color,
-          boxShadow: isSelected ? `0 0 0 2px var(--primary)` : cellShadow,
+          boxShadow: isMultiSelected ? '0 0 0 2.5px #22c55e' : isSelected ? `0 0 0 2px var(--primary)` : cellShadow,
         }}
         title={titleText}
       >
@@ -289,6 +297,9 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                       canEdit={!d.isWeekend && canEditRow(member.email, member.userId)}
                       onSelect={(mId, date, x, y) => setQuickStatus({ memberId: mId, date, x, y })}
                       onDeselect={() => setQuickStatus(null)}
+                      selectMode={false}
+                      isMultiSelected={false}
+                      onMultiToggle={() => {}}
                     />
                   ))}
                   {MONTH_STATS_COLS.map((s, i) => {
@@ -463,6 +474,11 @@ export default function YearOverviewPage() {
   const [bulkFill, setBulkFill] = useState<{ month: number; year: number; x: number; y: number } | null>(null);
   const quickRef = useRef<HTMLDivElement>(null);
   const bulkRef = useRef<HTMLDivElement>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [multiSelected, setMultiSelected] = useState<Set<string>>(new Set());
+  const [multiPickerAnchor, setMultiPickerAnchor] = useState<{ x: number; y: number } | null>(null);
+  const multiPickerRef = useRef<HTMLDivElement>(null);
+  const multiKey = (mId: string, date: string) => `${mId}::${date}`;
 
   const today = new Date().toISOString().slice(0, 10);
   const currentMonth = new Date().getMonth();
@@ -477,10 +493,13 @@ export default function YearOverviewPage() {
       if (bulkRef.current && !bulkRef.current.contains(e.target as Node)) {
         setBulkFill(null);
       }
+      if (multiPickerRef.current && !multiPickerRef.current.contains(e.target as Node)) {
+        setMultiPickerAnchor(null);
+      }
     };
-    if (quickStatus || bulkFill) document.addEventListener('mousedown', handler);
+    if (quickStatus || bulkFill || multiPickerAnchor) document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [quickStatus, bulkFill]);
+  }, [quickStatus, bulkFill, multiPickerAnchor]);
 
   // -- getDayCategory ------------------------------------
   const getDayCategory = useCallback((memberId: string, dateStr: string): DayCategory => {
@@ -670,6 +689,31 @@ export default function YearOverviewPage() {
 
   // -- Collapsible months --------------------------------
   const [collapsedMonths, setCollapsedMonths] = useState<Set<number>>(new Set());
+
+  const handleMultiToggle = useCallback((mId: string, date: string) => {
+    setMultiSelected((prev) => {
+      const next = new Set(prev);
+      const k = multiKey(mId, date);
+      next.has(k) ? next.delete(k) : next.add(k);
+      return next;
+    });
+  }, []);
+
+  const handleApplyMultiStatus = (status: AvailabilityStatus) => {
+    multiSelected.forEach((k) => {
+      const [mId, date] = k.split('::');
+      addAvailability({ memberId: mId, date, status });
+    });
+    setMultiSelected(new Set());
+    setMultiPickerAnchor(null);
+    setSelectMode(false);
+  };
+
+  const cancelMultiSelect = useCallback(() => {
+    setMultiSelected(new Set());
+    setSelectMode(false);
+    setMultiPickerAnchor(null);
+  }, []);
   const toggleMonth = useCallback((month: number) => {
     setCollapsedMonths((prev) => {
       const next = new Set(prev);
@@ -685,7 +729,7 @@ export default function YearOverviewPage() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 w-full space-y-5 animate-fade-in" onClick={() => { if (quickStatus) setQuickStatus(null); if (bulkFill) setBulkFill(null); }}>
+    <div className="p-4 sm:p-6 w-full space-y-5 animate-fade-in" onClick={() => { if (quickStatus) setQuickStatus(null); if (bulkFill) setBulkFill(null); if (multiPickerAnchor) setMultiPickerAnchor(null); }}>
 
       {/* -- Quick-Status Picker (fixed, außerhalb jedes overflow-Containers) -- */}
       {quickStatus && (
@@ -742,6 +786,38 @@ export default function YearOverviewPage() {
             );
           })}
           <button onClick={() => setBulkFill(null)}
+            className="col-span-2 pt-1 text-[8px] font-bold uppercase tracking-wide text-gray-400 hover:text-gray-600 border-none cursor-pointer bg-transparent text-center">
+            Abbrechen
+          </button>
+        </div>
+      )}
+
+      {/* -- Multi-Select Picker (fixed, außerhalb jedes overflow-Containers) -- */}
+      {multiPickerAnchor && (
+        <div
+          ref={multiPickerRef}
+          className="fixed z-[200] bg-white dark:bg-gray-900 shadow-2xl border dark:border-white/10 border-gray-200 rounded-xl p-2 grid grid-cols-2 gap-1 min-w-[190px]"
+          style={{
+            top: Math.min(multiPickerAnchor.y + 4, window.innerHeight - 270),
+            left: Math.min(multiPickerAnchor.x - 95, window.innerWidth - 200),
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="col-span-2 text-[9px] font-black uppercase tracking-wide dark:text-white/40 text-gray-400 px-1 pb-1 border-b dark:border-white/10 border-gray-100 mb-1">
+            {multiSelected.size} Kästchen setzen auf:
+          </div>
+          {STATUS_PICKER_OPTIONS.map(({ key, cat }) => {
+            const c = DAY_CATEGORY_CONFIG[cat];
+            return (
+              <button key={key} onClick={() => handleApplyMultiStatus(key)}
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[9px] font-semibold text-left hover:bg-gray-50 dark:hover:bg-white/5 border-none cursor-pointer w-full transition-colors bg-transparent dark:text-white/70 text-gray-700">
+                <div className="w-4 h-4 rounded flex items-center justify-center text-[7px] font-bold shrink-0"
+                  style={{ background: c.bg, color: c.color, boxShadow: 'inset 0 0 0 1.5px rgba(0,0,0,0.15)' }}>{c.short}</div>
+                {c.label.replace(/ \(.*\)/, '')}
+              </button>
+            );
+          })}
+          <button onClick={cancelMultiSelect}
             className="col-span-2 pt-1 text-[8px] font-bold uppercase tracking-wide text-gray-400 hover:text-gray-600 border-none cursor-pointer bg-transparent text-center">
             Abbrechen
           </button>
@@ -1135,6 +1211,18 @@ export default function YearOverviewPage() {
               className="p-1.5 rounded-lg border dark:border-white/[0.06] border-black/[0.06] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors disabled:opacity-30">
               <ChevronRight size={14} className="dark:text-white/50 text-gray-600" />
             </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); selectMode ? cancelMultiSelect() : setSelectMode(true); }}
+              title="Mehrere Kästchen auswählen und denselben Status setzen"
+              className={`ml-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[10px] font-semibold transition-all cursor-pointer ${
+                selectMode
+                  ? 'bg-green-600 text-white border-green-600'
+                  : 'border-black/[0.08] dark:border-white/[0.08] dark:text-white/50 text-gray-500 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] bg-transparent'
+              }`}
+            >
+              <CheckSquare size={12} />
+              Mehrfachauswahl
+            </button>
           </div>
 
           {/* Legende */}
@@ -1148,6 +1236,31 @@ export default function YearOverviewPage() {
                 </div>
               ))}
           </div>
+
+          {/* Multi-Auswahl Aktionsleiste */}
+          {selectMode && (
+            <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/30" onClick={(e) => e.stopPropagation()}>
+              <CheckSquare size={14} className="text-green-600 dark:text-green-400 shrink-0" />
+              <span className="text-xs font-bold text-green-700 dark:text-green-400">
+                {multiSelected.size > 0 ? `${multiSelected.size} Kästchen ausgewählt` : 'Kästchen anklicken zum Auswählen'}
+              </span>
+              {multiSelected.size > 0 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                    setMultiPickerAnchor({ x: rect.left + rect.width / 2, y: rect.bottom });
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-green-600 text-white text-[10px] font-bold hover:bg-green-700 transition-colors border-none cursor-pointer"
+                >
+                  Status setzen →
+                </button>
+              )}
+              <button onClick={cancelMultiSelect} className="ml-auto p-1 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors border-none cursor-pointer text-green-600 dark:text-green-400">
+                <X size={12} />
+              </button>
+            </div>
+          )}
 
           {/* Tagesmatrix */}
           <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-x-auto">
@@ -1192,6 +1305,9 @@ export default function YearOverviewPage() {
                           canEdit={!d.isWeekend && canEditRow(member.email, member.userId)}
                           onSelect={(mId, date, x, y) => setQuickStatus({ memberId: mId, date, x, y })}
                           onDeselect={() => setQuickStatus(null)}
+                          selectMode={selectMode}
+                          isMultiSelected={selectMode && multiSelected.has(multiKey(member.id, d.dateStr))}
+                          onMultiToggle={handleMultiToggle}
                         />
                       ))}
                       <td className="text-center px-2 font-bold dark:text-white/50 text-gray-600 sticky right-0 bg-white dark:bg-gray-900 z-10 text-[10px]">

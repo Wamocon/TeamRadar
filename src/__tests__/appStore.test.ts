@@ -1492,3 +1492,252 @@ describe('Store: Fehlerbehandlung mit Fallback-Fehlermeldung (err ohne message)'
     expect(useAppStore.getState().writeError).toBe('Zuweisung konnte nicht gelöscht werden');
   });
 });
+
+/* ═══════════════════════════════════════════════════════════════
+   FEHLENDE BRANCH-COVERAGE: map-Ternaries + Fallback-Strings
+   ═══════════════════════════════════════════════════════════════ */
+
+describe('Store: updateMember – map-Ternary Zweig + Fallback-String', () => {
+  const memberA = { name: 'Anna', email: 'anna@t.de', role: 'Dev', department: 'Eng' };
+  const memberB = { name: 'Bob', email: 'bob@t.de', role: 'Design', department: 'Design' };
+
+  it('updateMember mit 2 Membern deckt den unveränderten Member-Zweig (":m") ab', () => {
+    const m1 = useAppStore.getState().addMember(memberA);
+    const m2 = useAppStore.getState().addMember(memberB);
+    useAppStore.getState().updateMember(m1.id, { name: 'Anna Neu' });
+    // m2 bleibt unverändert → ":m"-Zweig der map wird ausgeführt
+    expect(useAppStore.getState().members.find((m) => m.id === m2.id)!.name).toBe('Bob');
+  });
+
+  it('updateMember Rollback-map + Fallback-Fehler bei null-Error und 2 Membern', async () => {
+    const m1 = useAppStore.getState().addMember(memberA);
+    const m2 = useAppStore.getState().addMember(memberB);
+    mockDbUpdateMember.mockRejectedValueOnce(null); // null → kein .message → Fallback
+    useAppStore.getState().updateMember(m1.id, { name: 'Anna Neu' });
+    await flushMicroTasks();
+    // m1 zurückgerollt
+    expect(useAppStore.getState().members.find((m) => m.id === m1.id)!.name).toBe('Anna');
+    // m2 bleibt via ":m"-Zweig in Rollback-map unverändert
+    expect(useAppStore.getState().members.find((m) => m.id === m2.id)!.name).toBe('Bob');
+    // Fallback-String da err.message fehlt
+    expect(useAppStore.getState().writeError).toBe('Mitarbeiter konnte nicht aktualisiert werden');
+  });
+
+  it('deleteMember nutzt Fallback-Fehlermeldung wenn err kein Message hat', async () => {
+    const m = useAppStore.getState().addMember(memberA);
+    mockDbDeleteMember.mockRejectedValueOnce(null);
+    useAppStore.getState().deleteMember(m.id);
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Mitarbeiter konnte nicht gelöscht werden');
+  });
+});
+
+describe('Store: updateAvailability – map-Ternary Zweig + Fallback-String', () => {
+  it('updateAvailability mit 2 Einträgen deckt den unveränderten Eintrag-Zweig (":a") ab', () => {
+    const a1 = useAppStore.getState().addAvailability({ memberId: 'm1', date: '2026-01-01', status: 'available', startTime: '09:00', endTime: '17:00' });
+    const a2 = useAppStore.getState().addAvailability({ memberId: 'm1', date: '2026-01-02', status: 'sick' });
+    useAppStore.getState().updateAvailability(a1.id, { status: 'vacation' });
+    // a2 bleibt unverändert
+    expect(useAppStore.getState().availabilities.find((a) => a.id === a2.id)!.status).toBe('sick');
+  });
+
+  it('updateAvailability Rollback-map + Fallback-Fehler bei null-Error und 2 Einträgen', async () => {
+    const a1 = useAppStore.getState().addAvailability({ memberId: 'm1', date: '2026-01-01', status: 'available', startTime: '09:00', endTime: '17:00' });
+    const a2 = useAppStore.getState().addAvailability({ memberId: 'm1', date: '2026-01-02', status: 'sick' });
+    mockDbUpdateAvailability.mockRejectedValueOnce(null);
+    useAppStore.getState().updateAvailability(a1.id, { status: 'vacation' });
+    await flushMicroTasks();
+    expect(useAppStore.getState().availabilities.find((a) => a.id === a1.id)!.status).toBe('available');
+    expect(useAppStore.getState().writeError).toBe('Verfügbarkeit konnte nicht aktualisiert werden');
+  });
+
+  it('addAvailability nutzt Fallback-Fehlermeldung wenn err kein Message hat', async () => {
+    mockDbAddAvailability.mockRejectedValueOnce(null);
+    useAppStore.getState().addAvailability({ memberId: 'm1', date: '2026-01-01', status: 'available' });
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Verfügbarkeit konnte nicht gespeichert werden');
+  });
+
+  it('deleteAvailability nutzt Fallback-Fehlermeldung wenn err kein Message hat', async () => {
+    const a = useAppStore.getState().addAvailability({ memberId: 'm1', date: '2026-01-01', status: 'available' });
+    mockDbDeleteAvailability.mockRejectedValueOnce(null);
+    useAppStore.getState().deleteAvailability(a.id);
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Verfügbarkeit konnte nicht gelöscht werden');
+  });
+});
+
+describe('Store: updateTeam – map-Ternary Zweig + Fallback-String', () => {
+  it('updateTeam mit 2 Teams deckt den unveränderten Team-Zweig (":t") ab', () => {
+    const t1 = useAppStore.getState().addTeam({ name: 'Team A', memberIds: [] });
+    const t2 = useAppStore.getState().addTeam({ name: 'Team B', memberIds: [] });
+    useAppStore.getState().updateTeam(t1.id, { name: 'Team A Neu' });
+    expect(useAppStore.getState().teams.find((t) => t.id === t2.id)!.name).toBe('Team B');
+  });
+
+  it('updateTeam Rollback-map + Fallback-Fehler bei null-Error und 2 Teams', async () => {
+    const t1 = useAppStore.getState().addTeam({ name: 'Team A', memberIds: [] });
+    const t2 = useAppStore.getState().addTeam({ name: 'Team B', memberIds: [] });
+    mockDbUpdateTeam.mockRejectedValueOnce(null);
+    useAppStore.getState().updateTeam(t1.id, { name: 'Team A Neu' });
+    await flushMicroTasks();
+    expect(useAppStore.getState().teams.find((t) => t.id === t1.id)!.name).toBe('Team A');
+    expect(useAppStore.getState().writeError).toBe('Team konnte nicht aktualisiert werden');
+  });
+
+  it('addTeam nutzt Fallback-Fehlermeldung wenn err kein Message hat', async () => {
+    mockDbAddTeam.mockRejectedValueOnce(null);
+    useAppStore.getState().addTeam({ name: 'Test', memberIds: [] });
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Team konnte nicht gespeichert werden');
+  });
+
+  it('deleteTeam nutzt Fallback-Fehlermeldung wenn err kein Message hat', async () => {
+    const t = useAppStore.getState().addTeam({ name: 'Test', memberIds: [] });
+    mockDbDeleteTeam.mockRejectedValueOnce(null);
+    useAppStore.getState().deleteTeam(t.id);
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Team konnte nicht gelöscht werden');
+  });
+});
+
+describe('Store: updateProject – map-Ternary Zweig + Fallback-String', () => {
+  beforeEach(() => {
+    mockDbAddProject.mockResolvedValue(undefined);
+    mockDbUpdateProject.mockResolvedValue(undefined);
+  });
+
+  it('updateProject mit 2 Projekten deckt den unveränderten Projekt-Zweig (":p") ab', async () => {
+    const p1 = await useAppStore.getState().addProject({ name: 'Projekt A', type: 'internal', status: 'active', memberIds: [] });
+    const p2 = await useAppStore.getState().addProject({ name: 'Projekt B', type: 'internal', status: 'active', memberIds: [] });
+    useAppStore.getState().updateProject(p1.id, { name: 'Projekt A Neu' });
+    expect(useAppStore.getState().projects.find((p) => p.id === p2.id)!.name).toBe('Projekt B');
+  });
+
+  it('updateProject Rollback-map + Fallback-Fehler bei null-Error und 2 Projekten', async () => {
+    const p1 = await useAppStore.getState().addProject({ name: 'Projekt A', type: 'internal', status: 'active', memberIds: [] });
+    const p2 = await useAppStore.getState().addProject({ name: 'Projekt B', type: 'internal', status: 'active', memberIds: [] });
+    mockDbUpdateProject.mockRejectedValueOnce(null);
+    useAppStore.getState().updateProject(p1.id, { name: 'Projekt A Neu' });
+    await flushMicroTasks();
+    expect(useAppStore.getState().projects.find((p) => p.id === p1.id)!.name).toBe('Projekt A');
+    expect(useAppStore.getState().writeError).toBe('Projekt konnte nicht aktualisiert werden');
+  });
+
+  it('addProject nutzt Fallback-Fehlermeldung wenn err kein Message hat', async () => {
+    mockDbAddProject.mockRejectedValueOnce(null);
+    await expect(
+      useAppStore.getState().addProject({ name: 'X', type: 'internal', status: 'active', memberIds: [] })
+    ).rejects.toThrow('Datenbankfehler beim Speichern des Projekts');
+    expect(useAppStore.getState().writeError).toBe('Datenbankfehler beim Speichern des Projekts');
+  });
+});
+
+describe('Store: updateAllocation – map-Ternary Zweig', () => {
+  const allocA = { memberId: 'm1', projectId: 'p1', percentage: 50, startDate: '2026-01-01', endDate: '2026-12-31' };
+  const allocB = { memberId: 'm2', projectId: 'p2', percentage: 30, startDate: '2026-01-01', endDate: '2026-12-31' };
+
+  it('updateAllocation mit 2 Zuweisungen deckt den unveränderten Zuweisung-Zweig (":a") ab', () => {
+    const a1 = useAppStore.getState().addAllocation(allocA);
+    const a2 = useAppStore.getState().addAllocation(allocB);
+    useAppStore.getState().updateAllocation(a1.id, { percentage: 80 });
+    expect(useAppStore.getState().allocations.find((a) => a.id === a2.id)!.percentage).toBe(30);
+  });
+
+  it('updateAllocation Rollback-map deckt den unveränderten Zuweisung-Zweig (":a") ab bei Fehler', async () => {
+    const a1 = useAppStore.getState().addAllocation(allocA);
+    const a2 = useAppStore.getState().addAllocation(allocB);
+    mockDbUpdateAllocation.mockRejectedValueOnce(new Error('Update-Fehler'));
+    useAppStore.getState().updateAllocation(a1.id, { percentage: 80 });
+    await flushMicroTasks();
+    // a1 zurückgerollt
+    expect(useAppStore.getState().allocations.find((a) => a.id === a1.id)!.percentage).toBe(50);
+    // a2 bleibt via ":a"-Zweig unverändert
+    expect(useAppStore.getState().allocations.find((a) => a.id === a2.id)!.percentage).toBe(30);
+  });
+});
+
+describe('Store: loadFromSupabase – catch-Zweige (err-Typen)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockLoadAllData.mockResolvedValue(null);
+    mockDbGetUserProfile.mockResolvedValue(null);
+    useAppStore.setState({ isLoading: false, dbError: null });
+  });
+
+  it('setzt dbError mit string-Wert wenn string geworfen wird', async () => {
+    mockLoadAllData.mockRejectedValueOnce('Netzwerkfehler');
+    await useAppStore.getState().loadFromSupabase();
+    // typeof 'Netzwerkfehler' === 'string' → cond-expr idx=0 (err selbst als message)
+    expect(useAppStore.getState().dbError).toBe('Netzwerkfehler');
+  });
+
+  it('setzt dbError auf "Datenbankfehler" wenn err kein string und kein message hat', async () => {
+    mockLoadAllData.mockRejectedValueOnce({ code: 500 });
+    await useAppStore.getState().loadFromSupabase();
+    // typeof {} !== 'string' → cond-expr idx=1 ('Datenbankfehler')
+    expect(useAppStore.getState().dbError).toBe('Datenbankfehler');
+  });
+});
+
+describe('Store: Initialzustand im Production-Modus', () => {
+  it('userProfile und systemSettings sind null in production', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.resetModules();
+    // frischen Store im production-Modus importieren
+    const { useAppStore: prodStore } = await import('@/stores/appStore');
+    expect(prodStore.getState().userProfile).toBeNull();
+    expect(prodStore.getState().systemSettings).toBeNull();
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+});
+
+describe('Store: getAlerts – projNames find-Callback (Projekt im Store)', () => {
+  beforeEach(() => {
+    mockDbAddProject.mockResolvedValue(undefined);
+  });
+
+  it('deckt projNames find-Callback bei Überbuchung mit vorhandenem Projekt ab', async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const member = useAppStore.getState().addMember({
+      name: 'Ausgelastet', email: 'aus@t.de', role: 'Dev', department: 'Eng',
+    });
+    const project = await useAppStore.getState().addProject({
+      name: 'ProjektX', type: 'internal', status: 'active', memberIds: [member.id],
+    });
+    useAppStore.getState().addAvailability({ memberId: member.id, status: 'available', date: today });
+    useAppStore.getState().addAllocation({
+      memberId: member.id, projectId: project.id, percentage: 60,
+      startDate: '2025-01-01', endDate: '2027-12-31',
+    });
+    useAppStore.getState().addAllocation({
+      memberId: member.id, projectId: project.id, percentage: 50,
+      startDate: '2025-01-01', endDate: '2027-12-31',
+    });
+    const alerts = useAppStore.getState().getAlerts();
+    const overbookings = alerts.filter((a) => a.type === 'overbooking');
+    expect(overbookings.length).toBeGreaterThanOrEqual(1);
+    expect(overbookings[0].message).toContain('ProjektX');
+  });
+
+  it('deckt projNames find-Callback bei Urlaubs-Konflikt mit vorhandenem Projekt ab', async () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    const member = useAppStore.getState().addMember({
+      name: 'Urlauber2', email: 'u2@t.de', role: 'Dev', department: 'Eng',
+    });
+    const project = await useAppStore.getState().addProject({
+      name: 'ProjektY', type: 'internal', status: 'active', memberIds: [member.id],
+    });
+    useAppStore.getState().addAvailability({ memberId: member.id, status: 'vacation', date: tomorrow });
+    useAppStore.getState().addAllocation({
+      memberId: member.id, projectId: project.id, percentage: 80,
+      startDate: today, endDate: new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10),
+    });
+    const alerts = useAppStore.getState().getAlerts();
+    const vacConflicts = alerts.filter((a) => a.type === 'vacation_conflict' && a.memberId === member.id);
+    expect(vacConflicts.length).toBeGreaterThanOrEqual(1);
+    expect(vacConflicts[0].message).toContain('ProjektY');
+  });
+});

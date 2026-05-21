@@ -135,6 +135,13 @@ describe('Feiertage: Bundesland-spezifische Feiertage', () => {
     expect(bw.has('2026-11-18')).toBe(false);
   });
 
+  it('Buß- und Bettag 2022: 23. Nov ist Mittwoch → liegt direkt auf dem 23.11.', () => {
+    const sn = getHolidays(2022, 'SN');
+    // 2022: 23. Nov ist Mittwoch → daysToWed = 0 → Feiertag auf dem 23.11.
+    expect(sn.has('2022-11-23')).toBe(true);
+    expect(sn.get('2022-11-23')!.name).toBe('Buß- und Bettag');
+  });
+
   it('Gründonnerstag ist kein gesetzlicher Feiertag in Deutschland', () => {
     const bw = getHolidays(2026, 'BW');
     const all = getHolidays(2026, 'ALL');

@@ -7,6 +7,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as XLSX from '@e965/xlsx';
 import { generateTemplate, parseExcelFile, downloadTemplate } from '@/lib/excel-import';
 
+// vi.mock mit factory macht XLSX.read als vi.fn wrappbar (ESM Namespace ist sonst nicht konfigurierbar)
+vi.mock('@e965/xlsx', async (importActual) => {
+  const actual = await importActual<typeof import('@e965/xlsx')>();
+  return {
+    ...actual,
+    read: vi.fn((...args: Parameters<typeof actual.read>) => actual.read(...args)),
+  };
+});
+
 /* ── Hilfsfunktion: Erzeugt eine File-Instanz aus Excel-Daten ── */
 function createExcelFile(data: Record<string, unknown>[], sheetName = 'Mitarbeiter'): File {
   const ws = XLSX.utils.json_to_sheet(data);
@@ -260,6 +269,29 @@ describe('Excel: Validierung & Fehlerbehandlung', () => {
     const result = await parseExcelFile(file);
     expect(result.errors[0].row).toBe(3); // Zeile 3 (Header=1, erste Daten=2)
     expect(result.errors[1].row).toBe(4);
+  });
+
+  it('erkennt Excel-Datei ohne Arbeitsblätter (leere SheetNames)', async () => {
+    // XLSX.read ist via vi.mock factory als vi.fn konfiguriert → mockReturnValueOnce möglich
+    (XLSX.read as ReturnType<typeof vi.fn>).mockReturnValueOnce({ SheetNames: [], Sheets: {} });
+    const file = new File(['fake'], 'empty.xlsx');
+    const result = await parseExcelFile(file);
+    expect(result.members).toHaveLength(0);
+    expect(result.errors[0].message).toContain('keine Arbeitsblätter');
+  });
+
+  it('behandelt null-Werte in Name- und E-Mail-Spalten (?? Fallback)', async () => {
+    // Row 1: Name = null → null ?? '' = '' → Name-Fehler; deckt L97 ab
+    // Row 2: E-Mail = null → null ?? '' = '' → E-Mail-Fehler; deckt L98 ab
+    vi.spyOn(XLSX.utils, 'sheet_to_json').mockReturnValueOnce([
+      { 'Name': null, 'E-Mail': 'test@firma.de', 'Position': '', 'Abteilung': '', 'Telefon': '' },
+      { 'Name': 'Test', 'E-Mail': null, 'Position': '', 'Abteilung': '', 'Telefon': '' },
+    ] as any);
+    const file = createExcelFile([{ 'Name': 'dummy', 'E-Mail': 'dummy@a.de' }]);
+    const result = await parseExcelFile(file);
+    expect(result.members).toHaveLength(0);
+    expect(result.errors.length).toBeGreaterThanOrEqual(2);
+    vi.restoreAllMocks();
   });
 });
 

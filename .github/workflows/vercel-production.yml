@@ -32,7 +32,7 @@ jobs:
         run: npm ci
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@37
+        run: npm install --global vercel@39
 
       - name: Vercel Projekt verknüpfen
         run: |

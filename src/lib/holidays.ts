@@ -95,8 +95,12 @@ export function getHolidays(year: number, bundesland: Bundesland): Map<string, H
     ['BW', 'BY', 'ST']);
   reg(new Date(year, 2, 8), 'Internationaler Frauentag',
     ['BE', 'MV']);
-  reg(addDays(easter, -3), 'Gründonnerstag',
-    ['BW']);
+  reg(easter, 'Ostersonntag',
+    ['BB']);
+  reg(addDays(easter, 49), 'Pfingstsonntag',
+    ['BB']);
+  reg(addDays(easter, 60), 'Fronleichnam',
+    ['BW', 'BY', 'HE', 'NW', 'RP', 'SL']);
   reg(new Date(year, 7, 15), 'Mariä Himmelfahrt',
     ['BY', 'SL']);
   reg(new Date(year, 8, 20), 'Weltkindertag',

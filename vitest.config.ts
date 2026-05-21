@@ -21,10 +21,10 @@ export default defineConfig({
         'src/lib/actions/**',  // Server Actions – erfordern Integration-Tests mit echter DB
       ],
       thresholds: {
-        lines: 99,
-        functions: 95,
-        branches: 80,
-        statements: 95,
+        lines: 100,
+        functions: 100,
+        branches: 100,
+        statements: 100,
       },
     },
     reporters: ['verbose'],

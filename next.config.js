@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  // 'standalone' nur außerhalb von Vercel aktivieren (Docker/Self-Hosting)
+  ...(process.env.VERCEL ? {} : { output: 'standalone' }),
   images: {
     remotePatterns: [
       {

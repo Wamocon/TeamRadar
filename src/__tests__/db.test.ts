@@ -154,6 +154,11 @@ describe('DB: Guard-Checks (ohne Supabase)', () => {
     await dbAddProject(project);
     expect(mockFrom).not.toHaveBeenCalled();
   });
+
+  it('dbGetUserProfile gibt null ohne Supabase-Config', async () => {
+    const result = await dbGetUserProfile();
+    expect(result).toBeNull();
+  });
 });
 
 describe('DB: Funktionen mit Supabase konfiguriert', () => {
@@ -604,5 +609,196 @@ describe('DB: Guard-Checks Allocation (ohne Supabase)', () => {
   it('dbDeleteAllocation tut nichts ohne Supabase-Config', async () => {
     await dbDeleteAllocation('al1');
     expect(mockFrom).not.toHaveBeenCalled();
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   KEIN EINGELOGGTER USER (Supabase konfiguriert, aber user=null)
+   ═══════════════════════════════════════════════════════════════ */
+describe('DB: Kein eingeloggter User (Supabase konfiguriert)', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-key';
+    vi.clearAllMocks();
+    mockGetUser.mockResolvedValue({ data: { user: null } });
+    mockUpsert.mockReturnValue({ error: null });
+    mockFrom.mockReturnValue({
+      insert: mockInsert, update: mockUpdate, delete: mockDelete,
+      select: vi.fn(), upsert: mockUpsert,
+    });
+  });
+
+  afterEach(() => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = '';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
+  });
+
+  it('getUserId gibt null zurück wenn kein User eingeloggt', async () => {
+    const id = await getUserId();
+    expect(id).toBeNull();
+  });
+
+  it('dbGetUserProfile gibt null zurück wenn kein User', async () => {
+    const result = await dbGetUserProfile();
+    expect(result).toBeNull();
+  });
+
+  it('dbAddMember wirft Fehler wenn kein User', async () => {
+    const member: Member = { id: '1', name: 'Test', email: 'a@b.de', role: 'Dev', department: 'Eng', createdAt: '2025-01-01' };
+    await expect(dbAddMember(member)).rejects.toThrow('Nicht eingeloggt.');
+    expect(mockUpsertMemberAction).not.toHaveBeenCalled();
+  });
+
+  it('dbUpdateMember tut nichts wenn kein User', async () => {
+    const member: Member = { id: '1', name: 'Test', email: 'a@b.de', role: 'Dev', department: 'Eng', createdAt: '2025-01-01' };
+    await dbUpdateMember(member);
+    expect(mockUpsertMemberAction).not.toHaveBeenCalled();
+  });
+
+  it('dbAddAvailability tut nichts wenn kein User', async () => {
+    const entry: Availability = { id: 'a1', memberId: 'm1', status: 'available', date: '2026-01-01' };
+    await dbAddAvailability(entry);
+    expect(mockUpsert).not.toHaveBeenCalled();
+  });
+
+  it('dbUpdateAvailability tut nichts wenn kein User', async () => {
+    const entry: Availability = { id: 'a1', memberId: 'm1', status: 'available', date: '2026-01-01' };
+    await dbUpdateAvailability(entry);
+    expect(mockUpsert).not.toHaveBeenCalled();
+  });
+
+  it('dbAddTeam tut nichts wenn kein User', async () => {
+    const team: Team = { id: 't1', name: 'Test', memberIds: [] };
+    await dbAddTeam(team);
+    expect(mockUpsertTeamAction).not.toHaveBeenCalled();
+  });
+
+  it('dbUpdateTeam tut nichts wenn kein User', async () => {
+    const team: Team = { id: 't1', name: 'Test', memberIds: [] };
+    await dbUpdateTeam(team);
+    expect(mockUpsertTeamAction).not.toHaveBeenCalled();
+  });
+
+  it('dbAddProject wirft Fehler wenn kein User', async () => {
+    const project: Project = { id: 'p1', name: 'Test', type: 'internal', status: 'active', memberIds: [], createdAt: '2026-01-01' };
+    await expect(dbAddProject(project)).rejects.toThrow();
+    expect(mockUpsertProjectAction).not.toHaveBeenCalled();
+  });
+
+  it('dbUpdateProject wirft Fehler wenn kein User', async () => {
+    const project: Project = { id: 'p1', name: 'Test', type: 'internal', status: 'active', memberIds: [], createdAt: '2026-01-01' };
+    await expect(dbUpdateProject(project)).rejects.toThrow();
+    expect(mockUpsertProjectAction).not.toHaveBeenCalled();
+  });
+
+  it('dbAddAllocation tut nichts wenn kein User', async () => {
+    const alloc: Allocation = { id: 'al1', memberId: 'm1', projectId: 'p1', percentage: 60, startDate: '2026-01-01', endDate: '2026-06-30' };
+    await dbAddAllocation(alloc);
+    expect(mockUpsertAllocationAction).not.toHaveBeenCalled();
+  });
+
+  it('dbUpdateAllocation tut nichts wenn kein User', async () => {
+    const alloc: Allocation = { id: 'al1', memberId: 'm1', projectId: 'p1', percentage: 60, startDate: '2026-01-01', endDate: '2026-06-30' };
+    await dbUpdateAllocation(alloc);
+    expect(mockUpsertAllocationAction).not.toHaveBeenCalled();
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   FEHLER-PFADE (Supabase gibt Fehler zurück)
+   ═══════════════════════════════════════════════════════════════ */
+describe('DB: Fehler-Pfade Availability (upsert/delete Fehler)', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-key';
+    vi.clearAllMocks();
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-123' } } });
+  });
+
+  afterEach(() => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = '';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
+  });
+
+  it('dbAddAvailability wirft bei upsert-Fehler', async () => {
+    mockFrom.mockReturnValueOnce({ upsert: vi.fn().mockReturnValue({ error: { message: 'upsert failed' } }) });
+    const entry: Availability = { id: 'a1', memberId: 'm1', status: 'available', date: '2026-01-01' };
+    await expect(dbAddAvailability(entry)).rejects.toThrow('upsert failed');
+  });
+
+  it('dbUpdateAvailability wirft bei upsert-Fehler', async () => {
+    mockFrom.mockReturnValueOnce({ upsert: vi.fn().mockReturnValue({ error: { message: 'update failed' } }) });
+    const entry: Availability = { id: 'a1', memberId: 'm1', status: 'meeting', date: '2026-01-01' };
+    await expect(dbUpdateAvailability(entry)).rejects.toThrow('update failed');
+  });
+
+  it('dbDeleteAvailability wirft bei delete-Fehler', async () => {
+    const mockEqFn = vi.fn().mockReturnValue({ error: { message: 'delete failed' } });
+    mockFrom.mockReturnValueOnce({ delete: vi.fn().mockReturnValue({ eq: mockEqFn }) });
+    await expect(dbDeleteAvailability('a1')).rejects.toThrow('delete failed');
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   OPTIONALE FELDER (??-null-Pfade)
+   ═══════════════════════════════════════════════════════════════ */
+describe('DB: Optionale Felder werden als null gespeichert', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-key';
+    vi.clearAllMocks();
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'user-123' } } });
+    mockUpsert.mockReturnValue({ error: null });
+    mockFrom.mockReturnValue({
+      insert: mockInsert, update: mockUpdate, delete: mockDelete,
+      select: vi.fn(), upsert: mockUpsert,
+    });
+    mockUpsertProjectAction.mockResolvedValue(undefined);
+    mockUpsertAllocationAction.mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = '';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
+  });
+
+  it('dbAddAvailability: optionale Felder (startTime, endTime, note) → null', async () => {
+    const entry: Availability = { id: 'a1', memberId: 'm1', status: 'available', date: '2026-01-01' };
+    await dbAddAvailability(entry);
+    const row = mockUpsert.mock.calls[0][0];
+    expect(row.start_time).toBeNull();
+    expect(row.end_time).toBeNull();
+    expect(row.note).toBeNull();
+  });
+
+  it('dbUpdateAvailability: optionale Felder (startTime, endTime, note) → null', async () => {
+    const entry: Availability = { id: 'a1', memberId: 'm1', status: 'meeting', date: '2026-01-01' };
+    await dbUpdateAvailability(entry);
+    const row = mockUpsert.mock.calls[0][0];
+    expect(row.start_time).toBeNull();
+    expect(row.end_time).toBeNull();
+    expect(row.note).toBeNull();
+  });
+
+  it('dbAddProject: optionale Felder (client, description, startDate, endDate, maxDays) → null', async () => {
+    const project: Project = { id: 'p1', name: 'Test', type: 'internal', status: 'active', memberIds: [], createdAt: '2026-01-01' };
+    await dbAddProject(project);
+    const row = mockUpsertProjectAction.mock.calls[0][0];
+    expect(row.client).toBeNull();
+    expect(row.description).toBeNull();
+    expect(row.start_date).toBeNull();
+    expect(row.end_date).toBeNull();
+    expect(row.max_days).toBeNull();
+  });
+
+  it('dbUpdateProject: optionale Felder → null', async () => {
+    const project: Project = { id: 'p1', name: 'Test', type: 'internal', status: 'active', memberIds: [], createdAt: '2026-01-01' };
+    await dbUpdateProject(project);
+    const row = mockUpsertProjectAction.mock.calls[0][0];
+    expect(row.client).toBeNull();
+    expect(row.description).toBeNull();
+    expect(row.start_date).toBeNull();
+    expect(row.end_date).toBeNull();
+    expect(row.max_days).toBeNull();
   });
 });

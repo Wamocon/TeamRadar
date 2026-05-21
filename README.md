@@ -38,42 +38,61 @@ Das Produkthandbuch liegt als statische HTML-Datei im Verzeichnis `docs/index.ht
 - **Dashboard** – Echtzeit-Übersicht der Team-Verfügbarkeit mit Status-Karten
 - **Mitarbeiter** – CRUD für Mitarbeiterprofile (Name, Rolle, Abteilung, Kontakt)
 - **Verfügbarkeit** – Status eintragen (Verfügbar, Beschäftigt, Meeting, Urlaub, Krank, Remote, Offline)
-- **Kalender** – Monatsansicht mit farbcodierten Verfügbarkeits-Dots
+- **Kalender** – Monatsansicht mit farbcodierten Verfügbarkeits-Dots und Feiertagen
+- **Jahresübersicht** – 12-Monats-Kompaktansicht mit Feiertagen und Statusfärbung
 - **Teams** – Mitarbeiter in Teams/Gruppen organisieren
-- **Auth** – Login/Registrierung via Supabase Auth
+- **Projekte & Allocations** – Projektbindung mit prozentualer Kapazitätssteuerung
+- **Auslastung** – Visualisierung der Mitarbeiterauslastung über Zeiträume
+- **Alerts** – Automatische Warnungen bei Überbuchung (>100 %) und Urlaubs-/Krankheitskonflikten
+- **Reports** – Export von Auslastungs- und Stammdatenbericht (CSV / JSON)
+- **Admin** – Compliance-Übersicht und Benutzerverwaltung
+- **Auth** – Login/Registrierung via Supabase Auth mit AGB/Datenschutz-Zustimmung
 - **Dark/Light Mode** – Umschaltbar mit persistenter Einstellung
 - **Hybrid Store** – Funktioniert lokal, synchronisiert optional mit Supabase
+- **Feiertags-Management** – Gesetzliche Feiertage nach Bundesland (alle 16 Bundesländer)
 
 ## Projektstruktur
 
 ```
 src/
 ├── app/                  # Next.js App Router Seiten
-│   ├── auth/login/       # Login/Registrierung
+│   ├── auth/             # Login / Registrierung
 │   ├── calendar/         # Kalenderansicht
 │   ├── members/          # Mitarbeiter CRUD
 │   ├── teams/            # Team-Verwaltung
+│   ├── projects/         # Projektverwaltung
+│   ├── year/             # Jahresübersicht (12-Monats-Ansicht)
+│   ├── utilization/      # Auslastungsübersicht
+│   ├── alerts/           # Warnungen & Konflikte
+│   ├── reports/          # Export & Berichte
+│   ├── admin/            # Admin-Bereich (Compliance, User)
 │   ├── settings/         # Einstellungen
+│   ├── agb/              # AGB (Rechtseite)
+│   ├── datenschutz/      # Datenschutzerklärung
+│   ├── impressum/        # Impressum
 │   ├── layout.tsx        # Root-Layout
 │   └── page.tsx          # Dashboard
 ├── components/
 │   ├── layout/           # AppShell, Header, Sidebar, Footer
 │   ├── team/             # MemberCard, StatusBadge, TeamGrid, Formulare
-│   └── ui/               # ThemeProvider
+│   ├── dashboard/        # Dashboard-Komponenten
+│   ├── ui/               # ThemeProvider, Modal-System
+│   └── legal/            # AGB, Datenschutz, Impressum
 ├── lib/
 │   ├── supabase/         # Client, Server, DB-Abstraktionsschicht
+│   ├── holidays.ts       # Gesetzliche Feiertage nach Bundesland
+│   ├── excel-import.ts   # Excel-Datei-Import für Mitarbeiter
 │   └── utils.ts          # cn() Helper
 ├── stores/
 │   └── appStore.ts       # Zustand Store
 ├── types/
 │   └── index.ts          # TypeScript Interfaces
-
-└── middleware.ts          # Auth-Guard
+└── proxy.ts              # Auth-Guard (Session-Middleware)
 ```
 
 ## Supabase Setup & Umgebungsmanagement
 
-- Die App nutzt Supabase als Datenbank mit den Schemas `public`, `test` und `prod`.
+- Die App nutzt Supabase als Datenbank mit den Schemas `teamradar-dev`, `teamradar-test` und `teamradar-prod`.
 - Das aktive Schema wird über die Umgebungsvariable `NEXT_PUBLIC_DB_SCHEMA` gesteuert (siehe `.env.local`).
 - Migrationen und Rechte siehe `README_SUPABASE.md` und `supabase/migrations/`.
 - Nach Änderungen an Migrationen oder .env: Projekt neu starten!
@@ -84,6 +103,7 @@ src/
 - Die App zeigt nur Daten an, die zum eingeloggten Supabase-User gehören (user_id).
 - Nach dem Start: LocalStorage leeren, um Demo-Daten zu vermeiden.
 - Tests für Seed-Daten, Policies und Datenkonsistenz siehe `src/__tests__/`.
+- **Testabdeckung: 100 %** auf allen Metriken (Zeilen, Branches, Funktionen, Statements) – geprüft mit Vitest + v8.
 
 ## Troubleshooting
 

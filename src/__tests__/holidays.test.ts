@@ -135,12 +135,37 @@ describe('Feiertage: Bundesland-spezifische Feiertage', () => {
     expect(bw.has('2026-11-18')).toBe(false);
   });
 
-  it('Gründonnerstag nur in BW', () => {
+  it('Buß- und Bettag 2022: 23. Nov ist Mittwoch → liegt direkt auf dem 23.11.', () => {
+    const sn = getHolidays(2022, 'SN');
+    // 2022: 23. Nov ist Mittwoch → daysToWed = 0 → Feiertag auf dem 23.11.
+    expect(sn.has('2022-11-23')).toBe(true);
+    expect(sn.get('2022-11-23')!.name).toBe('Buß- und Bettag');
+  });
+
+  it('Gründonnerstag ist kein gesetzlicher Feiertag in Deutschland', () => {
     const bw = getHolidays(2026, 'BW');
-    const by = getHolidays(2026, 'BY');
-    // Ostern 2026: 5. April → Gründonnerstag: 2. April
-    expect(bw.has('2026-04-02')).toBe(true);
-    expect(by.has('2026-04-02')).toBe(false);
+    const all = getHolidays(2026, 'ALL');
+    // Gründonnerstag = 2. April 2026, nur stiller Tag in BW, kein Feiertag
+    expect(bw.has('2026-04-02')).toBe(false);
+    expect(all.has('2026-04-02')).toBe(false);
+  });
+
+  it('Ostersonntag nur in BB (Brandenburg)', () => {
+    const bb = getHolidays(2026, 'BB');
+    const nw = getHolidays(2026, 'NW');
+    // Ostern 2026: 5. April
+    expect(bb.has('2026-04-05')).toBe(true);
+    expect(bb.get('2026-04-05')!.name).toBe('Ostersonntag');
+    expect(nw.has('2026-04-05')).toBe(false);
+  });
+
+  it('Pfingstsonntag nur in BB (Brandenburg)', () => {
+    const bb = getHolidays(2026, 'BB');
+    const nw = getHolidays(2026, 'NW');
+    // Pfingstsonntag 2026: 24. Mai (Ostern + 49 Tage)
+    expect(bb.has('2026-05-24')).toBe(true);
+    expect(bb.get('2026-05-24')!.name).toBe('Pfingstsonntag');
+    expect(nw.has('2026-05-24')).toBe(false);
   });
 
   it('Weltkindertag (20. Sep) nur in TH', () => {

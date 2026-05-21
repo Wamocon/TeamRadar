@@ -1,5 +1,5 @@
 # TeamRadar – Professionelles Produkthandbuch
-**Version 1.0 | März 2026 | WAMOCON GmbH**
+**Version 1.1 | Mai 2026 | WAMOCON GmbH**
 
 ---
 
@@ -38,13 +38,27 @@ Das Dashboard bietet eine aggregierte Sicht auf das Team:
 - **Statuskarten**: Schnelleinsicht in Verfügbar, Meeting, Krank, Urlaub etc.
 - **Timeline-Ansicht**: Visualisierung der Verfügbarkeit über den Tagesverlauf.
 - **Status-Eintrag**: Nutzer können ihren Status mit Zeitangaben und Notizen versehen.
+- **Alerts**: Automatische Warnungen bei Überbuchung (>100 %) und Konflikten mit Urlaub/Krankheit.
 
 ### 3.3 Projekt- & Teammanagement
 - **Projekte**: Unterscheidung zwischen internen und externen Projekten mit Start- und Enddatum.
 - **Teams**: Gruppierung von Mitarbeitern für schnellere Filterung und Berichterstellung.
-- **Zuweisungen (Allocations)**: Festlegung, zu wie viel Prozent (z.B. 50% für Projekt A) ein Mitarbeiter gebunden ist.
+- **Zuweisungen (Allocations)**: Festlegung, zu wie viel Prozent (z.B. 50 % für Projekt A) ein Mitarbeiter gebunden ist.
+- **Auslastungsübersicht**: Prozentuale Darstellung der Kapazitätsauslastung je Mitarbeiter und Team.
 
-### 3.4 Reporting
+### 3.4 Jahresübersicht
+Die Jahresansicht (`/year`) bietet eine komprimierte 12-Monats-Übersicht aller Verfügbarkeiten:
+- Farbcodierte Darstellung von Urlaub, Krankheit und anderen Statusarten je Monat.
+- Gefilterte Anzeige nach Mitarbeitern und Teams.
+- Automatische Einblendung gesetzlicher Feiertage des konfigurierten Bundeslandes.
+
+### 3.5 Feiertags-Management
+TeamRadar wertet die gesetzlichen Feiertage automatisch aus:
+- Konfigurierbar je Bundesland (16 Bundesländer unterstützt, inkl. regionaler Feiertage).
+- Feiertage werden in der Kalender- und Jahresansicht hervorgehoben.
+- Konflikte zwischen Projektallokation und Feiertagen können so frühzeitig erkannt werden.
+
+### 3.6 Reporting
 Im Report-Bereich können Daten als CSV (für Excel/BI-Tools) oder JSON (für technische Audits) exportiert werden. Reports umfassen Auslastung, Stammdaten, Projektlisten und Verfügbarkeitshistorien.
 
 ---
@@ -66,6 +80,8 @@ TeamRadar nutzt ein hierarchisches Rollenmodell:
 - **State Management**: Zustand mit Cloud-Synchronisation und lokalem Persist-Modus.
 - **Backend / DB**: Supabase (PostgreSQL) mit Row Level Security (RLS).
 - **Authentifizierung**: Supabase Auth mit Einladungs-Tokens.
+- **Auth-Proxy**: `src/proxy.ts` schützt alle Routen mit session-basiertem Auth-Guard.
+- **Testabdeckung**: 100 % Zeilen-, Branch-, Funktions- und Statement-Abdeckung (Vitest + v8).
 
 ### 5.2 Offline-Konzept
 TeamRadar nutzt einen hybriden Store-Ansatz. Daten werden im lokalen Browser-Speicher gepuffert, was eine unterbrechungsfreie Nutzung bei instabiler Internetverbindung erlaubt. Die Synchronisation erfolgt automatisch bei Wiederherstellung der Verbindung.
@@ -105,4 +121,4 @@ Frühere Dokumentationslücken wurden durch die Integration der Rechtstexte dire
 - Letzte juristische Endprüfung der spezifischen AGB-Formulierungen durch einen Fachanwalt.
 - Abschluss von AVV/DPA Verträgen mit Drittanbietern (z.B. Hosting-Provider).
 
-**Fazit**: TeamRadar ist in der vorliegenden Version 1.0 technisch und administrativ bereit für den produktiven Einsatz in compliance-sensitiven Umgebungen.
+**Fazit**: TeamRadar ist in der vorliegenden Version 1.1 technisch und administrativ bereit für den produktiven Einsatz in compliance-sensitiven Umgebungen. Die neu eingeführte Jahresübersicht, das state-basierte Feiertags-Management und das automatische Alerting-System runden das Produkt zu einer vollständigen Kapazitätsplanungslösung ab. Die lückenlose Testabdeckung (100 % nach allen Metriken) garantiert eine hohe Softwarequalität und Wartbarkeit.

@@ -561,7 +561,7 @@ export default function YearOverviewPage() {
       });
       return { month, days, memberRows };
     });
-  }, [year, members, getDayCategory]);
+  }, [year, members, getDayCategory, holidays]);
 
   // -- Member Year KPIs ----------------------------------
   const memberYearKPIs = useMemo(() => {
@@ -640,7 +640,7 @@ export default function YearOverviewPage() {
       Object.entries(summary).forEach(([c, n]) => { totalSummary[c as DayCategory] = (totalSummary[c as DayCategory] || 0) + n; });
     });
     return { days, memberRows, totalSummary, daysInMonth };
-  }, [year, entryMonth, members, getDayCategory]);
+  }, [year, entryMonth, members, getDayCategory, holidays]);
 
   // -- Project Gantt -------------------------------------
   const yearStart = new Date(year, 0, 1).getTime();

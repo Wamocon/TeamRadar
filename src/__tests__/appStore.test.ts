@@ -1543,7 +1543,7 @@ describe('Store: updateAvailability – map-Ternary Zweig + Fallback-String', ()
 
   it('updateAvailability Rollback-map + Fallback-Fehler bei null-Error und 2 Einträgen', async () => {
     const a1 = useAppStore.getState().addAvailability({ memberId: 'm1', date: '2026-01-01', status: 'available', startTime: '09:00', endTime: '17:00' });
-    const a2 = useAppStore.getState().addAvailability({ memberId: 'm1', date: '2026-01-02', status: 'sick' });
+    useAppStore.getState().addAvailability({ memberId: 'm1', date: '2026-01-02', status: 'sick' });
     mockDbUpdateAvailability.mockRejectedValueOnce(null);
     useAppStore.getState().updateAvailability(a1.id, { status: 'vacation' });
     await flushMicroTasks();

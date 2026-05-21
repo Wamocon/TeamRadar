@@ -1063,7 +1063,7 @@ describe('Store: addProject Fehlerbehandlung', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockDbAddProject.mockResolvedValue(undefined);
-    useAppStore.setState({ projects: [], dbError: null });
+    useAppStore.setState({ projects: [], dbError: null, writeError: null });
   });
 
   it('wirft Fehler und macht Rollback wenn dbAddProject fehlschlägt', async () => {
@@ -1075,7 +1075,7 @@ describe('Store: addProject Fehlerbehandlung', () => {
 
     // Rollback: Projekt darf nicht im Store bleiben
     expect(useAppStore.getState().projects).toHaveLength(0);
-    expect(useAppStore.getState().dbError).toBe('DB-Fehler beim Speichern');
+    expect(useAppStore.getState().writeError).toBe('DB-Fehler beim Speichern');
   });
 });
 

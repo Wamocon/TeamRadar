@@ -16,6 +16,7 @@
  */
 
 import { createClient, createAdminClient } from '@/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 const PRIVILEGED_ROLES = ['super_admin', 'admin', 'cio', 'department_lead'] as const;
 
@@ -33,7 +34,21 @@ async function getAuthContext() {
   const role = (profile?.role as string) ?? 'employee';
   const isPrivileged = PRIVILEGED_ROLES.includes(role as typeof PRIVILEGED_ROLES[number]);
 
-  const admin = await createAdminClient();
+  // Service-Role-Keys sind JWTs und beginnen mit 'eyJ'.
+  // Fehlende oder andersfomatige Keys (z. B. sb_secret_*) → Fallback auf
+  // authentifizierten User-Client. RLS-Policies erlauben eigene Schreibvorgänge.
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  let admin: SupabaseClient;
+  if (serviceKey && serviceKey.startsWith('eyJ')) {
+    try {
+      admin = await createAdminClient();
+    } catch {
+      admin = supabase as unknown as SupabaseClient;
+    }
+  } else {
+    admin = supabase as unknown as SupabaseClient;
+  }
+
   return { userId: user.id, role, isPrivileged, admin };
 }
 

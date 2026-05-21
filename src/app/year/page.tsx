@@ -544,23 +544,52 @@ export default function YearOverviewPage() {
   const memberYearKPIs = useMemo(() => {
     return members.map((member) => {
       let extDays = 0, intDays = 0, sickDays = 0, vacationDays = 0;
-      yearlyMatrixData.forEach(({ memberRows }) => {
+
+      // Alle Werktage mit Kategorie für 39h-Berechnung sammeln
+      const weekdayMap = new Map<string, Array<DayCategory>>();
+      yearlyMatrixData.forEach(({ days, memberRows }) => {
         const row = memberRows.find((r) => r.member.id === member.id);
-        row?.categories.forEach((cat) => {
+        if (!row) return;
+        days.forEach((dayInfo, idx) => {
+          const cat = row.categories[idx];
           if (cat === 'vacation') vacationDays++;
           else if (cat === 'sick') sickDays++;
           else if (cat === 'extern-onsite' || cat === 'extern-remote') extDays++;
           else if (cat === 'intern-onsite' || cat === 'intern-remote') intDays++;
+
+          if (dayInfo.isWeekend) return; // Wochenenden ignorieren
+          // Montag der Woche berechnen (Wochenschlüssel)
+          const d = new Date(dayInfo.dateStr);
+          const dow = d.getDay(); // 0=So,1=Mo,...,5=Fr,6=Sa
+          const diff = dow === 0 ? -6 : 1 - dow;
+          const monday = new Date(d);
+          monday.setDate(d.getDate() + diff);
+          const weekKey = monday.toISOString().slice(0, 10);
+          if (!weekdayMap.has(weekKey)) weekdayMap.set(weekKey, []);
+          weekdayMap.get(weekKey)!.push(cat);
         });
       });
-      // Externes Budget: Summe der maxDays aller zugewiesenen ext. Projekte mit gesetztem Limit
+
+      // 39h-Ausgleich: 1h Verlust pro Woche, in der ALLE 5 Werktage extern sind.
+      // Feiertage/Urlaub/Krank/Büro an irgendeinem Tag → Woche hat <40h extern → kein Verlust.
+      let fullExtWeeks = 0;
+      weekdayMap.forEach((cats) => {
+        if (
+          cats.length === 5 &&
+          cats.every((c) => c === 'extern-onsite' || c === 'extern-remote')
+        ) fullExtWeeks++;
+      });
+      const hourLoss = fullExtWeeks;           // 1h pro Vollwoche extern (39h statt 40h)
+      const extraDaysNeeded = Math.ceil(hourLoss / 8);
+
+      // Externes Budget
       const assignedExtProjects = projects.filter(
         (p) => p.type === 'external' && p.memberIds.includes(member.id) && p.maxDays != null
       );
       const extBudget = assignedExtProjects.length > 0
         ? assignedExtProjects.reduce((sum, p) => sum + (p.maxDays ?? 0), 0)
         : null;
-      return { member, extDays, intDays, sickDays, vacationDays, extBudget };
+      return { member, extDays, intDays, sickDays, vacationDays, extBudget, fullExtWeeks, hourLoss, extraDaysNeeded };
     });
   }, [yearlyMatrixData, members, projects]);
 
@@ -775,10 +804,12 @@ export default function YearOverviewPage() {
                     <th className="text-center px-3 py-2 font-semibold text-[#ec4899] min-w-[80px]">Krank</th>
                     <th className="text-center px-3 py-2 font-semibold text-[#8b5cf6] min-w-[80px]">Urlaub</th>
                     <th className="text-center px-3 py-2 font-semibold text-[#f97316] min-w-[110px] border-l dark:border-white/[0.06] border-black/[0.04]">Ext. Budget</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#f59e0b] min-w-[80px] border-l dark:border-white/[0.06] border-black/[0.04]" title="Kalenderwochen mit 5 externen Werktagen (39h statt 40h)">Ext. Wo.</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#ef4444] min-w-[110px]" title="39h-Regel: 1h Verlust pro Vollwoche extern → benötigte Zusatztage">39h-Ausgleich</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {memberYearKPIs.map(({ member, extDays, intDays, sickDays, vacationDays, extBudget }) => (
+                  {memberYearKPIs.map(({ member, extDays, intDays, sickDays, vacationDays, extBudget, fullExtWeeks, hourLoss, extraDaysNeeded }) => (
                     <tr key={member.id} className="border-b dark:border-white/[0.03] border-black/[0.02] hover:bg-black/[0.01] dark:hover:bg-white/[0.01]">
                       <td className="px-4 py-2 font-semibold dark:text-white/80 text-gray-800">{member.name}</td>
                       <td className="text-center px-3 py-2">
@@ -813,6 +844,23 @@ export default function YearOverviewPage() {
                             </span>
                           );
                         })() : <span className="text-[10px] text-gray-400">—</span>}
+                      </td>
+                      {/* 39h-Ausgleich: volle externe Wochen zählen */}
+                      <td className="text-center px-3 py-2 border-l dark:border-white/[0.06] border-black/[0.04]">
+                        {fullExtWeeks > 0
+                          ? <span className="text-[10px] font-bold" style={{ color: '#f59e0b' }}>{fullExtWeeks}</span>
+                          : <span className="text-[10px] text-gray-400">—</span>}
+                      </td>
+                      <td className="text-center px-3 py-2">
+                        {hourLoss > 0 ? (
+                          <span
+                            className="inline-flex flex-col items-center leading-tight"
+                            title={`${fullExtWeeks} Vollwochen extern × 1h = ${hourLoss}h Verlust → ${extraDaysNeeded} Zusatztag${extraDaysNeeded !== 1 ? 'e' : ''} nötig`}
+                          >
+                            <span className="text-[10px] font-bold" style={{ color: '#ef4444' }}>−{hourLoss}h</span>
+                            <span className="text-[9px] font-semibold" style={{ color: '#f97316' }}>+{extraDaysNeeded}d nötig</span>
+                          </span>
+                        ) : <span className="text-[10px] text-gray-400">—</span>}
                       </td>
                     </tr>
                   ))}

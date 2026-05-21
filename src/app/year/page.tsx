@@ -581,6 +581,8 @@ export default function YearOverviewPage() {
       });
       const hourLoss = fullExtWeeks;           // 1h pro Vollwoche extern (39h statt 40h)
       const extraDaysNeeded = Math.ceil(hourLoss / 8);
+      // Effektiv geleistete Tage (39h-korrigiert): jede Vollwoche ext. = nur 7.875h statt 8h
+      const effectiveDays = parseFloat((extDays - hourLoss / 8).toFixed(2));
 
       // Externes Budget
       const assignedExtProjects = projects.filter(
@@ -589,7 +591,7 @@ export default function YearOverviewPage() {
       const extBudget = assignedExtProjects.length > 0
         ? assignedExtProjects.reduce((sum, p) => sum + (p.maxDays ?? 0), 0)
         : null;
-      return { member, extDays, intDays, sickDays, vacationDays, extBudget, fullExtWeeks, hourLoss, extraDaysNeeded };
+      return { member, extDays, intDays, sickDays, vacationDays, extBudget, fullExtWeeks, hourLoss, extraDaysNeeded, effectiveDays };
     });
   }, [yearlyMatrixData, members, projects]);
 
@@ -789,7 +791,74 @@ export default function YearOverviewPage() {
           ═════════════════════════════════════════════════ */}
       {viewMode === 'overview' && (
         <div className="space-y-6">
-          {/* Jahr-KPI pro Mitarbeiter */}
+
+          {/* ── 39h-Effektiv-Bilanz pro ext. Berater ─────────────── */}
+          {(() => {
+            const extConsultants = memberYearKPIs.filter((k) => k.extBudget != null);
+            if (extConsultants.length === 0) return null;
+            return (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <TrendingUp size={13} className="text-[#f97316]" />
+                  <h3 className="text-xs font-black dark:text-white/70 text-gray-700">39h-Effektivbilanz – Ext. Berater {year}</h3>
+                  <span className="text-[10px] dark:text-white/30 text-gray-400">(geleistete Tage unter Berücksichtigung 39h/Woche-Regel)</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {extConsultants.map(({ member, effectiveDays, extBudget, extDays, fullExtWeeks, hourLoss }) => {
+                    const plan = extBudget!;
+                    const diff = parseFloat((effectiveDays - plan).toFixed(2));
+                    const pct  = Math.min(100, Math.round((effectiveDays / plan) * 100));
+                    const isOver   = diff >= 0;
+                    const isWarn   = diff < 0 && diff >= -5;
+                    const isAlert  = diff < -5;
+                    const barColor = isOver ? '#22c55e' : isWarn ? '#f59e0b' : '#ef4444';
+                    const bgColor  = isOver ? 'rgba(34,197,94,0.08)' : isWarn ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)';
+                    const borderColor = isOver ? 'rgba(34,197,94,0.25)' : isWarn ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.35)';
+                    const label    = isOver ? 'Im/Über Plan' : isWarn ? `${Math.abs(diff).toFixed(1)}d unter Plan` : `${Math.abs(diff).toFixed(1)}d unter Plan`;
+                    const labelColor = isOver ? '#16a34a' : isWarn ? '#d97706' : '#dc2626';
+                    return (
+                      <div
+                        key={member.id}
+                        className="rounded-xl p-4 border"
+                        style={{ background: bgColor, borderColor }}
+                        title={`${extDays} ext. Tage − ${hourLoss}h Verlust (${fullExtWeeks} Vollwochen × 1h) ÷ 8 = ${effectiveDays}d effektiv`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <div className="text-[10px] font-semibold dark:text-white/50 text-gray-500 truncate max-w-[130px]">{member.name}</div>
+                            <div className="text-2xl font-black mt-0.5" style={{ color: barColor }}>
+                              {effectiveDays.toFixed(1)}<span className="text-sm font-semibold ml-0.5 opacity-60">d</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-[9px] dark:text-white/30 text-gray-400">Plan</div>
+                            <div className="text-sm font-black dark:text-white/60 text-gray-600">{plan}d</div>
+                          </div>
+                        </div>
+                        {/* Fortschrittsbalken */}
+                        <div className="w-full h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden mb-2">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: barColor }} />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] font-bold" style={{ color: labelColor }}>
+                            {isOver ? '✓' : '⚠'} {label}
+                          </span>
+                          <span className="text-[9px] dark:text-white/30 text-gray-400">{pct}%</span>
+                        </div>
+                        {hourLoss > 0 && (
+                          <div className="text-[8px] mt-1 dark:text-white/25 text-gray-400">
+                            −{hourLoss}h durch {fullExtWeeks}×39h-Wo.
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Jahr-KPI pro Mitarbeiter */
           <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
             <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04]">
               <h3 className="text-sm font-black dark:text-white text-gray-900">Jahresübersicht {year} pro Mitarbeiter</h3>
@@ -803,13 +872,13 @@ export default function YearOverviewPage() {
                     <th className="text-center px-3 py-2 font-semibold text-[#6366f1] min-w-[90px]">Int. Projekt</th>
                     <th className="text-center px-3 py-2 font-semibold text-[#ec4899] min-w-[80px]">Krank</th>
                     <th className="text-center px-3 py-2 font-semibold text-[#8b5cf6] min-w-[80px]">Urlaub</th>
-                    <th className="text-center px-3 py-2 font-semibold text-[#f97316] min-w-[110px] border-l dark:border-white/[0.06] border-black/[0.04]">Ext. Budget</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#22c55e] min-w-[120px] border-l dark:border-white/[0.06] border-black/[0.04]" title="Effektiv geleistete Tage (39h-korrigiert) vs. Plan">Eff. Tage / Plan</th>
                     <th className="text-center px-3 py-2 font-semibold text-[#f59e0b] min-w-[80px] border-l dark:border-white/[0.06] border-black/[0.04]" title="Kalenderwochen mit 5 externen Werktagen (39h statt 40h)">Ext. Wo.</th>
                     <th className="text-center px-3 py-2 font-semibold text-[#ef4444] min-w-[110px]" title="39h-Regel: 1h Verlust pro Vollwoche extern → benötigte Zusatztage">39h-Ausgleich</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {memberYearKPIs.map(({ member, extDays, intDays, sickDays, vacationDays, extBudget, fullExtWeeks, hourLoss, extraDaysNeeded }) => (
+                  {memberYearKPIs.map(({ member, extDays, intDays, sickDays, vacationDays, extBudget, fullExtWeeks, hourLoss, extraDaysNeeded, effectiveDays }) => (
                     <tr key={member.id} className="border-b dark:border-white/[0.03] border-black/[0.02] hover:bg-black/[0.01] dark:hover:bg-white/[0.01]">
                       <td className="px-4 py-2 font-semibold dark:text-white/80 text-gray-800">{member.name}</td>
                       <td className="text-center px-3 py-2">
@@ -834,13 +903,19 @@ export default function YearOverviewPage() {
                       </td>
                       <td className="text-center px-3 py-2 border-l dark:border-white/[0.06] border-black/[0.04]">
                         {extBudget != null ? (() => {
-                          const over = extDays > extBudget;
-                          const under = extDays < extBudget;
-                          const color = over ? '#ef4444' : under ? '#f59e0b' : '#22c55e';
+                          const diff = effectiveDays - extBudget;
+                          const isOver  = diff >= 0;
+                          const isWarn  = diff < 0 && diff >= -5;
+                          const color   = isOver ? '#22c55e' : isWarn ? '#f59e0b' : '#ef4444';
                           return (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold" style={{ color }}>
-                              {over && <AlertCircle size={10} />}
-                              {extDays}/{extBudget}d
+                            <span
+                              className="inline-flex flex-col items-center gap-0 text-[10px] font-bold"
+                              style={{ color }}
+                              title={`Effektiv: ${effectiveDays.toFixed(2)}d von ${extBudget}d Plan (Differenz: ${diff >= 0 ? '+' : ''}${diff.toFixed(2)}d)`}
+                            >
+                              {!isOver && !isWarn && <AlertCircle size={9} />}
+                              <span>{effectiveDays.toFixed(1)}/{extBudget}d</span>
+                              <span style={{ fontSize: '8px', opacity: 0.8 }}>{diff >= 0 ? '+' : ''}{diff.toFixed(1)}d</span>
                             </span>
                           );
                         })() : <span className="text-[10px] text-gray-400">—</span>}

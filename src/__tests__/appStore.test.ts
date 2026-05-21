@@ -1577,7 +1577,7 @@ describe('Store: updateTeam – map-Ternary Zweig + Fallback-String', () => {
 
   it('updateTeam Rollback-map + Fallback-Fehler bei null-Error und 2 Teams', async () => {
     const t1 = useAppStore.getState().addTeam({ name: 'Team A', memberIds: [] });
-    const t2 = useAppStore.getState().addTeam({ name: 'Team B', memberIds: [] });
+    useAppStore.getState().addTeam({ name: 'Team B', memberIds: [] });
     mockDbUpdateTeam.mockRejectedValueOnce(null);
     useAppStore.getState().updateTeam(t1.id, { name: 'Team A Neu' });
     await flushMicroTasks();

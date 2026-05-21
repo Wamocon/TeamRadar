@@ -192,20 +192,17 @@ export const useAppStore = create<AppStore>()(
 
     updateMember: (id, data) => {
       const original = get().members.find((m) => m.id === id);
+      if (!original) return;
       set((state) => ({
         members: state.members.map((m) => (m.id === id ? { ...m, ...data } : m)),
       }));
-      const updated = get().members.find((m) => m.id === id);
-      if (updated) {
-        dbUpdateMember(updated).catch((err: any) => {
-          if (original) {
-            set((state) => ({
-              members: state.members.map((m) => (m.id === id ? original : m)),
-            }));
-          }
-          set({ writeError: err?.message || 'Mitarbeiter konnte nicht aktualisiert werden' });
-        });
-      }
+      const updated = get().members.find((m) => m.id === id)!;
+      dbUpdateMember(updated).catch((err: any) => {
+        set((state) => ({
+          members: state.members.map((m) => (m.id === id ? original : m)),
+        }));
+        set({ writeError: err?.message || 'Mitarbeiter konnte nicht aktualisiert werden' });
+      });
     },
 
     deleteMember: (id) => {
@@ -259,22 +256,19 @@ export const useAppStore = create<AppStore>()(
 
     updateAvailability: (id, data) => {
       const original = get().availabilities.find((a) => a.id === id);
+      if (!original) return;
       set((state) => ({
         availabilities: state.availabilities.map((a) =>
           a.id === id ? { ...a, ...data } : a
         ),
       }));
-      const updated = get().availabilities.find((a) => a.id === id);
-      if (updated) {
-        dbUpdateAvailability(updated).catch((err: any) => {
-          if (original) {
-            set((state) => ({
-              availabilities: state.availabilities.map((a) => (a.id === id ? original : a)),
-            }));
-          }
-          set({ writeError: err?.message || 'Verfügbarkeit konnte nicht aktualisiert werden' });
-        });
-      }
+      const updated = get().availabilities.find((a) => a.id === id)!;
+      dbUpdateAvailability(updated).catch((err: any) => {
+        set((state) => ({
+          availabilities: state.availabilities.map((a) => (a.id === id ? original : a)),
+        }));
+        set({ writeError: err?.message || 'Verfügbarkeit konnte nicht aktualisiert werden' });
+      });
     },
 
     deleteAvailability: (id) => {
@@ -320,20 +314,17 @@ export const useAppStore = create<AppStore>()(
 
     updateTeam: (id, data) => {
       const original = get().teams.find((t) => t.id === id);
+      if (!original) return;
       set((state) => ({
         teams: state.teams.map((t) => (t.id === id ? { ...t, ...data } : t)),
       }));
-      const updated = get().teams.find((t) => t.id === id);
-      if (updated) {
-        dbUpdateTeam(updated).catch((err: any) => {
-          if (original) {
-            set((state) => ({
-              teams: state.teams.map((t) => (t.id === id ? original : t)),
-            }));
-          }
-          set({ writeError: err?.message || 'Team konnte nicht aktualisiert werden' });
-        });
-      }
+      const updated = get().teams.find((t) => t.id === id)!;
+      dbUpdateTeam(updated).catch((err: any) => {
+        set((state) => ({
+          teams: state.teams.map((t) => (t.id === id ? original : t)),
+        }));
+        set({ writeError: err?.message || 'Team konnte nicht aktualisiert werden' });
+      });
     },
 
     deleteTeam: (id) => {
@@ -370,20 +361,17 @@ export const useAppStore = create<AppStore>()(
 
     updateProject: (id, data) => {
       const original = get().projects.find((p) => p.id === id);
+      if (!original) return;
       set((state) => ({
         projects: state.projects.map((p) => (p.id === id ? { ...p, ...data } : p)),
       }));
-      const updated = get().projects.find((p) => p.id === id);
-      if (updated) {
-        dbUpdateProject(updated).catch((err: any) => {
-          if (original) {
-            set((state) => ({
-              projects: state.projects.map((p) => (p.id === id ? original : p)),
-            }));
-          }
-          set({ writeError: err?.message || 'Projekt konnte nicht aktualisiert werden' });
-        });
-      }
+      const updated = get().projects.find((p) => p.id === id)!;
+      dbUpdateProject(updated).catch((err: any) => {
+        set((state) => ({
+          projects: state.projects.map((p) => (p.id === id ? original : p)),
+        }));
+        set({ writeError: err?.message || 'Projekt konnte nicht aktualisiert werden' });
+      });
     },
 
     deleteProject: (id) => {
@@ -416,20 +404,17 @@ export const useAppStore = create<AppStore>()(
 
     updateAllocation: (id, data) => {
       const original = get().allocations.find((a) => a.id === id);
+      if (!original) return;
       set((state) => ({
         allocations: state.allocations.map((a) => (a.id === id ? { ...a, ...data } : a)),
       }));
-      const updated = get().allocations.find((a) => a.id === id);
-      if (updated) {
-        dbUpdateAllocation(updated).catch((err: any) => {
-          if (original) {
-            set((state) => ({
-              allocations: state.allocations.map((a) => (a.id === id ? original : a)),
-            }));
-          }
-          set({ writeError: err?.message || 'Zuweisung konnte nicht aktualisiert werden' });
-        });
-      }
+      const updated = get().allocations.find((a) => a.id === id)!;
+      dbUpdateAllocation(updated).catch((err: any) => {
+        set((state) => ({
+          allocations: state.allocations.map((a) => (a.id === id ? original : a)),
+        }));
+        set({ writeError: err?.message || 'Zuweisung konnte nicht aktualisiert werden' });
+      });
     },
 
     deleteAllocation: (id) => {

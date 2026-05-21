@@ -7,35 +7,58 @@ import { useAppStore } from '@/stores/appStore';
 import type { AvailabilityStatus } from '@/types';
 
 // vi.hoisted: Variablen müssen vor vi.mock-Factories verfügbar sein
-const { mockLoadAllData, mockDbGetUserProfile, mockDbAddProject } = vi.hoisted(() => {
-  const mockLoadAllData = vi.fn().mockResolvedValue(null);
-  const mockDbGetUserProfile = vi.fn().mockResolvedValue(null);
-  const mockDbAddProject = vi.fn().mockResolvedValue(undefined);
-  return { mockLoadAllData, mockDbGetUserProfile, mockDbAddProject };
+const {
+  mockLoadAllData, mockDbGetUserProfile, mockDbAddProject,
+  mockDbAddMember, mockDbUpdateMember, mockDbDeleteMember,
+  mockDbAddAvailability, mockDbUpdateAvailability, mockDbDeleteAvailability,
+  mockDbAddTeam, mockDbUpdateTeam, mockDbDeleteTeam,
+  mockDbUpdateProject, mockDbDeleteProject,
+  mockDbAddAllocation, mockDbUpdateAllocation, mockDbDeleteAllocation,
+} = vi.hoisted(() => {
+  return {
+    mockLoadAllData: vi.fn().mockResolvedValue(null),
+    mockDbGetUserProfile: vi.fn().mockResolvedValue(null),
+    mockDbAddProject: vi.fn().mockResolvedValue(undefined),
+    mockDbAddMember: vi.fn().mockResolvedValue(undefined),
+    mockDbUpdateMember: vi.fn().mockResolvedValue(undefined),
+    mockDbDeleteMember: vi.fn().mockResolvedValue(undefined),
+    mockDbAddAvailability: vi.fn().mockResolvedValue(undefined),
+    mockDbUpdateAvailability: vi.fn().mockResolvedValue(undefined),
+    mockDbDeleteAvailability: vi.fn().mockResolvedValue(undefined),
+    mockDbAddTeam: vi.fn().mockResolvedValue(undefined),
+    mockDbUpdateTeam: vi.fn().mockResolvedValue(undefined),
+    mockDbDeleteTeam: vi.fn().mockResolvedValue(undefined),
+    mockDbUpdateProject: vi.fn().mockResolvedValue(undefined),
+    mockDbDeleteProject: vi.fn().mockResolvedValue(undefined),
+    mockDbAddAllocation: vi.fn().mockResolvedValue(undefined),
+    mockDbUpdateAllocation: vi.fn().mockResolvedValue(undefined),
+    mockDbDeleteAllocation: vi.fn().mockResolvedValue(undefined),
+  };
 });
 
 vi.mock('@/lib/supabase/db', () => ({
   loadAllData: mockLoadAllData,
-  dbAddMember: vi.fn().mockResolvedValue(undefined),
-  dbUpdateMember: vi.fn().mockResolvedValue(undefined),
-  dbDeleteMember: vi.fn().mockResolvedValue(undefined),
-  dbAddAvailability: vi.fn().mockResolvedValue(undefined),
-  dbUpdateAvailability: vi.fn().mockResolvedValue(undefined),
-  dbDeleteAvailability: vi.fn().mockResolvedValue(undefined),
-  dbAddTeam: vi.fn().mockResolvedValue(undefined),
-  dbUpdateTeam: vi.fn().mockResolvedValue(undefined),
-  dbDeleteTeam: vi.fn().mockResolvedValue(undefined),
+  dbAddMember: mockDbAddMember,
+  dbUpdateMember: mockDbUpdateMember,
+  dbDeleteMember: mockDbDeleteMember,
+  dbAddAvailability: mockDbAddAvailability,
+  dbUpdateAvailability: mockDbUpdateAvailability,
+  dbDeleteAvailability: mockDbDeleteAvailability,
+  dbAddTeam: mockDbAddTeam,
+  dbUpdateTeam: mockDbUpdateTeam,
+  dbDeleteTeam: mockDbDeleteTeam,
   dbAddProject: mockDbAddProject,
-  dbUpdateProject: vi.fn().mockResolvedValue(undefined),
-  dbDeleteProject: vi.fn().mockResolvedValue(undefined),
-  dbAddAllocation: vi.fn().mockResolvedValue(undefined),
-  dbUpdateAllocation: vi.fn().mockResolvedValue(undefined),
-  dbDeleteAllocation: vi.fn().mockResolvedValue(undefined),
+  dbUpdateProject: mockDbUpdateProject,
+  dbDeleteProject: mockDbDeleteProject,
+  dbAddAllocation: mockDbAddAllocation,
+  dbUpdateAllocation: mockDbUpdateAllocation,
+  dbDeleteAllocation: mockDbDeleteAllocation,
   dbGetUserProfile: mockDbGetUserProfile,
 }));
 
 // Store vor jedem Test zurücksetzen
 beforeEach(() => {
+  vi.clearAllMocks();
   useAppStore.setState({
     members: [],
     availabilities: [],
@@ -43,6 +66,7 @@ beforeEach(() => {
     projects: [],
     allocations: [],
     userProfile: null,
+    writeError: null,
   });
 });
 
@@ -1061,7 +1085,6 @@ describe('Store: getMemberStatus mit Zeitfenstern', () => {
 
 describe('Store: addProject Fehlerbehandlung', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
     mockDbAddProject.mockResolvedValue(undefined);
     useAppStore.setState({ projects: [], dbError: null, writeError: null });
   });
@@ -1113,5 +1136,359 @@ describe('Store: getAlerts – Urlaubs-Konflikt', () => {
     const vacConflicts = alerts.filter((a) => a.type === 'vacation_conflict' && a.memberId === member.id);
     expect(vacConflicts.length).toBeGreaterThanOrEqual(1);
     expect(vacConflicts[0].severity).toBe('warning');
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   FEHLERBEHANDLUNG: writeError + Rollback
+   ═══════════════════════════════════════════════════════════════ */
+
+// Hilfsfunktion: Micro-Tasks flushen, damit .catch()-Callbacks ausgeführt werden
+const flushMicroTasks = () => new Promise<void>((r) => setTimeout(r, 0));
+
+describe('Store: clearWriteError', () => {
+  it('setzt writeError auf null', () => {
+    useAppStore.setState({ writeError: 'Ein Fehler' });
+    useAppStore.getState().clearWriteError();
+    expect(useAppStore.getState().writeError).toBeNull();
+  });
+});
+
+describe('Store: Mitarbeiter – Fehlerbehandlung', () => {
+  const memberData = { name: 'Test', email: 't@test.de', role: 'Dev', department: 'Eng' };
+
+  it('addMember: Rollback und writeError bei DB-Fehler', async () => {
+    mockDbAddMember.mockRejectedValueOnce(new Error('DB-Fehler Mitarbeiter'));
+    useAppStore.getState().addMember(memberData);
+    await flushMicroTasks();
+    expect(useAppStore.getState().members).toHaveLength(0);
+    expect(useAppStore.getState().writeError).toBe('DB-Fehler Mitarbeiter');
+  });
+
+  it('updateMember: Rollback auf ursprünglichen Wert bei DB-Fehler', async () => {
+    const m = useAppStore.getState().addMember(memberData);
+    mockDbUpdateMember.mockRejectedValueOnce(new Error('Update-Fehler'));
+    useAppStore.getState().updateMember(m.id, { name: 'Geändert' });
+    await flushMicroTasks();
+    expect(useAppStore.getState().members[0].name).toBe('Test');
+    expect(useAppStore.getState().writeError).toBe('Update-Fehler');
+  });
+
+  it('deleteMember: Rollback bei DB-Fehler', async () => {
+    const m = useAppStore.getState().addMember(memberData);
+    mockDbDeleteMember.mockRejectedValueOnce(new Error('Delete-Fehler'));
+    useAppStore.getState().deleteMember(m.id);
+    await flushMicroTasks();
+    expect(useAppStore.getState().members).toHaveLength(1);
+    expect(useAppStore.getState().writeError).toBe('Delete-Fehler');
+  });
+
+  it('deleteMember: Rollback stellt auch Verfügbarkeiten wieder her', async () => {
+    const m = useAppStore.getState().addMember(memberData);
+    useAppStore.getState().addAvailability({ memberId: m.id, date: '2026-05-01', status: 'vacation' });
+    mockDbDeleteMember.mockRejectedValueOnce(new Error('Delete-Fehler'));
+    useAppStore.getState().deleteMember(m.id);
+    await flushMicroTasks();
+    expect(useAppStore.getState().members).toHaveLength(1);
+    expect(useAppStore.getState().availabilities).toHaveLength(1);
+  });
+});
+
+describe('Store: Verfügbarkeit – Fehlerbehandlung', () => {
+  const memberData = { name: 'Test', email: 't@test.de', role: 'Dev', department: 'Eng' };
+  const availData = { date: '2026-05-21', status: 'vacation' as const };
+
+  it('addAvailability: Rollback und writeError bei DB-Fehler', async () => {
+    const m = useAppStore.getState().addMember(memberData);
+    mockDbAddAvailability.mockRejectedValueOnce(new Error('Avail-Fehler'));
+    useAppStore.getState().addAvailability({ memberId: m.id, ...availData });
+    await flushMicroTasks();
+    expect(useAppStore.getState().availabilities).toHaveLength(0);
+    expect(useAppStore.getState().writeError).toBe('Avail-Fehler');
+  });
+
+  it('updateAvailability: Rollback auf ursprünglichen Status bei DB-Fehler', async () => {
+    const m = useAppStore.getState().addMember(memberData);
+    const a = useAppStore.getState().addAvailability({ memberId: m.id, ...availData });
+    mockDbUpdateAvailability.mockRejectedValueOnce(new Error('Update-Avail-Fehler'));
+    useAppStore.getState().updateAvailability(a.id, { status: 'sick' });
+    await flushMicroTasks();
+    expect(useAppStore.getState().availabilities[0].status).toBe('vacation');
+    expect(useAppStore.getState().writeError).toBe('Update-Avail-Fehler');
+  });
+
+  it('deleteAvailability: Rollback bei DB-Fehler', async () => {
+    const m = useAppStore.getState().addMember(memberData);
+    const a = useAppStore.getState().addAvailability({ memberId: m.id, ...availData });
+    mockDbDeleteAvailability.mockRejectedValueOnce(new Error('Delete-Avail-Fehler'));
+    useAppStore.getState().deleteAvailability(a.id);
+    await flushMicroTasks();
+    expect(useAppStore.getState().availabilities).toHaveLength(1);
+    expect(useAppStore.getState().writeError).toBe('Delete-Avail-Fehler');
+  });
+});
+
+describe('Store: Teams – Fehlerbehandlung', () => {
+  it('addTeam: Rollback und writeError bei DB-Fehler', async () => {
+    mockDbAddTeam.mockRejectedValueOnce(new Error('Team-Fehler'));
+    useAppStore.getState().addTeam({ name: 'Test-Team', memberIds: [] });
+    await flushMicroTasks();
+    expect(useAppStore.getState().teams).toHaveLength(0);
+    expect(useAppStore.getState().writeError).toBe('Team-Fehler');
+  });
+
+  it('updateTeam: Rollback auf ursprünglichen Namen bei DB-Fehler', async () => {
+    const t = useAppStore.getState().addTeam({ name: 'Original', memberIds: [] });
+    mockDbUpdateTeam.mockRejectedValueOnce(new Error('Update-Team-Fehler'));
+    useAppStore.getState().updateTeam(t.id, { name: 'Geändert' });
+    await flushMicroTasks();
+    expect(useAppStore.getState().teams[0].name).toBe('Original');
+    expect(useAppStore.getState().writeError).toBe('Update-Team-Fehler');
+  });
+
+  it('deleteTeam: Rollback bei DB-Fehler', async () => {
+    const t = useAppStore.getState().addTeam({ name: 'Zu löschen', memberIds: [] });
+    mockDbDeleteTeam.mockRejectedValueOnce(new Error('Delete-Team-Fehler'));
+    useAppStore.getState().deleteTeam(t.id);
+    await flushMicroTasks();
+    expect(useAppStore.getState().teams).toHaveLength(1);
+    expect(useAppStore.getState().writeError).toBe('Delete-Team-Fehler');
+  });
+});
+
+describe('Store: Projekte – Fehlerbehandlung (Update/Delete)', () => {
+  beforeEach(() => {
+    mockDbAddProject.mockResolvedValue(undefined);
+    mockDbUpdateProject.mockResolvedValue(undefined);
+    mockDbDeleteProject.mockResolvedValue(undefined);
+  });
+
+  it('updateProject: Rollback auf ursprünglichen Namen bei DB-Fehler', async () => {
+    const p = await useAppStore.getState().addProject({ name: 'Original-Projekt', type: 'internal', status: 'active', memberIds: [] });
+    mockDbUpdateProject.mockRejectedValueOnce(new Error('Update-Projekt-Fehler'));
+    useAppStore.getState().updateProject(p.id, { name: 'Geändert' });
+    await flushMicroTasks();
+    expect(useAppStore.getState().projects[0].name).toBe('Original-Projekt');
+    expect(useAppStore.getState().writeError).toBe('Update-Projekt-Fehler');
+  });
+
+  it('deleteProject: Rollback bei DB-Fehler', async () => {
+    const p = await useAppStore.getState().addProject({ name: 'Zu löschen', type: 'internal', status: 'active', memberIds: [] });
+    mockDbDeleteProject.mockRejectedValueOnce(new Error('Delete-Projekt-Fehler'));
+    useAppStore.getState().deleteProject(p.id);
+    await flushMicroTasks();
+    expect(useAppStore.getState().projects).toHaveLength(1);
+    expect(useAppStore.getState().writeError).toBe('Delete-Projekt-Fehler');
+  });
+});
+
+describe('Store: Allocations – Fehlerbehandlung', () => {
+  const allocData = { memberId: 'm1', projectId: 'p1', percentage: 50, startDate: '2026-01-01', endDate: '2026-12-31' };
+
+  it('addAllocation: Rollback und writeError bei DB-Fehler', async () => {
+    mockDbAddAllocation.mockRejectedValueOnce(new Error('Allocation-Fehler'));
+    useAppStore.getState().addAllocation(allocData);
+    await flushMicroTasks();
+    expect(useAppStore.getState().allocations).toHaveLength(0);
+    expect(useAppStore.getState().writeError).toBe('Allocation-Fehler');
+  });
+
+  it('updateAllocation: Rollback auf ursprünglichen Prozentsatz bei DB-Fehler', async () => {
+    const a = useAppStore.getState().addAllocation(allocData);
+    mockDbUpdateAllocation.mockRejectedValueOnce(new Error('Update-Allocation-Fehler'));
+    useAppStore.getState().updateAllocation(a.id, { percentage: 80 });
+    await flushMicroTasks();
+    expect(useAppStore.getState().allocations[0].percentage).toBe(50);
+    expect(useAppStore.getState().writeError).toBe('Update-Allocation-Fehler');
+  });
+
+  it('deleteAllocation: Rollback bei DB-Fehler', async () => {
+    const a = useAppStore.getState().addAllocation(allocData);
+    mockDbDeleteAllocation.mockRejectedValueOnce(new Error('Delete-Allocation-Fehler'));
+    useAppStore.getState().deleteAllocation(a.id);
+    await flushMicroTasks();
+    expect(useAppStore.getState().allocations).toHaveLength(1);
+    expect(useAppStore.getState().writeError).toBe('Delete-Allocation-Fehler');
+  });
+});
+
+describe('Store: getAlerts – Krank-Konflikt', () => {
+  it('erkennt Krank-Konflikt wenn Allocation während Krankheit', () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+
+    const member = useAppStore.getState().addMember({
+      name: 'Kranker', email: 'krank@x.de', role: 'Dev', department: 'Eng',
+    });
+    useAppStore.getState().addAvailability({ memberId: member.id, status: 'sick', date: tomorrow });
+    useAppStore.getState().addAllocation({
+      memberId: member.id, projectId: 'p1', percentage: 80,
+      startDate: today, endDate: new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10),
+    });
+
+    const alerts = useAppStore.getState().getAlerts();
+    const sickConflicts = alerts.filter((a) => a.type === 'vacation_conflict' && a.memberId === member.id);
+    expect(sickConflicts.length).toBeGreaterThanOrEqual(1);
+    expect(sickConflicts[0].message).toContain('Krank');
+  });
+});
+
+describe('Store: hasMinRole – unbekannte Rolle', () => {
+  it('behandelt unbekannte Rolle wie employee', () => {
+    useAppStore.setState({
+      userProfile: { id: '1', email: 'x@x.de', displayName: 'X', role: 'unbekannt' as any },
+    });
+    expect(useAppStore.getState().hasMinRole('employee')).toBe(true);
+    expect(useAppStore.getState().hasMinRole('department_lead')).toBe(false);
+  });
+
+  it('behandelt unbekannte minRole wie employee-Level', () => {
+    useAppStore.setState({
+      userProfile: { id: '1', email: 'x@x.de', displayName: 'X', role: 'employee' },
+    });
+    // hasMinRole mit unbekannter minRole → Fallback auf Level 1 (employee)
+    expect(useAppStore.getState().hasMinRole('unbekannt' as any)).toBe(true);
+  });
+});
+
+describe('Store: getMemberUtilization/getMemberAllocations ohne Datum', () => {
+  it('getMemberUtilization: nutzt heutiges Datum als Fallback wenn kein Datum übergeben', () => {
+    const m = useAppStore.getState().addMember({ name: 'Test', email: 't@t.de', role: 'Dev', department: 'Eng' });
+    const today = new Date().toISOString().slice(0, 10);
+    useAppStore.getState().addAllocation({ memberId: m.id, projectId: 'p1', percentage: 60, startDate: today, endDate: today });
+    // Kein Datum-Parameter → Fallback auf new Date()
+    expect(useAppStore.getState().getMemberUtilization(m.id)).toBe(60);
+  });
+
+  it('getMemberAllocations: nutzt heutiges Datum als Fallback wenn kein Datum übergeben', () => {
+    const m = useAppStore.getState().addMember({ name: 'Test', email: 't@t.de', role: 'Dev', department: 'Eng' });
+    const today = new Date().toISOString().slice(0, 10);
+    useAppStore.getState().addAllocation({ memberId: m.id, projectId: 'p1', percentage: 60, startDate: today, endDate: today });
+    // Kein Datum-Parameter → Fallback auf new Date()
+    expect(useAppStore.getState().getMemberAllocations(m.id)).toHaveLength(1);
+  });
+});
+
+describe('Store: getAlerts – Urlaub ohne Konflikt', () => {
+  it('generiert keinen Urlaubs-Konflikt wenn keine Allocation vorhanden', () => {
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    const member = useAppStore.getState().addMember({ name: 'Test', email: 't@t.de', role: 'Dev', department: 'Eng' });
+    // Urlaub eintragen, aber KEINE Allocation → kein vacation_conflict
+    useAppStore.getState().addAvailability({ memberId: member.id, status: 'vacation', date: tomorrow });
+    const alerts = useAppStore.getState().getAlerts();
+    const conflicts = alerts.filter((a) => a.type === 'vacation_conflict' && a.memberId === member.id);
+    expect(conflicts).toHaveLength(0);
+  });
+});
+
+describe('Store: Delete mit nicht-existierender ID (original = undefined)', () => {
+  it('deleteMember: setzt nur writeError ohne Rollback wenn Member nicht existiert', async () => {
+    mockDbDeleteMember.mockRejectedValueOnce(new Error('Member nicht gefunden'));
+    useAppStore.getState().deleteMember('nicht-vorhanden');
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Member nicht gefunden');
+    expect(useAppStore.getState().members).toHaveLength(0);
+  });
+
+  it('deleteAvailability: setzt nur writeError ohne Rollback wenn Verfügbarkeit nicht existiert', async () => {
+    mockDbDeleteAvailability.mockRejectedValueOnce(new Error('Verf. nicht gefunden'));
+    useAppStore.getState().deleteAvailability('nicht-vorhanden');
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Verf. nicht gefunden');
+    expect(useAppStore.getState().availabilities).toHaveLength(0);
+  });
+
+  it('deleteTeam: setzt nur writeError ohne Rollback wenn Team nicht existiert', async () => {
+    mockDbDeleteTeam.mockRejectedValueOnce(new Error('Team nicht gefunden'));
+    useAppStore.getState().deleteTeam('nicht-vorhanden');
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Team nicht gefunden');
+    expect(useAppStore.getState().teams).toHaveLength(0);
+  });
+
+  it('deleteProject: setzt nur writeError ohne Rollback wenn Projekt nicht existiert', async () => {
+    mockDbDeleteProject.mockRejectedValueOnce(new Error('Projekt nicht gefunden'));
+    useAppStore.getState().deleteProject('nicht-vorhanden');
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Projekt nicht gefunden');
+    expect(useAppStore.getState().projects).toHaveLength(0);
+  });
+
+  it('deleteAllocation: setzt nur writeError ohne Rollback wenn Zuweisung nicht existiert', async () => {
+    mockDbDeleteAllocation.mockRejectedValueOnce(new Error('Zuweisung nicht gefunden'));
+    useAppStore.getState().deleteAllocation('nicht-vorhanden');
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Zuweisung nicht gefunden');
+    expect(useAppStore.getState().allocations).toHaveLength(0);
+  });
+});
+
+describe('Store: Update mit nicht-existierender ID (early return)', () => {
+  it('updateMember: tut nichts wenn Member nicht existiert', () => {
+    useAppStore.getState().updateMember('nicht-vorhanden', { name: 'X' });
+    expect(useAppStore.getState().members).toHaveLength(0);
+    expect(mockDbUpdateMember).not.toHaveBeenCalled();
+  });
+
+  it('updateAvailability: tut nichts wenn Verfügbarkeit nicht existiert', () => {
+    useAppStore.getState().updateAvailability('nicht-vorhanden', { status: 'vacation' });
+    expect(useAppStore.getState().availabilities).toHaveLength(0);
+    expect(mockDbUpdateAvailability).not.toHaveBeenCalled();
+  });
+
+  it('updateTeam: tut nichts wenn Team nicht existiert', () => {
+    useAppStore.getState().updateTeam('nicht-vorhanden', { name: 'X' });
+    expect(useAppStore.getState().teams).toHaveLength(0);
+    expect(mockDbUpdateTeam).not.toHaveBeenCalled();
+  });
+
+  it('updateProject: tut nichts wenn Projekt nicht existiert', () => {
+    useAppStore.getState().updateProject('nicht-vorhanden', { name: 'X' });
+    expect(useAppStore.getState().projects).toHaveLength(0);
+    expect(mockDbUpdateProject).not.toHaveBeenCalled();
+  });
+
+  it('updateAllocation: tut nichts wenn Zuweisung nicht existiert', () => {
+    useAppStore.getState().updateAllocation('nicht-vorhanden', { percentage: 50 });
+    expect(useAppStore.getState().allocations).toHaveLength(0);
+    expect(mockDbUpdateAllocation).not.toHaveBeenCalled();
+  });
+});
+
+describe('Store: Fehlerbehandlung mit Fallback-Fehlermeldung (err ohne message)', () => {
+  it('addMember: nutzt Fallback-Fehlermeldung wenn err kein Message hat', async () => {
+    mockDbAddMember.mockRejectedValueOnce(null);
+    useAppStore.getState().addMember({ name: 'T', email: 't@t.de', role: 'Dev', department: 'Eng' });
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Mitarbeiter konnte nicht gespeichert werden');
+  });
+
+  it('deleteProject: nutzt Fallback-Fehlermeldung wenn err kein Message hat', async () => {
+    mockDbDeleteProject.mockRejectedValueOnce(null);
+    useAppStore.getState().deleteProject('nicht-vorhanden');
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Projekt konnte nicht gelöscht werden');
+  });
+
+  it('addAllocation: nutzt Fallback-Fehlermeldung wenn err kein Message hat', async () => {
+    mockDbAddAllocation.mockRejectedValueOnce(null);
+    useAppStore.getState().addAllocation({ memberId: 'm1', projectId: 'p1', percentage: 50, startDate: '2026-01-01', endDate: '2026-12-31' });
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Zuweisung konnte nicht gespeichert werden');
+  });
+
+  it('updateAllocation: nutzt Fallback-Fehlermeldung wenn err kein Message hat', async () => {
+    const a = useAppStore.getState().addAllocation({ memberId: 'm1', projectId: 'p1', percentage: 50, startDate: '2026-01-01', endDate: '2026-12-31' });
+    mockDbUpdateAllocation.mockRejectedValueOnce(null);
+    useAppStore.getState().updateAllocation(a.id, { percentage: 80 });
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Zuweisung konnte nicht aktualisiert werden');
+  });
+
+  it('deleteAllocation: nutzt Fallback-Fehlermeldung wenn err kein Message hat', async () => {
+    mockDbDeleteAllocation.mockRejectedValueOnce(null);
+    useAppStore.getState().deleteAllocation('nicht-vorhanden');
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Zuweisung konnte nicht gelöscht werden');
   });
 });

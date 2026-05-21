@@ -246,16 +246,17 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(mockDeleteMemberAction).toHaveBeenCalledWith('m1');
   });
 
-  it('dbAddAvailability ruft upsertAvailabilityAction auf', async () => {
+  it('dbAddAvailability ruft from().upsert() auf (Browser-Client)', async () => {
     const entry: Availability = {
       id: 'a1', memberId: 'm1', status: 'available', date: '2026-03-20',
       startTime: '09:00', endTime: '17:00',
     };
     await dbAddAvailability(entry);
-    expect(mockUpsertAvailabilityAction).toHaveBeenCalledOnce();
-    const row = mockUpsertAvailabilityAction.mock.calls[0][0];
+    expect(mockFrom).toHaveBeenCalledWith('availabilities');
+    expect(mockUpsert).toHaveBeenCalledOnce();
+    const row = mockUpsert.mock.calls[0][0];
     expect(row.id).toBe('a1');
-    expect(row.memberId).toBe('m1');
+    expect(row.member_id).toBe('m1');
     expect(row.status).toBe('available');
   });
 
@@ -268,9 +269,10 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(row.member_ids).toEqual(['m1', 'm2']);
   });
 
-  it('dbDeleteAvailability ruft deleteAvailabilityAction auf', async () => {
+  it('dbDeleteAvailability ruft from().delete() auf (Browser-Client)', async () => {
     await dbDeleteAvailability('a1');
-    expect(mockDeleteAvailabilityAction).toHaveBeenCalledWith('a1');
+    expect(mockFrom).toHaveBeenCalledWith('availabilities');
+    expect(mockDelete).toHaveBeenCalledOnce();
   });
 
   it('dbUpdateTeam ruft upsertTeamAction auf', async () => {
@@ -284,13 +286,14 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(mockDeleteTeamAction).toHaveBeenCalledWith('t1');
   });
 
-  it('dbUpdateAvailability ruft upsertAvailabilityAction auf', async () => {
+  it('dbUpdateAvailability ruft from().upsert() auf (Browser-Client)', async () => {
     const entry: Availability = {
       id: 'a1', memberId: 'm1', status: 'meeting', date: '2026-03-20',
       startTime: '10:00', endTime: '11:00', note: 'Daily',
     };
     await dbUpdateAvailability(entry);
-    expect(mockUpsertAvailabilityAction).toHaveBeenCalledOnce();
+    expect(mockFrom).toHaveBeenCalledWith('availabilities');
+    expect(mockUpsert).toHaveBeenCalledOnce();
   });
 
   it('dbAddProject ruft upsertProjectAction auf', async () => {

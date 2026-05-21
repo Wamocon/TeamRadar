@@ -36,6 +36,7 @@ export async function loadAllDataAction(): Promise<{
   teamRows: Record<string, unknown>[];
   projectRows: Record<string, unknown>[];
   allocationRows: Record<string, unknown>[];
+  organizationRows: Record<string, unknown>[];
 } | null> {
   // 1. Authentifizierung prüfen
   const supabase = await createClient();
@@ -51,12 +52,14 @@ export async function loadAllDataAction(): Promise<{
     { data: teamRows, error: tErr },
     { data: projectRows, error: pErr },
     { data: allocationRows, error: alErr },
+    { data: organizationRows },
   ] = await Promise.all([
     client.from('members').select('*').order('created_at', { ascending: true }),
     client.from('availabilities').select('*').order('date', { ascending: true }),
     client.from('teams').select('*').order('name', { ascending: true }),
     client.from('projects').select('*').order('name', { ascending: true }),
     client.from('allocations').select('*'),
+    client.from('organizations').select('id, name, slug, created_at').order('name', { ascending: true }),
   ]);
 
   if (mErr) { console.error('loadAllDataAction members:', mErr); throw new Error(mErr.message); }
@@ -64,6 +67,7 @@ export async function loadAllDataAction(): Promise<{
   if (tErr) { console.error('loadAllDataAction teams:', tErr); throw new Error(tErr.message); }
   if (pErr) { console.error('loadAllDataAction projects:', pErr); throw new Error(pErr.message); }
   if (alErr) { console.error('loadAllDataAction allocations:', alErr); throw new Error(alErr.message); }
+  // organizations-Fehler sind nicht kritisch – App funktioniert ohne Org-Zuweisung
 
   return {
     memberRows: (memberRows ?? []) as Record<string, unknown>[],
@@ -71,6 +75,7 @@ export async function loadAllDataAction(): Promise<{
     teamRows: (teamRows ?? []) as Record<string, unknown>[],
     projectRows: (projectRows ?? []) as Record<string, unknown>[],
     allocationRows: (allocationRows ?? []) as Record<string, unknown>[],
+    organizationRows: (organizationRows ?? []) as Record<string, unknown>[],
   };
 }
 

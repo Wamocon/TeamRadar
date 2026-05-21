@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Member, Availability, Team, Project, AvailabilityStatus, UserProfile, UserRole, Allocation, Alert, ProjectType } from '@/types';
+import type { Member, Availability, Team, Project, AvailabilityStatus, UserProfile, UserRole, Allocation, Alert, ProjectType, Organization } from '@/types';
 import {
   loadAllData,
   dbAddMember,
@@ -26,8 +26,7 @@ interface AppStore {
   availabilities: Availability[];
   teams: Team[];
   projects: Project[];
-  allocations: Allocation[];
-  userProfile: UserProfile | null;
+  allocations: Allocation[];  organizations: Organization[];  userProfile: UserProfile | null;
   systemSettings: {
     orgName: string;
     orgLogoUrl?: string;
@@ -38,6 +37,8 @@ interface AppStore {
   /* ── Lade-Zustand ──────────────────────────── */
   isLoading: boolean;
   dbError: string | null;
+  writeError: string | null;
+  clearWriteError: () => void;
 
   /* ── Laden ─────────────────────────────────── */
   loadFromSupabase: () => Promise<void>;
@@ -90,6 +91,7 @@ export const useAppStore = create<AppStore>()(
     teams: [],
     projects: [],
     allocations: [],
+    organizations: [],
     userProfile: process.env.NODE_ENV !== 'production' 
       ? { 
           id: 'mock-1', 
@@ -111,6 +113,8 @@ export const useAppStore = create<AppStore>()(
       : null,
     isLoading: false,
     dbError: null,
+    writeError: null,
+    clearWriteError: () => set({ writeError: null }),
 
     /* ── Supabase laden ──────────────────────── */
     loadFromSupabase: async () => {
@@ -127,6 +131,7 @@ export const useAppStore = create<AppStore>()(
             teams: data.teams,
             projects: data.projects,
             allocations: data.allocations,
+            organizations: data.organizations,
             isLoading: false,
           });
         } else {
@@ -176,19 +181,33 @@ export const useAppStore = create<AppStore>()(
         createdAt: new Date().toISOString(),
       };
       set((state) => ({ members: [...state.members, member] }));
-      void dbAddMember(member);
+      dbAddMember(member).catch((err: any) => {
+        set((state) => ({
+          members: state.members.filter((m) => m.id !== member.id),
+          writeError: err?.message || 'Mitarbeiter konnte nicht gespeichert werden',
+        }));
+      });
       return member;
     },
 
     updateMember: (id, data) => {
+      const original = get().members.find((m) => m.id === id);
+      if (!original) return;
       set((state) => ({
         members: state.members.map((m) => (m.id === id ? { ...m, ...data } : m)),
       }));
-      const updated = get().members.find((m) => m.id === id);
-      if (updated) void dbUpdateMember(updated);
+      const updated = get().members.find((m) => m.id === id)!;
+      dbUpdateMember(updated).catch((err: any) => {
+        set((state) => ({
+          members: state.members.map((m) => (m.id === id ? original : m)),
+        }));
+        set({ writeError: err?.message || 'Mitarbeiter konnte nicht aktualisiert werden' });
+      });
     },
 
     deleteMember: (id) => {
+      const originalMember = get().members.find((m) => m.id === id);
+      const originalAvailabilities = get().availabilities.filter((a) => a.memberId === id);
       set((state) => ({
         members: state.members.filter((m) => m.id !== id),
         availabilities: state.availabilities.filter((a) => a.memberId !== id),
@@ -201,7 +220,15 @@ export const useAppStore = create<AppStore>()(
           memberIds: p.memberIds.filter((mid) => mid !== id),
         })),
       }));
-      void dbDeleteMember(id);
+      dbDeleteMember(id).catch((err: any) => {
+        if (originalMember) {
+          set((state) => ({
+            members: [...state.members, originalMember],
+            availabilities: [...state.availabilities, ...originalAvailabilities],
+          }));
+        }
+        set({ writeError: err?.message || 'Mitarbeiter konnte nicht gelöscht werden' });
+      });
     },
 
     /* ── Verfügbarkeit ─────────────────────────── */
@@ -218,25 +245,43 @@ export const useAppStore = create<AppStore>()(
 
       const entry: Availability = { ...data, id: crypto.randomUUID() };
       set((state) => ({ availabilities: [...state.availabilities, entry] }));
-      void dbAddAvailability(entry);
+      dbAddAvailability(entry).catch((err: any) => {
+        set((state) => ({
+          availabilities: state.availabilities.filter((a) => a.id !== entry.id),
+          writeError: err?.message || 'Verfügbarkeit konnte nicht gespeichert werden',
+        }));
+      });
       return entry;
     },
 
     updateAvailability: (id, data) => {
+      const original = get().availabilities.find((a) => a.id === id);
+      if (!original) return;
       set((state) => ({
         availabilities: state.availabilities.map((a) =>
           a.id === id ? { ...a, ...data } : a
         ),
       }));
-      const updated = get().availabilities.find((a) => a.id === id);
-      if (updated) void dbUpdateAvailability(updated);
+      const updated = get().availabilities.find((a) => a.id === id)!;
+      dbUpdateAvailability(updated).catch((err: any) => {
+        set((state) => ({
+          availabilities: state.availabilities.map((a) => (a.id === id ? original : a)),
+        }));
+        set({ writeError: err?.message || 'Verfügbarkeit konnte nicht aktualisiert werden' });
+      });
     },
 
     deleteAvailability: (id) => {
+      const original = get().availabilities.find((a) => a.id === id);
       set((state) => ({
         availabilities: state.availabilities.filter((a) => a.id !== id),
       }));
-      void dbDeleteAvailability(id);
+      dbDeleteAvailability(id).catch((err: any) => {
+        if (original) {
+          set((state) => ({ availabilities: [...state.availabilities, original] }));
+        }
+        set({ writeError: err?.message || 'Verfügbarkeit konnte nicht gelöscht werden' });
+      });
     },
 
     getMemberStatus: (memberId, date) => {
@@ -258,21 +303,39 @@ export const useAppStore = create<AppStore>()(
     addTeam: (data) => {
       const team: Team = { ...data, id: crypto.randomUUID() };
       set((state) => ({ teams: [...state.teams, team] }));
-      void dbAddTeam(team);
+      dbAddTeam(team).catch((err: any) => {
+        set((state) => ({
+          teams: state.teams.filter((t) => t.id !== team.id),
+          writeError: err?.message || 'Team konnte nicht gespeichert werden',
+        }));
+      });
       return team;
     },
 
     updateTeam: (id, data) => {
+      const original = get().teams.find((t) => t.id === id);
+      if (!original) return;
       set((state) => ({
         teams: state.teams.map((t) => (t.id === id ? { ...t, ...data } : t)),
       }));
-      const updated = get().teams.find((t) => t.id === id);
-      if (updated) void dbUpdateTeam(updated);
+      const updated = get().teams.find((t) => t.id === id)!;
+      dbUpdateTeam(updated).catch((err: any) => {
+        set((state) => ({
+          teams: state.teams.map((t) => (t.id === id ? original : t)),
+        }));
+        set({ writeError: err?.message || 'Team konnte nicht aktualisiert werden' });
+      });
     },
 
     deleteTeam: (id) => {
+      const original = get().teams.find((t) => t.id === id);
       set((state) => ({ teams: state.teams.filter((t) => t.id !== id) }));
-      void dbDeleteTeam(id);
+      dbDeleteTeam(id).catch((err: any) => {
+        if (original) {
+          set((state) => ({ teams: [...state.teams, original] }));
+        }
+        set({ writeError: err?.message || 'Team konnte nicht gelöscht werden' });
+      });
     },
 
     /* ── Projekte ──────────────────────────── */
@@ -289,7 +352,7 @@ export const useAppStore = create<AppStore>()(
         // Rollback: Projekt aus Store entfernen
         set((state) => ({ projects: state.projects.filter((p) => p.id !== project.id) }));
         const msg = err?.message || 'Datenbankfehler beim Speichern des Projekts';
-        set({ dbError: msg });
+        set({ writeError: msg });
         console.error('[addProject]', msg);
         throw new Error(msg);
       }
@@ -297,16 +360,29 @@ export const useAppStore = create<AppStore>()(
     },
 
     updateProject: (id, data) => {
+      const original = get().projects.find((p) => p.id === id);
+      if (!original) return;
       set((state) => ({
         projects: state.projects.map((p) => (p.id === id ? { ...p, ...data } : p)),
       }));
-      const updated = get().projects.find((p) => p.id === id);
-      if (updated) void dbUpdateProject(updated).catch((err) => console.error('[updateProject]', err));
+      const updated = get().projects.find((p) => p.id === id)!;
+      dbUpdateProject(updated).catch((err: any) => {
+        set((state) => ({
+          projects: state.projects.map((p) => (p.id === id ? original : p)),
+        }));
+        set({ writeError: err?.message || 'Projekt konnte nicht aktualisiert werden' });
+      });
     },
 
     deleteProject: (id) => {
+      const original = get().projects.find((p) => p.id === id);
       set((state) => ({ projects: state.projects.filter((p) => p.id !== id) }));
-      void dbDeleteProject(id);
+      dbDeleteProject(id).catch((err: any) => {
+        if (original) {
+          set((state) => ({ projects: [...state.projects, original] }));
+        }
+        set({ writeError: err?.message || 'Projekt konnte nicht gelöscht werden' });
+      });
     },
 
     getMemberProjects: (memberId) => {
@@ -317,21 +393,39 @@ export const useAppStore = create<AppStore>()(
     addAllocation: (data) => {
       const alloc: Allocation = { ...data, id: crypto.randomUUID() };
       set((state) => ({ allocations: [...state.allocations, alloc] }));
-      void dbAddAllocation(alloc);
+      dbAddAllocation(alloc).catch((err: any) => {
+        set((state) => ({
+          allocations: state.allocations.filter((a) => a.id !== alloc.id),
+          writeError: err?.message || 'Zuweisung konnte nicht gespeichert werden',
+        }));
+      });
       return alloc;
     },
 
     updateAllocation: (id, data) => {
+      const original = get().allocations.find((a) => a.id === id);
+      if (!original) return;
       set((state) => ({
         allocations: state.allocations.map((a) => (a.id === id ? { ...a, ...data } : a)),
       }));
-      const updated = get().allocations.find((a) => a.id === id);
-      if (updated) void dbUpdateAllocation(updated);
+      const updated = get().allocations.find((a) => a.id === id)!;
+      dbUpdateAllocation(updated).catch((err: any) => {
+        set((state) => ({
+          allocations: state.allocations.map((a) => (a.id === id ? original : a)),
+        }));
+        set({ writeError: err?.message || 'Zuweisung konnte nicht aktualisiert werden' });
+      });
     },
 
     deleteAllocation: (id) => {
+      const original = get().allocations.find((a) => a.id === id);
       set((state) => ({ allocations: state.allocations.filter((a) => a.id !== id) }));
-      void dbDeleteAllocation(id);
+      dbDeleteAllocation(id).catch((err: any) => {
+        if (original) {
+          set((state) => ({ allocations: [...state.allocations, original] }));
+        }
+        set({ writeError: err?.message || 'Zuweisung konnte nicht gelöscht werden' });
+      });
     },
 
     getMemberUtilization: (memberId, date, projectType) => {

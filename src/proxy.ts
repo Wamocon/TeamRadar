@@ -20,6 +20,12 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next({ request });
   }
 
+  // Server Actions (POST mit Next-Action-Header) NIEMALS redirecten.
+  // Sie werden als POST-Request gesendet; ein Redirect zu /auth/login
+  // würde die Action-Response durch HTML ersetzen → Client-Fehler → Rollback.
+  // Server Actions haben ihre eigene Auth-Prüfung in getAuthContext().
+  const isServerAction = request.method === 'POST' && request.headers.has('next-action');
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -46,11 +52,11 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // Session auffrischen
+  // Session auffrischen – aktualisiert Cookies für den nachfolgenden Request
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Nicht eingeloggt → zum Login
-  if (!user) {
+  // Nicht eingeloggt → zum Login, AUSSER bei Server Actions
+  if (!user && !isServerAction) {
     return NextResponse.redirect(new URL('/auth/login', request.url));
   }
 

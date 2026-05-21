@@ -5,7 +5,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // vi.hoisted stellt sicher, dass diese Variablen auch in vi.mock-Factories verfügbar sind
-const { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, mockLoadAllDataAction, mockAddAvailabilityAction } = vi.hoisted(() => {
+const { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, mockLoadAllDataAction,
+  mockUpsertMemberAction, mockDeleteMemberAction,
+  mockUpsertAvailabilityAction, mockDeleteAvailabilityAction,
+  mockUpsertTeamAction, mockDeleteTeamAction,
+  mockUpsertProjectAction, mockDeleteProjectAction,
+  mockUpsertAllocationAction, mockDeleteAllocationAction,
+} = vi.hoisted(() => {
   const mockInsert = vi.fn().mockReturnValue({ error: null });
   const mockUpdate = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
   const mockDelete = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ error: null }) });
@@ -26,8 +32,23 @@ const { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, m
     data: { user: { id: 'user-123' } },
   });
   const mockLoadAllDataAction = vi.fn().mockResolvedValue(null);
-  const mockAddAvailabilityAction = vi.fn().mockResolvedValue(undefined);
-  return { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, mockLoadAllDataAction, mockAddAvailabilityAction };
+  const mockUpsertMemberAction     = vi.fn().mockResolvedValue(undefined);
+  const mockDeleteMemberAction     = vi.fn().mockResolvedValue(undefined);
+  const mockUpsertAvailabilityAction = vi.fn().mockResolvedValue(undefined);
+  const mockDeleteAvailabilityAction = vi.fn().mockResolvedValue(undefined);
+  const mockUpsertTeamAction       = vi.fn().mockResolvedValue(undefined);
+  const mockDeleteTeamAction       = vi.fn().mockResolvedValue(undefined);
+  const mockUpsertProjectAction    = vi.fn().mockResolvedValue(undefined);
+  const mockDeleteProjectAction    = vi.fn().mockResolvedValue(undefined);
+  const mockUpsertAllocationAction = vi.fn().mockResolvedValue(undefined);
+  const mockDeleteAllocationAction = vi.fn().mockResolvedValue(undefined);
+  return { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, mockLoadAllDataAction,
+    mockUpsertMemberAction, mockDeleteMemberAction,
+    mockUpsertAvailabilityAction, mockDeleteAvailabilityAction,
+    mockUpsertTeamAction, mockDeleteTeamAction,
+    mockUpsertProjectAction, mockDeleteProjectAction,
+    mockUpsertAllocationAction, mockDeleteAllocationAction,
+  };
 });
 
 vi.mock('@/lib/supabase/client', () => ({
@@ -46,7 +67,19 @@ vi.mock('@/lib/supabase/server', () => ({
 
 vi.mock('@/lib/actions/dataActions', () => ({
   loadAllDataAction: mockLoadAllDataAction,
-  addAvailabilityAction: mockAddAvailabilityAction,
+}));
+
+vi.mock('@/lib/actions/writeActions', () => ({
+  upsertMemberAction:       mockUpsertMemberAction,
+  deleteMemberAction:       mockDeleteMemberAction,
+  upsertAvailabilityAction: mockUpsertAvailabilityAction,
+  deleteAvailabilityAction: mockDeleteAvailabilityAction,
+  upsertTeamAction:         mockUpsertTeamAction,
+  deleteTeamAction:         mockDeleteTeamAction,
+  upsertProjectAction:      mockUpsertProjectAction,
+  deleteProjectAction:      mockDeleteProjectAction,
+  upsertAllocationAction:   mockUpsertAllocationAction,
+  deleteAllocationAction:   mockDeleteAllocationAction,
 }));
 
 // Import NACH dem Mock
@@ -136,9 +169,8 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     mockUpsert.mockReturnValue({ error: null });
     mockFrom.mockReturnValue({ insert: mockInsert, update: mockUpdate, delete: mockDelete, select: vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue({ data: [], error: null }), eq: vi.fn().mockReturnValue({ order: vi.fn().mockReturnValue({ data: [], error: null }) }) }), upsert: mockUpsert });
     mockLoadAllDataAction.mockResolvedValue({
-      memberRows: [], availabilityRows: [], teamRows: [], projectRows: [], allocationRows: [],
+      memberRows: [], availabilityRows: [], teamRows: [], projectRows: [], allocationRows: [], organizationRows: [],
     });
-    mockAddAvailabilityAction.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -151,31 +183,29 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(id).toBe('user-123');
   });
 
-  it('dbAddMember ruft from("members").insert auf', async () => {
+  it('dbAddMember ruft upsertMemberAction auf', async () => {
     const member: Member = {
       id: '1', name: 'Test', email: 'a@b.de', role: 'Dev',
       department: 'Eng', createdAt: '2025-01-01',
     };
     await dbAddMember(member);
 
-    expect(mockFrom).toHaveBeenCalledWith('members');
-    expect(mockInsert).toHaveBeenCalled();
-    const row = mockInsert.mock.calls[0][0];
+    expect(mockUpsertMemberAction).toHaveBeenCalledOnce();
+    const row = mockUpsertMemberAction.mock.calls[0][0];
     expect(row.id).toBe('1');
     expect(row.user_id).toBe('user-123');
     expect(row.name).toBe('Test');
     expect(row.email).toBe('a@b.de');
   });
 
-  it('dbUpdateMember ruft from("members").update auf', async () => {
+  it('dbUpdateMember ruft upsertMemberAction auf', async () => {
     const member: Member = {
       id: '1', name: 'Updated', email: 'a@b.de', role: 'Dev',
       department: 'Eng', createdAt: '2025-01-01',
     };
     await dbUpdateMember(member);
 
-    expect(mockFrom).toHaveBeenCalledWith('members');
-    expect(mockUpdate).toHaveBeenCalled();
+    expect(mockUpsertMemberAction).toHaveBeenCalledOnce();
   });
 
   it('dbGetUserProfile mapping: snake_case -> camelCase inkl. neuer Felder', async () => {
@@ -211,94 +241,88 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     });
   });
 
-  it('dbDeleteMember ruft delete für availabilities und members auf', async () => {
+  it('dbDeleteMember ruft deleteMemberAction auf', async () => {
     await dbDeleteMember('m1');
-    // Sollte zweimal from() aufrufen: einmal für availabilities, einmal für members
-    expect(mockFrom).toHaveBeenCalledWith('availabilities');
-    expect(mockFrom).toHaveBeenCalledWith('members');
+    expect(mockDeleteMemberAction).toHaveBeenCalledWith('m1');
   });
 
-  it('dbAddAvailability ruft addAvailabilityAction auf', async () => {
+  it('dbAddAvailability ruft from().upsert() auf (Browser-Client)', async () => {
     const entry: Availability = {
       id: 'a1', memberId: 'm1', status: 'available', date: '2026-03-20',
       startTime: '09:00', endTime: '17:00',
     };
     await dbAddAvailability(entry);
-
-    expect(mockAddAvailabilityAction).toHaveBeenCalledWith(entry);
+    expect(mockFrom).toHaveBeenCalledWith('availabilities');
+    expect(mockUpsert).toHaveBeenCalledOnce();
+    const row = mockUpsert.mock.calls[0][0];
+    expect(row.id).toBe('a1');
+    expect(row.member_id).toBe('m1');
+    expect(row.status).toBe('available');
   });
 
-  it('dbAddTeam ruft from("teams").insert auf', async () => {
+  it('dbAddTeam ruft upsertTeamAction auf', async () => {
     const team: Team = { id: 't1', name: 'Frontend', memberIds: ['m1', 'm2'] };
     await dbAddTeam(team);
-
-    expect(mockFrom).toHaveBeenCalledWith('teams');
-    expect(mockInsert).toHaveBeenCalled();
-    const row = mockInsert.mock.calls[0][0];
+    expect(mockUpsertTeamAction).toHaveBeenCalledOnce();
+    const row = mockUpsertTeamAction.mock.calls[0][0];
     expect(row.name).toBe('Frontend');
     expect(row.member_ids).toEqual(['m1', 'm2']);
   });
 
-  it('dbDeleteAvailability ruft from("availabilities").delete auf', async () => {
+  it('dbDeleteAvailability ruft from().delete() auf (Browser-Client)', async () => {
     await dbDeleteAvailability('a1');
     expect(mockFrom).toHaveBeenCalledWith('availabilities');
-    expect(mockDelete).toHaveBeenCalled();
+    expect(mockDelete).toHaveBeenCalledOnce();
   });
 
-  it('dbUpdateTeam ruft from("teams").update auf', async () => {
+  it('dbUpdateTeam ruft upsertTeamAction auf', async () => {
     const team: Team = { id: 't1', name: 'Updated', memberIds: ['m3'] };
     await dbUpdateTeam(team);
-    expect(mockFrom).toHaveBeenCalledWith('teams');
-    expect(mockUpdate).toHaveBeenCalled();
+    expect(mockUpsertTeamAction).toHaveBeenCalledOnce();
   });
 
-  it('dbDeleteTeam ruft from("teams").delete auf', async () => {
+  it('dbDeleteTeam ruft deleteTeamAction auf', async () => {
     await dbDeleteTeam('t1');
-    expect(mockFrom).toHaveBeenCalledWith('teams');
-    expect(mockDelete).toHaveBeenCalled();
+    expect(mockDeleteTeamAction).toHaveBeenCalledWith('t1');
   });
 
-  it('dbUpdateAvailability ruft from("availabilities").update auf', async () => {
+  it('dbUpdateAvailability ruft from().upsert() auf (Browser-Client)', async () => {
     const entry: Availability = {
       id: 'a1', memberId: 'm1', status: 'meeting', date: '2026-03-20',
       startTime: '10:00', endTime: '11:00', note: 'Daily',
     };
     await dbUpdateAvailability(entry);
     expect(mockFrom).toHaveBeenCalledWith('availabilities');
-    expect(mockUpdate).toHaveBeenCalled();
+    expect(mockUpsert).toHaveBeenCalledOnce();
   });
 
-  it('dbAddProject ruft from("projects").insert auf', async () => {
+  it('dbAddProject ruft upsertProjectAction auf', async () => {
     const project: Project = {
       id: 'p1', name: 'Cloud-Migration', type: 'external', status: 'active',
       client: 'BMW AG', memberIds: ['m1'], startDate: '2026-01-01',
       endDate: '2026-06-30', createdAt: '2026-01-01',
     };
     await dbAddProject(project);
-
-    expect(mockFrom).toHaveBeenCalledWith('projects');
-    expect(mockInsert).toHaveBeenCalled();
-    const row = mockInsert.mock.calls[0][0];
+    expect(mockUpsertProjectAction).toHaveBeenCalledOnce();
+    const row = mockUpsertProjectAction.mock.calls[0][0];
     expect(row.name).toBe('Cloud-Migration');
     expect(row.type).toBe('external');
     expect(row.client).toBe('BMW AG');
     expect(row.member_ids).toEqual(['m1']);
   });
 
-  it('dbUpdateProject ruft from("projects").update auf', async () => {
+  it('dbUpdateProject ruft upsertProjectAction auf', async () => {
     const project: Project = {
       id: 'p1', name: 'Updated', type: 'internal', status: 'completed',
       memberIds: ['m2'], createdAt: '2026-01-01',
     };
     await dbUpdateProject(project);
-    expect(mockFrom).toHaveBeenCalledWith('projects');
-    expect(mockUpdate).toHaveBeenCalled();
+    expect(mockUpsertProjectAction).toHaveBeenCalledOnce();
   });
 
-  it('dbDeleteProject ruft from("projects").delete auf', async () => {
+  it('dbDeleteProject ruft deleteProjectAction auf', async () => {
     await dbDeleteProject('p1');
-    expect(mockFrom).toHaveBeenCalledWith('projects');
-    expect(mockDelete).toHaveBeenCalled();
+    expect(mockDeleteProjectAction).toHaveBeenCalledWith('p1');
   });
 
   it('loadAllData gibt Daten zurück wenn Supabase konfiguriert', async () => {
@@ -341,6 +365,9 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
         id: 'al1', member_id: 'm1', project_id: 'p1',
         percentage: 80, start_date: '2026-01-01', end_date: '2026-12-31', user_id: 'u1',
       }],
+      organizationRows: [{
+        id: 'org1', name: 'WAMOCON GmbH', slug: 'wamocon-gmbh', created_at: '2026-01-01',
+      }],
     });
 
     const data = await loadAllData();
@@ -377,6 +404,12 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(alloc.memberId).toBe('m1');
     expect(alloc.projectId).toBe('p1');
     expect(alloc.percentage).toBe(80);
+
+    // Organization-Mapping
+    const org = data!.organizations[0];
+    expect(org.id).toBe('org1');
+    expect(org.name).toBe('WAMOCON GmbH');
+    expect(org.slug).toBe('wamocon-gmbh');
   });
 
   it('loadAllData: leere member_ids werden als [] gemappt', async () => {
@@ -386,6 +419,7 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
       teamRows: [{ id: 't1', name: 'Leer', description: null, member_ids: null }],
       projectRows: [{ id: 'p1', name: 'X', type: 'internal', status: 'active', client: null, description: null, member_ids: null, start_date: null, end_date: null, max_days: null, created_at: '2026-01-01' }],
       allocationRows: [],
+      organizationRows: [],
     });
     const data = await loadAllData();
     expect(data!.teams[0].memberIds).toEqual([]);
@@ -406,12 +440,12 @@ describe('DB: Guard-Checks weitere Funktionen (ohne Supabase)', () => {
       department: 'Eng', createdAt: '2025-01-01',
     };
     await dbUpdateMember(member);
-    expect(mockFrom).not.toHaveBeenCalled();
+    expect(mockUpsertMemberAction).not.toHaveBeenCalled();
   });
 
   it('dbDeleteMember tut nichts ohne Supabase-Config', async () => {
     await dbDeleteMember('m1');
-    expect(mockFrom).not.toHaveBeenCalled();
+    expect(mockDeleteMemberAction).not.toHaveBeenCalled();
   });
 
   it('dbUpdateAvailability tut nichts ohne Supabase-Config', async () => {
@@ -419,23 +453,23 @@ describe('DB: Guard-Checks weitere Funktionen (ohne Supabase)', () => {
       id: '1', memberId: 'm1', status: 'available', date: '2025-01-01',
     };
     await dbUpdateAvailability(entry);
-    expect(mockFrom).not.toHaveBeenCalled();
+    expect(mockUpsertAvailabilityAction).not.toHaveBeenCalled();
   });
 
   it('dbDeleteAvailability tut nichts ohne Supabase-Config', async () => {
     await dbDeleteAvailability('a1');
-    expect(mockFrom).not.toHaveBeenCalled();
+    expect(mockDeleteAvailabilityAction).not.toHaveBeenCalled();
   });
 
   it('dbUpdateTeam tut nichts ohne Supabase-Config', async () => {
     const team: Team = { id: '1', name: 'Test', memberIds: [] };
     await dbUpdateTeam(team);
-    expect(mockFrom).not.toHaveBeenCalled();
+    expect(mockUpsertTeamAction).not.toHaveBeenCalled();
   });
 
   it('dbDeleteTeam tut nichts ohne Supabase-Config', async () => {
     await dbDeleteTeam('t1');
-    expect(mockFrom).not.toHaveBeenCalled();
+    expect(mockDeleteTeamAction).not.toHaveBeenCalled();
   });
 
   it('dbUpdateProject tut nichts ohne Supabase-Config', async () => {
@@ -444,12 +478,12 @@ describe('DB: Guard-Checks weitere Funktionen (ohne Supabase)', () => {
       memberIds: [], createdAt: '2026-01-01',
     };
     await dbUpdateProject(project);
-    expect(mockFrom).not.toHaveBeenCalled();
+    expect(mockUpsertProjectAction).not.toHaveBeenCalled();
   });
 
   it('dbDeleteProject tut nichts ohne Supabase-Config', async () => {
     await dbDeleteProject('p1');
-    expect(mockFrom).not.toHaveBeenCalled();
+    expect(mockDeleteProjectAction).not.toHaveBeenCalled();
   });
 });
 
@@ -470,42 +504,36 @@ describe('DB: Allocation-Funktionen mit Supabase konfiguriert', () => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = '';
   });
 
-  it('dbAddAllocation ruft from("allocations").insert auf', async () => {
+  it('dbAddAllocation ruft upsertAllocationAction auf', async () => {
     const alloc: Allocation = {
       id: 'al1', memberId: 'm1', projectId: 'p1',
       percentage: 60, startDate: '2026-01-01', endDate: '2026-06-30',
     };
     await dbAddAllocation(alloc);
-    expect(mockFrom).toHaveBeenCalledWith('allocations');
-    expect(mockInsert).toHaveBeenCalled();
-    const row = mockInsert.mock.calls[0][0];
+    expect(mockUpsertAllocationAction).toHaveBeenCalledOnce();
+    const row = mockUpsertAllocationAction.mock.calls[0][0];
     expect(row.member_id).toBe('m1');
     expect(row.project_id).toBe('p1');
     expect(row.percentage).toBe(60);
   });
 
-  it('dbUpdateAllocation ruft from("allocations").update auf', async () => {
+  it('dbUpdateAllocation ruft upsertAllocationAction auf', async () => {
     const alloc: Allocation = {
       id: 'al1', memberId: 'm1', projectId: 'p1',
       percentage: 80, startDate: '2026-01-01', endDate: '2026-06-30',
     };
     await dbUpdateAllocation(alloc);
-    expect(mockFrom).toHaveBeenCalledWith('allocations');
-    expect(mockUpdate).toHaveBeenCalled();
+    expect(mockUpsertAllocationAction).toHaveBeenCalledOnce();
   });
 
-  it('dbDeleteAllocation ruft from("allocations").delete auf', async () => {
+  it('dbDeleteAllocation ruft deleteAllocationAction auf', async () => {
     await dbDeleteAllocation('al1');
-    expect(mockFrom).toHaveBeenCalledWith('allocations');
-    expect(mockDelete).toHaveBeenCalled();
+    expect(mockDeleteAllocationAction).toHaveBeenCalledWith('al1');
   });
 
-  it('dbDeleteMember löscht auch allocations', async () => {
+  it('dbDeleteMember ruft deleteMemberAction auf (inkl. allocations)', async () => {
     await dbDeleteMember('m1');
-    const calls = mockFrom.mock.calls.map((c: unknown[]) => c[0]);
-    expect(calls).toContain('availabilities');
-    expect(calls).toContain('allocations');
-    expect(calls).toContain('members');
+    expect(mockDeleteMemberAction).toHaveBeenCalledWith('m1');
   });
 
   it('dbGetUserProfile gibt null zurück wenn kein User eingeloggt', async () => {
@@ -540,7 +568,7 @@ describe('DB: Allocation-Funktionen mit Supabase konfiguriert', () => {
       percentage: 100, startDate: '2026-03-01', endDate: '2026-12-31',
     };
     await dbAddAllocation(alloc);
-    const row = mockInsert.mock.calls[0][0];
+    const row = mockUpsertAllocationAction.mock.calls[0][0];
     expect(row.id).toBe('al2');
     expect(row.user_id).toBe('user-123');
     expect(row.start_date).toBe('2026-03-01');
@@ -561,7 +589,7 @@ describe('DB: Guard-Checks Allocation (ohne Supabase)', () => {
       percentage: 60, startDate: '2026-01-01', endDate: '2026-06-30',
     };
     await dbAddAllocation(alloc);
-    expect(mockFrom).not.toHaveBeenCalled();
+    expect(mockUpsertAllocationAction).not.toHaveBeenCalled();
   });
 
   it('dbUpdateAllocation tut nichts ohne Supabase-Config', async () => {

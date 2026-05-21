@@ -26,24 +26,6 @@ export default function ReportsPage() {
   const getMemberAllocations = useAppStore((s) => s.getMemberAllocations);
   const hasMinRole = useAppStore((s) => s.hasMinRole);
 
-  // ── RBAC Guard ────────────────────────────────────
-  if (!hasMinRole('department_lead')) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center h-full min-h-[60vh] gap-4 text-center p-8">
-        <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-          <Lock size={28} className="text-red-400" />
-        </div>
-        <h2 className="text-xl font-black dark:text-white text-gray-900">Kein Zugriff</h2>
-        <p className="text-sm dark:text-white/40 text-gray-500 max-w-xs">
-          Dieser Bereich ist nur für Team-Leads, CIOs und Administratoren zugänglich.
-        </p>
-        <Link href="/" className="px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity">
-          Zum Dashboard
-        </Link>
-      </div>
-    );
-  }
-
   const [selectedReport, setSelectedReport] = useState<ReportType>('utilization');
   const [filterType, setFilterType] = useState<'all' | ProjectType>('all');
   const [exportFormat, setExportFormat] = useState<ExportFormat>('csv');
@@ -327,6 +309,24 @@ export default function ReportsPage() {
     { type: 'projects', label: 'Projekte', desc: 'Projektliste mit Status und Zuweisungen', icon: Briefcase, count: filteredProjects.length },
     { type: 'availability', label: 'Verfügbarkeit', desc: 'Alle Status-Einträge als Zeitleiste', icon: CalendarDays, count: availabilities.length },
   ];
+
+  // ── RBAC Guard (nach allen Hooks) ─────────────────
+  if (!hasMinRole('department_lead')) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center h-full min-h-[60vh] gap-4 text-center p-8">
+        <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+          <Lock size={28} className="text-red-400" />
+        </div>
+        <h2 className="text-xl font-black dark:text-white text-gray-900">Kein Zugriff</h2>
+        <p className="text-sm dark:text-white/40 text-gray-500 max-w-xs">
+          Dieser Bereich ist nur für Team-Leads, CIOs und Administratoren zugänglich.
+        </p>
+        <Link href="/" className="px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity">
+          Zum Dashboard
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 w-full space-y-6 animate-fade-in">

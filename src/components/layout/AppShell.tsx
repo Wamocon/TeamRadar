@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { Footer } from './Footer';
 import { useAppStore } from '@/stores/appStore';
-import { AlertTriangle, Loader2, Menu } from 'lucide-react';
+import { AlertTriangle, Loader2, Menu, X } from 'lucide-react';
 import { useTheme } from '@/components/ui/ThemeProvider';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -13,6 +13,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const loadFromSupabase = useAppStore((s) => s.loadFromSupabase);
   const isLoading = useAppStore((s) => s.isLoading);
   const dbError = useAppStore((s) => s.dbError);
+  const writeError = useAppStore((s) => s.writeError);
+  const clearWriteError = useAppStore((s) => s.clearWriteError);
   const userProfile = useAppStore((s) => s.userProfile);
   const { setTheme } = useTheme();
 
@@ -41,6 +43,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {/* Mobile Menu Toggle (Floating) */}
           <button 
             onClick={() => setMobileMenuOpen(true)}
+            title="Menü öffnen"
             className="md:hidden fixed top-4 right-4 z-40 p-2 rounded-xl bg-blue-600 text-white shadow-lg border-none"
           >
             <Menu size={20} />
@@ -60,7 +63,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <p className="text-xs text-red-400/70 mt-1">{dbError}</p>
                 </div>
               </div>
-            ) : children}
+            ) : (
+              <>
+                {writeError && (
+                  <div className="mx-4 mt-4 p-3 rounded-xl border border-red-500/20 bg-red-500/10 flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle size={14} className="text-red-400 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-xs font-semibold text-red-400">Speicherfehler</p>
+                        <p className="text-xs text-red-400/70 mt-0.5">{writeError}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={clearWriteError}
+                      title="Fehlermeldung schließen"
+                      className="p-0.5 rounded hover:bg-red-500/20 transition-colors border-none bg-transparent cursor-pointer text-red-400 shrink-0"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+                {children}
+              </>
+            )}
           </div>
           <Footer />
         </div>

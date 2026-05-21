@@ -49,7 +49,12 @@ if (!dbUrl) {
 }
 
 // ── SQL laden ────────────────────────────────────────────────
-const sqlPath = resolve(__dirname, '../supabase/migrations/20260411_teamradar_schema_migration.sql');
+// Argument: node scripts/migrate.mjs [pfad/zur/migration.sql]
+// Default: 20260411_teamradar_schema_migration.sql
+const sqlArg = process.argv[2];
+const sqlPath = sqlArg
+  ? resolve(process.cwd(), sqlArg)
+  : resolve(__dirname, '../supabase/migrations/20260411_teamradar_schema_migration.sql');
 const sql = readFileSync(sqlPath, 'utf8');
 
 console.log(`\n📄 Migration: ${sqlPath.split(/[\\/]/).pop()}`);

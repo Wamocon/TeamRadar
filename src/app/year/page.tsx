@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import {
@@ -53,10 +53,10 @@ const DAY_CATEGORY_CONFIG: Record<DayCategory, { label: string; short: string; c
   free:          { label: 'Kein Status',        short: '',    color: '#d1d5db', bg: 'transparent' },
 };
 
-// ── Monats-Statistikspalten ───────────────────────────────────────────────────
+// -- Monats-Statistikspalten ---------------------------------------------------
 interface StatCol { key: string; title: string; color: string; cat: DayCategory | null }
 const MONTH_STATS_COLS: StatCol[] = [
-  { key: 'Σ',   title: 'Arbeitstage gesamt',       color: '#374151', cat: null },
+  { key: 'S',   title: 'Arbeitstage gesamt',       color: '#374151', cat: null },
   { key: 'eP',  title: 'Ext. Präsenz',             color: '#f97316', cat: 'extern-onsite' },
   { key: 'BeP', title: 'Ext. HomeOffice',          color: '#fb923c', cat: 'extern-remote' },
   { key: 'B',   title: 'Büro intern',              color: '#6366f1', cat: 'intern-onsite' },
@@ -87,10 +87,10 @@ function formatDateDisplay(dateStr: string) {
   return `${d.getDate()}. ${MONTH_NAMES_LONG[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Sub-components auf Modulebene → stabile Funktionsidentität → kein ungewolltes
 // Unmount/Remount bei jedem State-Update → kein Scroll-Jump mehr
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 interface DayCellProps {
   memberId: string; memberEmail: string; memberUserId?: string;
@@ -122,8 +122,8 @@ function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, toda
     ? 'inset 0 0 0 1px rgba(239,68,68,0.35)'
     : category !== 'free' ? 'inset 0 0 0 1.5px rgba(0,0,0,0.15)' : 'inset 0 0 0 1px rgba(0,0,0,0.06)';
   const titleText = isHoliday
-    ? `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} — 🎉 ${holiday!.name}${getHolidayStatesLabel(holiday!) ? ` (${getHolidayStatesLabel(holiday!)})` : ''}${category !== 'free' ? ` · ${conf.label}` : ''}`
-    : `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} — ${conf.label}`;
+    ? `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} – 🗓️ ${holiday!.name}${getHolidayStatesLabel(holiday!) ? ` (${getHolidayStatesLabel(holiday!)})` : ''}${category !== 'free' ? ` – ${conf.label}` : ''}`
+    : `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} – ${conf.label}`;
 
   return (
     <td className="text-center relative p-1">
@@ -211,7 +211,7 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
               className="px-2 py-1 rounded-lg text-[9px] font-bold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
               title="Ganzen Monat mit Status füllen"
             >
-              Monat füllen ▾
+              Monat füllen →
             </button>
           )}
         </div>
@@ -238,7 +238,7 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                       'dark:text-white/40 text-gray-500'
                     }`}
                     style={{ fontSize: '11px', background: d.holiday && !d.isWeekend ? 'rgba(239,68,68,0.04)' : undefined }}
-                    title={d.holiday ? `🎉 ${d.holiday.name}` : undefined}>
+                    title={d.holiday ? `?? ${d.holiday.name}` : undefined}>
                     {d.day}
                   </th>
                 ))}
@@ -313,7 +313,7 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
   );
 }
 
-// ── Module-level ProjectPopup ─────────────────────────────────────────────────
+// -- Module-level ProjectPopup -------------------------------------------------
 interface ProjectPopupProps {
   project: Project;
   members: { id: string; name: string }[];
@@ -398,7 +398,7 @@ function ProjectPopup({ project, members, hasMinRole, onClose }: ProjectPopupPro
   );
 }
 
-// ── Module-level ProjectCard ──────────────────────────────────────────────────
+// -- Module-level ProjectCard --------------------------------------------------
 interface ProjectCardProps {
   project: Project;
   onSelect: (project: Project) => void;
@@ -482,7 +482,7 @@ export default function YearOverviewPage() {
     return () => document.removeEventListener('mousedown', handler);
   }, [quickStatus, bulkFill]);
 
-  // ── getDayCategory ────────────────────────────────────
+  // -- getDayCategory ------------------------------------
   const getDayCategory = useCallback((memberId: string, dateStr: string): DayCategory => {
     const dow = new Date(dateStr).getDay();
     if (dow === 0 || dow === 6) return 'weekend';
@@ -509,7 +509,7 @@ export default function YearOverviewPage() {
     return 'free';
   }, [availabilities, allocations, projects]);
 
-  // ── canEditRow ── Admins können alle Zeilen bearbeiten, Mitarbeiter nur ihre eigene Zeile
+  // -- canEditRow -- Admins können alle Zeilen bearbeiten, Mitarbeiter nur ihre eigene Zeile
   // Primär: E-Mail-Vergleich (zuverlässig). Sekundär: userId-UUID als Fallback.
   const canEditRow = useCallback((memberEmail: string, memberUserId?: string) => {
     if (hasMinRole('admin')) return true;
@@ -520,7 +520,7 @@ export default function YearOverviewPage() {
     return false;
   }, [userProfile, hasMinRole]);
 
-  // ── Yearly matrix data (all 12 months) ───────────────
+  // -- Yearly matrix data (all 12 months) ---------------
   const yearlyMatrixData = useMemo(() => {
     return Array.from({ length: 12 }, (_, month) => {
       const daysInMonth = getDaysInMonth(year, month);
@@ -540,31 +540,62 @@ export default function YearOverviewPage() {
     });
   }, [year, members, getDayCategory]);
 
-  // ── Member Year KPIs ──────────────────────────────────
+  // -- Member Year KPIs ----------------------------------
   const memberYearKPIs = useMemo(() => {
     return members.map((member) => {
       let extDays = 0, intDays = 0, sickDays = 0, vacationDays = 0;
-      yearlyMatrixData.forEach(({ memberRows }) => {
+
+      // Alle Werktage mit Kategorie für 39h-Berechnung sammeln
+      const weekdayMap = new Map<string, Array<DayCategory>>();
+      yearlyMatrixData.forEach(({ days, memberRows }) => {
         const row = memberRows.find((r) => r.member.id === member.id);
-        row?.categories.forEach((cat) => {
+        if (!row) return;
+        days.forEach((dayInfo, idx) => {
+          const cat = row.categories[idx];
           if (cat === 'vacation') vacationDays++;
           else if (cat === 'sick') sickDays++;
           else if (cat === 'extern-onsite' || cat === 'extern-remote') extDays++;
           else if (cat === 'intern-onsite' || cat === 'intern-remote') intDays++;
+
+          if (dayInfo.isWeekend) return; // Wochenenden ignorieren
+          // Montag der Woche berechnen (Wochenschlüssel)
+          const d = new Date(dayInfo.dateStr);
+          const dow = d.getDay(); // 0=So,1=Mo,...,5=Fr,6=Sa
+          const diff = dow === 0 ? -6 : 1 - dow;
+          const monday = new Date(d);
+          monday.setDate(d.getDate() + diff);
+          const weekKey = monday.toISOString().slice(0, 10);
+          if (!weekdayMap.has(weekKey)) weekdayMap.set(weekKey, []);
+          weekdayMap.get(weekKey)!.push(cat);
         });
       });
-      // Externes Budget: Summe der maxDays aller zugewiesenen ext. Projekte mit gesetztem Limit
+
+      // 39h-Ausgleich: 1h Verlust pro Woche, in der ALLE 5 Werktage extern sind.
+      // Feiertage/Urlaub/Krank/Büro an irgendeinem Tag → Woche hat <40h extern → kein Verlust.
+      let fullExtWeeks = 0;
+      weekdayMap.forEach((cats) => {
+        if (
+          cats.length === 5 &&
+          cats.every((c) => c === 'extern-onsite' || c === 'extern-remote')
+        ) fullExtWeeks++;
+      });
+      const hourLoss = fullExtWeeks;           // 1h pro Vollwoche extern (39h statt 40h)
+      const extraDaysNeeded = Math.ceil(hourLoss / 8);
+      // Effektiv geleistete Tage (39h-korrigiert): jede Vollwoche ext. = nur 7.875h statt 8h
+      const effectiveDays = parseFloat((extDays - hourLoss / 8).toFixed(2));
+
+      // Externes Budget
       const assignedExtProjects = projects.filter(
         (p) => p.type === 'external' && p.memberIds.includes(member.id) && p.maxDays != null
       );
       const extBudget = assignedExtProjects.length > 0
         ? assignedExtProjects.reduce((sum, p) => sum + (p.maxDays ?? 0), 0)
         : null;
-      return { member, extDays, intDays, sickDays, vacationDays, extBudget };
+      return { member, extDays, intDays, sickDays, vacationDays, extBudget, fullExtWeeks, hourLoss, extraDaysNeeded, effectiveDays };
     });
   }, [yearlyMatrixData, members, projects]);
 
-  // ── Entry month data ──────────────────────────────────
+  // -- Entry month data ----------------------------------
   const entryData = useMemo(() => {
     const daysInMonth = getDaysInMonth(year, entryMonth);
     const days = Array.from({ length: daysInMonth }, (_, i) => {
@@ -588,7 +619,7 @@ export default function YearOverviewPage() {
     return { days, memberRows, totalSummary, daysInMonth };
   }, [year, entryMonth, members, getDayCategory]);
 
-  // ── Project Gantt ─────────────────────────────────────
+  // -- Project Gantt -------------------------------------
   const yearStart = new Date(year, 0, 1).getTime();
   const yearEnd = new Date(year, 11, 31).getTime();
   const totalMs = yearEnd - yearStart;
@@ -613,7 +644,7 @@ export default function YearOverviewPage() {
   const internalProjects = projects.filter((p) => p.type === 'internal');
   const externalProjects = projects.filter((p) => p.type === 'external');
 
-  // ── Status Picker & Bulk Fill ─────────────────────────
+  // -- Status Picker & Bulk Fill -------------------------
   const handleSetStatus = (memberId: string, date: string, status: AvailabilityStatus) => {
     addAvailability({ memberId, date, status });
     setQuickStatus(null);
@@ -637,7 +668,7 @@ export default function YearOverviewPage() {
     setBulkFill(null);
   };
 
-  // ── Collapsible months ────────────────────────────────
+  // -- Collapsible months --------------------------------
   const [collapsedMonths, setCollapsedMonths] = useState<Set<number>>(new Set());
   const toggleMonth = useCallback((month: number) => {
     setCollapsedMonths((prev) => {
@@ -656,7 +687,7 @@ export default function YearOverviewPage() {
   return (
     <div className="p-4 sm:p-6 w-full space-y-5 animate-fade-in" onClick={() => { if (quickStatus) setQuickStatus(null); if (bulkFill) setBulkFill(null); }}>
 
-      {/* ── Quick-Status Picker (fixed, außerhalb jedes overflow-Containers) ── */}
+      {/* -- Quick-Status Picker (fixed, außerhalb jedes overflow-Containers) -- */}
       {quickStatus && (
         <div
           ref={quickRef}
@@ -685,7 +716,7 @@ export default function YearOverviewPage() {
         </div>
       )}
 
-      {/* ── Bulk-Fill Picker (fixed, außerhalb jedes overflow-Containers) ── */}
+      {/* -- Bulk-Fill Picker (fixed, außerhalb jedes overflow-Containers) -- */}
       {bulkFill && (
         <div
           ref={bulkRef}
@@ -716,7 +747,7 @@ export default function YearOverviewPage() {
           </button>
         </div>
       )}
-      {/* ── Header ───────────────────────────────────── */}
+      {/* -- Header ------------------------------------- */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
@@ -740,7 +771,7 @@ export default function YearOverviewPage() {
         </div>
       </div>
 
-      {/* ── Tabs ─────────────────────────────────────── */}
+      {/* -- Tabs --------------------------------------- */}
       <div className="flex gap-1 p-1 bg-black/[0.04] dark:bg-white/[0.04] rounded-xl w-fit">
         {tabs.map((tab) => (
           <button key={tab.mode} onClick={() => setViewMode(tab.mode)}
@@ -755,11 +786,77 @@ export default function YearOverviewPage() {
         ))}
       </div>
 
-      {/* ═════════════════════════════════════════════════
+      {/* -------------------------------------------------
           VIEW: Übersicht – Jahres-KPI + 12 Monate
-          ═════════════════════════════════════════════════ */}
+          ------------------------------------------------- */}
       {viewMode === 'overview' && (
         <div className="space-y-6">
+
+          {/* -- 39h-Effektiv-Bilanz pro ext. Berater --------------- */}
+          {(() => {
+            const extConsultants = memberYearKPIs.filter((k) => k.extBudget != null);
+            if (extConsultants.length === 0) return null;
+            return (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <TrendingUp size={13} className="text-[#f97316]" />
+                  <h3 className="text-xs font-black dark:text-white/70 text-gray-700">39h-Effektivbilanz – Ext. Berater {year}</h3>
+                  <span className="text-[10px] dark:text-white/30 text-gray-400">(geleistete Tage unter Berücksichtigung 39h/Woche-Regel)</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                  {extConsultants.map(({ member, effectiveDays, extBudget, extDays, fullExtWeeks, hourLoss }) => {
+                    const plan = extBudget!;
+                    const diff = parseFloat((effectiveDays - plan).toFixed(2));
+                    const pct  = Math.min(100, Math.round((effectiveDays / plan) * 100));
+                    const isOver   = diff >= 0;
+                    const isWarn   = diff < 0 && diff >= -5;
+                    const barColor = isOver ? '#22c55e' : isWarn ? '#f59e0b' : '#ef4444';
+                    const bgColor  = isOver ? 'rgba(34,197,94,0.08)' : isWarn ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)';
+                    const borderColor = isOver ? 'rgba(34,197,94,0.25)' : isWarn ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.35)';
+                    const label    = isOver ? 'Im/Über Plan' : isWarn ? `${Math.abs(diff).toFixed(1)}d unter Plan` : `${Math.abs(diff).toFixed(1)}d unter Plan`;
+                    const labelColor = isOver ? '#16a34a' : isWarn ? '#d97706' : '#dc2626';
+                    return (
+                      <div
+                        key={member.id}
+                        className="rounded-xl p-4 border"
+                        style={{ background: bgColor, borderColor }}
+                        title={`${extDays} ext. Tage - ${hourLoss}h Verlust (${fullExtWeeks} Vollwochen × 1h) ÷ 8 = ${effectiveDays}d effektiv`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <div className="text-[10px] font-semibold dark:text-white/50 text-gray-500 truncate max-w-[130px]">{member.name}</div>
+                            <div className="text-2xl font-black mt-0.5" style={{ color: barColor }}>
+                              {effectiveDays.toFixed(1)}<span className="text-sm font-semibold ml-0.5 opacity-60">d</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-[9px] dark:text-white/30 text-gray-400">Plan</div>
+                            <div className="text-sm font-black dark:text-white/60 text-gray-600">{plan}d</div>
+                          </div>
+                        </div>
+                        {/* Fortschrittsbalken */}
+                        <div className="w-full h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden mb-2">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: barColor }} />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] font-bold" style={{ color: labelColor }}>
+                            {isOver ? '↑' : '↓'} {label}
+                          </span>
+                          <span className="text-[9px] dark:text-white/30 text-gray-400">{pct}%</span>
+                        </div>
+                        {hourLoss > 0 && (
+                          <div className="text-[8px] mt-1 dark:text-white/25 text-gray-400">
+                            -{hourLoss}h durch {fullExtWeeks}×39h-Wo.
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Jahr-KPI pro Mitarbeiter */}
           <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
             <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04]">
@@ -774,11 +871,13 @@ export default function YearOverviewPage() {
                     <th className="text-center px-3 py-2 font-semibold text-[#6366f1] min-w-[90px]">Int. Projekt</th>
                     <th className="text-center px-3 py-2 font-semibold text-[#ec4899] min-w-[80px]">Krank</th>
                     <th className="text-center px-3 py-2 font-semibold text-[#8b5cf6] min-w-[80px]">Urlaub</th>
-                    <th className="text-center px-3 py-2 font-semibold text-[#f97316] min-w-[110px] border-l dark:border-white/[0.06] border-black/[0.04]">Ext. Budget</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#22c55e] min-w-[120px] border-l dark:border-white/[0.06] border-black/[0.04]" title="Effektiv geleistete Tage (39h-korrigiert) vs. Plan">Eff. Tage / Plan</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#f59e0b] min-w-[80px] border-l dark:border-white/[0.06] border-black/[0.04]" title="Kalenderwochen mit 5 externen Werktagen (39h statt 40h)">Ext. Wo.</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#ef4444] min-w-[110px]" title="39h-Regel: 1h Verlust pro Vollwoche extern → benötigte Zusatztage">39h-Ausgleich</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {memberYearKPIs.map(({ member, extDays, intDays, sickDays, vacationDays, extBudget }) => (
+                  {memberYearKPIs.map(({ member, extDays, intDays, sickDays, vacationDays, extBudget, fullExtWeeks, hourLoss, extraDaysNeeded, effectiveDays }) => (
                     <tr key={member.id} className="border-b dark:border-white/[0.03] border-black/[0.02] hover:bg-black/[0.01] dark:hover:bg-white/[0.01]">
                       <td className="px-4 py-2 font-semibold dark:text-white/80 text-gray-800">{member.name}</td>
                       <td className="text-center px-3 py-2">
@@ -803,16 +902,39 @@ export default function YearOverviewPage() {
                       </td>
                       <td className="text-center px-3 py-2 border-l dark:border-white/[0.06] border-black/[0.04]">
                         {extBudget != null ? (() => {
-                          const over = extDays > extBudget;
-                          const under = extDays < extBudget;
-                          const color = over ? '#ef4444' : under ? '#f59e0b' : '#22c55e';
+                          const diff = effectiveDays - extBudget;
+                          const isOver  = diff >= 0;
+                          const isWarn  = diff < 0 && diff >= -5;
+                          const color   = isOver ? '#22c55e' : isWarn ? '#f59e0b' : '#ef4444';
                           return (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-bold" style={{ color }}>
-                              {over && <AlertCircle size={10} />}
-                              {extDays}/{extBudget}d
+                            <span
+                              className="inline-flex flex-col items-center gap-0 text-[10px] font-bold"
+                              style={{ color }}
+                              title={`Effektiv: ${effectiveDays.toFixed(2)}d von ${extBudget}d Plan (Differenz: ${diff >= 0 ? '+' : ''}${diff.toFixed(2)}d)`}
+                            >
+                              {!isOver && !isWarn && <AlertCircle size={9} />}
+                              <span>{effectiveDays.toFixed(1)}/{extBudget}d</span>
+                              <span style={{ fontSize: '8px', opacity: 0.8 }}>{diff >= 0 ? '+' : ''}{diff.toFixed(1)}d</span>
                             </span>
                           );
-                        })() : <span className="text-[10px] text-gray-400">—</span>}
+                        })() : <span className="text-[10px] text-gray-400">–</span>}
+                      </td>
+                      {/* 39h-Ausgleich: volle externe Wochen zählen */}
+                      <td className="text-center px-3 py-2 border-l dark:border-white/[0.06] border-black/[0.04]">
+                        {fullExtWeeks > 0
+                          ? <span className="text-[10px] font-bold" style={{ color: '#f59e0b' }}>{fullExtWeeks}</span>
+                          : <span className="text-[10px] text-gray-400">–</span>}
+                      </td>
+                      <td className="text-center px-3 py-2">
+                        {hourLoss > 0 ? (
+                          <span
+                            className="inline-flex flex-col items-center leading-tight"
+                            title={`${fullExtWeeks} Vollwochen extern × 1h = ${hourLoss}h Verlust → ${extraDaysNeeded} Zusatztag${extraDaysNeeded !== 1 ? 'e' : ''} nötig`}
+                          >
+                            <span className="text-[10px] font-bold" style={{ color: '#ef4444' }}>-{hourLoss}h</span>
+                            <span className="text-[9px] font-semibold" style={{ color: '#f97316' }}>+{extraDaysNeeded}d nötig</span>
+                          </span>
+                        ) : <span className="text-[10px] text-gray-400">–</span>}
                       </td>
                     </tr>
                   ))}
@@ -900,9 +1022,9 @@ export default function YearOverviewPage() {
         </div>
       )}
 
-      {/* ═════════════════════════════════════════════════
+      {/* -------------------------------------------------
           VIEW: Projekte – Intern/Extern getrennt
-          ═════════════════════════════════════════════════ */}
+          ------------------------------------------------- */}
       {viewMode === 'projects' && (
         <div className="space-y-5">
           {/* KPI Header */}
@@ -986,9 +1108,9 @@ export default function YearOverviewPage() {
         </div>
       )}
 
-      {/* ═════════════════════════════════════════════════
+      {/* -------------------------------------------------
           VIEW: Beraterübersicht (monatliche Eingabe)
-          ═════════════════════════════════════════════════ */}
+          ------------------------------------------------- */}
       {viewMode === 'entry' && (
         <div className="space-y-4">
           {/* Monats-Navigation */}
@@ -1040,7 +1162,7 @@ export default function YearOverviewPage() {
                       {d.day}
                     </th>
                   ))}
-                  <th className="text-center px-2 font-semibold dark:text-white/40 text-gray-500 sticky right-0 bg-white dark:bg-gray-900 z-20 min-w-[40px]" rowSpan={2}>Σ</th>
+                  <th className="text-center px-2 font-semibold dark:text-white/40 text-gray-500 sticky right-0 bg-white dark:bg-gray-900 z-20 min-w-[40px]" rowSpan={2}>S</th>
                 </tr>
                 <tr className="border-b dark:border-white/[0.08] border-black/[0.05]">
                   {entryData.days.map((d) => (

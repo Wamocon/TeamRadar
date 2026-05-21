@@ -183,9 +183,13 @@ interface MonthMatrixProps {
   canEditRow: (email: string, userId?: string) => boolean;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  selectMode: boolean;
+  multiSelected: Set<string>;
+  multiKey: (mId: string, date: string) => string;
+  onMultiToggle: (memberId: string, date: string) => void;
 }
 
-function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, today, quickStatus, setQuickStatus, bulkFill, setBulkFill, canEditRow, isCollapsed, onToggleCollapse }: MonthMatrixProps) {
+function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, today, quickStatus, setQuickStatus, bulkFill, setBulkFill, canEditRow, isCollapsed, onToggleCollapse, selectMode, multiSelected, multiKey, onMultiToggle }: MonthMatrixProps) {
   const { month, days, memberRows } = monthData;
   const isCurrent = month === currentMonth && year === currentYear;
 
@@ -297,9 +301,9 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                       canEdit={!d.isWeekend && canEditRow(member.email, member.userId)}
                       onSelect={(mId, date, x, y) => setQuickStatus({ memberId: mId, date, x, y })}
                       onDeselect={() => setQuickStatus(null)}
-                      selectMode={false}
-                      isMultiSelected={false}
-                      onMultiToggle={() => {}}
+                      selectMode={selectMode}
+                      isMultiSelected={selectMode && multiSelected.has(multiKey(member.id, d.dateStr))}
+                      onMultiToggle={onMultiToggle}
                     />
                   ))}
                   {MONTH_STATS_COLS.map((s, i) => {
@@ -1055,12 +1059,49 @@ export default function YearOverviewPage() {
               ))}
           </div>
 
+          {/* Multi-Auswahl Aktionsleiste */}
+          {selectMode && (
+            <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/30" onClick={(e) => e.stopPropagation()}>
+              <CheckSquare size={14} className="text-green-600 dark:text-green-400 shrink-0" />
+              <span className="text-xs font-bold text-green-700 dark:text-green-400">
+                {multiSelected.size > 0 ? `${multiSelected.size} Kästchen ausgewählt` : 'Kästchen anklicken zum Auswählen'}
+              </span>
+              {multiSelected.size > 0 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
+                    setMultiPickerAnchor({ x: rect.left + rect.width / 2, y: rect.bottom });
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-green-600 text-white text-[10px] font-bold hover:bg-green-700 transition-colors border-none cursor-pointer"
+                >
+                  Status setzen →
+                </button>
+              )}
+              <button onClick={cancelMultiSelect} className="ml-auto p-1 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors border-none cursor-pointer text-green-600 dark:text-green-400">
+                <X size={12} />
+              </button>
+            </div>
+          )}
+
           {/* 12 Monate scrollbar */}
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs font-bold dark:text-white/40 text-gray-500 uppercase tracking-wider">
               {12 - collapsedMonths.size} / 12 Monate sichtbar
             </span>
             <div className="flex gap-1.5">
+              <button
+                onClick={(e) => { e.stopPropagation(); selectMode ? cancelMultiSelect() : setSelectMode(true); }}
+                title="Mehrere Kästchen auswählen und denselben Status setzen"
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-semibold transition-all cursor-pointer ${
+                  selectMode
+                    ? 'bg-green-600 text-white border-green-600'
+                    : 'border-black/[0.08] dark:border-white/[0.08] dark:text-white/50 text-gray-500 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] bg-transparent'
+                }`}
+              >
+                <CheckSquare size={12} />
+                Mehrfachauswahl
+              </button>
               <button
                 onClick={() => setCollapsedMonths(new Set())}
                 className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
@@ -1092,6 +1133,10 @@ export default function YearOverviewPage() {
                 canEditRow={canEditRow}
                 isCollapsed={collapsedMonths.has(monthData.month)}
                 onToggleCollapse={() => toggleMonth(monthData.month)}
+                selectMode={selectMode}
+                multiSelected={multiSelected}
+                multiKey={multiKey}
+                onMultiToggle={handleMultiToggle}
               />
             ))}
           </div>

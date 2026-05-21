@@ -31,8 +31,8 @@ import {
 import Link from 'next/link';
 import { getHolidays, BUNDESLAENDER, type Bundesland, type Holiday, getHolidayStatesLabel } from '@/lib/holidays';
 
-const MONTH_NAMES = ['Jan', 'Feb', 'M�r', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-const MONTH_NAMES_LONG = ['Januar', 'Februar', 'M�rz', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+const MONTH_NAMES = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+const MONTH_NAMES_LONG = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 const WEEKDAY_SHORT = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
 type ViewMode = 'overview' | 'projects' | 'entry';
@@ -45,10 +45,10 @@ const DAY_CATEGORY_CONFIG: Record<DayCategory, { label: string; short: string; c
   vacation:      { label: 'Urlaub',             short: 'U',   color: '#fff',    bg: '#8b5cf6' },
   sick:          { label: 'Krank',              short: 'K',   color: '#fff',    bg: '#ec4899' },
   'extern-onsite':{ label: 'Ext. Projekt (eP)', short: 'eP',  color: '#fff',    bg: '#f97316' },
-  'extern-remote':{ label: 'B�ro ext. (BeP)',   short: 'BeP', color: '#fff',    bg: '#fb923c' },
-  'intern-onsite':{ label: 'B�ro intern (B)',   short: 'B',   color: '#fff',    bg: '#6366f1' },
+  'extern-remote':{ label: 'Büro ext. (BeP)',   short: 'BeP', color: '#fff',    bg: '#fb923c' },
+  'intern-onsite':{ label: 'Büro intern (B)',   short: 'B',   color: '#fff',    bg: '#6366f1' },
   'intern-remote':{ label: 'Homeoffice (H)',    short: 'H',   color: '#fff',    bg: '#06b6d4' },
-  available:     { label: 'Verf�gbar',          short: 'V',   color: '#166534', bg: '#bbf7d0' },
+  available:     { label: 'Verfügbar',          short: 'V',   color: '#166534', bg: '#bbf7d0' },
   weekend:       { label: 'Wochenende',         short: '',    color: '#9ca3af', bg: 'rgba(156,163,175,0.1)' },
   free:          { label: 'Kein Status',        short: '',    color: '#d1d5db', bg: 'transparent' },
 };
@@ -57,15 +57,15 @@ const DAY_CATEGORY_CONFIG: Record<DayCategory, { label: string; short: string; c
 interface StatCol { key: string; title: string; color: string; cat: DayCategory | null }
 const MONTH_STATS_COLS: StatCol[] = [
   { key: 'S',   title: 'Arbeitstage gesamt',       color: '#374151', cat: null },
-  { key: 'eP',  title: 'Ext. Pr�senz',             color: '#f97316', cat: 'extern-onsite' },
+  { key: 'eP',  title: 'Ext. Präsenz',             color: '#f97316', cat: 'extern-onsite' },
   { key: 'BeP', title: 'Ext. HomeOffice',          color: '#fb923c', cat: 'extern-remote' },
-  { key: 'B',   title: 'B�ro intern',              color: '#6366f1', cat: 'intern-onsite' },
+  { key: 'B',   title: 'Büro intern',              color: '#6366f1', cat: 'intern-onsite' },
   { key: 'H',   title: 'HomeOffice intern',        color: '#06b6d4', cat: 'intern-remote' },
   { key: 'K',   title: 'Krank',                    color: '#ec4899', cat: 'sick' },
   { key: 'U',   title: 'Urlaub',                   color: '#8b5cf6', cat: 'vacation' },
 ];
 
-// Module-level constant � not recreated on every render
+// Module-level constant – not recreated on every render
 const STATUS_PICKER_OPTIONS: { key: AvailabilityStatus; cat: DayCategory }[] = [
   { key: 'vacation',      cat: 'vacation' },
   { key: 'sick',          cat: 'sick' },
@@ -88,8 +88,8 @@ function formatDateDisplay(dateStr: string) {
 }
 
 // -----------------------------------------------------------------------------
-// Sub-components auf Modulebene ? stabile Funktionsidentit�t ? kein ungewolltes
-// Unmount/Remount bei jedem State-Update ? kein Scroll-Jump mehr
+// Sub-components auf Modulebene → stabile Funktionsidentität → kein ungewolltes
+// Unmount/Remount bei jedem State-Update → kein Scroll-Jump mehr
 // -----------------------------------------------------------------------------
 
 interface DayCellProps {
@@ -122,8 +122,8 @@ function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, toda
     ? 'inset 0 0 0 1px rgba(239,68,68,0.35)'
     : category !== 'free' ? 'inset 0 0 0 1.5px rgba(0,0,0,0.15)' : 'inset 0 0 0 1px rgba(0,0,0,0.06)';
   const titleText = isHoliday
-    ? `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} � ?? ${holiday!.name}${getHolidayStatesLabel(holiday!) ? ` (${getHolidayStatesLabel(holiday!)})` : ''}${category !== 'free' ? ` � ${conf.label}` : ''}`
-    : `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} � ${conf.label}`;
+    ? `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} – 🗓️ ${holiday!.name}${getHolidayStatesLabel(holiday!) ? ` (${getHolidayStatesLabel(holiday!)})` : ''}${category !== 'free' ? ` – ${conf.label}` : ''}`
+    : `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} – ${conf.label}`;
 
   return (
     <td className="text-center relative p-1">
@@ -209,9 +209,9 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                 }
               }}
               className="px-2 py-1 rounded-lg text-[9px] font-bold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
-              title="Ganzen Monat mit Status f�llen"
+              title="Ganzen Monat mit Status füllen"
             >
-              Monat f�llen ?
+              Monat füllen →
             </button>
           )}
         </div>
@@ -299,7 +299,7 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                       <td key={s.key}
                         className={`text-center font-bold py-1 ${i === 0 ? 'border-l-2 dark:border-white/[0.15] border-black/[0.08]' : ''}`}
                         style={{ fontSize: '11px', color: val > 0 ? s.color : '#d1d5db' }}>
-                        {val > 0 ? val : '�'}
+                        {val > 0 ? val : '–'}
                       </td>
                     );
                   })}
@@ -454,7 +454,7 @@ export default function YearOverviewPage() {
     if (typeof window !== 'undefined') localStorage.setItem('tr-bundesland', bl);
   };
 
-  // Feiertage f�r aktuelles Jahr + Bundesland
+  // Feiertage für aktuelles Jahr + Bundesland
   const holidays = useMemo(() => getHolidays(year, bundesland), [year, bundesland]);
   const [filterType] = useState<'all' | ProjectType>('all');
   const [quickStatus, setQuickStatus] = useState<{ memberId: string; date: string; x: number; y: number } | null>(null);
@@ -509,8 +509,8 @@ export default function YearOverviewPage() {
     return 'free';
   }, [availabilities, allocations, projects]);
 
-  // -- canEditRow -- Admins k�nnen alle Zeilen bearbeiten, Mitarbeiter nur ihre eigene Zeile
-  // Prim�r: E-Mail-Vergleich (zuverl�ssig). Sekund�r: userId-UUID als Fallback.
+  // -- canEditRow -- Admins können alle Zeilen bearbeiten, Mitarbeiter nur ihre eigene Zeile
+  // Primär: E-Mail-Vergleich (zuverlässig). Sekundär: userId-UUID als Fallback.
   const canEditRow = useCallback((memberEmail: string, memberUserId?: string) => {
     if (hasMinRole('admin')) return true;
     if (!userProfile) return false;
@@ -545,7 +545,7 @@ export default function YearOverviewPage() {
     return members.map((member) => {
       let extDays = 0, intDays = 0, sickDays = 0, vacationDays = 0;
 
-      // Alle Werktage mit Kategorie f�r 39h-Berechnung sammeln
+      // Alle Werktage mit Kategorie für 39h-Berechnung sammeln
       const weekdayMap = new Map<string, Array<DayCategory>>();
       yearlyMatrixData.forEach(({ days, memberRows }) => {
         const row = memberRows.find((r) => r.member.id === member.id);
@@ -558,7 +558,7 @@ export default function YearOverviewPage() {
           else if (cat === 'intern-onsite' || cat === 'intern-remote') intDays++;
 
           if (dayInfo.isWeekend) return; // Wochenenden ignorieren
-          // Montag der Woche berechnen (Wochenschl�ssel)
+          // Montag der Woche berechnen (Wochenschlüssel)
           const d = new Date(dayInfo.dateStr);
           const dow = d.getDay(); // 0=So,1=Mo,...,5=Fr,6=Sa
           const diff = dow === 0 ? -6 : 1 - dow;
@@ -571,7 +571,7 @@ export default function YearOverviewPage() {
       });
 
       // 39h-Ausgleich: 1h Verlust pro Woche, in der ALLE 5 Werktage extern sind.
-      // Feiertage/Urlaub/Krank/B�ro an irgendeinem Tag ? Woche hat <40h extern ? kein Verlust.
+      // Feiertage/Urlaub/Krank/Büro an irgendeinem Tag → Woche hat <40h extern → kein Verlust.
       let fullExtWeeks = 0;
       weekdayMap.forEach((cats) => {
         if (
@@ -652,7 +652,7 @@ export default function YearOverviewPage() {
 
   const handleBulkFillMonth = (month: number, yr: number, status: AvailabilityStatus) => {
     if (!userProfile) return;
-    // Bulk-Fill: eigenen Member per Email finden (zuverl�ssiger als userId-Vergleich)
+    // Bulk-Fill: eigenen Member per Email finden (zuverlässiger als userId-Vergleich)
     const ownMember = members.find((m) =>
       userProfile.email && m.email.toLowerCase() === userProfile.email.toLowerCase()
     ) ?? members.find((m) => m.userId === userProfile.id);
@@ -679,15 +679,15 @@ export default function YearOverviewPage() {
   }, []);
 
   const tabs: { mode: ViewMode; label: string; icon: React.ElementType }[] = [
-    { mode: 'overview', label: '�bersicht', icon: Eye },
+    { mode: 'overview', label: 'Übersicht', icon: Eye },
     { mode: 'projects', label: 'Projekte', icon: Briefcase },
-    { mode: 'entry', label: 'Berater�bersicht', icon: CalendarDays },
+    { mode: 'entry', label: 'Beraterübersicht', icon: CalendarDays },
   ];
 
   return (
     <div className="p-4 sm:p-6 w-full space-y-5 animate-fade-in" onClick={() => { if (quickStatus) setQuickStatus(null); if (bulkFill) setBulkFill(null); }}>
 
-      {/* -- Quick-Status Picker (fixed, au�erhalb jedes overflow-Containers) -- */}
+      {/* -- Quick-Status Picker (fixed, außerhalb jedes overflow-Containers) -- */}
       {quickStatus && (
         <div
           ref={quickRef}
@@ -711,12 +711,12 @@ export default function YearOverviewPage() {
           })}
           <button onClick={() => setQuickStatus(null)}
             className="col-span-2 pt-1 text-[8px] font-bold uppercase tracking-wide text-gray-400 hover:text-gray-600 border-none cursor-pointer bg-transparent text-center">
-            Schlie�en
+            Schließen
           </button>
         </div>
       )}
 
-      {/* -- Bulk-Fill Picker (fixed, au�erhalb jedes overflow-Containers) -- */}
+      {/* -- Bulk-Fill Picker (fixed, außerhalb jedes overflow-Containers) -- */}
       {bulkFill && (
         <div
           ref={bulkRef}
@@ -754,7 +754,7 @@ export default function YearOverviewPage() {
             <div className="w-10 h-10 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
               <CalendarRange size={20} className="text-[var(--primary)]" />
             </div>
-            Jahres�bersicht
+            Jahresübersicht
           </h1>
           <p className="text-sm dark:text-white/40 text-gray-500 mt-1">Auslastung, Projekte und Statuseingabe</p>
         </div>
@@ -787,7 +787,7 @@ export default function YearOverviewPage() {
       </div>
 
       {/* -------------------------------------------------
-          VIEW: �bersicht � Jahres-KPI + 12 Monate
+          VIEW: Übersicht – Jahres-KPI + 12 Monate
           ------------------------------------------------- */}
       {viewMode === 'overview' && (
         <div className="space-y-6">
@@ -800,8 +800,8 @@ export default function YearOverviewPage() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <TrendingUp size={13} className="text-[#f97316]" />
-                  <h3 className="text-xs font-black dark:text-white/70 text-gray-700">39h-Effektivbilanz � Ext. Berater {year}</h3>
-                  <span className="text-[10px] dark:text-white/30 text-gray-400">(geleistete Tage unter Ber�cksichtigung 39h/Woche-Regel)</span>
+                  <h3 className="text-xs font-black dark:text-white/70 text-gray-700">39h-Effektivbilanz – Ext. Berater {year}</h3>
+                  <span className="text-[10px] dark:text-white/30 text-gray-400">(geleistete Tage unter Berücksichtigung 39h/Woche-Regel)</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                   {extConsultants.map(({ member, effectiveDays, extBudget, extDays, fullExtWeeks, hourLoss }) => {
@@ -813,14 +813,14 @@ export default function YearOverviewPage() {
                     const barColor = isOver ? '#22c55e' : isWarn ? '#f59e0b' : '#ef4444';
                     const bgColor  = isOver ? 'rgba(34,197,94,0.08)' : isWarn ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)';
                     const borderColor = isOver ? 'rgba(34,197,94,0.25)' : isWarn ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.35)';
-                    const label    = isOver ? 'Im/�ber Plan' : isWarn ? `${Math.abs(diff).toFixed(1)}d unter Plan` : `${Math.abs(diff).toFixed(1)}d unter Plan`;
+                    const label    = isOver ? 'Im/Über Plan' : isWarn ? `${Math.abs(diff).toFixed(1)}d unter Plan` : `${Math.abs(diff).toFixed(1)}d unter Plan`;
                     const labelColor = isOver ? '#16a34a' : isWarn ? '#d97706' : '#dc2626';
                     return (
                       <div
                         key={member.id}
                         className="rounded-xl p-4 border"
                         style={{ background: bgColor, borderColor }}
-                        title={`${extDays} ext. Tage - ${hourLoss}h Verlust (${fullExtWeeks} Vollwochen � 1h) � 8 = ${effectiveDays}d effektiv`}
+                        title={`${extDays} ext. Tage - ${hourLoss}h Verlust (${fullExtWeeks} Vollwochen × 1h) ÷ 8 = ${effectiveDays}d effektiv`}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div>
@@ -840,13 +840,13 @@ export default function YearOverviewPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-[9px] font-bold" style={{ color: labelColor }}>
-                            {isOver ? '?' : '?'} {label}
+                            {isOver ? '↑' : '↓'} {label}
                           </span>
                           <span className="text-[9px] dark:text-white/30 text-gray-400">{pct}%</span>
                         </div>
                         {hourLoss > 0 && (
                           <div className="text-[8px] mt-1 dark:text-white/25 text-gray-400">
-                            -{hourLoss}h durch {fullExtWeeks}�39h-Wo.
+                            -{hourLoss}h durch {fullExtWeeks}×39h-Wo.
                           </div>
                         )}
                       </div>
@@ -860,7 +860,7 @@ export default function YearOverviewPage() {
           {/* Jahr-KPI pro Mitarbeiter */}
           <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
             <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04]">
-              <h3 className="text-sm font-black dark:text-white text-gray-900">Jahres�bersicht {year} pro Mitarbeiter</h3>
+              <h3 className="text-sm font-black dark:text-white text-gray-900">Jahresübersicht {year} pro Mitarbeiter</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
@@ -873,7 +873,7 @@ export default function YearOverviewPage() {
                     <th className="text-center px-3 py-2 font-semibold text-[#8b5cf6] min-w-[80px]">Urlaub</th>
                     <th className="text-center px-3 py-2 font-semibold text-[#22c55e] min-w-[120px] border-l dark:border-white/[0.06] border-black/[0.04]" title="Effektiv geleistete Tage (39h-korrigiert) vs. Plan">Eff. Tage / Plan</th>
                     <th className="text-center px-3 py-2 font-semibold text-[#f59e0b] min-w-[80px] border-l dark:border-white/[0.06] border-black/[0.04]" title="Kalenderwochen mit 5 externen Werktagen (39h statt 40h)">Ext. Wo.</th>
-                    <th className="text-center px-3 py-2 font-semibold text-[#ef4444] min-w-[110px]" title="39h-Regel: 1h Verlust pro Vollwoche extern ? ben�tigte Zusatztage">39h-Ausgleich</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#ef4444] min-w-[110px]" title="39h-Regel: 1h Verlust pro Vollwoche extern → benötigte Zusatztage">39h-Ausgleich</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -917,24 +917,24 @@ export default function YearOverviewPage() {
                               <span style={{ fontSize: '8px', opacity: 0.8 }}>{diff >= 0 ? '+' : ''}{diff.toFixed(1)}d</span>
                             </span>
                           );
-                        })() : <span className="text-[10px] text-gray-400">�</span>}
+                        })() : <span className="text-[10px] text-gray-400">–</span>}
                       </td>
-                      {/* 39h-Ausgleich: volle externe Wochen z�hlen */}
+                      {/* 39h-Ausgleich: volle externe Wochen zählen */}
                       <td className="text-center px-3 py-2 border-l dark:border-white/[0.06] border-black/[0.04]">
                         {fullExtWeeks > 0
                           ? <span className="text-[10px] font-bold" style={{ color: '#f59e0b' }}>{fullExtWeeks}</span>
-                          : <span className="text-[10px] text-gray-400">�</span>}
+                          : <span className="text-[10px] text-gray-400">–</span>}
                       </td>
                       <td className="text-center px-3 py-2">
                         {hourLoss > 0 ? (
                           <span
                             className="inline-flex flex-col items-center leading-tight"
-                            title={`${fullExtWeeks} Vollwochen extern � 1h = ${hourLoss}h Verlust ? ${extraDaysNeeded} Zusatztag${extraDaysNeeded !== 1 ? 'e' : ''} n�tig`}
+                            title={`${fullExtWeeks} Vollwochen extern × 1h = ${hourLoss}h Verlust → ${extraDaysNeeded} Zusatztag${extraDaysNeeded !== 1 ? 'e' : ''} nötig`}
                           >
                             <span className="text-[10px] font-bold" style={{ color: '#ef4444' }}>-{hourLoss}h</span>
-                            <span className="text-[9px] font-semibold" style={{ color: '#f97316' }}>+{extraDaysNeeded}d n�tig</span>
+                            <span className="text-[9px] font-semibold" style={{ color: '#f97316' }}>+{extraDaysNeeded}d nötig</span>
                           </span>
-                        ) : <span className="text-[10px] text-gray-400">�</span>}
+                        ) : <span className="text-[10px] text-gray-400">–</span>}
                       </td>
                     </tr>
                   ))}
@@ -949,12 +949,12 @@ export default function YearOverviewPage() {
               <MapPin size={12} className="dark:text-white/40 text-gray-400 shrink-0" />
               <label className="text-[10px] font-bold dark:text-white/40 text-gray-500 whitespace-nowrap">Feiertage:</label>
               <select
-                title="Bundesland f�r Feiertagsanzeige"
+                title="Bundesland für Feiertagsanzeige"
                 value={bundesland}
                 onChange={(e) => handleBundeslandChange(e.target.value as Bundesland)}
                 className="text-[10px] rounded-lg px-2 py-1 border dark:border-white/[0.08] border-black/[0.08] bg-transparent dark:text-white/70 text-gray-700 outline-none focus:border-[var(--primary)] cursor-pointer">
                 {(Object.entries(BUNDESLAENDER) as [Bundesland, string][]).map(([k, v]) => (
-                  <option key={k} value={k}>{k === 'ALL' ? v : `${k} � ${v}`}</option>
+                  <option key={k} value={k}>{k === 'ALL' ? v : `${k} – ${v}`}</option>
                 ))}
               </select>
             </div>
@@ -1023,7 +1023,7 @@ export default function YearOverviewPage() {
       )}
 
       {/* -------------------------------------------------
-          VIEW: Projekte � Intern/Extern getrennt
+          VIEW: Projekte – Intern/Extern getrennt
           ------------------------------------------------- */}
       {viewMode === 'projects' && (
         <div className="space-y-5">
@@ -1047,7 +1047,7 @@ export default function YearOverviewPage() {
             ))}
           </div>
 
-          {/* Interne Projekte (gr��erer Bereich) */}
+          {/* Interne Projekte (größerer Bereich) */}
           <div className="grid lg:grid-cols-3 gap-5">
             <div className="lg:col-span-2 card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
               <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04] flex items-center gap-2">
@@ -1055,7 +1055,7 @@ export default function YearOverviewPage() {
                 <h3 className="text-sm font-black dark:text-white text-gray-900">Interne Projekte</h3>
                 <span className="ml-auto px-2 py-0.5 rounded-full bg-[#6366f1]/10 text-[#6366f1] text-[10px] font-bold">{internalProjects.length}</span>
               </div>
-              {/* Gantt f�r interne Projekte */}
+              {/* Gantt für interne Projekte */}
               <div className="p-4 overflow-x-auto">
                 <div className="flex mb-3 min-w-[500px]">
                   <div className="w-36 shrink-0" />
@@ -1086,7 +1086,7 @@ export default function YearOverviewPage() {
                   {internalProjects.length === 0 && <div className="text-center py-6 text-xs dark:text-white/30 text-gray-400">Keine internen Projekte</div>}
                 </div>
               </div>
-              {/* Tile Grid f�r interne Projekte */}
+              {/* Tile Grid für interne Projekte */}
               <div className="px-4 pb-4 grid sm:grid-cols-2 gap-2">
                 {internalProjects.filter(p => !p.startDate && !p.endDate).map(p => <ProjectCard key={p.id} project={p} onSelect={setSelectedProject} />)}
               </div>
@@ -1109,7 +1109,7 @@ export default function YearOverviewPage() {
       )}
 
       {/* -------------------------------------------------
-          VIEW: Berater�bersicht (monatliche Eingabe)
+          VIEW: Beraterübersicht (monatliche Eingabe)
           ------------------------------------------------- */}
       {viewMode === 'entry' && (
         <div className="space-y-4">

@@ -56,25 +56,6 @@ export default function UtilizationPage() {
     });
   }, []);
 
-  if (!hasMinRole('department_lead')) {
-    return (
-      <div className="p-6 w-full flex items-center justify-center min-h-[60vh]">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto text-red-500">
-            <AlertTriangle size={32} />
-          </div>
-          <h2 className="text-xl font-bold dark:text-white text-gray-900">Kein Zugriff</h2>
-          <p className="text-sm dark:text-white/40 text-gray-500 max-w-xs">
-            Die Auslastungsübersicht ist nur für Abteilungsleiter, CIOs und Admins sichtbar.
-          </p>
-          <Link href="/" className="inline-block mt-4 px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-sm font-semibold no-underline hover:opacity-90">
-            Zurück zum Dashboard
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   const today = new Date().toISOString().slice(0, 10);
 
   function getDayData(memberId: string, dateStr: string): { kind: CellKind; pct: number } {
@@ -138,6 +119,26 @@ export default function UtilizationPage() {
     totalExtDays: memberData.reduce((s, m) => s + m.extDays, 0),
     totalIntDays: memberData.reduce((s, m) => s + m.intDays, 0),
   }), [memberData, members.length]);
+
+  // ── RBAC Guard (nach allen Hooks) ─────────────────
+  if (!hasMinRole('department_lead')) {
+    return (
+      <div className="p-6 w-full flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto text-red-500">
+            <AlertTriangle size={32} />
+          </div>
+          <h2 className="text-xl font-bold dark:text-white text-gray-900">Kein Zugriff</h2>
+          <p className="text-sm dark:text-white/40 text-gray-500 max-w-xs">
+            Die Auslastungsübersicht ist nur für Abteilungsleiter, CIOs und Admins sichtbar.
+          </p>
+          <Link href="/" className="inline-block mt-4 px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-sm font-semibold no-underline hover:opacity-90">
+            Zurück zum Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 sm:p-6 w-full space-y-6 animate-fade-in">

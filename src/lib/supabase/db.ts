@@ -8,8 +8,6 @@ import type { Member, Availability, Team, Project, Allocation, Organization } fr
 // Dynamischer Import (äawait import(...)ä) scheitert in Turbopack und verursacht Lock-Konflikte.
 import { loadAllDataAction } from '@/lib/actions/dataActions';
 import {
-  upsertAvailabilityAction,
-  deleteAvailabilityAction,
   upsertMemberAction,
   deleteMemberAction,
   upsertTeamAction,
@@ -206,37 +204,45 @@ export async function dbAddAvailability(entry: Availability) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
   if (!userId) return;
-  await upsertAvailabilityAction({
+  // Browser-Client direkt: RLS erlaubt Schreiben wenn auth.uid() = user_id.
+  // Server Actions hatten in Vercel-Preview-Deployments Cookie-Probleme → 500er.
+  const supabase = createClient();
+  const { error } = await supabase.from('availabilities').upsert({
     id: entry.id,
-    memberId: entry.memberId,
-    userId,
+    user_id: userId,
+    member_id: entry.memberId,
     status: entry.status,
     date: entry.date,
-    startTime: entry.startTime ?? null,
-    endTime: entry.endTime ?? null,
+    start_time: entry.startTime ?? null,
+    end_time: entry.endTime ?? null,
     note: entry.note ?? null,
-  });
+  }, { onConflict: 'id' });
+  if (error) throw new Error(`Availability konnte nicht gespeichert werden: ${error.message}`);
 }
 
 export async function dbUpdateAvailability(entry: Availability) {
   if (!isSupabaseConfigured()) return;
   const userId = await getUserId();
   if (!userId) return;
-  await upsertAvailabilityAction({
+  const supabase = createClient();
+  const { error } = await supabase.from('availabilities').upsert({
     id: entry.id,
-    memberId: entry.memberId,
-    userId,
+    user_id: userId,
+    member_id: entry.memberId,
     status: entry.status,
     date: entry.date,
-    startTime: entry.startTime ?? null,
-    endTime: entry.endTime ?? null,
+    start_time: entry.startTime ?? null,
+    end_time: entry.endTime ?? null,
     note: entry.note ?? null,
-  });
+  }, { onConflict: 'id' });
+  if (error) throw new Error(`Availability konnte nicht gespeichert werden: ${error.message}`);
 }
 
 export async function dbDeleteAvailability(id: string) {
   if (!isSupabaseConfigured()) return;
-  await deleteAvailabilityAction(id);
+  const supabase = createClient();
+  const { error } = await supabase.from('availabilities').delete().eq('id', id);
+  if (error) throw new Error(`Availability konnte nicht gelöscht werden: ${error.message}`);
 }
 
 /* ── Teams ────────────────────────────────────────────────── */

@@ -56,7 +56,18 @@ export async function loadAllDataAction(): Promise<{
     { data: organizationRows },
   ] = await Promise.all([
     client.from('members').select('*').order('created_at', { ascending: true }),
-    client.from('availabilities').select('*').order('date', { ascending: true }).limit(50000),
+    // Datums-Filter: aktuelles Jahr ±1 – verhindert PostgREST-Row-Limit (Standard 1000 Rows)
+    // bei größeren Teams (>8 MA × >130 Arbeitstage trifft man sonst das Limit um Juli herum).
+    (() => {
+      const y = new Date().getFullYear();
+      return client
+        .from('availabilities')
+        .select('*')
+        .gte('date', `${y - 1}-01-01`)
+        .lte('date', `${y + 1}-12-31`)
+        .order('date', { ascending: true })
+        .limit(50000);
+    })(),
     client.from('teams').select('*').order('name', { ascending: true }),
     client.from('projects').select('*').order('name', { ascending: true }),
     client.from('allocations').select('*'),

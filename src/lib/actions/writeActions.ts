@@ -57,7 +57,8 @@ async function getAuthContext() {
 export async function upsertAvailabilityAction(entry: {
   id: string;
   memberId: string;
-  userId: string;
+  // userId wird NICHT vom Client übergeben – immer server-seitig aus der Auth-Session lesen.
+  // Browser-seitiges getUserId() führt bei Bulk-Writes zu navigator.locks Konflikten.
   status: string;
   date: string;
   startTime?: string | null;
@@ -66,9 +67,8 @@ export async function upsertAvailabilityAction(entry: {
 }) {
   const { userId, isPrivileged, admin } = await getAuthContext();
 
-  // Eigene Einträge ODER privilegierte Rolle
-  if (entry.userId !== userId && !isPrivileged) {
-    // Fallback: prüfen ob der Member dem eingeloggten User gehört
+  // Nicht-privilegierte User dürfen nur eigene Member-Einträge schreiben.
+  if (!isPrivileged) {
     const { data: member } = await admin
       .from('members')
       .select('user_id')
@@ -81,7 +81,7 @@ export async function upsertAvailabilityAction(entry: {
 
   const row = {
     id: entry.id,
-    user_id: entry.userId,
+    user_id: userId,   // immer die server-seitige Auth-ID
     member_id: entry.memberId,
     status: entry.status,
     date: entry.date,
@@ -92,6 +92,50 @@ export async function upsertAvailabilityAction(entry: {
 
   const { error } = await admin.from('availabilities').upsert(row, { onConflict: 'id' });
   if (error) throw new Error(`Availability konnte nicht gespeichert werden: ${error.message}`);
+}
+
+/**
+ * Bulk-Upsert für mehrere Availability-Einträge in einem einzigen DB-Aufruf.
+ * Wird von Bulk-Operationen ("Monat füllen", "Mehrfachauswahl") genutzt um
+ * navigator.locks Konflikte bei parallelen Browser-Auth-Calls zu vermeiden.
+ */
+export async function bulkUpsertAvailabilitiesAction(entries: Array<{
+  id: string;
+  memberId: string;
+  status: string;
+  date: string;
+  startTime?: string | null;
+  endTime?: string | null;
+  note?: string | null;
+}>) {
+  if (entries.length === 0) return;
+  const { userId, isPrivileged, admin } = await getAuthContext();
+
+  // Nicht-privilegierte User: alle memberIds prüfen
+  if (!isPrivileged) {
+    const memberIds = [...new Set(entries.map((e) => e.memberId))];
+    const { data: members } = await admin
+      .from('members')
+      .select('id, user_id')
+      .in('id', memberIds);
+    const ownIds = new Set((members ?? []).filter((m) => m.user_id === userId).map((m) => m.id));
+    const unauthorized = entries.some((e) => !ownIds.has(e.memberId));
+    if (unauthorized) throw new Error('Keine Berechtigung für einen oder mehrere Mitarbeiter.');
+  }
+
+  const rows = entries.map((e) => ({
+    id: e.id,
+    user_id: userId,
+    member_id: e.memberId,
+    status: e.status,
+    date: e.date,
+    start_time: e.startTime ?? null,
+    end_time: e.endTime ?? null,
+    note: e.note ?? null,
+  }));
+
+  const { error } = await admin.from('availabilities').upsert(rows, { onConflict: 'id' });
+  if (error) throw new Error(`Bulk-Availability konnte nicht gespeichert werden: ${error.message}`);
 }
 
 export async function deleteAvailabilityAction(id: string) {

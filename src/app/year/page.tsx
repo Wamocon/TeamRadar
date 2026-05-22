@@ -455,6 +455,7 @@ export default function YearOverviewPage() {
   const availabilities = useAppStore((s) => s.availabilities);
   const allocations = useAppStore((s) => s.allocations);
   const addAvailability = useAppStore((s) => s.addAvailability);
+  const bulkAddAvailabilities = useAppStore((s) => s.bulkAddAvailabilities);
   const hasMinRole = useAppStore((s) => s.hasMinRole);
   const userProfile = useAppStore((s) => s.userProfile);
 
@@ -685,13 +686,16 @@ export default function YearOverviewPage() {
     ) ?? members.find((m) => m.userId === userProfile.id);
     if (!ownMember) return;
     const daysInMonth = getDaysInMonth(yr, month);
+    const entries: Array<{ memberId: string; date: string; status: AvailabilityStatus }> = [];
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = formatDate(yr, month, d);
       const dow = new Date(dateStr).getDay();
       if (dow !== 0 && dow !== 6) {
-        addAvailability({ memberId: ownMember.id, date: dateStr, status });
+        entries.push({ memberId: ownMember.id, date: dateStr, status });
       }
     }
+    // Ein einziger Bulk-Write statt N einzelner Server-Action-Calls
+    bulkAddAvailabilities(entries);
     setBulkFill(null);
   };
 
@@ -708,10 +712,12 @@ export default function YearOverviewPage() {
   }, []);
 
   const handleApplyMultiStatus = (status: AvailabilityStatus) => {
-    multiSelected.forEach((k) => {
+    const entries = Array.from(multiSelected).map((k) => {
       const [mId, date] = k.split('::');
-      addAvailability({ memberId: mId, date, status });
+      return { memberId: mId, date, status };
     });
+    // Ein einziger Bulk-Write statt N einzelner Server-Action-Calls
+    bulkAddAvailabilities(entries);
     setMultiSelected(new Set());
     setMultiPickerAnchor(null);
     setSelectMode(false);

@@ -64,19 +64,31 @@ export async function loadAllDataAction(): Promise<{
     // Lösung: .range(from, from+PAGE-1) holt explizit eine Seite auf einmal;
     // jede Seite bleibt ≤ 1000 Rows und umgeht so das server-seitige Limit korrekt.
     (async (): Promise<{ data: unknown[] | null; error: unknown }> => {
+      // Seitengroesse: Supabase-Standard db_max_rows = 1000.
+      // Wichtig: from wird um data.length (tatsaechlich erhaltene Rows) inkrementiert,
+      // NICHT um PAGE – dadurch funktioniert die Paginierung auch wenn der Server
+      // weniger als PAGE Rows zurueckgibt (z.B. db_max_rows < PAGE).
+      // Abbruch nur bei echter leerer Antwort, nicht bei data.length < PAGE.
       const PAGE = 1000;
       const all: unknown[] = [];
       let from = 0;
-      for (let page = 0; page < 50; page++) { // Sicherheitslimit: max 50.000 Rows
+      for (let page = 0; page < 100; page++) { // Sicherheitslimit: max 100.000 Rows
         const { data, error } = await client
           .from('availabilities')
           .select('*')
           .order('date', { ascending: true })
           .range(from, from + PAGE - 1);
-        if (error) return { data: null, error };
-        if (data && data.length > 0) all.push(...data);
-        if (!data || data.length < PAGE) break; // letzte Seite erreicht
-        from += PAGE;
+        // PGRST103 = "Range Not Satisfiable" → from liegt hinter dem Tabellenende,
+        // das sind keine neuen Daten – kein echter Fehler, einfach abbrechen.
+        if (error) {
+          const code = typeof error === 'object' && error !== null && 'code' in error
+            ? (error as { code: unknown }).code : null;
+          if (code === 'PGRST103') break;
+          return { data: null, error };
+        }
+        if (!data || data.length === 0) break; // Keine weiteren Rows
+        all.push(...data);
+        from += data.length; // Vorwaerts um tatsaechlich erhaltene Rows (robust gegen db_max_rows < PAGE)
       }
       return { data: all, error: null };
     })(),

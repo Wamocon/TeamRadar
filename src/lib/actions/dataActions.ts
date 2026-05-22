@@ -91,7 +91,7 @@ export async function loadAllDataAction(): Promise<{
         // PGRST103 = "Range Not Satisfiable" → from liegt hinter dem Tabellenende,
         // das sind keine neuen Daten – kein echter Fehler, einfach abbrechen.
         if (error) {
-          const code = typeof error === 'object' && error !== null && 'code' in error
+          const code = typeof error === 'object' && 'code' in (error as object)
             ? (error as { code: unknown }).code : null;
           if (code === 'PGRST103') break;
           return { data: null, error };

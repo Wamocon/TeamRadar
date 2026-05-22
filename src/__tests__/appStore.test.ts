@@ -1543,7 +1543,7 @@ describe('Store: updateAvailability – map-Ternary Zweig + Fallback-String', ()
 
   it('updateAvailability Rollback-map + Fallback-Fehler bei null-Error und 2 Einträgen', async () => {
     const a1 = useAppStore.getState().addAvailability({ memberId: 'm1', date: '2026-01-01', status: 'available', startTime: '09:00', endTime: '17:00' });
-    const a2 = useAppStore.getState().addAvailability({ memberId: 'm1', date: '2026-01-02', status: 'sick' });
+    useAppStore.getState().addAvailability({ memberId: 'm1', date: '2026-01-02', status: 'sick' });
     mockDbUpdateAvailability.mockRejectedValueOnce(null);
     useAppStore.getState().updateAvailability(a1.id, { status: 'vacation' });
     await flushMicroTasks();
@@ -1577,7 +1577,7 @@ describe('Store: updateTeam – map-Ternary Zweig + Fallback-String', () => {
 
   it('updateTeam Rollback-map + Fallback-Fehler bei null-Error und 2 Teams', async () => {
     const t1 = useAppStore.getState().addTeam({ name: 'Team A', memberIds: [] });
-    const t2 = useAppStore.getState().addTeam({ name: 'Team B', memberIds: [] });
+    useAppStore.getState().addTeam({ name: 'Team B', memberIds: [] });
     mockDbUpdateTeam.mockRejectedValueOnce(null);
     useAppStore.getState().updateTeam(t1.id, { name: 'Team A Neu' });
     await flushMicroTasks();
@@ -1616,7 +1616,7 @@ describe('Store: updateProject – map-Ternary Zweig + Fallback-String', () => {
 
   it('updateProject Rollback-map + Fallback-Fehler bei null-Error und 2 Projekten', async () => {
     const p1 = await useAppStore.getState().addProject({ name: 'Projekt A', type: 'internal', status: 'active', memberIds: [] });
-    const p2 = await useAppStore.getState().addProject({ name: 'Projekt B', type: 'internal', status: 'active', memberIds: [] });
+    await useAppStore.getState().addProject({ name: 'Projekt B', type: 'internal', status: 'active', memberIds: [] });
     mockDbUpdateProject.mockRejectedValueOnce(null);
     useAppStore.getState().updateProject(p1.id, { name: 'Projekt A Neu' });
     await flushMicroTasks();

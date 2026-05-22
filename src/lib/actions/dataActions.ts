@@ -55,7 +55,7 @@ export async function loadAllDataAction(): Promise<{
     { data: organizationRows },
   ] = await Promise.all([
     client.from('members').select('*').order('created_at', { ascending: true }),
-    client.from('availabilities').select('*').order('date', { ascending: true }),
+    client.from('availabilities').select('*').order('date', { ascending: true }).limit(50000),
     client.from('teams').select('*').order('name', { ascending: true }),
     client.from('projects').select('*').order('name', { ascending: true }),
     client.from('allocations').select('*'),

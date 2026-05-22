@@ -34,12 +34,12 @@ async function getAuthContext() {
   const role = (profile?.role as string) ?? 'employee';
   const isPrivileged = PRIVILEGED_ROLES.includes(role as typeof PRIVILEGED_ROLES[number]);
 
-  // Service-Role-Keys sind JWTs und beginnen mit 'eyJ'.
-  // Fehlende oder andersfomatige Keys (z. B. sb_secret_*) → Fallback auf
-  // authentifizierten User-Client. RLS-Policies erlauben eigene Schreibvorgänge.
+  // Admin-Client immer verwenden wenn Service-Role-Key gesetzt ist.
+  // Supabase hat das Key-Format auf 'sb_secret_*' umgestellt – der alte
+  // startsWith('eyJ') Check schloss neue Keys fälschlicherweise aus.
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   let admin: SupabaseClient;
-  if (serviceKey && serviceKey.startsWith('eyJ')) {
+  if (serviceKey) {
     try {
       admin = await createAdminClient();
     } catch {
@@ -131,6 +131,11 @@ export async function upsertMemberAction(row: {
 
   const { error } = await admin.from('members').upsert(row, { onConflict: 'id' });
   if (error) throw new Error(`Mitarbeiter konnte nicht gespeichert werden: ${error.message}`);
+
+  // Rolle auch in der profiles-Tabelle synchronisieren (wird für RLS-Policies verwendet)
+  if (row.user_id) {
+    await admin.from('profiles').update({ role: row.role }).eq('id', row.user_id);
+  }
 }
 
 export async function deleteMemberAction(id: string) {

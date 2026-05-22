@@ -2,10 +2,12 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { createClient } from '@/lib/supabase/client';
+import type { Member } from '@/types';
 import {
   Building2, Plus, Edit3, Trash2, Users, Mail, Globe, Phone,
   Save, Loader, Lock, X, Check, Shield, CreditCard,
   Image as ImageIcon, AlertCircle, CheckCircle, ChevronDown, ChevronUp,
+  UserCog,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -57,6 +59,12 @@ export default function OrganisationPage() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('employee');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [editMember, setEditMember] = useState<Member | null>(null);
+  const [editForm, setEditForm] = useState<{ name: string; email: string; role: string; department: string; phone: string }>({ name: '', email: '', role: 'employee', department: '', phone: '' });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editMsg, setEditMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const updateMember = useAppStore((s) => s.updateMember);
   const [openIdentity, setOpenIdentity] = useState(true);
   const [openAddress, setOpenAddress] = useState(true);
   const [openQuickInfo, setOpenQuickInfo] = useState(true);
@@ -128,10 +136,30 @@ export default function OrganisationPage() {
   };
 
   const ROLE_COLORS: Record<string, string> = {
-    admin: '#6366f1', cio: '#8b5cf6', department_lead: '#06b6d4', employee: '#6b7280',
+    super_admin: '#ef4444', admin: '#6366f1', cio: '#8b5cf6', department_lead: '#06b6d4', employee: '#6b7280',
   };
   const ROLE_LABELS: Record<string, string> = {
-    admin: 'Administrator', cio: 'CIO', department_lead: 'Team-Lead', employee: 'Mitarbeiter',
+    super_admin: 'Super Admin', admin: 'Administrator', cio: 'CIO', department_lead: 'Team-Lead', employee: 'Mitarbeiter',
+  };
+
+  const openEditModal = (m: Member) => {
+    setEditMember(m);
+    setEditForm({ name: m.name, email: m.email, role: m.role, department: m.department || '', phone: m.phone || '' });
+    setEditMsg(null);
+  };
+
+  const handleEditSave = async () => {
+    if (!editMember) return;
+    setEditSaving(true);
+    setEditMsg(null);
+    try {
+      await updateMember({ ...editMember, name: editForm.name, email: editForm.email, role: editForm.role, department: editForm.department, phone: editForm.phone });
+      setEditMsg({ type: 'success', text: 'Mitarbeiter gespeichert.' });
+      setTimeout(() => { setEditMember(null); setEditMsg(null); }, 900);
+    } catch (e: any) {
+      setEditMsg({ type: 'error', text: e.message || 'Fehler beim Speichern.' });
+    }
+    setEditSaving(false);
   };
 
   if (!isAdmin) {
@@ -156,6 +184,75 @@ export default function OrganisationPage() {
 
   return (
     <div className="p-4 sm:p-6 w-full space-y-5 animate-fade-in pb-20">
+      {/* ─── Member-Edit-Modal ───────────────────────────── */}
+      {editMember && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.55)' }} onClick={(e) => { if (e.target === e.currentTarget) setEditMember(null); }}>
+          <div className="w-full max-w-md rounded-2xl border dark:border-white/[0.08] border-black/[0.08] bg-white dark:bg-[#111] shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b dark:border-white/[0.06] border-black/[0.06]">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
+                  <UserCog size={15} className="text-[var(--primary)]" />
+                </div>
+                <div>
+                  <div className="text-sm font-black dark:text-white text-gray-900">Mitarbeiter bearbeiten</div>
+                  <div className="text-[10px] dark:text-white/40 text-gray-500">{editMember.email}</div>
+                </div>
+              </div>
+              <button onClick={() => setEditMember(null)} className="p-1.5 rounded-lg hover:bg-black/[0.05] dark:hover:bg-white/[0.05] dark:text-white/40 text-gray-400 transition-all border-none bg-transparent cursor-pointer"><X size={15} /></button>
+            </div>
+            {/* Form */}
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2 space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Name</label>
+                  <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                </div>
+                <div className="col-span-2 space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Abteilung</label>
+                  <input value={editForm.department} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
+                    placeholder="z. B. Engineering"
+                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Telefon</label>
+                  <input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                    placeholder="+49 ..."
+                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Rolle</label>
+                  <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all">
+                    <option value="employee">Mitarbeiter</option>
+                    <option value="department_lead">Team-Lead</option>
+                    <option value="cio">CIO</option>
+                    <option value="admin">Administrator</option>
+                    <option value="super_admin">Super Admin</option>
+                  </select>
+                </div>
+              </div>
+              {editMsg && (
+                <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border ${
+                  editMsg.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'
+                }`}>
+                  {editMsg.type === 'success' ? <CheckCircle size={13} /> : <AlertCircle size={13} />}
+                  {editMsg.text}
+                </div>
+              )}
+              <div className="flex gap-2 pt-1">
+                <button onClick={() => setEditMember(null)} className="flex-1 py-2.5 rounded-xl text-xs font-semibold dark:text-white/50 text-gray-600 border dark:border-white/10 border-gray-200 bg-transparent cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 transition-colors border-solid">Abbrechen</button>
+                <button onClick={handleEditSave} disabled={editSaving}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none disabled:opacity-60">
+                  {editSaving ? <Loader size={13} className="animate-spin" /> : <Save size={13} />}
+                  Speichern
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -405,10 +502,12 @@ export default function OrganisationPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center gap-1 justify-end">
-                          <Link href={`/members?highlight=${m.id}`}
-                            className="p-1.5 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all">
+                          <button
+                            onClick={() => openEditModal(members.find(x => x.id === m.id)!)}
+                            title="Bearbeiten"
+                            className="p-1.5 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all border-none bg-transparent cursor-pointer">
                             <Edit3 size={12} />
-                          </Link>
+                          </button>
                           {deleteConfirm === m.id ? (
                             <>
                               <button onClick={() => setDeleteConfirm(null)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 transition-all border-none bg-transparent cursor-pointer"><X size={12} /></button>

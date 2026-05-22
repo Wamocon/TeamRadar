@@ -31,6 +31,16 @@ async function getReadClient(): Promise<SupabaseClient> {
   return await createClient();
 }
 
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (typeof err === 'string') return err;
+  if (err && typeof err === 'object') {
+    const maybeMessage = (err as { message?: unknown }).message;
+    if (typeof maybeMessage === 'string') return maybeMessage;
+    if (maybeMessage != null) return String(maybeMessage);
+  }
+  return fallback;
+}
+
 export async function loadAllDataAction(): Promise<{
   memberRows: Record<string, unknown>[];
   availabilityRows: Record<string, unknown>[];
@@ -99,7 +109,7 @@ export async function loadAllDataAction(): Promise<{
   ]);
 
   if (mErr) { console.error('loadAllDataAction members:', mErr); throw new Error(mErr.message); }
-  if (aErr) { console.error('loadAllDataAction availabilities:', aErr); throw new Error(typeof aErr === 'object' && aErr !== null && 'message' in aErr ? String((aErr as { message: unknown }).message) : 'Fehler beim Laden der Availabilities'); }
+  if (aErr) { console.error('loadAllDataAction availabilities:', aErr); throw new Error(getErrorMessage(aErr, 'Fehler beim Laden der Availabilities')); }
   if (tErr) { console.error('loadAllDataAction teams:', tErr); throw new Error(tErr.message); }
   if (pErr) { console.error('loadAllDataAction projects:', pErr); throw new Error(pErr.message); }
   if (alErr) { console.error('loadAllDataAction allocations:', alErr); throw new Error(alErr.message); }

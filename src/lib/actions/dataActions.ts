@@ -31,6 +31,16 @@ async function getReadClient(): Promise<SupabaseClient> {
   return await createClient();
 }
 
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (typeof err === 'string') return err;
+  if (err && typeof err === 'object') {
+    const maybeMessage = (err as { message?: unknown }).message;
+    if (typeof maybeMessage === 'string') return maybeMessage;
+    if (maybeMessage != null) return String(maybeMessage);
+  }
+  return fallback;
+}
+
 export async function loadAllDataAction(): Promise<{
   memberRows: Record<string, unknown>[];
   availabilityRows: Record<string, unknown>[];
@@ -56,17 +66,41 @@ export async function loadAllDataAction(): Promise<{
     { data: organizationRows },
   ] = await Promise.all([
     client.from('members').select('*').order('created_at', { ascending: true }),
-    // Datums-Filter: aktuelles Jahr ±1 – verhindert PostgREST-Row-Limit (Standard 1000 Rows)
-    // bei größeren Teams (>8 MA × >130 Arbeitstage trifft man sonst das Limit um Juli herum).
-    (() => {
-      const y = new Date().getFullYear();
-      return client
-        .from('availabilities')
-        .select('*')
-        .gte('date', `${y - 1}-01-01`)
-        .lte('date', `${y + 1}-12-31`)
-        .order('date', { ascending: true })
-        .limit(50000);
+    // Paginierung gegen server-seitiges PostgREST Row-Limit:
+    // Supabase begrenzt jede API-Antwort auf db_max_rows (Standard: 1000 Rows).
+    // client-seitiges .limit(n) kann dieses Limit NICHT überschreiben – der Server
+    // kappt jede Response trotzdem bei 1000. Deshalb war der vorherige .limit(50000)-
+    // Aufruf wirkungslos und die Einträge ab ~Juli (Row 1001) wurden nie zurückgegeben.
+    // Lösung: .range(from, from+PAGE-1) holt explizit eine Seite auf einmal;
+    // jede Seite bleibt ≤ 1000 Rows und umgeht so das server-seitige Limit korrekt.
+    (async (): Promise<{ data: unknown[] | null; error: unknown }> => {
+      // Seitengroesse: Supabase-Standard db_max_rows = 1000.
+      // Wichtig: from wird um data.length (tatsaechlich erhaltene Rows) inkrementiert,
+      // NICHT um PAGE – dadurch funktioniert die Paginierung auch wenn der Server
+      // weniger als PAGE Rows zurueckgibt (z.B. db_max_rows < PAGE).
+      // Abbruch nur bei echter leerer Antwort, nicht bei data.length < PAGE.
+      const PAGE = 1000;
+      const all: unknown[] = [];
+      let from = 0;
+      for (let page = 0; page < 100; page++) { // Sicherheitslimit: max 100.000 Rows
+        const { data, error } = await client
+          .from('availabilities')
+          .select('*')
+          .order('date', { ascending: true })
+          .range(from, from + PAGE - 1);
+        // PGRST103 = "Range Not Satisfiable" → from liegt hinter dem Tabellenende,
+        // das sind keine neuen Daten – kein echter Fehler, einfach abbrechen.
+        if (error) {
+          const code = typeof error === 'object' && 'code' in (error as object)
+            ? (error as { code: unknown }).code : null;
+          if (code === 'PGRST103') break;
+          return { data: null, error };
+        }
+        if (!data || data.length === 0) break; // Keine weiteren Rows
+        all.push(...data);
+        from += data.length; // Vorwaerts um tatsaechlich erhaltene Rows (robust gegen db_max_rows < PAGE)
+      }
+      return { data: all, error: null };
     })(),
     client.from('teams').select('*').order('name', { ascending: true }),
     client.from('projects').select('*').order('name', { ascending: true }),
@@ -75,7 +109,7 @@ export async function loadAllDataAction(): Promise<{
   ]);
 
   if (mErr) { console.error('loadAllDataAction members:', mErr); throw new Error(mErr.message); }
-  if (aErr) { console.error('loadAllDataAction availabilities:', aErr); throw new Error(aErr.message); }
+  if (aErr) { console.error('loadAllDataAction availabilities:', aErr); throw new Error(getErrorMessage(aErr, 'Fehler beim Laden der Availabilities')); }
   if (tErr) { console.error('loadAllDataAction teams:', tErr); throw new Error(tErr.message); }
   if (pErr) { console.error('loadAllDataAction projects:', pErr); throw new Error(pErr.message); }
   if (alErr) { console.error('loadAllDataAction allocations:', alErr); throw new Error(alErr.message); }

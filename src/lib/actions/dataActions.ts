@@ -63,11 +63,9 @@ export async function loadAllDataAction(): Promise<{
     // Aufruf wirkungslos und die Einträge ab ~Juli (Row 1001) wurden nie zurückgegeben.
     // Lösung: .range(from, from+PAGE-1) holt explizit eine Seite auf einmal;
     // jede Seite bleibt ≤ 1000 Rows und umgeht so das server-seitige Limit korrekt.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (async (): Promise<{ data: any[] | null; error: any }> => {
+    (async (): Promise<{ data: unknown[] | null; error: unknown }> => {
       const PAGE = 1000;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const all: any[] = [];
+      const all: unknown[] = [];
       let from = 0;
       for (let page = 0; page < 50; page++) { // Sicherheitslimit: max 50.000 Rows
         const { data, error } = await client
@@ -89,7 +87,7 @@ export async function loadAllDataAction(): Promise<{
   ]);
 
   if (mErr) { console.error('loadAllDataAction members:', mErr); throw new Error(mErr.message); }
-  if (aErr) { console.error('loadAllDataAction availabilities:', aErr); throw new Error(aErr.message); }
+  if (aErr) { console.error('loadAllDataAction availabilities:', aErr); throw new Error(typeof aErr === 'object' && aErr !== null && 'message' in aErr ? String((aErr as { message: unknown }).message) : 'Fehler beim Laden der Availabilities'); }
   if (tErr) { console.error('loadAllDataAction teams:', tErr); throw new Error(tErr.message); }
   if (pErr) { console.error('loadAllDataAction projects:', pErr); throw new Error(pErr.message); }
   if (alErr) { console.error('loadAllDataAction allocations:', alErr); throw new Error(alErr.message); }

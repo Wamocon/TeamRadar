@@ -153,7 +153,13 @@ export default function OrganisationPage() {
     setEditSaving(true);
     setEditMsg(null);
     try {
-      await updateMember({ ...editMember, name: editForm.name, email: editForm.email, role: editForm.role, department: editForm.department, phone: editForm.phone });
+      updateMember(editMember.id, {
+        name: editForm.name,
+        email: editForm.email,
+        role: editForm.role,
+        department: editForm.department,
+        phone: editForm.phone,
+      });
       setEditMsg({ type: 'success', text: 'Mitarbeiter gespeichert.' });
       setTimeout(() => { setEditMember(null); setEditMsg(null); }, 900);
     } catch (e: any) {

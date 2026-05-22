@@ -56,17 +56,31 @@ export async function loadAllDataAction(): Promise<{
     { data: organizationRows },
   ] = await Promise.all([
     client.from('members').select('*').order('created_at', { ascending: true }),
-    // Datums-Filter: aktuelles Jahr ±1 – verhindert PostgREST-Row-Limit (Standard 1000 Rows)
-    // bei größeren Teams (>8 MA × >130 Arbeitstage trifft man sonst das Limit um Juli herum).
-    (() => {
-      const y = new Date().getFullYear();
-      return client
-        .from('availabilities')
-        .select('*')
-        .gte('date', `${y - 1}-01-01`)
-        .lte('date', `${y + 1}-12-31`)
-        .order('date', { ascending: true })
-        .limit(50000);
+    // Paginierung gegen server-seitiges PostgREST Row-Limit:
+    // Supabase begrenzt jede API-Antwort auf db_max_rows (Standard: 1000 Rows).
+    // client-seitiges .limit(n) kann dieses Limit NICHT überschreiben – der Server
+    // kappt jede Response trotzdem bei 1000. Deshalb war der vorherige .limit(50000)-
+    // Aufruf wirkungslos und die Einträge ab ~Juli (Row 1001) wurden nie zurückgegeben.
+    // Lösung: .range(from, from+PAGE-1) holt explizit eine Seite auf einmal;
+    // jede Seite bleibt ≤ 1000 Rows und umgeht so das server-seitige Limit korrekt.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (async (): Promise<{ data: any[] | null; error: any }> => {
+      const PAGE = 1000;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const all: any[] = [];
+      let from = 0;
+      for (let page = 0; page < 50; page++) { // Sicherheitslimit: max 50.000 Rows
+        const { data, error } = await client
+          .from('availabilities')
+          .select('*')
+          .order('date', { ascending: true })
+          .range(from, from + PAGE - 1);
+        if (error) return { data: null, error };
+        if (data && data.length > 0) all.push(...data);
+        if (!data || data.length < PAGE) break; // letzte Seite erreicht
+        from += PAGE;
+      }
+      return { data: all, error: null };
     })(),
     client.from('teams').select('*').order('name', { ascending: true }),
     client.from('projects').select('*').order('name', { ascending: true }),

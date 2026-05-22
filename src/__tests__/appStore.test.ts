@@ -1057,17 +1057,16 @@ describe('Store: updateSystemSettings', () => {
 
 describe('Store: getMemberStatus mit Zeitfenstern', () => {
   it('gibt letzten Eintrag zurück ohne aktiven Zeitbereich', () => {
-    // Stundenbasierter Eintrag in der Vergangenheit für heute
+    // Zeitfenster 00:00–00:01 ist garantiert abgelaufen → current === undefined → ?? Fallback
     useAppStore.setState({
       availabilities: [{
         id: 'a1', memberId: 'm1', status: 'meeting',
         date: new Date().toISOString().slice(0, 10),
-        startTime: '08:00', endTime: '09:00',
+        startTime: '00:00', endTime: '00:01',
       }],
     });
-    // Aktuelle Zeit ist nach 09:00 → kein aktives Fenster → letzter Eintrag
     const status = useAppStore.getState().getMemberStatus('m1');
-    expect(['meeting', 'offline']).toContain(status);
+    expect(status).toBe('meeting');
   });
 
   it('berücksichtigt Zeitfenster für heutigen Eintrag', () => {

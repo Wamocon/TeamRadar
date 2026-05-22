@@ -251,18 +251,17 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(mockDeleteMemberAction).toHaveBeenCalledWith('m1');
   });
 
-  it('dbAddAvailability ruft from().upsert() auf (Browser-Client)', async () => {
+  it('dbAddAvailability ruft upsertAvailabilityAction auf', async () => {
     const entry: Availability = {
       id: 'a1', memberId: 'm1', status: 'available', date: '2026-03-20',
       startTime: '09:00', endTime: '17:00',
     };
     await dbAddAvailability(entry);
-    expect(mockFrom).toHaveBeenCalledWith('availabilities');
-    expect(mockUpsert).toHaveBeenCalledOnce();
-    const row = mockUpsert.mock.calls[0][0];
-    expect(row.id).toBe('a1');
-    expect(row.member_id).toBe('m1');
-    expect(row.status).toBe('available');
+    expect(mockUpsertAvailabilityAction).toHaveBeenCalledOnce();
+    const arg = mockUpsertAvailabilityAction.mock.calls[0][0];
+    expect(arg.id).toBe('a1');
+    expect(arg.memberId).toBe('m1');
+    expect(arg.status).toBe('available');
   });
 
   it('dbAddTeam ruft upsertTeamAction auf', async () => {
@@ -274,10 +273,9 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(row.member_ids).toEqual(['m1', 'm2']);
   });
 
-  it('dbDeleteAvailability ruft from().delete() auf (Browser-Client)', async () => {
+  it('dbDeleteAvailability ruft deleteAvailabilityAction auf', async () => {
     await dbDeleteAvailability('a1');
-    expect(mockFrom).toHaveBeenCalledWith('availabilities');
-    expect(mockDelete).toHaveBeenCalledOnce();
+    expect(mockDeleteAvailabilityAction).toHaveBeenCalledWith('a1');
   });
 
   it('dbUpdateTeam ruft upsertTeamAction auf', async () => {
@@ -291,14 +289,16 @@ describe('DB: Funktionen mit Supabase konfiguriert', () => {
     expect(mockDeleteTeamAction).toHaveBeenCalledWith('t1');
   });
 
-  it('dbUpdateAvailability ruft from().upsert() auf (Browser-Client)', async () => {
+  it('dbUpdateAvailability ruft upsertAvailabilityAction auf', async () => {
     const entry: Availability = {
       id: 'a1', memberId: 'm1', status: 'meeting', date: '2026-03-20',
       startTime: '10:00', endTime: '11:00', note: 'Daily',
     };
     await dbUpdateAvailability(entry);
-    expect(mockFrom).toHaveBeenCalledWith('availabilities');
-    expect(mockUpsert).toHaveBeenCalledOnce();
+    expect(mockUpsertAvailabilityAction).toHaveBeenCalledOnce();
+    const arg = mockUpsertAvailabilityAction.mock.calls[0][0];
+    expect(arg.id).toBe('a1');
+    expect(arg.note).toBe('Daily');
   });
 
   it('dbAddProject ruft upsertProjectAction auf', async () => {
@@ -721,20 +721,19 @@ describe('DB: Fehler-Pfade Availability (upsert/delete Fehler)', () => {
   });
 
   it('dbAddAvailability wirft bei upsert-Fehler', async () => {
-    mockFrom.mockReturnValueOnce({ upsert: vi.fn().mockReturnValue({ error: { message: 'upsert failed' } }) });
+    mockUpsertAvailabilityAction.mockRejectedValueOnce(new Error('upsert failed'));
     const entry: Availability = { id: 'a1', memberId: 'm1', status: 'available', date: '2026-01-01' };
     await expect(dbAddAvailability(entry)).rejects.toThrow('upsert failed');
   });
 
   it('dbUpdateAvailability wirft bei upsert-Fehler', async () => {
-    mockFrom.mockReturnValueOnce({ upsert: vi.fn().mockReturnValue({ error: { message: 'update failed' } }) });
+    mockUpsertAvailabilityAction.mockRejectedValueOnce(new Error('update failed'));
     const entry: Availability = { id: 'a1', memberId: 'm1', status: 'meeting', date: '2026-01-01' };
     await expect(dbUpdateAvailability(entry)).rejects.toThrow('update failed');
   });
 
   it('dbDeleteAvailability wirft bei delete-Fehler', async () => {
-    const mockEqFn = vi.fn().mockReturnValue({ error: { message: 'delete failed' } });
-    mockFrom.mockReturnValueOnce({ delete: vi.fn().mockReturnValue({ eq: mockEqFn }) });
+    mockDeleteAvailabilityAction.mockRejectedValueOnce(new Error('delete failed'));
     await expect(dbDeleteAvailability('a1')).rejects.toThrow('delete failed');
   });
 });
@@ -763,21 +762,23 @@ describe('DB: Optionale Felder werden als null gespeichert', () => {
   });
 
   it('dbAddAvailability: optionale Felder (startTime, endTime, note) → null', async () => {
+    mockUpsertAvailabilityAction.mockResolvedValue(undefined);
     const entry: Availability = { id: 'a1', memberId: 'm1', status: 'available', date: '2026-01-01' };
     await dbAddAvailability(entry);
-    const row = mockUpsert.mock.calls[0][0];
-    expect(row.start_time).toBeNull();
-    expect(row.end_time).toBeNull();
-    expect(row.note).toBeNull();
+    const arg = mockUpsertAvailabilityAction.mock.calls[0][0];
+    expect(arg.startTime).toBeNull();
+    expect(arg.endTime).toBeNull();
+    expect(arg.note).toBeNull();
   });
 
   it('dbUpdateAvailability: optionale Felder (startTime, endTime, note) → null', async () => {
+    mockUpsertAvailabilityAction.mockResolvedValue(undefined);
     const entry: Availability = { id: 'a1', memberId: 'm1', status: 'meeting', date: '2026-01-01' };
     await dbUpdateAvailability(entry);
-    const row = mockUpsert.mock.calls[0][0];
-    expect(row.start_time).toBeNull();
-    expect(row.end_time).toBeNull();
-    expect(row.note).toBeNull();
+    const arg = mockUpsertAvailabilityAction.mock.calls[0][0];
+    expect(arg.startTime).toBeNull();
+    expect(arg.endTime).toBeNull();
+    expect(arg.note).toBeNull();
   });
 
   it('dbAddProject: optionale Felder (client, description, startDate, endDate, maxDays) → null', async () => {

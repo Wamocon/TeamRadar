@@ -8,6 +8,7 @@ import {
   dbAddAvailability,
   dbUpdateAvailability,
   dbDeleteAvailability,
+  dbBulkAddAvailabilities,
   dbAddTeam,
   dbUpdateTeam,
   dbDeleteTeam,
@@ -53,8 +54,7 @@ interface AppStore {
   deleteMember: (id: string) => void;
 
   /* ── Verfügbarkeit ─────────────────────────── */
-  addAvailability: (entry: Omit<Availability, 'id'>) => Availability;
-  updateAvailability: (id: string, data: Partial<Availability>) => void;
+  addAvailability: (entry: Omit<Availability, 'id'>) => Availability;  bulkAddAvailabilities: (entries: Array<Omit<Availability, 'id'>>) => Availability[];  updateAvailability: (id: string, data: Partial<Availability>) => void;
   deleteAvailability: (id: string) => void;
   getMemberStatus: (memberId: string, date?: string) => AvailabilityStatus;
 
@@ -252,6 +252,55 @@ export const useAppStore = create<AppStore>()(
         }));
       });
       return entry;
+    },
+
+    bulkAddAvailabilities: (dataList) => {
+      // Optimistisches Update für alle Einträge gleichzeitig berechnen
+      const currentAvails = get().availabilities;
+      const toAdd: Availability[] = [];
+      const toUpdate: Array<{ orig: Availability; newStatus: Availability['status'] }> = [];
+
+      for (const data of dataList) {
+        const existing = currentAvails.find(
+          (a) => a.memberId === data.memberId && a.date === data.date && !a.startTime && !a.endTime
+        );
+        if (existing) {
+          toUpdate.push({ orig: existing, newStatus: data.status as Availability['status'] });
+        } else {
+          toAdd.push({ ...data, id: crypto.randomUUID() });
+        }
+      }
+
+      // id → neuer Status Map für O(1)-Lookup (kein ?? nötig, da immer vorhanden)
+      const updateIds = new Set(toUpdate.map((u) => u.orig.id));
+      const updateStatusById = new Map(toUpdate.map((u) => [u.orig.id, u.newStatus]));
+
+      // Optimistisch: neue Einträge hinzufügen + bestehende updaten
+      set((state) => {
+        const withUpdates = state.availabilities.map((a) =>
+          updateIds.has(a.id) ? { ...a, status: updateStatusById.get(a.id)! } : a
+        );
+        return { availabilities: [...withUpdates, ...toAdd] };
+      });
+
+      // Ein einziger Bulk-DB-Write für ALLE Einträge (verhindert navigator.locks Konflikte)
+      const allForDB = [
+        ...toAdd.map((e) => ({ id: e.id, memberId: e.memberId, status: e.status as string, date: e.date })),
+        ...toUpdate.map((u) => ({ id: u.orig.id, memberId: u.orig.memberId, status: u.newStatus as string, date: u.orig.date })),
+      ];
+
+      const addedIds = new Set(toAdd.map((a) => a.id));
+      dbBulkAddAvailabilities(allForDB).catch((err: any) => {
+        // Rollback: neu hinzugefügte Einträge entfernen + Updates zurücksetzen
+        set((state) => ({
+          availabilities: state.availabilities
+            .filter((a) => !addedIds.has(a.id))
+            .map((a) => toUpdate.find((u) => u.orig.id === a.id)?.orig ?? a),
+          writeError: err?.message || 'Bulk-Verfügbarkeit konnte nicht gespeichert werden',
+        }));
+      });
+
+      return toAdd;
     },
 
     updateAvailability: (id, data) => {

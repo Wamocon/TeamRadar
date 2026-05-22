@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // vi.hoisted stellt sicher, dass diese Variablen auch in vi.mock-Factories verfügbar sind
 const { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, mockLoadAllDataAction,
   mockUpsertMemberAction, mockDeleteMemberAction,
-  mockUpsertAvailabilityAction, mockDeleteAvailabilityAction,
+  mockUpsertAvailabilityAction, mockDeleteAvailabilityAction, mockBulkUpsertAvailabilitiesAction,
   mockUpsertTeamAction, mockDeleteTeamAction,
   mockUpsertProjectAction, mockDeleteProjectAction,
   mockUpsertAllocationAction, mockDeleteAllocationAction,
@@ -36,6 +36,7 @@ const { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, m
   const mockDeleteMemberAction     = vi.fn().mockResolvedValue(undefined);
   const mockUpsertAvailabilityAction = vi.fn().mockResolvedValue(undefined);
   const mockDeleteAvailabilityAction = vi.fn().mockResolvedValue(undefined);
+  const mockBulkUpsertAvailabilitiesAction = vi.fn().mockResolvedValue(undefined);
   const mockUpsertTeamAction       = vi.fn().mockResolvedValue(undefined);
   const mockDeleteTeamAction       = vi.fn().mockResolvedValue(undefined);
   const mockUpsertProjectAction    = vi.fn().mockResolvedValue(undefined);
@@ -44,7 +45,7 @@ const { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, m
   const mockDeleteAllocationAction = vi.fn().mockResolvedValue(undefined);
   return { mockInsert, mockUpdate, mockDelete, mockFrom, mockGetUser, mockUpsert, mockLoadAllDataAction,
     mockUpsertMemberAction, mockDeleteMemberAction,
-    mockUpsertAvailabilityAction, mockDeleteAvailabilityAction,
+    mockUpsertAvailabilityAction, mockDeleteAvailabilityAction, mockBulkUpsertAvailabilitiesAction,
     mockUpsertTeamAction, mockDeleteTeamAction,
     mockUpsertProjectAction, mockDeleteProjectAction,
     mockUpsertAllocationAction, mockDeleteAllocationAction,
@@ -70,16 +71,17 @@ vi.mock('@/lib/actions/dataActions', () => ({
 }));
 
 vi.mock('@/lib/actions/writeActions', () => ({
-  upsertMemberAction:       mockUpsertMemberAction,
-  deleteMemberAction:       mockDeleteMemberAction,
-  upsertAvailabilityAction: mockUpsertAvailabilityAction,
-  deleteAvailabilityAction: mockDeleteAvailabilityAction,
-  upsertTeamAction:         mockUpsertTeamAction,
-  deleteTeamAction:         mockDeleteTeamAction,
-  upsertProjectAction:      mockUpsertProjectAction,
-  deleteProjectAction:      mockDeleteProjectAction,
-  upsertAllocationAction:   mockUpsertAllocationAction,
-  deleteAllocationAction:   mockDeleteAllocationAction,
+  upsertMemberAction:              mockUpsertMemberAction,
+  deleteMemberAction:              mockDeleteMemberAction,
+  upsertAvailabilityAction:        mockUpsertAvailabilityAction,
+  deleteAvailabilityAction:        mockDeleteAvailabilityAction,
+  bulkUpsertAvailabilitiesAction:  mockBulkUpsertAvailabilitiesAction,
+  upsertTeamAction:                mockUpsertTeamAction,
+  deleteTeamAction:                mockDeleteTeamAction,
+  upsertProjectAction:             mockUpsertProjectAction,
+  deleteProjectAction:             mockDeleteProjectAction,
+  upsertAllocationAction:          mockUpsertAllocationAction,
+  deleteAllocationAction:          mockDeleteAllocationAction,
 }));
 
 // Import NACH dem Mock
@@ -93,6 +95,7 @@ import {
   dbAddAvailability,
   dbUpdateAvailability,
   dbDeleteAvailability,
+  dbBulkAddAvailabilities,
   dbAddTeam,
   dbUpdateTeam,
   dbDeleteTeam,
@@ -466,6 +469,11 @@ describe('DB: Guard-Checks weitere Funktionen (ohne Supabase)', () => {
     expect(mockDeleteAvailabilityAction).not.toHaveBeenCalled();
   });
 
+  it('dbBulkAddAvailabilities tut nichts ohne Supabase-Config', async () => {
+    await dbBulkAddAvailabilities([{ id: 'a1', memberId: 'm1', status: 'available', date: '2026-01-01' }]);
+    expect(mockBulkUpsertAvailabilitiesAction).not.toHaveBeenCalled();
+  });
+
   it('dbUpdateTeam tut nichts ohne Supabase-Config', async () => {
     const team: Team = { id: '1', name: 'Test', memberIds: [] };
     await dbUpdateTeam(team);
@@ -534,6 +542,21 @@ describe('DB: Allocation-Funktionen mit Supabase konfiguriert', () => {
   it('dbDeleteAllocation ruft deleteAllocationAction auf', async () => {
     await dbDeleteAllocation('al1');
     expect(mockDeleteAllocationAction).toHaveBeenCalledWith('al1');
+  });
+
+  it('dbBulkAddAvailabilities ruft bulkUpsertAvailabilitiesAction auf', async () => {
+    const entries = [
+      { id: 'a1', memberId: 'm1', status: 'available', date: '2026-03-20' },
+      { id: 'a2', memberId: 'm1', status: 'vacation', date: '2026-03-21' },
+    ];
+    await dbBulkAddAvailabilities(entries);
+    expect(mockBulkUpsertAvailabilitiesAction).toHaveBeenCalledOnce();
+    expect(mockBulkUpsertAvailabilitiesAction).toHaveBeenCalledWith(entries);
+  });
+
+  it('dbBulkAddAvailabilities tut nichts bei leerer Liste', async () => {
+    await dbBulkAddAvailabilities([]);
+    expect(mockBulkUpsertAvailabilitiesAction).not.toHaveBeenCalled();
   });
 
   it('dbDeleteMember ruft deleteMemberAction auf (inkl. allocations)', async () => {

@@ -18,6 +18,7 @@ import {
   deleteAllocationAction,
   upsertAvailabilityAction,
   deleteAvailabilityAction,
+  bulkUpsertAvailabilitiesAction,
 } from '@/lib/actions/writeActions';
 
 /* ── Hilfsfunktionen: DB-Rows ↔ App-Typen ──────────────── */
@@ -204,12 +205,12 @@ export async function dbDeleteMember(id: string) {
 
 export async function dbAddAvailability(entry: Availability) {
   if (!isSupabaseConfigured()) return;
-  const userId = await getUserId();
-  if (!userId) return;
+  // Kein getUserId()-Aufruf! Server Action liest userId sicher aus der Server-Session.
+  // Browser-seitiges getUserId() führt bei Bulk-Writes zu navigator.locks Konflikten
+  // und gibt silent null zurück → DB-Write wird ohne Fehler übersprungen.
   await upsertAvailabilityAction({
     id: entry.id,
     memberId: entry.memberId,
-    userId,
     status: entry.status,
     date: entry.date,
     startTime: entry.startTime ?? null,
@@ -220,12 +221,9 @@ export async function dbAddAvailability(entry: Availability) {
 
 export async function dbUpdateAvailability(entry: Availability) {
   if (!isSupabaseConfigured()) return;
-  const userId = await getUserId();
-  if (!userId) return;
   await upsertAvailabilityAction({
     id: entry.id,
     memberId: entry.memberId,
-    userId,
     status: entry.status,
     date: entry.date,
     startTime: entry.startTime ?? null,
@@ -237,6 +235,16 @@ export async function dbUpdateAvailability(entry: Availability) {
 export async function dbDeleteAvailability(id: string) {
   if (!isSupabaseConfigured()) return;
   await deleteAvailabilityAction(id);
+}
+
+/**
+ * Bulk-Write für Availability-Einträge – ein einziger Server-Action-Call statt N parallele.
+ * Vermeidet navigator.locks Browser-Lock-Konflikte bei Monat-Füllen und Mehrfachauswahl.
+ */
+export async function dbBulkAddAvailabilities(entries: Array<{ id: string; memberId: string; status: string; date: string }>) {
+  if (!isSupabaseConfigured()) return;
+  if (entries.length === 0) return;
+  await bulkUpsertAvailabilitiesAction(entries);
 }
 
 /* ── Teams ────────────────────────────────────────────────── */

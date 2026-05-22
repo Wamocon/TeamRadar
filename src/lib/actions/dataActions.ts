@@ -17,16 +17,17 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 async function getReadClient(): Promise<SupabaseClient> {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  // Supabase Service-Role-Keys sind JWTs und beginnen immer mit 'eyJ'
-  // Andere Key-Formate (sb_secret_...) werden als Anon-Key behandelt
-  if (serviceKey && serviceKey.startsWith('eyJ')) {
+  // Admin-Client immer verwenden wenn Service-Role-Key gesetzt ist.
+  // Supabase hat das Key-Format auf 'sb_secret_*' umgestellt – der alte
+  // startsWith('eyJ') Check schloss neue Keys fälschlicherweise aus.
+  if (serviceKey) {
     try {
       return await createAdminClient();
     } catch (e) {
       console.warn('createAdminClient fehlgeschlagen, Fallback auf anon client:', e);
     }
   }
-  // Fallback: normaler Auth-Client (funktioniert nach RLS-Migration)
+  // Fallback: normaler Auth-Client
   return await createClient();
 }
 

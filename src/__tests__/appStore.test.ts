@@ -10,7 +10,7 @@ import type { AvailabilityStatus } from '@/types';
 const {
   mockLoadAllData, mockDbGetUserProfile, mockDbAddProject,
   mockDbAddMember, mockDbUpdateMember, mockDbDeleteMember,
-  mockDbAddAvailability, mockDbUpdateAvailability, mockDbDeleteAvailability,
+  mockDbAddAvailability, mockDbUpdateAvailability, mockDbDeleteAvailability, mockDbBulkAddAvailabilities,
   mockDbAddTeam, mockDbUpdateTeam, mockDbDeleteTeam,
   mockDbUpdateProject, mockDbDeleteProject,
   mockDbAddAllocation, mockDbUpdateAllocation, mockDbDeleteAllocation,
@@ -25,6 +25,7 @@ const {
     mockDbAddAvailability: vi.fn().mockResolvedValue(undefined),
     mockDbUpdateAvailability: vi.fn().mockResolvedValue(undefined),
     mockDbDeleteAvailability: vi.fn().mockResolvedValue(undefined),
+    mockDbBulkAddAvailabilities: vi.fn().mockResolvedValue(undefined),
     mockDbAddTeam: vi.fn().mockResolvedValue(undefined),
     mockDbUpdateTeam: vi.fn().mockResolvedValue(undefined),
     mockDbDeleteTeam: vi.fn().mockResolvedValue(undefined),
@@ -44,6 +45,7 @@ vi.mock('@/lib/supabase/db', () => ({
   dbAddAvailability: mockDbAddAvailability,
   dbUpdateAvailability: mockDbUpdateAvailability,
   dbDeleteAvailability: mockDbDeleteAvailability,
+  dbBulkAddAvailabilities: mockDbBulkAddAvailabilities,
   dbAddTeam: mockDbAddTeam,
   dbUpdateTeam: mockDbUpdateTeam,
   dbDeleteTeam: mockDbDeleteTeam,
@@ -294,6 +296,107 @@ describe('Store: getMemberStatus', () => {
 
     expect(useAppStore.getState().getMemberStatus('m1', testDate)).toBe('available');
     expect(useAppStore.getState().getMemberStatus('m2', testDate)).toBe('sick');
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   BULK AVAILABILITIES
+   ═══════════════════════════════════════════════════════════════ */
+
+describe('Store: bulkAddAvailabilities', () => {
+  const testDate1 = '2026-04-01';
+  const testDate2 = '2026-04-02';
+
+  it('fügt mehrere neue Einträge auf einmal hinzu', () => {
+    useAppStore.getState().bulkAddAvailabilities([
+      { memberId: 'm1', status: 'available', date: testDate1 },
+      { memberId: 'm1', status: 'vacation', date: testDate2 },
+    ]);
+
+    expect(useAppStore.getState().availabilities).toHaveLength(2);
+    expect(useAppStore.getState().getMemberStatus('m1', testDate1)).toBe('available');
+    expect(useAppStore.getState().getMemberStatus('m1', testDate2)).toBe('vacation');
+    expect(mockDbBulkAddAvailabilities).toHaveBeenCalledOnce();
+  });
+
+  it('ruft dbBulkAddAvailabilities mit allen IDs auf', () => {
+    useAppStore.getState().bulkAddAvailabilities([
+      { memberId: 'm1', status: 'available', date: testDate1 },
+    ]);
+
+    const arg = mockDbBulkAddAvailabilities.mock.calls[0][0];
+    expect(arg).toHaveLength(1);
+    expect(arg[0].memberId).toBe('m1');
+    expect(arg[0].status).toBe('available');
+    expect(arg[0].date).toBe(testDate1);
+    expect(typeof arg[0].id).toBe('string');
+  });
+
+  it('aktualisiert bestehende Einträge (Upsert) statt neu einzufügen', () => {
+    // Erst einen Eintrag anlegen
+    useAppStore.getState().addAvailability({ memberId: 'm1', status: 'available', date: testDate1 });
+    expect(useAppStore.getState().availabilities).toHaveLength(1);
+
+    // Bulk-Update für denselben Tag
+    useAppStore.getState().bulkAddAvailabilities([
+      { memberId: 'm1', status: 'sick', date: testDate1 },
+    ]);
+
+    // Kein neuer Eintrag, nur Status geändert
+    expect(useAppStore.getState().availabilities).toHaveLength(1);
+    expect(useAppStore.getState().getMemberStatus('m1', testDate1)).toBe('sick');
+  });
+
+  it('Rollback bei DB-Fehler: neue Einträge werden entfernt', async () => {
+    mockDbBulkAddAvailabilities.mockRejectedValueOnce(new Error('Bulk-Fehler'));
+
+    useAppStore.getState().bulkAddAvailabilities([
+      { memberId: 'm1', status: 'available', date: testDate1 },
+      { memberId: 'm1', status: 'vacation', date: testDate2 },
+    ]);
+
+    await flushMicroTasks();
+    expect(useAppStore.getState().availabilities).toHaveLength(0);
+    expect(useAppStore.getState().writeError).toBe('Bulk-Fehler');
+  });
+
+  it('Rollback bei DB-Fehler: aktualisierte Einträge werden zur\u00fcckgesetzt', async () => {
+    useAppStore.getState().addAvailability({ memberId: 'm1', status: 'available', date: testDate1 });
+    mockDbBulkAddAvailabilities.mockRejectedValueOnce(new Error('Bulk-Update-Fehler'));
+
+    useAppStore.getState().bulkAddAvailabilities([
+      { memberId: 'm1', status: 'sick', date: testDate1 },
+    ]);
+
+    await flushMicroTasks();
+    // Status auf 'available' zurückgesetzt
+    expect(useAppStore.getState().getMemberStatus('m1', testDate1)).toBe('available');
+    expect(useAppStore.getState().writeError).toBe('Bulk-Update-Fehler');
+  });
+
+  it('Rollback: unber\u00fchrte Eintr\u00e4ge bleiben im State (?? a Zweig)', async () => {
+    // m2-Eintrag ist NICHT Teil des bulk-Aufrufs → landet im Rollback im ?? a Zweig
+    useAppStore.getState().addAvailability({ memberId: 'm2', status: 'sick', date: testDate2 });
+    mockDbBulkAddAvailabilities.mockRejectedValueOnce(new Error('Fehler'));
+
+    useAppStore.getState().bulkAddAvailabilities([
+      { memberId: 'm1', status: 'available', date: testDate1 },
+    ]);
+
+    await flushMicroTasks();
+    // m1 (neuer Eintrag) wird zurückgerollt
+    expect(useAppStore.getState().getMemberStatus('m1', testDate1)).toBe('offline');
+    // m2 (unbeteiligt) bleibt erhalten
+    expect(useAppStore.getState().getMemberStatus('m2', testDate2)).toBe('sick');
+  });
+
+  it('Fallback-Fehlermeldung bei null-Error', async () => {
+    mockDbBulkAddAvailabilities.mockRejectedValueOnce(null);
+    useAppStore.getState().bulkAddAvailabilities([
+      { memberId: 'm1', status: 'available', date: testDate1 },
+    ]);
+    await flushMicroTasks();
+    expect(useAppStore.getState().writeError).toBe('Bulk-Verfügbarkeit konnte nicht gespeichert werden');
   });
 });
 

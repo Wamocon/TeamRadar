@@ -152,7 +152,7 @@ function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, toda
           }
         }}
         className={`w-11 h-11 rounded-md flex items-center justify-center text-[11px] font-bold transition-all mx-auto relative ${
-          isToday ? 'ring-2 ring-[var(--primary)] ring-offset-1' : ''
+          isToday ? 'ring-2 ring-(--primary) ring-offset-1' : ''
         } ${canEdit ? 'hover:scale-105 hover:brightness-110 cursor-pointer' : 'cursor-default'} border-none`}
         style={{
           background: cellBg,
@@ -198,8 +198,8 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
   const isCurrent = month === currentMonth && year === currentYear;
 
   return (
-    <div className={`card-shimmer rounded-xl border overflow-hidden ${isCurrent ? 'border-[var(--primary)]/30 ring-1 ring-[var(--primary)]/20' : 'border-black/10 dark:border-white/10'}`}>
-      <div className={`px-3 py-2 flex items-center justify-between border-b border-black/10 dark:border-white/10 ${isCurrent ? 'bg-[var(--primary-light)]' : ''}`}>
+    <div className={`card-shimmer rounded-xl border overflow-hidden ${isCurrent ? 'border-(--primary)/30 ring-1 ring-(--primary)/20' : 'border-black/10 dark:border-white/10'}`}>
+      <div className={`px-3 py-2 flex items-center justify-between border-b border-black/10 dark:border-white/10 ${isCurrent ? 'bg-(--primary-light)' : ''}`}>
         <button
           onClick={onToggleCollapse}
           className="flex items-center gap-2 bg-transparent border-none cursor-pointer p-0 hover:opacity-70 transition-opacity"
@@ -207,12 +207,12 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
           {isCollapsed
             ? <ChevronDown size={14} className="dark:text-white/40 text-gray-400" />
             : <ChevronUp size={14} className="dark:text-white/40 text-gray-400" />}
-          <span className={`text-sm font-black ${isCurrent ? 'text-[var(--primary)]' : 'dark:text-white text-gray-900'}`}>
+          <span className={`text-sm font-black ${isCurrent ? 'text-(--primary)' : 'dark:text-white text-gray-900'}`}>
             {MONTH_NAMES_LONG[month]} {year}
           </span>
         </button>
         <div className="flex items-center gap-2">
-          {isCurrent && <span className="px-1.5 py-0.5 rounded-full bg-[var(--primary)] text-white text-[8px] font-bold">AKTUELL</span>}
+          {isCurrent && <span className="px-1.5 py-0.5 rounded-full bg-(--primary) text-white text-[8px] font-bold">AKTUELL</span>}
           {!isCollapsed && (
             <button
               onClick={(e) => {
@@ -224,7 +224,7 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                   setBulkFill({ month, year, x: rect.right, y: rect.bottom });
                 }
               }}
-              className="px-2 py-1 rounded-lg text-[9px] font-bold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
+              className="px-2 py-1 rounded-lg text-[9px] font-bold border dark:border-white/10 border-black/10 hover:bg-(--primary-light) hover:text-(--primary) dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
               title="Ganzen Monat mit Status füllen"
             >
               Monat füllen →
@@ -234,15 +234,15 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
       </div>
       {!isCollapsed && (
         <div className="overflow-x-auto w-full">
-          <table className="text-[10px] border-collapse w-full" style={{ borderSpacing: 0 }}>
+          <table className="text-[10px] border-collapse border-spacing-0 w-full">
             <colgroup>
-              <col style={{ minWidth: '140px', width: '160px' }} />
-              {days.map((d) => <col key={d.day} style={{ minWidth: d.isWeekend ? '34px' : '46px' }} />)}
-              {MONTH_STATS_COLS.map((s) => <col key={s.key} style={{ width: '38px', minWidth: '38px' }} />)}
+              <col className="min-w-35 w-40" />
+              {days.map((d) => <col key={d.day} className={d.isWeekend ? 'min-w-8.5' : 'min-w-11.5'} />)}
+              {MONTH_STATS_COLS.map((s) => <col key={s.key} className="w-9.5 min-w-9.5" />)}
             </colgroup>
             <thead>
               <tr className="border-b dark:border-white/10 border-gray-200">
-                <th className="text-left px-2 py-2 font-black dark:text-white/40 text-gray-500 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/10 border-gray-200" style={{ fontSize: '10px' }}>
+                <th className="text-left px-2 py-2 text-[10px] font-black dark:text-white/40 text-gray-500 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/10 border-gray-200">
                   Berater
                 </th>
                 {days.map((d) => (
@@ -250,7 +250,7 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                     className={`text-center font-black pb-0.5 pt-1.5 ${
                       d.isWeekend ? 'dark:text-white/15 text-gray-300' :
                       d.holiday ? 'text-red-400 dark:text-red-400' :
-                      d.dateStr === today ? 'text-[var(--primary)]' :
+                      d.dateStr === today ? 'text-(--primary)' :
                       'dark:text-white/40 text-gray-500'
                     }`}
                     style={{ fontSize: '11px', background: d.holiday ? 'rgba(239,68,68,0.04)' : undefined }}
@@ -260,7 +260,7 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                 ))}
                 {MONTH_STATS_COLS.map((s, i) => (
                   <th key={s.key} rowSpan={2} title={s.title}
-                    className={`text-center font-black align-middle ${i === 0 ? 'border-l-2 dark:border-white/[0.15] border-black/[0.08]' : ''}`}
+                    className={`text-center font-black align-middle ${i === 0 ? 'border-l-2 dark:border-white/15 border-black/8' : ''}`}
                     style={{ fontSize: '9px', color: s.color, verticalAlign: 'middle' }}>
                     {s.key}
                   </th>
@@ -290,9 +290,9 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
             </thead>
             <tbody>
               {memberRows.map(({ member, categories }) => (
-                <tr key={member.id} className="border-b dark:border-white/[0.06] border-gray-150 hover:bg-black/[0.01] dark:hover:bg-white/[0.01]">
+                <tr key={member.id} className="border-b dark:border-white/6 border-gray-150 hover:bg-black/1 dark:hover:bg-white/1">
                   <td className="px-2 py-1.5 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/10 border-gray-200">
-                    <div className="font-bold dark:text-white/80 text-gray-700 truncate" style={{ fontSize: '11px', maxWidth: 140 }}>
+                    <div className="font-bold text-[11px] dark:text-white/80 text-gray-700 truncate max-w-35">
                       {member.name}
                     </div>
                   </td>
@@ -316,7 +316,7 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                       : categories.filter(c => c === s.cat).length;
                     return (
                       <td key={s.key}
-                        className={`text-center font-bold py-1 ${i === 0 ? 'border-l-2 dark:border-white/[0.15] border-black/[0.08]' : ''}`}
+                        className={`text-center font-bold py-1 ${i === 0 ? 'border-l-2 dark:border-white/15 border-black/8' : ''}`}
                         style={{ fontSize: '11px', color: val > 0 ? s.color : '#d1d5db' }}>
                         {val > 0 ? val : '–'}
                       </td>
@@ -368,7 +368,7 @@ function ProjectPopup({ project, members, hasMinRole, onClose }: ProjectPopupPro
               </div>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-all border-none bg-transparent cursor-pointer dark:text-white/50 text-gray-500">
+          <button onClick={onClose} title="Schließen" className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-all border-none bg-transparent cursor-pointer dark:text-white/50 text-gray-500">
             <X size={16} />
           </button>
         </div>
@@ -396,7 +396,7 @@ function ProjectPopup({ project, members, hasMinRole, onClose }: ProjectPopupPro
               <div className="text-xs dark:text-white/40 text-gray-500 mb-2">Zugewiesene Berater</div>
               <div className="flex flex-wrap gap-1.5">
                 {assignedMembers.map((m) => (
-                  <span key={m.id} className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--primary-light)] text-[var(--primary)] border border-[rgba(99,102,241,0.2)]">
+                  <span key={m.id} className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-(--primary-light) text-(--primary) border border-[rgba(99,102,241,0.2)]">
                     {m.name}
                   </span>
                 ))}
@@ -407,7 +407,7 @@ function ProjectPopup({ project, members, hasMinRole, onClose }: ProjectPopupPro
         {canManage && (
           <div className="px-5 py-3 border-t dark:border-white/10 border-gray-100 flex justify-end gap-2">
             <Link href={`/projects`} onClick={onClose}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--primary)] text-white text-xs font-semibold no-underline hover:opacity-90 transition-opacity">
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-(--primary) text-white text-xs font-semibold no-underline hover:opacity-90 transition-opacity">
               <ExternalLink size={12} /> Verwalten
             </Link>
           </div>
@@ -430,11 +430,11 @@ function ProjectCard({ project, onSelect }: ProjectCardProps) {
 
   return (
     <button onClick={() => onSelect(project)}
-      className="w-full text-left p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06] hover:border-[var(--primary)]/30 hover:bg-[var(--primary-light)] transition-all cursor-pointer bg-transparent group">
+      className="w-full text-left p-3 rounded-xl border dark:border-white/6 border-black/6 hover:border-(--primary)/30 hover:bg-(--primary-light) transition-all cursor-pointer bg-transparent group">
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <div className="w-2 h-2 rounded-full shrink-0" style={{ background: typeConf.color }} />
-          <span className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-[var(--primary)] transition-colors">{project.name}</span>
+          <span className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-(--primary) transition-colors">{project.name}</span>
         </div>
         <span className="px-1.5 py-0.5 rounded-md text-[8px] font-bold border ml-2 shrink-0" style={{ color: statusConf.color, borderColor: `${statusConf.color}40` }}>
           {statusConf.label}
@@ -750,7 +750,7 @@ export default function YearOverviewPage() {
       {quickStatus && (
         <div
           ref={quickRef}
-          className="fixed z-[200] bg-white dark:bg-gray-900 shadow-2xl border dark:border-white/10 border-gray-200 rounded-xl p-2 grid grid-cols-2 gap-1 min-w-[160px]"
+          className="fixed z-200 bg-white dark:bg-gray-900 shadow-2xl border dark:border-white/10 border-gray-200 rounded-xl p-2 grid grid-cols-2 gap-1 min-w-40"
           style={{
             top: Math.min(quickStatus.y + 4, window.innerHeight - 200),
             left: Math.min(quickStatus.x, window.innerWidth - 175),
@@ -779,7 +779,7 @@ export default function YearOverviewPage() {
       {bulkFill && (
         <div
           ref={bulkRef}
-          className="fixed z-[200] bg-white dark:bg-gray-900 shadow-2xl border dark:border-white/10 border-gray-200 rounded-xl p-2 grid grid-cols-2 gap-1 min-w-[170px]"
+          className="fixed z-200 bg-white dark:bg-gray-900 shadow-2xl border dark:border-white/10 border-gray-200 rounded-xl p-2 grid grid-cols-2 gap-1 min-w-42.5"
           style={{
             top: Math.min(bulkFill.y + 4, window.innerHeight - 240),
             left: Math.min(bulkFill.x - 170, window.innerWidth - 185),
@@ -811,7 +811,7 @@ export default function YearOverviewPage() {
       {multiPickerAnchor && (
         <div
           ref={multiPickerRef}
-          className="fixed z-[200] bg-white dark:bg-gray-900 shadow-2xl border dark:border-white/10 border-gray-200 rounded-xl p-2 grid grid-cols-2 gap-1 min-w-[190px]"
+          className="fixed z-200 bg-white dark:bg-gray-900 shadow-2xl border dark:border-white/10 border-gray-200 rounded-xl p-2 grid grid-cols-2 gap-1 min-w-47.5"
           style={{
             top: Math.min(multiPickerAnchor.y + 4, window.innerHeight - 270),
             left: Math.min(multiPickerAnchor.x - 95, window.innerWidth - 200),
@@ -842,8 +842,8 @@ export default function YearOverviewPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
-              <CalendarRange size={20} className="text-[var(--primary)]" />
+            <div className="w-10 h-10 rounded-xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
+              <CalendarRange size={20} className="text-(--primary)" />
             </div>
             Jahresübersicht
           </h1>
@@ -856,32 +856,32 @@ export default function YearOverviewPage() {
             title="Nur eigene Einträge anzeigen – fokussiert auf deine Zeile"
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
               showOnlyMine
-                ? 'bg-[var(--primary)] text-white border-[var(--primary)]'
-                : 'border-black/[0.08] dark:border-white/[0.08] dark:text-white/60 text-gray-600 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] bg-transparent'
+                ? 'bg-(--primary) text-white border-(--primary)'
+                : 'border-black/8 dark:border-white/8 dark:text-white/60 text-gray-600 hover:bg-(--primary-light) hover:text-(--primary) bg-transparent'
             }`}
           >
             <Eye size={13} />
             Nur meine
           </button>
-          <button onClick={() => setYear((y) => y - 1)}
-            className="p-2 rounded-lg border dark:border-white/[0.06] border-black/[0.06] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+          <button onClick={() => setYear((y) => y - 1)} title="Vorheriges Jahr"
+            className="p-2 rounded-lg border dark:border-white/6 border-black/6 hover:bg-black/4 dark:hover:bg-white/4 transition-colors">
             <ChevronLeft size={16} className="dark:text-white/50 text-gray-600" />
           </button>
-          <span className="text-xl font-black dark:text-white text-gray-900 min-w-[70px] text-center">{year}</span>
-          <button onClick={() => setYear((y) => y + 1)}
-            className="p-2 rounded-lg border dark:border-white/[0.06] border-black/[0.06] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+          <span className="text-xl font-black dark:text-white text-gray-900 min-w-17.5 text-center">{year}</span>
+          <button onClick={() => setYear((y) => y + 1)} title="Nächstes Jahr"
+            className="p-2 rounded-lg border dark:border-white/6 border-black/6 hover:bg-black/4 dark:hover:bg-white/4 transition-colors">
             <ChevronRight size={16} className="dark:text-white/50 text-gray-600" />
           </button>
         </div>
       </div>
 
       {/* -- Tabs --------------------------------------- */}
-      <div className="flex gap-1 p-1 bg-black/[0.04] dark:bg-white/[0.04] rounded-xl w-fit">
+      <div className="flex gap-1 p-1 bg-black/4 dark:bg-white/4 rounded-xl w-fit">
         {tabs.map((tab) => (
           <button key={tab.mode} onClick={() => setViewMode(tab.mode)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all border-none cursor-pointer ${
               viewMode === tab.mode
-                ? 'bg-[var(--primary)] text-white shadow-sm'
+                ? 'bg-(--primary) text-white shadow-sm'
                 : 'dark:text-white/50 text-gray-500 hover:text-gray-700 dark:hover:text-white/70 bg-transparent'
             }`}>
             <tab.icon size={12} />
@@ -928,7 +928,7 @@ export default function YearOverviewPage() {
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <div className="text-[10px] font-semibold dark:text-white/50 text-gray-500 truncate max-w-[130px]">{member.name}</div>
+                            <div className="text-[10px] font-semibold dark:text-white/50 text-gray-500 truncate max-w-32.5">{member.name}</div>
                             <div className="text-2xl font-black mt-0.5" style={{ color: barColor }}>
                               {effectiveDays.toFixed(1)}<span className="text-sm font-semibold ml-0.5 opacity-60">d</span>
                             </div>
@@ -962,49 +962,49 @@ export default function YearOverviewPage() {
           })()}
 
           {/* Jahr-KPI pro Mitarbeiter */}
-          <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
-            <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04]">
+          <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
+            <div className="px-4 py-3 border-b dark:border-white/6 border-black/4">
               <h3 className="text-sm font-black dark:text-white text-gray-900">Jahresübersicht {year} pro Mitarbeiter</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b dark:border-white/[0.06] border-black/[0.04]">
-                    <th className="text-left px-4 py-2 font-semibold dark:text-white/40 text-gray-500 min-w-[150px]">Mitarbeiter</th>
-                    <th className="text-center px-3 py-2 font-semibold text-[#f97316] min-w-[90px]">Ext. Projekt</th>
-                    <th className="text-center px-3 py-2 font-semibold text-[#6366f1] min-w-[90px]">Int. Projekt</th>
-                    <th className="text-center px-3 py-2 font-semibold text-[#ec4899] min-w-[80px]">Krank</th>
-                    <th className="text-center px-3 py-2 font-semibold text-[#8b5cf6] min-w-[80px]">Urlaub</th>
-                    <th className="text-center px-3 py-2 font-semibold text-[#22c55e] min-w-[120px] border-l dark:border-white/[0.06] border-black/[0.04]" title="Effektiv geleistete Tage (39h-korrigiert) vs. Plan">Eff. Tage / Plan</th>
-                    <th className="text-center px-3 py-2 font-semibold text-[#f59e0b] min-w-[80px] border-l dark:border-white/[0.06] border-black/[0.04]" title="Kalenderwochen mit 5 externen Werktagen (39h statt 40h)">Ext. Wo.</th>
-                    <th className="text-center px-3 py-2 font-semibold text-[#ef4444] min-w-[110px]" title="39h-Regel: 1h Verlust pro Vollwoche extern → benötigte Zusatztage">39h-Ausgleich</th>
+                  <tr className="border-b dark:border-white/6 border-black/4">
+                    <th className="text-left px-4 py-2 font-semibold dark:text-white/40 text-gray-500 min-w-37.5">Mitarbeiter</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#f97316] min-w-22.5">Ext. Projekt</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#6366f1] min-w-22.5">Int. Projekt</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#ec4899] min-w-20">Krank</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#8b5cf6] min-w-20">Urlaub</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#22c55e] min-w-30 border-l dark:border-white/6 border-black/4" title="Effektiv geleistete Tage (39h-korrigiert) vs. Plan">Eff. Tage / Plan</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#f59e0b] min-w-20 border-l dark:border-white/6 border-black/4" title="Kalenderwochen mit 5 externen Werktagen (39h statt 40h)">Ext. Wo.</th>
+                    <th className="text-center px-3 py-2 font-semibold text-[#ef4444] min-w-27.5" title="39h-Regel: 1h Verlust pro Vollwoche extern → benötigte Zusatztage">39h-Ausgleich</th>
                   </tr>
                 </thead>
                 <tbody>
                   {memberYearKPIs.map(({ member, extDays, intDays, sickDays, vacationDays, extBudget, fullExtWeeks, hourLoss, extraDaysNeeded, effectiveDays }) => (
-                    <tr key={member.id} className="border-b dark:border-white/[0.03] border-black/[0.02] hover:bg-black/[0.01] dark:hover:bg-white/[0.01]">
+                    <tr key={member.id} className="border-b dark:border-white/3 border-black/2 hover:bg-black/1 dark:hover:bg-white/1">
                       <td className="px-4 py-2 font-semibold dark:text-white/80 text-gray-800">{member.name}</td>
                       <td className="text-center px-3 py-2">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: extDays > 0 ? '#f97316' : 'rgba(156,163,175,0.2)' }}>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${extDays > 0 ? 'bg-orange-500' : 'bg-gray-400/20'}`}>
                           {extDays}d
                         </span>
                       </td>
                       <td className="text-center px-3 py-2">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: intDays > 0 ? '#6366f1' : 'rgba(156,163,175,0.2)' }}>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold text-white ${intDays > 0 ? 'bg-indigo-500' : 'bg-gray-400/20'}`}>
                           {intDays}d
                         </span>
                       </td>
                       <td className="text-center px-3 py-2">
-                        <span className="text-[10px] font-bold" style={{ color: sickDays > 5 ? '#ec4899' : sickDays > 0 ? '#e879a0' : '#9ca3af' }}>
+                        <span className={`text-[10px] font-bold ${sickDays > 5 ? 'text-pink-400' : sickDays > 0 ? 'text-[#e879a0]' : 'text-gray-400'}`}>
                           {sickDays}d
                         </span>
                       </td>
                       <td className="text-center px-3 py-2">
-                        <span className="text-[10px] font-bold" style={{ color: vacationDays > 0 ? '#8b5cf6' : '#9ca3af' }}>
+                        <span className={`text-[10px] font-bold ${vacationDays > 0 ? 'text-violet-500' : 'text-gray-400'}`}>
                           {vacationDays}d
                         </span>
                       </td>
-                      <td className="text-center px-3 py-2 border-l dark:border-white/[0.06] border-black/[0.04]">
+                      <td className="text-center px-3 py-2 border-l dark:border-white/6 border-black/4">
                         {extBudget != null ? (() => {
                           const diff = effectiveDays - extBudget;
                           const isOver  = diff >= 0;
@@ -1018,15 +1018,15 @@ export default function YearOverviewPage() {
                             >
                               {!isOver && !isWarn && <AlertCircle size={9} />}
                               <span>{effectiveDays.toFixed(1)}/{extBudget}d</span>
-                              <span style={{ fontSize: '8px', opacity: 0.8 }}>{diff >= 0 ? '+' : ''}{diff.toFixed(1)}d</span>
+                              <span className="text-[8px] opacity-80">{diff >= 0 ? '+' : ''}{diff.toFixed(1)}d</span>
                             </span>
                           );
                         })() : <span className="text-[10px] text-gray-400">–</span>}
                       </td>
                       {/* 39h-Ausgleich: volle externe Wochen zählen */}
-                      <td className="text-center px-3 py-2 border-l dark:border-white/[0.06] border-black/[0.04]">
+                      <td className="text-center px-3 py-2 border-l dark:border-white/6 border-black/4">
                         {fullExtWeeks > 0
-                          ? <span className="text-[10px] font-bold" style={{ color: '#f59e0b' }}>{fullExtWeeks}</span>
+                          ? <span className="text-[10px] font-bold text-amber-500">{fullExtWeeks}</span>
                           : <span className="text-[10px] text-gray-400">–</span>}
                       </td>
                       <td className="text-center px-3 py-2">
@@ -1035,8 +1035,8 @@ export default function YearOverviewPage() {
                             className="inline-flex flex-col items-center leading-tight"
                             title={`${fullExtWeeks} Vollwochen extern × 1h = ${hourLoss}h Verlust → ${extraDaysNeeded} Zusatztag${extraDaysNeeded !== 1 ? 'e' : ''} nötig`}
                           >
-                            <span className="text-[10px] font-bold" style={{ color: '#ef4444' }}>-{hourLoss}h</span>
-                            <span className="text-[9px] font-semibold" style={{ color: '#f97316' }}>+{extraDaysNeeded}d nötig</span>
+                            <span className="text-[10px] font-bold text-red-500">-{hourLoss}h</span>
+                            <span className="text-[9px] font-semibold text-orange-500">+{extraDaysNeeded}d nötig</span>
                           </span>
                         ) : <span className="text-[10px] text-gray-400">–</span>}
                       </td>
@@ -1056,7 +1056,7 @@ export default function YearOverviewPage() {
                 title="Bundesland für Feiertagsanzeige"
                 value={bundesland}
                 onChange={(e) => handleBundeslandChange(e.target.value as Bundesland)}
-                className="text-[10px] rounded-lg px-2 py-1 border dark:border-white/[0.08] border-black/[0.08] bg-transparent dark:text-white/70 text-gray-700 outline-none focus:border-[var(--primary)] cursor-pointer">
+                className="text-[10px] rounded-lg px-2 py-1 border dark:border-white/8 border-black/8 bg-transparent dark:text-white/70 text-gray-700 outline-none focus:border-(--primary) cursor-pointer">
                 {(Object.entries(BUNDESLAENDER) as [Bundesland, string][]).map(([k, v]) => (
                   <option key={k} value={k}>{k === 'ALL' ? v : `${k} – ${v}`}</option>
                 ))}
@@ -1102,7 +1102,7 @@ export default function YearOverviewPage() {
                   Status setzen →
                 </button>
               )}
-              <button onClick={cancelMultiSelect} className="ml-auto p-1 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors border-none cursor-pointer text-green-600 dark:text-green-400">
+              <button onClick={cancelMultiSelect} title="Mehrfachauswahl beenden" className="ml-auto p-1 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors border-none cursor-pointer text-green-600 dark:text-green-400">
                 <X size={12} />
               </button>
             </div>
@@ -1120,7 +1120,7 @@ export default function YearOverviewPage() {
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-semibold transition-all cursor-pointer ${
                   selectMode
                     ? 'bg-green-600 text-white border-green-600'
-                    : 'border-black/[0.08] dark:border-white/[0.08] dark:text-white/50 text-gray-500 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] bg-transparent'
+                    : 'border-black/8 dark:border-white/8 dark:text-white/50 text-gray-500 hover:bg-black/4 dark:hover:bg-white/4 bg-transparent'
                 }`}
               >
                 <CheckSquare size={12} />
@@ -1128,20 +1128,20 @@ export default function YearOverviewPage() {
               </button>
               <button
                 onClick={() => setCollapsedMonths(new Set())}
-                className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
+                className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-(--primary-light) hover:text-(--primary) dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
               >
                 Alle aufklappen
               </button>
               <button
                 onClick={() => setCollapsedMonths(new Set([0,1,2,3,4,5,6,7,8,9,10,11]))}
-                className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
+                className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-(--primary-light) hover:text-(--primary) dark:text-white/50 text-gray-500 transition-all bg-transparent cursor-pointer"
               >
                 Alle einklappen
               </button>
             </div>
           </div>
           {showOnlyMine && (
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] text-[11px] font-semibold text-[var(--primary)]">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] text-[11px] font-semibold text-(--primary)">
               <Eye size={12} />
               Nur deine Einträge werden angezeigt – alle anderen Berater ausgeblendet. Klicke &ldquo;Nur meine&rdquo; erneut, um alle anzuzeigen.
             </div>
@@ -1205,29 +1205,29 @@ export default function YearOverviewPage() {
 
           {/* Interne Projekte (größerer Bereich) */}
           <div className="grid lg:grid-cols-3 gap-5">
-            <div className="lg:col-span-2 card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
-              <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04] flex items-center gap-2">
+            <div className="lg:col-span-2 card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
+              <div className="px-4 py-3 border-b dark:border-white/6 border-black/4 flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-[#6366f1]" />
                 <h3 className="text-sm font-black dark:text-white text-gray-900">Interne Projekte</h3>
                 <span className="ml-auto px-2 py-0.5 rounded-full bg-[#6366f1]/10 text-[#6366f1] text-[10px] font-bold">{internalProjects.length}</span>
               </div>
               {/* Gantt für interne Projekte */}
               <div className="p-4 overflow-x-auto">
-                <div className="flex mb-3 min-w-[500px]">
+                <div className="flex mb-3 min-w-125">
                   <div className="w-36 shrink-0" />
                   <div className="flex-1 flex">
                     {MONTH_NAMES.map((m, i) => (
-                      <div key={m} className={`flex-1 text-center text-[9px] font-semibold ${i === currentMonth && year === currentYear ? 'text-[var(--primary)]' : 'dark:text-white/30 text-gray-400'}`}>{m}</div>
+                      <div key={m} className={`flex-1 text-center text-[9px] font-semibold ${i === currentMonth && year === currentYear ? 'text-(--primary)' : 'dark:text-white/30 text-gray-400'}`}>{m}</div>
                     ))}
                   </div>
                 </div>
-                <div className="space-y-1.5 min-w-[500px]">
+                <div className="space-y-1.5 min-w-125">
                   {projectGantt.filter(g => g.project.type === 'internal').map(({ project, leftPercent, widthPercent }) => (
                     <div key={project.id} className="flex items-center gap-2">
-                      <button onClick={() => setSelectedProject(project)} className="w-36 shrink-0 text-[10px] font-medium dark:text-white/70 text-gray-700 truncate text-left bg-transparent border-none cursor-pointer hover:text-[var(--primary)] transition-colors">
+                      <button onClick={() => setSelectedProject(project)} className="w-36 shrink-0 text-[10px] font-medium dark:text-white/70 text-gray-700 truncate text-left bg-transparent border-none cursor-pointer hover:text-(--primary) transition-colors">
                         {project.name}
                       </button>
-                      <div className="flex-1 h-6 rounded bg-black/[0.03] dark:bg-white/[0.03] relative">
+                      <div className="flex-1 h-6 rounded bg-black/3 dark:bg-white/3 relative">
                         <button onClick={() => setSelectedProject(project)} className="absolute h-full rounded flex items-center px-2 text-[8px] font-bold text-white overflow-hidden whitespace-nowrap border-none cursor-pointer hover:opacity-90 transition-opacity"
                           style={{ left: `${leftPercent}%`, width: `${widthPercent}%`, background: 'linear-gradient(135deg,#6366f1,#818cf8)', minWidth: 4 }}>
                           {widthPercent > 8 && project.name}
@@ -1249,8 +1249,8 @@ export default function YearOverviewPage() {
             </div>
 
             {/* Externe Projekte (kleinerer Bereich) */}
-            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
-              <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04] flex items-center gap-2">
+            <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
+              <div className="px-4 py-3 border-b dark:border-white/6 border-black/4 flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-[#f97316]" />
                 <h3 className="text-sm font-black dark:text-white text-gray-900">Externe Projekte</h3>
                 <span className="ml-auto px-2 py-0.5 rounded-full bg-[#f97316]/10 text-[#f97316] text-[10px] font-bold">{externalProjects.length}</span>
@@ -1271,24 +1271,24 @@ export default function YearOverviewPage() {
         <div className="space-y-4">
           {/* Monats-Navigation */}
           <div className="flex items-center gap-2 flex-wrap">
-            <button onClick={() => setEntryMonth((m) => Math.max(0, m - 1))} disabled={entryMonth === 0}
-              className="p-1.5 rounded-lg border dark:border-white/[0.06] border-black/[0.06] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors disabled:opacity-30">
+            <button onClick={() => setEntryMonth((m) => Math.max(0, m - 1))} title="Vorheriger Monat" disabled={entryMonth === 0}
+              className="p-1.5 rounded-lg border dark:border-white/6 border-black/6 hover:bg-black/4 dark:hover:bg-white/4 transition-colors disabled:opacity-30">
               <ChevronLeft size={14} className="dark:text-white/50 text-gray-600" />
             </button>
             <div className="flex gap-1 flex-wrap">
               {MONTH_NAMES.map((m, i) => (
                 <button key={m} onClick={() => setEntryMonth(i)}
                   className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all border-none cursor-pointer ${
-                    entryMonth === i ? 'bg-[var(--primary)] text-white shadow-sm'
-                    : i === currentMonth && year === currentYear ? 'bg-[var(--primary-light)] text-[var(--primary)] border border-[rgba(99,102,241,0.3)]'
-                    : 'dark:text-white/40 text-gray-500 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] bg-transparent'
+                    entryMonth === i ? 'bg-(--primary) text-white shadow-sm'
+                    : i === currentMonth && year === currentYear ? 'bg-(--primary-light) text-(--primary) border border-[rgba(99,102,241,0.3)]'
+                    : 'dark:text-white/40 text-gray-500 hover:bg-black/4 dark:hover:bg-white/4 bg-transparent'
                   }`}>
                   {m}
                 </button>
               ))}
             </div>
-            <button onClick={() => setEntryMonth((m) => Math.min(11, m + 1))} disabled={entryMonth === 11}
-              className="p-1.5 rounded-lg border dark:border-white/[0.06] border-black/[0.06] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors disabled:opacity-30">
+            <button onClick={() => setEntryMonth((m) => Math.min(11, m + 1))} title="Nächster Monat" disabled={entryMonth === 11}
+              className="p-1.5 rounded-lg border dark:border-white/6 border-black/6 hover:bg-black/4 dark:hover:bg-white/4 transition-colors disabled:opacity-30">
               <ChevronRight size={14} className="dark:text-white/50 text-gray-600" />
             </button>
             <button
@@ -1297,7 +1297,7 @@ export default function YearOverviewPage() {
               className={`ml-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[10px] font-semibold transition-all cursor-pointer ${
                 selectMode
                   ? 'bg-green-600 text-white border-green-600'
-                  : 'border-black/[0.08] dark:border-white/[0.08] dark:text-white/50 text-gray-500 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] bg-transparent'
+                  : 'border-black/8 dark:border-white/8 dark:text-white/50 text-gray-500 hover:bg-black/4 dark:hover:bg-white/4 bg-transparent'
               }`}
             >
               <CheckSquare size={12} />
@@ -1336,30 +1336,30 @@ export default function YearOverviewPage() {
                   Status setzen →
                 </button>
               )}
-              <button onClick={cancelMultiSelect} className="ml-auto p-1 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors border-none cursor-pointer text-green-600 dark:text-green-400">
+              <button onClick={cancelMultiSelect} title="Mehrfachauswahl beenden" className="ml-auto p-1 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors border-none cursor-pointer text-green-600 dark:text-green-400">
                 <X size={12} />
               </button>
             </div>
           )}
 
           {/* Tagesmatrix */}
-          <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-x-auto">
+          <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-x-auto">
             <table className="border-collapse text-[9px]" style={{ minWidth: `${165 + entryData.daysInMonth * 24}px` }}>
               <thead>
-                <tr className="border-b dark:border-white/[0.06] border-black/[0.04]">
-                  <th className="text-left px-3 py-2 font-semibold dark:text-white/40 text-gray-500 sticky left-0 bg-white dark:bg-gray-900 z-20 min-w-[150px]" rowSpan={2}>
+                <tr className="border-b dark:border-white/6 border-black/4">
+                  <th className="text-left px-3 py-2 font-semibold dark:text-white/40 text-gray-500 sticky left-0 bg-white dark:bg-gray-900 z-20 min-w-37.5" rowSpan={2}>
                     {MONTH_NAMES_LONG[entryMonth]} {year}
                   </th>
                   {entryData.days.map((d) => (
-                    <th key={d.day} className={`text-center font-bold min-w-[22px] pb-0.5 ${d.isWeekend ? 'dark:text-white/15 text-gray-300' : d.dateStr === today ? 'text-[var(--primary)]' : 'dark:text-white/50 text-gray-600'}`}>
+                    <th key={d.day} className={`text-center font-bold min-w-5.5 pb-0.5 ${d.isWeekend ? 'dark:text-white/15 text-gray-300' : d.dateStr === today ? 'text-(--primary)' : 'dark:text-white/50 text-gray-600'}`}>
                       {d.day}
                     </th>
                   ))}
-                  <th className="text-center px-2 font-semibold dark:text-white/40 text-gray-500 sticky right-0 bg-white dark:bg-gray-900 z-20 min-w-[40px]" rowSpan={2}>S</th>
+                  <th className="text-center px-2 font-semibold dark:text-white/40 text-gray-500 sticky right-0 bg-white dark:bg-gray-900 z-20 min-w-10" rowSpan={2}>S</th>
                 </tr>
-                <tr className="border-b dark:border-white/[0.08] border-black/[0.05]">
+                <tr className="border-b dark:border-white/8 border-black/5">
                   {entryData.days.map((d) => (
-                    <th key={d.day} className={`text-center font-medium pb-1 ${d.isWeekend ? 'dark:text-white/10 text-gray-200' : 'dark:text-white/25 text-gray-400'}`} style={{ fontSize: '7px' }}>
+                    <th key={d.day} className={`text-[7px] text-center font-medium pb-1 ${d.isWeekend ? 'dark:text-white/10 text-gray-200' : 'dark:text-white/25 text-gray-400'}`}>
                       {d.weekday}
                     </th>
                   ))}
@@ -1370,7 +1370,7 @@ export default function YearOverviewPage() {
                   const workDays = categories.filter((c) => c !== 'weekend' && c !== 'free').length;
                   const editable = canEditRow(member.email);
                   return (
-                    <tr key={member.id} className={`border-b dark:border-white/[0.02] border-gray-50 ${editable ? 'hover:bg-black/[0.01] dark:hover:bg-white/[0.01]' : 'opacity-80'}`}>
+                    <tr key={member.id} className={`border-b dark:border-white/2 border-gray-50 ${editable ? 'hover:bg-black/1 dark:hover:bg-white/1' : 'opacity-80'}`}>
                       <td className="px-3 py-1 sticky left-0 bg-white dark:bg-gray-900 z-10">
                         <div className="flex flex-col">
                           <span className="text-[10px] font-bold dark:text-white/80 text-gray-800">{member.name}</span>
@@ -1401,7 +1401,7 @@ export default function YearOverviewPage() {
           </div>
 
           {/* Zusammenfassung */}
-          <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-4">
+          <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 p-4">
             <h3 className="text-sm font-black dark:text-white text-gray-900 mb-3">Zusammenfassung {MONTH_NAMES_LONG[entryMonth]} {year}</h3>
             <div className="flex flex-wrap gap-3">
               {(Object.entries(DAY_CATEGORY_CONFIG) as [DayCategory, typeof DAY_CATEGORY_CONFIG[DayCategory]][])

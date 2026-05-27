@@ -35,24 +35,24 @@ export function CollapsibleSection({
   const toggle = isControlled ? (controlledToggle ?? (() => {})) : () => setInternalOpen((v) => !v);
 
   return (
-    <div className={`card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden ${className}`}>
+    <div className={`card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden ${className}`}>
       <button
         onClick={toggle}
-        className={`w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors group ${open ? 'border-b dark:border-white/[0.06] border-black/[0.06]' : ''} ${headerClassName}`}
+        className={`w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors group ${open ? 'border-b dark:border-white/6 border-black/6' : ''} ${headerClassName}`}
         aria-expanded={open}
       >
         <div className="flex items-center gap-3 min-w-0">
           {icon && (
-            <span className="text-[var(--primary)] shrink-0">{icon}</span>
+            <span className="text-(--primary) shrink-0">{icon}</span>
           )}
           <span className="text-sm font-black dark:text-white text-gray-900 text-left">{title}</span>
           {badge !== undefined && (
-            <span className="px-2 py-0.5 rounded-full bg-[var(--primary-light)] text-[var(--primary)] text-[10px] font-bold shrink-0">
+            <span className="px-2 py-0.5 rounded-full bg-(--primary-light) text-(--primary) text-[10px] font-bold shrink-0">
               {badge}
             </span>
           )}
         </div>
-        <span className="shrink-0 dark:text-white/30 text-gray-400 group-hover:text-[var(--primary)] transition-colors ml-3">
+        <span className="shrink-0 dark:text-white/30 text-gray-400 group-hover:text-(--primary) transition-colors ml-3">
           {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </span>
       </button>

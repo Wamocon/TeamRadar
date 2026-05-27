@@ -18,7 +18,7 @@ export default function EditMemberPage() {
         </h1>
       </div>
 
-      <div className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] p-6">
+      <div className="card-shimmer rounded-xl border border-black/6 dark:border-white/6 p-6">
         <MemberForm memberId={memberId} />
       </div>
     </div>

@@ -110,14 +110,14 @@ export default function AlertsPage() {
         const conf = ALERT_TYPE_CONFIG[type];
         const isCollapsed = collapsedAlertTypes.has(type);
         return (
-          <div key={type} className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+          <div key={type} className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
             <button
               onClick={() => setCollapsedAlertTypes((prev) => {
                 const next = new Set(prev);
                 if (next.has(type)) next.delete(type); else next.add(type);
                 return next;
               })}
-              className={`w-full flex items-center gap-2 px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors text-left ${!isCollapsed ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+              className={`w-full flex items-center gap-2 px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors text-left ${!isCollapsed ? 'border-b dark:border-white/6 border-black/4' : ''}`}
             >
               <span>{conf.icon}</span>
               <span className="text-sm font-bold dark:text-white text-gray-900">{conf.label}</span>

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useMemo, useCallback } from 'react';
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X, BookOpen,
@@ -12,7 +12,7 @@ import {
 } from 'date-fns';
 import { de } from 'date-fns/locale';
 
-// ── Types ─────────────────────────────────────────────────
+// -- Types -------------------------------------------------
 interface CalendarEvent {
   id: string;
   title: string;
@@ -30,7 +30,7 @@ const EVENT_COLORS = [
   '#6366f1', '#8b5cf6', '#ec4899', '#f97316', '#22c55e', '#0ea5e9', '#f59e0b',
 ];
 
-// ── ICS Parser (minimal) ──────────────────────────────────
+// -- ICS Parser (minimal) ----------------------------------
 function parseICS(text: string): CalendarEvent[] {
   const events: CalendarEvent[] = [];
   const blocks = text.split('BEGIN:VEVENT');
@@ -64,7 +64,7 @@ function parseICS(text: string): CalendarEvent[] {
   return events;
 }
 
-// ── How-To Popup ──────────────────────────────────────────
+// -- How-To Popup ------------------------------------------
 function HowToPopup({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<'google' | 'outlook'>('google');
   return (
@@ -78,7 +78,7 @@ function HowToPopup({ onClose }: { onClose: () => void }) {
             </div>
             <div>
               <h2 className="text-base font-black dark:text-white text-gray-900">Kalender synchronisieren</h2>
-              <p className="text-[10px] dark:text-white/40 text-gray-500">Anleitung für Google & Outlook</p>
+              <p className="text-[10px] dark:text-white/40 text-gray-500">Anleitung f�r Google & Outlook</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 border-none bg-transparent cursor-pointer dark:text-white/50 text-gray-500 transition-colors">
@@ -89,8 +89,8 @@ function HowToPopup({ onClose }: { onClose: () => void }) {
         <div className="flex gap-1 p-4 pb-0">
           {(['google', 'outlook'] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border-none cursor-pointer ${tab === t ? 'bg-[var(--primary)] text-white' : 'dark:text-white/40 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5 bg-transparent'}`}>
-              {t === 'google' ? '🔵 Google' : '🟫 Outlook'}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border-none cursor-pointer ${tab === t ? 'bg-(--primary) text-white' : 'dark:text-white/40 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5 bg-transparent'}`}>
+              {t === 'google' ? '?? Google' : '?? Outlook'}
             </button>
           ))}
         </div>
@@ -99,20 +99,20 @@ function HowToPopup({ onClose }: { onClose: () => void }) {
           {tab === 'google' ? (
             <>
               <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 text-xs dark:text-white/70 text-gray-700 leading-relaxed">
-                <strong className="text-blue-500">Option A – ICS-Import (empfohlen):</strong>
+                <strong className="text-blue-500">Option A � ICS-Import (empfohlen):</strong>
                 <ol className="mt-2 space-y-1.5 list-decimal list-inside">
-                  <li>Öffne <strong>calendar.google.com</strong></li>
-                  <li>Klicke rechts oben auf das Zahnrad → <strong>Einstellungen</strong></li>
-                  <li>Links unter "Einstellungen für meine Kalender" deinen Kalender wählen</li>
-                  <li>Ganz unten: <strong>"Kalender exportieren"</strong> → .ics herunterladen</li>
-                  <li>Zurück in TeamRadar: Schaltfläche <strong>"ICS importieren"</strong> klicken und Datei wählen</li>
+                  <li>�ffne <strong>calendar.google.com</strong></li>
+                  <li>Klicke rechts oben auf das Zahnrad ? <strong>Einstellungen</strong></li>
+                  <li>Links unter "Einstellungen f�r meine Kalender" deinen Kalender w�hlen</li>
+                  <li>Ganz unten: <strong>"Kalender exportieren"</strong> ? .ics herunterladen</li>
+                  <li>Zur�ck in TeamRadar: Schaltfl�che <strong>"ICS importieren"</strong> klicken und Datei w�hlen</li>
                 </ol>
               </div>
               <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/10 text-xs dark:text-white/70 text-gray-700 leading-relaxed">
-                <strong className="text-blue-500">Option B – Direkt-Link (read-only):</strong>
+                <strong className="text-blue-500">Option B � Direkt-Link (read-only):</strong>
                 <ol className="mt-2 space-y-1.5 list-decimal list-inside">
-                  <li>Kalender-Einstellungen → "Im iCal-Format" → ICAL-Link kopieren</li>
-                  <li>Den Link dem Administrator mitteilen für die Kalender-Integration</li>
+                  <li>Kalender-Einstellungen ? "Im iCal-Format" ? ICAL-Link kopieren</li>
+                  <li>Den Link dem Administrator mitteilen f�r die Kalender-Integration</li>
                 </ol>
               </div>
             </>
@@ -121,26 +121,26 @@ function HowToPopup({ onClose }: { onClose: () => void }) {
               <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10 text-xs dark:text-white/70 text-gray-700 leading-relaxed">
                 <strong className="text-orange-500">Outlook Desktop (Export):</strong>
                 <ol className="mt-2 space-y-1.5 list-decimal list-inside">
-                  <li>Outlook öffnen → <strong>Datei → Öffnen und Exportieren → Importieren/Exportieren</strong></li>
-                  <li>Wähle <strong>"In Datei exportieren"</strong> → <strong>iCalendar-Format (.ics)"</strong></li>
-                  <li>Kalender und Zeitraum wählen → Speichern</li>
-                  <li>Zurück in TeamRadar: <strong>"ICS importieren"</strong> klicken und die .ics-Datei wählen</li>
+                  <li>Outlook �ffnen ? <strong>Datei ? �ffnen und Exportieren ? Importieren/Exportieren</strong></li>
+                  <li>W�hle <strong>"In Datei exportieren"</strong> ? <strong>iCalendar-Format (.ics)"</strong></li>
+                  <li>Kalender und Zeitraum w�hlen ? Speichern</li>
+                  <li>Zur�ck in TeamRadar: <strong>"ICS importieren"</strong> klicken und die .ics-Datei w�hlen</li>
                 </ol>
               </div>
               <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10 text-xs dark:text-white/70 text-gray-700 leading-relaxed">
                 <strong className="text-orange-500">Outlook Web (OWA):</strong>
                 <ol className="mt-2 space-y-1.5 list-decimal list-inside">
-                  <li>Auf <strong>outlook.office.com</strong> anmelden → Kalender-Ansicht</li>
-                  <li>Oben rechts: Zahnrad → <strong>Kalendereinstellungen</strong></li>
-                  <li>ICS → "Kalender veröffentlichen" → Link generieren und hier einfügen</li>
+                  <li>Auf <strong>outlook.office.com</strong> anmelden ? Kalender-Ansicht</li>
+                  <li>Oben rechts: Zahnrad ? <strong>Kalendereinstellungen</strong></li>
+                  <li>ICS ? "Kalender ver�ffentlichen" ? Link generieren und hier einf�gen</li>
                 </ol>
               </div>
             </>
           )}
 
-          <div className="p-3 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] text-xs dark:text-white/70 text-gray-700 flex items-start gap-2">
-            <Info size={13} className="text-[var(--primary)] shrink-0 mt-0.5" />
-            Importierte Termine werden lokal gespeichert. Für Live-Sync bitte den Administrator kontaktieren.
+          <div className="p-3 rounded-xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] text-xs dark:text-white/70 text-gray-700 flex items-start gap-2">
+            <Info size={13} className="text-(--primary) shrink-0 mt-0.5" />
+            Importierte Termine werden lokal gespeichert. F�r Live-Sync bitte den Administrator kontaktieren.
           </div>
         </div>
       </div>
@@ -148,7 +148,7 @@ function HowToPopup({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ── Event Form ────────────────────────────────────────────
+// -- Event Form --------------------------------------------
 function EventForm({ initial, onSave, onCancel }: {
   initial?: Partial<CalendarEvent>;
   onSave: (ev: CalendarEvent) => void;
@@ -182,34 +182,34 @@ function EventForm({ initial, onSave, onCancel }: {
       <div className="space-y-1">
         <label className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Titel *</label>
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Termintitel"
-          className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+          className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-lg p-2.5 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
       </div>
       <div className="grid grid-cols-3 gap-2">
         <div className="col-span-1 space-y-1">
           <label className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Datum</label>
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-            className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-xs dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+            className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-lg p-2.5 text-xs dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
         </div>
         <div className="space-y-1">
           <label className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Von</label>
           <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)}
-            className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-xs dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+            className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-lg p-2.5 text-xs dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
         </div>
         <div className="space-y-1">
           <label className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Bis</label>
           <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)}
-            className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-xs dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+            className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-lg p-2.5 text-xs dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
         </div>
       </div>
       <div className="space-y-1">
         <label className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Ort</label>
         <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="z.B. Besprechungsraum A"
-          className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+          className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-lg p-2.5 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
       </div>
       <div className="space-y-1">
         <label className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Notiz</label>
         <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2}
-          className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2.5 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] resize-none" />
+          className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-lg p-2.5 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) resize-none" />
       </div>
       <div className="flex items-center gap-2">
         <span className="text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500">Farbe</span>
@@ -221,7 +221,7 @@ function EventForm({ initial, onSave, onCancel }: {
       </div>
       <div className="flex items-center justify-end gap-2 pt-2">
         <button onClick={onCancel} className="px-4 py-2 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 border dark:border-white/10 border-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer bg-transparent transition-colors">Abbrechen</button>
-        <button onClick={handleSave} disabled={!title.trim()} className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 disabled:opacity-50 transition-opacity">
+        <button onClick={handleSave} disabled={!title.trim()} className="px-4 py-2 rounded-lg bg-(--primary) text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 disabled:opacity-50 transition-opacity">
           {initial?.id ? 'Speichern' : 'Erstellen'}
         </button>
       </div>
@@ -229,7 +229,7 @@ function EventForm({ initial, onSave, onCancel }: {
   );
 }
 
-// ── Event Detail Popup ────────────────────────────────────
+// -- Event Detail Popup ------------------------------------
 function EventDetailPopup({ event, onClose, onEdit, onDelete }: {
   event: CalendarEvent;
   onClose: () => void;
@@ -249,7 +249,7 @@ function EventDetailPopup({ event, onClose, onEdit, onDelete }: {
           <div className="flex items-start justify-between mb-4">
             <h2 className="text-lg font-black dark:text-white text-gray-900 leading-tight pr-2">{event.title}</h2>
             <div className="flex items-center gap-1 shrink-0">
-              <button onClick={() => onEdit(event)} className="p-2 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all border-none bg-transparent cursor-pointer">
+              <button onClick={() => onEdit(event)} className="p-2 rounded-lg hover:bg-(--primary-light) text-(--primary) transition-all border-none bg-transparent cursor-pointer">
                 <Edit3 size={14} />
               </button>
               <button onClick={() => setConfirmDelete(true)} className="p-2 rounded-lg hover:bg-red-500/10 text-red-400 hover:text-red-500 transition-all border-none bg-transparent cursor-pointer">
@@ -263,25 +263,25 @@ function EventDetailPopup({ event, onClose, onEdit, onDelete }: {
 
           <div className="space-y-2.5">
             <div className="flex items-center gap-2 text-sm dark:text-white/70 text-gray-700">
-              <CalendarDays size={14} className="text-[var(--primary)] shrink-0" />
+              <CalendarDays size={14} className="text-(--primary) shrink-0" />
               <span className="font-semibold">
                 {new Date(event.date).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
               </span>
             </div>
             {(event.startTime || event.endTime) && (
               <div className="flex items-center gap-2 text-sm dark:text-white/60 text-gray-600">
-                <Clock size={14} className="text-[var(--primary)] shrink-0" />
-                <span>{event.startTime || '—'}{event.endTime ? ` – ${event.endTime}` : ''}</span>
+                <Clock size={14} className="text-(--primary) shrink-0" />
+                <span>{event.startTime || '�'}{event.endTime ? ` � ${event.endTime}` : ''}</span>
               </div>
             )}
             {event.location && (
               <div className="flex items-center gap-2 text-sm dark:text-white/60 text-gray-600">
-                <MapPin size={14} className="text-[var(--primary)] shrink-0" />
+                <MapPin size={14} className="text-(--primary) shrink-0" />
                 <span>{event.location}</span>
               </div>
             )}
             {event.description && (
-              <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.06] border-black/[0.06] text-xs dark:text-white/60 text-gray-600 whitespace-pre-line">
+              <div className="p-3 rounded-xl bg-black/2 dark:bg-white/2 border dark:border-white/6 border-black/6 text-xs dark:text-white/60 text-gray-600 whitespace-pre-line">
                 {event.description}
               </div>
             )}
@@ -294,8 +294,8 @@ function EventDetailPopup({ event, onClose, onEdit, onDelete }: {
 
           {confirmDelete && (
             <div className="mt-4 p-3 rounded-xl bg-red-500/5 border border-red-500/10 flex items-center gap-3">
-              <span className="text-xs text-red-500 flex-1">Termin wirklich löschen?</span>
-              <button onClick={() => { onDelete(event.id); onClose(); }} className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold cursor-pointer border-none hover:bg-red-600 transition-colors">Löschen</button>
+              <span className="text-xs text-red-500 flex-1">Termin wirklich l�schen?</span>
+              <button onClick={() => { onDelete(event.id); onClose(); }} className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold cursor-pointer border-none hover:bg-red-600 transition-colors">L�schen</button>
               <button onClick={() => setConfirmDelete(false)} className="px-3 py-1.5 rounded-lg bg-transparent text-gray-500 text-xs font-semibold cursor-pointer border dark:border-white/10 border-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">Abbrechen</button>
             </div>
           )}
@@ -305,7 +305,7 @@ function EventDetailPopup({ event, onClose, onEdit, onDelete }: {
   );
 }
 
-// ── Main Calendar Page ────────────────────────────────────
+// -- Main Calendar Page ------------------------------------
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -385,24 +385,24 @@ export default function CalendarPage() {
             </div>
             Kalender
           </h1>
-          <p className="text-sm dark:text-white/40 text-gray-500 mt-1">Termine und Meetings im Überblick</p>
+          <p className="text-sm dark:text-white/40 text-gray-500 mt-1">Termine und Meetings im �berblick</p>
         </div>
 
         <div className="flex items-center gap-2">
           {importMsg && (
             <span className="text-xs text-green-500 font-semibold px-3 py-1.5 bg-green-500/10 rounded-lg">{importMsg}</span>
           )}
-          <label className={`flex items-center gap-2 px-3 py-2 rounded-xl border dark:border-white/[0.08] border-black/[0.08] text-xs font-semibold dark:text-white/60 text-gray-600 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] hover:border-[rgba(99,102,241,0.3)] cursor-pointer transition-all ${importing ? 'opacity-50' : ''}`}>
+          <label className={`flex items-center gap-2 px-3 py-2 rounded-xl border dark:border-white/8 border-black/8 text-xs font-semibold dark:text-white/60 text-gray-600 hover:bg-(--primary-light) hover:text-(--primary) hover:border-[rgba(99,102,241,0.3)] cursor-pointer transition-all ${importing ? 'opacity-50' : ''}`}>
             {importing ? <Loader size={13} className="animate-spin" /> : <Upload size={13} />}
             ICS importieren
             <input type="file" accept=".ics,text/calendar" className="hidden" onChange={handleICSImport} disabled={importing} />
           </label>
           <button onClick={() => setShowHowTo(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border dark:border-white/[0.08] border-black/[0.08] text-xs font-semibold dark:text-white/60 text-gray-600 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] hover:border-[rgba(99,102,241,0.3)] cursor-pointer transition-all bg-transparent">
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border dark:border-white/8 border-black/8 text-xs font-semibold dark:text-white/60 text-gray-600 hover:bg-(--primary-light) hover:text-(--primary) hover:border-[rgba(99,102,241,0.3)] cursor-pointer transition-all bg-transparent">
             <BookOpen size={13} /> Anleitung
           </button>
           <button onClick={() => { setSelectedDate(null); setEditingEvent(null); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none">
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-(--primary) text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none">
             <Plus size={14} /> Neuer Termin
           </button>
         </div>
@@ -410,11 +410,11 @@ export default function CalendarPage() {
 
       <div className="grid lg:grid-cols-4 gap-5">
         {/* Calendar Grid */}
-        <div className="lg:col-span-3 card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+        <div className="lg:col-span-3 card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
           {/* Month Nav */}
-          <div className="px-4 py-3 border-b dark:border-white/[0.06] border-black/[0.04] flex items-center justify-between">
+          <div className="px-4 py-3 border-b dark:border-white/6 border-black/4 flex items-center justify-between">
             <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-              className="p-2 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all border-none bg-transparent cursor-pointer">
+              className="p-2 rounded-lg hover:bg-(--primary-light) text-(--primary) transition-all border-none bg-transparent cursor-pointer">
               <ChevronLeft size={16} />
             </button>
             <button
@@ -429,14 +429,14 @@ export default function CalendarPage() {
               </span>
             </button>
             <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-              className="p-2 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all border-none bg-transparent cursor-pointer">
+              className="p-2 rounded-lg hover:bg-(--primary-light) text-(--primary) transition-all border-none bg-transparent cursor-pointer">
               <ChevronRight size={16} />
             </button>
           </div>
 
           {openCalendar && (<>
           {/* Weekday header */}
-          <div className="grid grid-cols-7 border-b dark:border-white/[0.04] border-black/[0.04]">
+          <div className="grid grid-cols-7 border-b dark:border-white/4 border-black/4">
             {weekdays.map((d) => (
               <div key={d} className="text-center text-[10px] font-bold dark:text-white/30 text-gray-400 py-2 uppercase tracking-wide">{d}</div>
             ))}
@@ -454,12 +454,12 @@ export default function CalendarPage() {
                 <div
                   key={dateStr}
                   onClick={() => inMonth && handleDayClick(dateStr)}
-                  className={`min-h-[80px] p-1.5 border-b border-r dark:border-white/[0.03] border-black/[0.03] transition-colors
-                    ${inMonth ? 'hover:bg-[var(--primary-light)] cursor-pointer' : 'opacity-30 cursor-default'}
-                    ${today ? 'bg-[var(--primary-light)]' : ''}`}
+                  className={`min-h-[80px] p-1.5 border-b border-r dark:border-white/3 border-black/3 transition-colors
+                    ${inMonth ? 'hover:bg-(--primary-light) cursor-pointer' : 'opacity-30 cursor-default'}
+                    ${today ? 'bg-(--primary-light)' : ''}`}
                 >
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mb-1 mx-auto
-                    ${today ? 'bg-[var(--primary)] text-white' : 'dark:text-white/50 text-gray-600'}`}>
+                    ${today ? 'bg-(--primary) text-white' : 'dark:text-white/50 text-gray-600'}`}>
                     {format(day, 'd')}
                   </div>
                   <div className="space-y-0.5">
@@ -484,12 +484,12 @@ export default function CalendarPage() {
 
         {/* Sidebar: Upcoming Events */}
         <div className="space-y-4">
-          <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+          <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
             <button
               onClick={() => setOpenUpcoming(v => !v)}
-              className={`w-full flex items-center justify-between px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openUpcoming ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+              className={`w-full flex items-center justify-between px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${openUpcoming ? 'border-b dark:border-white/6 border-black/4' : ''}`}
             >
-              <h3 className="text-sm font-black dark:text-white text-gray-900">Nächste Termine</h3>
+              <h3 className="text-sm font-black dark:text-white text-gray-900">N�chste Termine</h3>
               <span className="dark:text-white/30 text-gray-400">
                 {openUpcoming ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
               </span>
@@ -501,13 +501,13 @@ export default function CalendarPage() {
                 )}
                 {upcomingEvents.map((ev) => (
                   <button key={ev.id} onClick={() => setSelectedEvent(ev)}
-                    className="w-full text-left p-2.5 rounded-xl border dark:border-white/[0.05] border-black/[0.04] hover:bg-[var(--primary-light)] transition-all cursor-pointer bg-transparent group relative overflow-hidden">
+                    className="w-full text-left p-2.5 rounded-xl border dark:border-white/5 border-black/4 hover:bg-(--primary-light) transition-all cursor-pointer bg-transparent group relative overflow-hidden">
                     <div className="absolute left-0 top-0 bottom-0 w-0.5" style={{ background: ev.color || '#6366f1' }} />
                     <div className="pl-2">
-                      <div className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-[var(--primary)] transition-colors">{ev.title}</div>
+                      <div className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-(--primary) transition-colors">{ev.title}</div>
                       <div className="text-[10px] dark:text-white/40 text-gray-500 mt-0.5">
                         {new Date(ev.date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short' })}
-                        {ev.startTime ? ` · ${ev.startTime}` : ''}
+                        {ev.startTime ? ` � ${ev.startTime}` : ''}
                       </div>
                       {ev.location && <div className="text-[10px] dark:text-white/30 text-gray-400 truncate">{ev.location}</div>}
                     </div>
@@ -518,10 +518,10 @@ export default function CalendarPage() {
           </div>
 
           {/* Stats */}
-          <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+          <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
             <button
               onClick={() => setOpenStats(v => !v)}
-              className={`w-full flex items-center justify-between px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openStats ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+              className={`w-full flex items-center justify-between px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${openStats ? 'border-b dark:border-white/6 border-black/4' : ''}`}
             >
               <h3 className="text-xs font-black dark:text-white/40 text-gray-500 uppercase tracking-wide">Statistik</h3>
               <span className="dark:text-white/30 text-gray-400">
@@ -537,7 +537,7 @@ export default function CalendarPage() {
                 ].map((s) => (
                   <div key={s.label} className="flex items-center justify-between text-xs">
                     <span className="dark:text-white/40 text-gray-500">{s.label}</span>
-                    <span className="font-black text-[var(--primary)]">{s.value}</span>
+                    <span className="font-black text-(--primary)">{s.value}</span>
                   </div>
                 ))}
               </div>

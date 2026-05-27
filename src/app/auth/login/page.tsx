@@ -178,7 +178,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-white/10 bg-white/[0.03] text-sm text-white focus:border-blue-500/50 focus:bg-blue-500/[0.02] outline-none transition-all"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-white/10 bg-white/3 text-sm text-white focus:border-blue-500/50 focus:bg-blue-500/2 outline-none transition-all"
                   placeholder="name@firma.de"
                   required
                   autoComplete="email"
@@ -196,7 +196,7 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-white/10 bg-white/[0.03] text-sm text-white focus:border-blue-500/50 focus:bg-blue-500/[0.02] outline-none transition-all"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-white/10 bg-white/3 text-sm text-white focus:border-blue-500/50 focus:bg-blue-500/2 outline-none transition-all"
                   placeholder="••••••••"
                   minLength={6}
                   required

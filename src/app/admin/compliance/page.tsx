@@ -107,7 +107,7 @@ export default function ComplianceDashboard() {
           { label: 'Vollständig konform', value: new Set(consents.filter(c => c.status).map(c => c.user_id)).size, icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
           { label: 'Offene Zustimmungen', value: new Set(consents.filter(c => !c.status).map(c => c.user_id)).size, icon: AlertOctagon, color: 'text-amber-500', bg: 'bg-amber-500/10' },
         ].map((stat) => (
-          <div key={stat.label} className="card-shimmer rounded-2xl p-5 border border-black/[0.05] dark:border-white/[0.05] bg-white dark:bg-white/[0.02]">
+          <div key={stat.label} className="card-shimmer rounded-2xl p-5 border border-black/5 dark:border-white/5 bg-white dark:bg-white/2">
             <div className="flex items-center justify-between mb-3">
               <div className={`p-2 rounded-lg ${stat.bg} ${stat.color}`}>
                 <stat.icon size={18} />
@@ -128,21 +128,21 @@ export default function ComplianceDashboard() {
             placeholder="Nutzer suchen (E-Mail, Name)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-slate-900/50 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+            className="w-full pl-12 pr-4 py-3 rounded-xl border border-black/8 dark:border-white/8 bg-white dark:bg-slate-900/50 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
           />
         </div>
-        <button className="flex items-center gap-2 px-4 py-3 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-slate-900/50 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
+        <button className="flex items-center gap-2 px-4 py-3 rounded-xl border border-black/8 dark:border-white/8 bg-white dark:bg-slate-900/50 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
           <Filter size={18} className="text-gray-400" />
           Filter
         </button>
       </div>
 
       {/* Table */}
-      <div className="card-shimmer rounded-2xl border border-black/[0.08] dark:border-white/[0.08] overflow-hidden bg-white dark:bg-white/[0.02]">
+      <div className="card-shimmer rounded-2xl border border-black/8 dark:border-white/8 overflow-hidden bg-white dark:bg-white/2">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="border-b border-black/[0.08] dark:border-white/[0.08] bg-gray-50/50 dark:bg-white/[0.02]">
+              <tr className="border-b border-black/8 dark:border-white/8 bg-gray-50/50 dark:bg-white/2">
                 <th className="px-6 py-4 font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider text-[10px]">Nutzer</th>
                 <th className="px-6 py-4 font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider text-[10px]">E-Mail</th>
                 <th className="px-6 py-4 font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider text-[10px]">Typ</th>
@@ -151,7 +151,7 @@ export default function ComplianceDashboard() {
                 <th className="px-6 py-4 font-bold text-gray-500 dark:text-white/40 uppercase tracking-wider text-[10px]">Zeitpunkt</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/[0.04] dark:divide-white/[0.04]">
+            <tbody className="divide-y divide-black/4 dark:divide-white/4">
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-20 text-center text-gray-400">Lädt Compliance-Daten...</td>
@@ -166,11 +166,11 @@ export default function ComplianceDashboard() {
                 </tr>
               ) : (
                 filteredConsents.map((c, i) => (
-                  <tr key={`${c.user_id}-${c.consent_type}-${i}`} className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
+                  <tr key={`${c.user_id}-${c.consent_type}-${i}`} className="hover:bg-gray-50 dark:hover:bg-white/2 transition-colors">
                     <td className="px-6 py-4 font-bold dark:text-white text-gray-900">{c.display_name || 'N/A'}</td>
                     <td className="px-6 py-4 text-gray-500 dark:text-white/60">{c.email}</td>
                     <td className="px-6 py-4">
-                      <span className="px-2 py-1 rounded bg-slate-100 dark:bg-white/5 text-[10px] font-black uppercase text-slate-500 dark:text-white/40 border border-black/[0.05] dark:border-white/[0.05]">
+                      <span className="px-2 py-1 rounded bg-slate-100 dark:bg-white/5 text-[10px] font-black uppercase text-slate-500 dark:text-white/40 border border-black/5 dark:border-white/5">
                         {c.consent_type}
                       </span>
                     </td>

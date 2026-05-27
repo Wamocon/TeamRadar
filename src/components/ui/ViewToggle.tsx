@@ -10,7 +10,7 @@ interface Props {
 
 export function ViewToggle({ value, onChange }: Props) {
   return (
-    <div className="flex gap-1 p-1 bg-black/[0.04] dark:bg-white/[0.04] rounded-xl">
+    <div className="flex gap-1 p-1 bg-black/4 dark:bg-white/4 rounded-xl">
       <button
         onClick={() => onChange('grid')}
         className={`p-1.5 rounded-lg transition-all cursor-pointer ${

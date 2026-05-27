@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { createClient } from '@/lib/supabase/client';
@@ -130,9 +130,9 @@ export default function OrganisationPage() {
 
   const PLAN_CONFIG = {
     free:       { label: 'Free', color: '#6b7280',  members: '5',  features: ['Grundfunktionen', 'WamoBook'] },
-    team:       { label: 'Team', color: '#6366f1',  members: '25', features: ['Alle Free-Features', 'Jahresübersicht', 'Reports'] },
+    team:       { label: 'Team', color: '#6366f1',  members: '25', features: ['Alle Free-Features', 'Jahres�bersicht', 'Reports'] },
     business:   { label: 'Business', color: '#8b5cf6', members: '100', features: ['Alle Team-Features', 'API-Zugang', 'Custom Branding'] },
-    enterprise: { label: 'Enterprise', color: '#f97316', members: '∞', features: ['Alle Features', 'On-Premise', 'SLA', 'Dedicated Support'] },
+    enterprise: { label: 'Enterprise', color: '#f97316', members: '8', features: ['Alle Features', 'On-Premise', 'SLA', 'Dedicated Support'] },
   };
 
   const ROLE_COLORS: Record<string, string> = {
@@ -175,8 +175,8 @@ export default function OrganisationPage() {
           <Lock size={28} className="text-red-400" />
         </div>
         <h2 className="text-xl font-black dark:text-white text-gray-900">Kein Zugriff</h2>
-        <p className="text-sm dark:text-white/40 text-gray-500 max-w-xs">Organisationsverwaltung ist nur für Administratoren zugänglich.</p>
-        <Link href="/" className="px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity">Zum Dashboard</Link>
+        <p className="text-sm dark:text-white/40 text-gray-500 max-w-xs">Organisationsverwaltung ist nur f�r Administratoren zug�nglich.</p>
+        <Link href="/" className="px-4 py-2 rounded-xl bg-(--primary) text-white text-xs font-bold hover:opacity-90 transition-opacity">Zum Dashboard</Link>
       </div>
     );
   }
@@ -190,22 +190,22 @@ export default function OrganisationPage() {
 
   return (
     <div className="p-4 sm:p-6 w-full space-y-5 animate-fade-in pb-20">
-      {/* ─── Member-Edit-Modal ───────────────────────────── */}
+      {/* --- Member-Edit-Modal ----------------------------- */}
       {editMember && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.55)' }} onClick={(e) => { if (e.target === e.currentTarget) setEditMember(null); }}>
-          <div className="w-full max-w-md rounded-2xl border dark:border-white/[0.08] border-black/[0.08] bg-white dark:bg-[#111] shadow-2xl overflow-hidden">
+          <div className="w-full max-w-md rounded-2xl border dark:border-white/8 border-black/8 bg-white dark:bg-[#111] shadow-2xl overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b dark:border-white/[0.06] border-black/[0.06]">
+            <div className="flex items-center justify-between px-5 py-4 border-b dark:border-white/6 border-black/6">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
-                  <UserCog size={15} className="text-[var(--primary)]" />
+                <div className="w-8 h-8 rounded-xl bg-(--primary-light) flex items-center justify-center">
+                  <UserCog size={15} className="text-(--primary)" />
                 </div>
                 <div>
                   <div className="text-sm font-black dark:text-white text-gray-900">Mitarbeiter bearbeiten</div>
                   <div className="text-[10px] dark:text-white/40 text-gray-500">{editMember.email}</div>
                 </div>
               </div>
-              <button onClick={() => setEditMember(null)} className="p-1.5 rounded-lg hover:bg-black/[0.05] dark:hover:bg-white/[0.05] dark:text-white/40 text-gray-400 transition-all border-none bg-transparent cursor-pointer"><X size={15} /></button>
+              <button onClick={() => setEditMember(null)} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 dark:text-white/40 text-gray-400 transition-all border-none bg-transparent cursor-pointer"><X size={15} /></button>
             </div>
             {/* Form */}
             <div className="p-5 space-y-4">
@@ -213,24 +213,24 @@ export default function OrganisationPage() {
                 <div className="col-span-2 space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Name</label>
                   <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                    className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                 </div>
                 <div className="col-span-2 space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Abteilung</label>
                   <input value={editForm.department} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
                     placeholder="z. B. Engineering"
-                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                    className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Telefon</label>
                   <input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                     placeholder="+49 ..."
-                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                    className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Rolle</label>
                   <select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all">
+                    className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all">
                     <option value="employee">Mitarbeiter</option>
                     <option value="department_lead">Team-Lead</option>
                     <option value="cio">CIO</option>
@@ -250,7 +250,7 @@ export default function OrganisationPage() {
               <div className="flex gap-2 pt-1">
                 <button onClick={() => setEditMember(null)} className="flex-1 py-2.5 rounded-xl text-xs font-semibold dark:text-white/50 text-gray-600 border dark:border-white/10 border-gray-200 bg-transparent cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 transition-colors border-solid">Abbrechen</button>
                 <button onClick={handleEditSave} disabled={editSaving}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none disabled:opacity-60">
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-(--primary) text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none disabled:opacity-60">
                   {editSaving ? <Loader size={13} className="animate-spin" /> : <Save size={13} />}
                   Speichern
                 </button>
@@ -263,8 +263,8 @@ export default function OrganisationPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
-              <Building2 size={20} className="text-[var(--primary)]" />
+            <div className="w-10 h-10 rounded-xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
+              <Building2 size={20} className="text-(--primary)" />
             </div>
             Organisationsverwaltung
           </h1>
@@ -272,7 +272,7 @@ export default function OrganisationPage() {
         </div>
         {activeTab !== 'members' && activeTab !== 'danger' && (
           <button onClick={handleSave} disabled={saving}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none disabled:opacity-60">
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-(--primary) text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none disabled:opacity-60">
             {saving ? <Loader size={14} className="animate-spin" /> : <Save size={14} />}
             Speichern
           </button>
@@ -287,26 +287,26 @@ export default function OrganisationPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-black/[0.02] dark:bg-white/[0.02] rounded-xl w-fit border dark:border-white/[0.06] border-black/[0.06]">
+      <div className="flex gap-1 p-1 bg-black/2 dark:bg-white/2 rounded-xl w-fit border dark:border-white/6 border-black/6">
         {tabs.map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all border-none cursor-pointer ${activeTab === tab.id ? 'bg-[var(--primary)] text-white shadow-sm' : 'dark:text-white/40 text-gray-500 hover:bg-black/[0.03] dark:hover:bg-white/[0.03] bg-transparent'}`}>
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all border-none cursor-pointer ${activeTab === tab.id ? 'bg-(--primary) text-white shadow-sm' : 'dark:text-white/40 text-gray-500 hover:bg-black/3 dark:hover:bg-white/3 bg-transparent'}`}>
             <tab.icon size={13} /> {tab.label}
           </button>
         ))}
       </div>
 
-      {/* ─── TAB: Allgemein ─────────────────────────────── */}
+      {/* --- TAB: Allgemein ------------------------------- */}
       {activeTab === 'general' && (
         <div className="grid lg:grid-cols-3 gap-5">
           {/* Main settings */}
           <div className="lg:col-span-2 space-y-5">
-            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+            <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
               <button
                 onClick={() => setOpenIdentity(v => !v)}
-                className={`w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openIdentity ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+                className={`w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${openIdentity ? 'border-b dark:border-white/6 border-black/4' : ''}`}
               >
-                <h3 className="text-sm font-black dark:text-white text-gray-900">Organisations-Identität</h3>
+                <h3 className="text-sm font-black dark:text-white text-gray-900">Organisations-Identit�t</h3>
                 <span className="dark:text-white/30 text-gray-400">{openIdentity ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</span>
               </button>
               {openIdentity && (
@@ -317,7 +317,7 @@ export default function OrganisationPage() {
                   <div className="relative">
                     <Building2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
                     <input value={settings.org_name} onChange={(e) => setSettings({ ...settings, org_name: e.target.value })} placeholder="Wamocon GmbH"
-                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                      className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -325,7 +325,7 @@ export default function OrganisationPage() {
                   <div className="relative">
                     <ImageIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
                     <input value={settings.org_logo_url || ''} onChange={(e) => setSettings({ ...settings, org_logo_url: e.target.value })} placeholder="https://..."
-                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                      className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -333,7 +333,7 @@ export default function OrganisationPage() {
                   <div className="relative">
                     <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
                     <input value={settings.website || ''} onChange={(e) => setSettings({ ...settings, website: e.target.value })} placeholder="https://wamocon.de"
-                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                      className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -341,7 +341,7 @@ export default function OrganisationPage() {
                   <div className="relative">
                     <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
                     <input type="email" value={settings.support_email || ''} onChange={(e) => setSettings({ ...settings, support_email: e.target.value })} placeholder="support@firma.de"
-                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                      className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                   </div>
                 </div>
                 <div className="space-y-1">
@@ -349,7 +349,7 @@ export default function OrganisationPage() {
                   <div className="relative">
                     <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
                     <input value={settings.phone || ''} onChange={(e) => setSettings({ ...settings, phone: e.target.value })} placeholder="+49 ..."
-                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                      className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                   </div>
                 </div>
               </div>
@@ -357,10 +357,10 @@ export default function OrganisationPage() {
               )}
             </div>
 
-            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+            <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
               <button
                 onClick={() => setOpenAddress(v => !v)}
-                className={`w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openAddress ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+                className={`w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${openAddress ? 'border-b dark:border-white/6 border-black/4' : ''}`}
               >
                 <h3 className="text-sm font-black dark:text-white text-gray-900">Adresse</h3>
                 <span className="dark:text-white/30 text-gray-400">{openAddress ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</span>
@@ -369,20 +369,20 @@ export default function OrganisationPage() {
               <div className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Straße & Hausnummer</label>
+                  <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Stra�e & Hausnummer</label>
                   <input value={settings.address || ''} onChange={(e) => setSettings({ ...settings, address: e.target.value })} placeholder="Musterstr. 1"
-                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                    className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Stadt</label>
                   <input value={settings.city || ''} onChange={(e) => setSettings({ ...settings, city: e.target.value })} placeholder="Berlin"
-                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                    className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Land</label>
                   <select value={settings.country || 'Deutschland'} onChange={(e) => setSettings({ ...settings, country: e.target.value })}
-                    className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all">
-                    {['Deutschland', 'Österreich', 'Schweiz', 'USA', 'UK', 'Frankreich', 'Niederlande'].map((c) => (
+                    className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all">
+                    {['Deutschland', '�sterreich', 'Schweiz', 'USA', 'UK', 'Frankreich', 'Niederlande'].map((c) => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
@@ -396,15 +396,15 @@ export default function OrganisationPage() {
           {/* Right: Logo preview + stats */}
           <div className="space-y-4">
             {settings.org_logo_url && /^https?:\/\//.test(settings.org_logo_url) && (
-              <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-4 flex flex-col items-center gap-3">
+              <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 p-4 flex flex-col items-center gap-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest dark:text-white/30 text-gray-500">Logo Vorschau</p>
                 <img src={settings.org_logo_url} alt="Logo" className="max-h-20 object-contain" />
               </div>
             )}
-            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+            <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
               <button
                 onClick={() => setOpenQuickInfo(v => !v)}
-                className={`w-full flex items-center justify-between px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openQuickInfo ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+                className={`w-full flex items-center justify-between px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${openQuickInfo ? 'border-b dark:border-white/6 border-black/4' : ''}`}
               >
                 <h4 className="text-xs font-black dark:text-white/40 text-gray-500 uppercase tracking-wide">Schnellinfo</h4>
                 <span className="dark:text-white/30 text-gray-400">{openQuickInfo ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</span>
@@ -414,10 +414,10 @@ export default function OrganisationPage() {
               {[
                 { label: 'Mitglieder', value: members.length, icon: Users },
                 { label: 'Aktiver Plan', value: PLAN_CONFIG[settings.plan as keyof typeof PLAN_CONFIG]?.label || settings.plan || 'Team', icon: CreditCard },
-                { label: 'Admin', value: userProfile?.email?.split('@')[0] || '—', icon: Shield },
+                { label: 'Admin', value: userProfile?.email?.split('@')[0] || '�', icon: Shield },
               ].map((s) => (
                 <div key={s.label} className="flex items-center gap-2 text-xs">
-                  <s.icon size={13} className="text-[var(--primary)] shrink-0" />
+                  <s.icon size={13} className="text-(--primary) shrink-0" />
                   <span className="dark:text-white/40 text-gray-500 flex-1">{s.label}</span>
                   <span className="font-bold dark:text-white text-gray-900">{s.value}</span>
                 </div>
@@ -429,34 +429,34 @@ export default function OrganisationPage() {
         </div>
       )}
 
-      {/* ─── TAB: Mitglieder ────────────────────────────── */}
+      {/* --- TAB: Mitglieder ------------------------------ */}
       {activeTab === 'members' && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="relative flex-1 max-w-xs">
               <Users size={13} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
               <input value={searchMember} onChange={(e) => setSearchMember(e.target.value)} placeholder="Name oder E-Mail suchen..."
-                className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2 pl-9 pr-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
             </div>
             <button onClick={() => setShowInvite(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none">
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-(--primary) text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none">
               <Plus size={13} /> Einladen
             </button>
           </div>
 
           {showInvite && (
-            <div className="card-shimmer rounded-xl border border-[rgba(99,102,241,0.2)] bg-[var(--primary-light)] p-4 space-y-3">
+            <div className="card-shimmer rounded-xl border border-[rgba(99,102,241,0.2)] bg-(--primary-light) p-4 space-y-3">
               <h4 className="text-xs font-black dark:text-white text-gray-900">Neues Mitglied einladen</h4>
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2 space-y-1">
                   <label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">E-Mail</label>
                   <input type="email" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} placeholder="max@firma.de"
-                    className="w-full bg-white dark:bg-black border dark:border-white/20 border-gray-200 rounded-lg py-2 px-3 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+                    className="w-full bg-white dark:bg-black border dark:border-white/20 border-gray-200 rounded-lg py-2 px-3 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">Rolle</label>
                   <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value)}
-                    className="w-full bg-white dark:bg-black border dark:border-white/20 border-gray-200 rounded-lg py-2 px-3 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]">
+                    className="w-full bg-white dark:bg-black border dark:border-white/20 border-gray-200 rounded-lg py-2 px-3 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)">
                     <option value="employee">Mitarbeiter</option>
                     <option value="department_lead">Team-Lead</option>
                     <option value="cio">CIO</option>
@@ -468,18 +468,18 @@ export default function OrganisationPage() {
                 <button onClick={() => { setShowInvite(false); setInviteEmail(''); }}
                   className="px-3 py-1.5 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 cursor-pointer border dark:border-white/10 border-gray-200 bg-transparent transition-colors hover:bg-gray-100 dark:hover:bg-white/5">Abbrechen</button>
                 <Link href={`/members?action=invite&email=${encodeURIComponent(inviteEmail)}&role=${encodeURIComponent(inviteRole)}`}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[var(--primary)] text-white text-xs font-bold cursor-pointer no-underline hover:opacity-90 transition-opacity">
-                  <Mail size={12} /> Einladung öffnen
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-(--primary) text-white text-xs font-bold cursor-pointer no-underline hover:opacity-90 transition-opacity">
+                  <Mail size={12} /> Einladung �ffnen
                 </Link>
               </div>
             </div>
           )}
 
-          <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+          <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b dark:border-white/[0.05] border-black/[0.05] bg-black/[0.01] dark:bg-white/[0.01]">
+                  <tr className="border-b dark:border-white/5 border-black/5 bg-black/1 dark:bg-white/1">
                     <th className="text-left px-4 py-3 font-bold dark:text-white/40 text-gray-500">Mitglied</th>
                     <th className="text-left px-4 py-3 font-bold dark:text-white/40 text-gray-500">Abteilung</th>
                     <th className="text-left px-4 py-3 font-bold dark:text-white/40 text-gray-500">Rolle</th>
@@ -488,10 +488,10 @@ export default function OrganisationPage() {
                 </thead>
                 <tbody>
                   {filteredMembers.map((m) => (
-                    <tr key={m.id} className="border-b dark:border-white/[0.03] border-black/[0.03] hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-colors">
+                    <tr key={m.id} className="border-b dark:border-white/3 border-black/3 hover:bg-black/1 dark:hover:bg-white/1 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-[var(--primary-light)] flex items-center justify-center text-[10px] font-black text-[var(--primary)] shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-(--primary-light) flex items-center justify-center text-[10px] font-black text-(--primary) shrink-0">
                             {m.name.charAt(0)}
                           </div>
                           <div>
@@ -500,7 +500,7 @@ export default function OrganisationPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 dark:text-white/60 text-gray-600">{m.department || '—'}</td>
+                      <td className="px-4 py-3 dark:text-white/60 text-gray-600">{m.department || '�'}</td>
                       <td className="px-4 py-3">
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: `${ROLE_COLORS[m.role] || '#6b7280'}20`, color: ROLE_COLORS[m.role] || '#6b7280' }}>
                           {ROLE_LABELS[m.role] || m.role}
@@ -511,7 +511,7 @@ export default function OrganisationPage() {
                           <button
                             onClick={() => openEditModal(members.find(x => x.id === m.id)!)}
                             title="Bearbeiten"
-                            className="p-1.5 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all border-none bg-transparent cursor-pointer">
+                            className="p-1.5 rounded-lg hover:bg-(--primary-light) text-(--primary) transition-all border-none bg-transparent cursor-pointer">
                             <Edit3 size={12} />
                           </button>
                           {deleteConfirm === m.id ? (
@@ -532,14 +532,14 @@ export default function OrganisationPage() {
                 </tbody>
               </table>
             </div>
-            <div className="px-4 py-3 border-t dark:border-white/[0.05] border-black/[0.05] text-xs dark:text-white/30 text-gray-400">
+            <div className="px-4 py-3 border-t dark:border-white/5 border-black/5 text-xs dark:text-white/30 text-gray-400">
               {filteredMembers.length} von {members.length} Mitgliedern
             </div>
           </div>
         </div>
       )}
 
-      {/* ─── TAB: Billing ────────────────────────────────── */}
+      {/* --- TAB: Billing ---------------------------------- */}
       {activeTab === 'billing' && (
         <div className="grid lg:grid-cols-2 gap-5">
           {/* Plan selection */}
@@ -548,10 +548,10 @@ export default function OrganisationPage() {
             <div className="grid sm:grid-cols-2 gap-3">
               {Object.entries(PLAN_CONFIG).map(([key, plan]) => (
                 <button key={key} onClick={() => setSettings({ ...settings, plan: key })}
-                  className={`p-4 rounded-xl border-2 text-left transition-all cursor-pointer bg-transparent ${settings.plan === key ? 'border-[rgba(99,102,241,0.5)] bg-[var(--primary-light)]' : 'dark:border-white/[0.06] border-black/[0.06] hover:border-[rgba(99,102,241,0.2)]'}`}>
+                  className={`p-4 rounded-xl border-2 text-left transition-all cursor-pointer bg-transparent ${settings.plan === key ? 'border-[rgba(99,102,241,0.5)] bg-(--primary-light)' : 'dark:border-white/6 border-black/6 hover:border-[rgba(99,102,241,0.2)]'}`}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-black" style={{ color: plan.color }}>{plan.label}</span>
-                    {settings.plan === key && <Check size={14} className="text-[var(--primary)]" />}
+                    {settings.plan === key && <Check size={14} className="text-(--primary)" />}
                   </div>
                   <div className="text-[10px] dark:text-white/40 text-gray-500">{plan.members} Mitglieder max.</div>
                   <ul className="mt-2 space-y-0.5">
@@ -567,10 +567,10 @@ export default function OrganisationPage() {
           {/* Billing info */}
           <div className="space-y-4">
             <h3 className="text-sm font-black dark:text-white text-gray-900">Rechnungsdetails</h3>
-            <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+            <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
               <button
                 onClick={() => setOpenBillingInfo(v => !v)}
-                className={`w-full flex items-center justify-between px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openBillingInfo ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+                className={`w-full flex items-center justify-between px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${openBillingInfo ? 'border-b dark:border-white/6 border-black/4' : ''}`}
               >
                 <span className="text-xs font-bold dark:text-white/50 text-gray-600">Rechnungsfelder</span>
                 <span className="dark:text-white/30 text-gray-400">{openBillingInfo ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</span>
@@ -580,20 +580,20 @@ export default function OrganisationPage() {
               <div className="space-y-1">
                 <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Rechnungs-E-Mail</label>
                 <input type="email" value={settings.billing_email || ''} onChange={(e) => setSettings({ ...settings, billing_email: e.target.value })} placeholder="billing@firma.de"
-                  className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                  className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">USt-IdNr.</label>
                 <input value={settings.tax_id || ''} onChange={(e) => setSettings({ ...settings, tax_id: e.target.value })} placeholder="DE123456789"
-                  className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                  className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Max. Mitglieder</label>
                 <input type="number" value={settings.max_members || 50} onChange={(e) => setSettings({ ...settings, max_members: parseInt(e.target.value) || 50 })} min={1} max={10000}
-                  className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all" />
+                  className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
               </div>
               <button onClick={handleSave} disabled={saving}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none disabled:opacity-50">
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-(--primary) text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none disabled:opacity-50">
                 {saving ? <Loader size={13} className="animate-spin" /> : <Save size={13} />} Abrechnungsdaten speichern
               </button>
               </div>
@@ -603,18 +603,18 @@ export default function OrganisationPage() {
         </div>
       )}
 
-      {/* ─── TAB: Danger Zone ───────────────────────────── */}
+      {/* --- TAB: Danger Zone ----------------------------- */}
       {activeTab === 'danger' && (
         <div className="space-y-4 max-w-xl">
           <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 text-xs text-amber-600 dark:text-amber-400 flex items-start gap-2">
             <AlertCircle size={14} className="shrink-0 mt-0.5" />
-            Aktionen in diesem Bereich können nicht rückgängig gemacht werden. Bitte mit Vorsicht vorgehen.
+            Aktionen in diesem Bereich k�nnen nicht r�ckg�ngig gemacht werden. Bitte mit Vorsicht vorgehen.
           </div>
 
           {[
             {
               title: 'Wartungsmodus aktivieren',
-              desc: 'Blockiert alle nicht-Admin-Benutzer. Sinnvoll für Migrations- oder Update-Phasen.',
+              desc: 'Blockiert alle nicht-Admin-Benutzer. Sinnvoll f�r Migrations- oder Update-Phasen.',
               action: settings.maintenance_mode ? 'Deaktivieren' : 'Aktivieren',
               color: settings.maintenance_mode ? 'bg-green-500 text-white' : 'bg-amber-500 text-white',
               onClick: async () => {
@@ -625,7 +625,7 @@ export default function OrganisationPage() {
               },
             },
           ].map((action, i) => (
-            <div key={i} className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] p-4 flex items-center justify-between gap-4">
+            <div key={i} className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 p-4 flex items-center justify-between gap-4">
               <div>
                 <div className="text-sm font-bold dark:text-white text-gray-900">{action.title}</div>
                 <div className="text-xs dark:text-white/40 text-gray-500 mt-0.5">{action.desc}</div>

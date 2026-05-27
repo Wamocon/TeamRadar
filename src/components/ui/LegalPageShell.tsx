@@ -14,7 +14,7 @@ export function LegalPageShell({ title, updatedAt, children }: LegalPageShellPro
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0b1120] pb-20">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-white/80 dark:bg-[#0b1120]/80 backdrop-blur-md border-black/[0.06] dark:border-white/[0.06]">
+      <header className="sticky top-0 z-50 w-full border-b bg-white/80 dark:bg-[#0b1120]/80 backdrop-blur-md border-black/6 dark:border-white/6">
         <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             <Link 
@@ -48,7 +48,7 @@ export function LegalPageShell({ title, updatedAt, children }: LegalPageShellPro
         </div>
 
         {/* Footer */}
-        <footer className="mt-20 border-t border-black/[0.1] dark:border-white/[0.1] pt-8 text-center text-xs text-gray-400 dark:text-gray-500">
+        <footer className="mt-20 border-t border-black/10 dark:border-white/10 pt-8 text-center text-xs text-gray-400 dark:text-gray-500">
           <p>© {new Date().getFullYear()} TeamRadar – Powered by WAMOCON GmbH</p>
           <p className="mt-2">Mergenthalerallee 79 – 81, 65760 Eschborn</p>
         </footer>
@@ -59,7 +59,7 @@ export function LegalPageShell({ title, updatedAt, children }: LegalPageShellPro
 
 export function LegalSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-black/[0.05] dark:border-white/[0.05] bg-white dark:bg-white/[0.02] p-6 shadow-sm sm:p-8">
+    <section className="rounded-2xl border border-black/5 dark:border-white/5 bg-white dark:bg-white/2 p-6 shadow-sm sm:p-8">
       <h2 className="text-lg font-bold text-gray-900 dark:text-white sm:text-xl mb-4">{title}</h2>
       <div className="space-y-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
         {children}

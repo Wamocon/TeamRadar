@@ -1,4 +1,4 @@
-ï»¿'use client';
+'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -38,7 +38,7 @@ interface NavItem {
   label: string;
   exact?: boolean;
   badge?: number;
-  activeColor?: string; // Override fÃ¼r aktive Farbe
+  activeColor?: string; // Override für aktive Farbe
 }
 
 function SidebarContent({
@@ -130,7 +130,7 @@ function SidebarContent({
 
   const NavLink = ({ item }: { item: NavItem }) => {
     const active = isActive(item.href, item.exact);
-    const activeClass = item.activeColor ?? 'bg-[var(--primary-light)] border-[rgba(99,102,241,0.2)]';
+    const activeClass = item.activeColor ?? 'bg-(--primary-light) border-[rgba(99,102,241,0.2)]';
     return (
       <Link
         href={item.href}
@@ -142,14 +142,14 @@ function SidebarContent({
         }`}
         style={active && !item.activeColor ? { color: theme === 'dark' ? 'rgba(255,255,255,0.9)' : '#374151' } : {}}
       >
-        <item.icon size={15} className={`shrink-0 transition-colors ${active ? 'text-[var(--primary)]' : 'opacity-50 group-hover:opacity-80'}`} />
+        <item.icon size={15} className={`shrink-0 transition-colors ${active ? 'text-(--primary)' : 'opacity-50 group-hover:opacity-80'}`} />
         <span className="flex-1">{item.label}</span>
         {item.badge !== undefined && item.badge > 0 && (
           <span className="text-[10px] font-bold bg-[var(--warning)] text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
             {item.badge}
           </span>
         )}
-        {active && <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] shrink-0" />}
+        {active && <div className="w-1.5 h-1.5 rounded-full bg-(--primary) shrink-0" />}
       </Link>
     );
   };
@@ -171,13 +171,13 @@ function SidebarContent({
           </div>
           <div>
             <div className="text-sm font-black tracking-tight text-[var(--sidebar-text)]">
-              <span className="text-[var(--primary)]">Team</span>Radar
+              <span className="text-(--primary)">Team</span>Radar
             </div>
-            <div className="text-[9px] uppercase tracking-widest text-[var(--sidebar-text-muted)] opacity-60">VerfÃ¼gbarkeit</div>
+            <div className="text-[9px] uppercase tracking-widest text-[var(--sidebar-text-muted)] opacity-60">Verfügbarkeit</div>
           </div>
         </div>
         {isMobile && (
-          <button onClick={onNavigate} className="p-1.5 rounded-lg hover:bg-[var(--sidebar-item-hover)] text-[var(--sidebar-text-muted)] transition-all border-none bg-transparent cursor-pointer" aria-label="MenÃ¼ schlieÃŸen">
+          <button onClick={onNavigate} className="p-1.5 rounded-lg hover:bg-[var(--sidebar-item-hover)] text-[var(--sidebar-text-muted)] transition-all border-none bg-transparent cursor-pointer" aria-label="Menü schließen">
             <X size={16} />
           </button>
         )}
@@ -186,13 +186,13 @@ function SidebarContent({
       {/* Org Box */}
       <div className="shrink-0 mx-3 mt-3">
         <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border" style={{ background: 'var(--bg-elevated, rgba(255,255,255,0.03))', borderColor: 'var(--sidebar-border)' }}>
-          <div className="w-7 h-7 rounded-lg bg-[var(--primary-light)] flex items-center justify-center shrink-0">
-            <Building2 size={13} className="text-[var(--primary)]" />
+          <div className="w-7 h-7 rounded-lg bg-(--primary-light) flex items-center justify-center shrink-0">
+            <Building2 size={13} className="text-(--primary)" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-[11px] font-bold text-[var(--sidebar-text)] truncate">{orgName}</div>
             {mounted && hasMinRole('department_lead') && (
-              <div className="text-[9px] text-[var(--primary)] font-semibold capitalize">
+              <div className="text-[9px] text-(--primary) font-semibold capitalize">
                 {isElevatedMode ? (userProfile?.role || 'admin') : 'employee'}
               </div>
             )}
@@ -200,7 +200,7 @@ function SidebarContent({
         </div>
       </div>
 
-      {/* Dual-Role-Switcher: nur fÃ¼r privilegierte User (department_lead+) */}
+      {/* Dual-Role-Switcher: nur für privilegierte User (department_lead+) */}
       {mounted && hasMinRole('department_lead') && (
         <div className="shrink-0 mx-3 mt-2">
           <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--sidebar-item-hover)' }}>
@@ -208,7 +208,7 @@ function SidebarContent({
               onClick={() => { setIsElevatedMode(true); localStorage.setItem('tr-role-mode', 'elevated'); window.dispatchEvent(new CustomEvent('tr-role-mode-change', { detail: { elevated: true } })); }}
               className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-bold transition-all border-none cursor-pointer ${
                 isElevatedMode
-                  ? 'bg-[var(--primary)] text-white shadow-sm'
+                  ? 'bg-(--primary) text-white shadow-sm'
                   : 'text-[var(--sidebar-text-muted)] bg-transparent hover:bg-[var(--sidebar-item-hover)]'
               }`}
               title={`Als ${userProfile?.role} arbeiten`}
@@ -220,7 +220,7 @@ function SidebarContent({
               onClick={() => { setIsElevatedMode(false); localStorage.setItem('tr-role-mode', 'employee'); window.dispatchEvent(new CustomEvent('tr-role-mode-change', { detail: { elevated: false } })); }}
               className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-bold transition-all border-none cursor-pointer ${
                 !isElevatedMode
-                  ? 'bg-[var(--primary)] text-white shadow-sm'
+                  ? 'bg-(--primary) text-white shadow-sm'
                   : 'text-[var(--sidebar-text-muted)] bg-transparent hover:bg-[var(--sidebar-item-hover)]'
               }`}
               title="Als normaler Mitarbeiter arbeiten"
@@ -235,7 +235,7 @@ function SidebarContent({
       {/* App Switcher */}
       <div className="shrink-0 grid grid-cols-2 gap-1.5 mx-3 mt-3">
         {apps.map((app) => (
-          <button key={app.id} onClick={() => setActivePortal(app)} className="flex items-center gap-2 px-2.5 py-2 rounded-xl border transition-all text-[10px] font-semibold cursor-pointer bg-transparent hover:border-[rgba(99,102,241,0.3)] hover:bg-[var(--primary-light)]" style={{ borderColor: 'var(--sidebar-border)', color: 'var(--sidebar-text-muted)' }}>
+          <button key={app.id} onClick={() => setActivePortal(app)} className="flex items-center gap-2 px-2.5 py-2 rounded-xl border transition-all text-[10px] font-semibold cursor-pointer bg-transparent hover:border-[rgba(99,102,241,0.3)] hover:bg-(--primary-light)" style={{ borderColor: 'var(--sidebar-border)', color: 'var(--sidebar-text-muted)' }}>
             <app.icon size={12} className={app.color} />
             {app.label}
           </button>
@@ -245,7 +245,7 @@ function SidebarContent({
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 sidebar-scroll space-y-4">
         <div>
-          <SectionLabel label="HauptmenÃ¼" />
+          <SectionLabel label="Hauptmenü" />
           <div className="flex flex-col gap-0.5">
             {mainNav.map((item) => <NavLink key={item.href} item={item} />)}
           </div>
@@ -271,7 +271,7 @@ function SidebarContent({
       {/* Footer */}
       <div className="shrink-0 p-3 border-t space-y-3" style={{ borderColor: 'var(--sidebar-border)', background: 'var(--bg-elevated, rgba(255,255,255,0.02))' }}>
         <div className="flex items-center gap-1 p-1 rounded-xl border" style={{ borderColor: 'var(--sidebar-border)' }}>
-          <button onClick={() => setTheme('light')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'light' ? 'bg-white shadow-sm text-[var(--primary)]' : 'text-[var(--sidebar-text-muted)]'}`}><Sun size={12} /></button>
+          <button onClick={() => setTheme('light')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'light' ? 'bg-white shadow-sm text-(--primary)' : 'text-[var(--sidebar-text-muted)]'}`}><Sun size={12} /></button>
           <button onClick={() => setTheme('dark')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'dark' ? 'bg-[#1a2236] text-white shadow-lg' : 'text-[var(--sidebar-text-muted)]'}`}><Moon size={12} /></button>
         </div>
         <div className="flex items-center gap-2.5">
@@ -281,7 +281,7 @@ function SidebarContent({
                 <Image src={userProfile.avatarUrl} alt="User Avatar" fill className="object-cover" sizes="32px" />
               </div>
             ) : (
-              <span className="text-[var(--primary)] font-black text-xs">
+              <span className="text-(--primary) font-black text-xs">
                 {userProfile?.displayName?.charAt(0) || userProfile?.email?.charAt(0) || '?'}
               </span>
             )}
@@ -293,7 +293,7 @@ function SidebarContent({
             </div>
           </div>
           <div className="flex items-center gap-0.5 shrink-0">
-            <Link href="/settings" onClick={onNavigate} className="p-1.5 rounded-lg hover:bg-[var(--primary-light)] text-[var(--sidebar-text-muted)] hover:text-[var(--primary)] transition-all no-underline">
+            <Link href="/settings" onClick={onNavigate} className="p-1.5 rounded-lg hover:bg-(--primary-light) text-[var(--sidebar-text-muted)] hover:text-(--primary) transition-all no-underline">
               <Settings size={14} />
             </Link>
             <button onClick={handleLogout} className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--sidebar-text-muted)] hover:text-red-500 transition-all border-none bg-transparent cursor-pointer">

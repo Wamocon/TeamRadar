@@ -17,7 +17,7 @@ const OPTIONS: { value: FilterValue; label: string; icon: string; color?: string
 
 export function ProjectTypeFilter({ value, onChange, counts }: Props) {
   return (
-    <div className="flex gap-1 p-1 bg-black/[0.04] dark:bg-white/[0.04] rounded-xl w-fit">
+    <div className="flex gap-1 p-1 bg-black/4 dark:bg-white/4 rounded-xl w-fit">
       {OPTIONS.map((opt) => {
         const isActive = value === opt.value;
         const count = opt.value === 'all'
@@ -38,7 +38,7 @@ export function ProjectTypeFilter({ value, onChange, counts }: Props) {
             {opt.label}
             {count !== undefined && (
               <span className={`text-[9px] px-1 py-0.5 rounded-full ${
-                isActive ? 'bg-black/[0.06] dark:bg-white/[0.06]' : 'bg-black/[0.04] dark:bg-white/[0.04]'
+                isActive ? 'bg-black/6 dark:bg-white/6' : 'bg-black/4 dark:bg-white/4'
               }`}>
                 {count}
               </span>

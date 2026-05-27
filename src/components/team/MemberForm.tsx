@@ -178,9 +178,9 @@ export function MemberForm({ memberId, onSuccess, onCancel }: {
         <div className="grid grid-cols-3 gap-2">
           {(Object.entries(CONSULTANT_TYPE_CONFIG) as [ConsultantType, typeof CONSULTANT_TYPE_CONFIG[ConsultantType]][]).map(([key, cfg]) => (
             <button key={key} type="button" onClick={() => setConsultantType(key)}
-              className={`p-2.5 rounded-lg border-2 text-left transition-all cursor-pointer bg-transparent ${consultantType === key ? 'border-[var(--primary)] bg-[var(--primary-light,#eef2ff)]' : 'border-slate-200 dark:border-white/10'}`}>
+              className={`p-2.5 rounded-lg border-2 text-left transition-all cursor-pointer bg-transparent ${consultantType === key ? 'border-(--primary) bg-[var(--primary-light,#eef2ff)]' : 'border-slate-200 dark:border-white/10'}`}>
               <span className="text-[10px] font-black uppercase tracking-wide" style={{ color: cfg.color }}>{cfg.short}</span>
-              <div className={`text-[10px] font-semibold mt-0.5 ${consultantType === key ? 'text-[var(--primary)]' : 'dark:text-white/60 text-gray-600'}`}>{cfg.label}</div>
+              <div className={`text-[10px] font-semibold mt-0.5 ${consultantType === key ? 'text-(--primary)' : 'dark:text-white/60 text-gray-600'}`}>{cfg.label}</div>
             </button>
           ))}
         </div>

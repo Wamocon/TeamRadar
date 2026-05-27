@@ -105,7 +105,7 @@ export function Modal({
         </div>
 
         {/* Footer */}
-        <div className="p-5 bg-white/[0.02] border-t border-white/5 flex justify-end gap-2">
+        <div className="p-5 bg-white/2 border-t border-white/5 flex justify-end gap-2">
           {footer}
           <button
             onClick={onClose}

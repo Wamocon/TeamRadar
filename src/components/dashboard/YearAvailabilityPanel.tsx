@@ -69,7 +69,7 @@ function ReadonlyDayCell({ dateStr, category, isWeekend, dayNum, holiday, today 
     <td className="text-center relative p-0.5" title={titleText}>
       <div
         className={`w-6 h-6 rounded flex items-center justify-center text-[7px] font-bold mx-auto relative ${
-          isToday ? 'ring-2 ring-[var(--primary)] ring-offset-1' : ''
+          isToday ? 'ring-2 ring-(--primary) ring-offset-1' : ''
         }`}
         style={{
           background: cellBg,
@@ -110,20 +110,20 @@ function MonthMatrixReadonly({
   const isCurrent = month === currentMonth && year === currentYear;
 
   return (
-    <div className={`rounded-xl border overflow-hidden ${isCurrent ? 'border-[var(--primary)]/30 ring-1 ring-[var(--primary)]/20' : 'border-black/10 dark:border-white/10'}`}>
+    <div className={`rounded-xl border overflow-hidden ${isCurrent ? 'border-(--primary)/30 ring-1 ring-(--primary)/20' : 'border-black/10 dark:border-white/10'}`}>
       <button
         onClick={onToggleCollapse}
-        className={`w-full flex items-center justify-between px-3 py-2 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${isCurrent ? 'bg-[var(--primary-light)]' : ''}`}
+        className={`w-full flex items-center justify-between px-3 py-2 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${isCurrent ? 'bg-(--primary-light)' : ''}`}
       >
         <div className="flex items-center gap-2">
           {isCollapsed
             ? <ChevronDown size={13} className="dark:text-white/40 text-gray-400" />
             : <ChevronUp size={13} className="dark:text-white/40 text-gray-400" />}
-          <span className={`text-xs font-black ${isCurrent ? 'text-[var(--primary)]' : 'dark:text-white text-gray-900'}`}>
+          <span className={`text-xs font-black ${isCurrent ? 'text-(--primary)' : 'dark:text-white text-gray-900'}`}>
             {MONTH_NAMES_LONG[month]} {year}
           </span>
           {isCurrent && (
-            <span className="px-1.5 py-0.5 rounded-full bg-[var(--primary)] text-white text-[8px] font-bold">AKTUELL</span>
+            <span className="px-1.5 py-0.5 rounded-full bg-(--primary) text-white text-[8px] font-bold">AKTUELL</span>
           )}
         </div>
       </button>
@@ -145,7 +145,7 @@ function MonthMatrixReadonly({
                     className={`text-center font-black pb-0.5 pt-0.5 ${
                       d.isWeekend ? 'dark:text-white/15 text-gray-300' :
                       d.holiday ? 'text-red-400' :
-                      d.dateStr === today ? 'text-[var(--primary)]' :
+                      d.dateStr === today ? 'text-(--primary)' :
                       'dark:text-white/40 text-gray-500'
                     }`}
                     style={{ fontSize: '8px', background: d.holiday && !d.isWeekend ? 'rgba(239,68,68,0.04)' : undefined }}
@@ -176,7 +176,7 @@ function MonthMatrixReadonly({
             </thead>
             <tbody>
               {memberRows.map(({ member, categories }) => (
-                <tr key={member.id} className="border-b dark:border-white/[0.06] border-gray-100">
+                <tr key={member.id} className="border-b dark:border-white/6 border-gray-100">
                   <td className="px-2 py-0.5 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/10 border-gray-200">
                     <div className="font-bold dark:text-white/70 text-gray-700 truncate" style={{ fontSize: '9px', maxWidth: 110 }}>
                       {member.name}
@@ -275,16 +275,16 @@ export function YearAvailabilityPanel() {
   if (members.length === 0) return null;
 
   return (
-    <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+    <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
       {/* Outer header */}
       <button
         onClick={() => setPanelOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors"
         aria-expanded={panelOpen}
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] flex items-center justify-center shrink-0">
-            <CalendarRange size={15} className="text-[var(--primary)]" />
+          <div className="w-8 h-8 rounded-lg bg-(--primary-light) border border-[rgba(99,102,241,0.2)] flex items-center justify-center shrink-0">
+            <CalendarRange size={15} className="text-(--primary)" />
           </div>
           <div className="text-left">
             <div className="text-sm font-black dark:text-white text-gray-900">Jahresverfügbarkeit</div>
@@ -295,7 +295,7 @@ export function YearAvailabilityPanel() {
           <Link
             href="/year"
             onClick={(e) => e.stopPropagation()}
-            className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/50 text-gray-500 transition-all no-underline"
+            className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-(--primary-light) hover:text-(--primary) dark:text-white/50 text-gray-500 transition-all no-underline"
           >
             Bearbeiten →
           </Link>
@@ -306,18 +306,18 @@ export function YearAvailabilityPanel() {
       </button>
 
       {panelOpen && (
-        <div className="border-t dark:border-white/[0.06] border-black/[0.06]">
+        <div className="border-t dark:border-white/6 border-black/6">
           {/* Controls bar */}
-          <div className="px-4 py-3 flex flex-wrap items-center gap-3 border-b dark:border-white/[0.06] border-black/[0.04] bg-black/[0.01] dark:bg-white/[0.01]">
+          <div className="px-4 py-3 flex flex-wrap items-center gap-3 border-b dark:border-white/6 border-black/4 bg-black/1 dark:bg-white/1">
             {/* Year navigation */}
             <div className="flex items-center gap-1.5">
               <button onClick={() => setYear((y) => y - 1)}
-                className="p-1 rounded-lg border dark:border-white/10 border-black/10 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors bg-transparent cursor-pointer">
+                className="p-1 rounded-lg border dark:border-white/10 border-black/10 hover:bg-black/4 dark:hover:bg-white/4 transition-colors bg-transparent cursor-pointer">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="dark:text-white/50 text-gray-600"><path d="M15 18l-6-6 6-6"/></svg>
               </button>
               <span className="text-sm font-black dark:text-white text-gray-900 min-w-[44px] text-center">{year}</span>
               <button onClick={() => setYear((y) => y + 1)}
-                className="p-1 rounded-lg border dark:border-white/10 border-black/10 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors bg-transparent cursor-pointer">
+                className="p-1 rounded-lg border dark:border-white/10 border-black/10 hover:bg-black/4 dark:hover:bg-white/4 transition-colors bg-transparent cursor-pointer">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="dark:text-white/50 text-gray-600"><path d="M9 18l6-6-6-6"/></svg>
               </button>
             </div>
@@ -329,7 +329,7 @@ export function YearAvailabilityPanel() {
                 title="Bundesland für Feiertagsanzeige"
                 value={bundesland}
                 onChange={(e) => setBundesland(e.target.value as Bundesland)}
-                className="text-[9px] rounded-lg px-2 py-1 border dark:border-white/[0.08] border-black/[0.08] bg-transparent dark:text-white/60 text-gray-600 outline-none focus:border-[var(--primary)] cursor-pointer"
+                className="text-[9px] rounded-lg px-2 py-1 border dark:border-white/8 border-black/8 bg-transparent dark:text-white/60 text-gray-600 outline-none focus:border-(--primary) cursor-pointer"
               >
                 {(Object.entries(BUNDESLAENDER) as [Bundesland, string][]).map(([k, v]) => (
                   <option key={k} value={k}>{k === 'ALL' ? v : `${k} – ${v}`}</option>
@@ -341,13 +341,13 @@ export function YearAvailabilityPanel() {
             <div className="ml-auto flex gap-1.5">
               <button
                 onClick={() => setCollapsedMonths(new Set())}
-                className="px-2 py-1 rounded text-[9px] font-semibold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/40 text-gray-400 transition-all bg-transparent cursor-pointer"
+                className="px-2 py-1 rounded text-[9px] font-semibold border dark:border-white/10 border-black/10 hover:bg-(--primary-light) hover:text-(--primary) dark:text-white/40 text-gray-400 transition-all bg-transparent cursor-pointer"
               >
                 Alle aufklappen
               </button>
               <button
                 onClick={() => setCollapsedMonths(new Set([0,1,2,3,4,5,6,7,8,9,10,11]))}
-                className="px-2 py-1 rounded text-[9px] font-semibold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/40 text-gray-400 transition-all bg-transparent cursor-pointer"
+                className="px-2 py-1 rounded text-[9px] font-semibold border dark:border-white/10 border-black/10 hover:bg-(--primary-light) hover:text-(--primary) dark:text-white/40 text-gray-400 transition-all bg-transparent cursor-pointer"
               >
                 Alle einklappen
               </button>
@@ -355,7 +355,7 @@ export function YearAvailabilityPanel() {
           </div>
 
           {/* Legende */}
-          <div className="px-4 py-2 flex flex-wrap gap-2.5 border-b dark:border-white/[0.04] border-black/[0.04]">
+          <div className="px-4 py-2 flex flex-wrap gap-2.5 border-b dark:border-white/4 border-black/4">
             {(Object.entries(DAY_CATEGORY_CONFIG) as [DayCategory, typeof DAY_CATEGORY_CONFIG[DayCategory]][])
               .filter(([cat]) => cat !== 'free' && cat !== 'weekend' && cat !== 'available')
               .map(([cat, conf]) => (

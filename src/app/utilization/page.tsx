@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import { useMemo, useState, useCallback } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import {
@@ -14,8 +14,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-const MONTH_NAMES_LONG  = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'M�r', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+const MONTH_NAMES_LONG  = ['Januar', 'Februar', 'M�rz', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 const WEEKDAY_SHORT = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
 function getDaysInMonth(year: number, month: number) {
@@ -31,7 +31,7 @@ function getCellStyle(kind: CellKind, pct: number): { bg: string; label: string 
   switch (kind) {
     case 'vacation':   return { bg: '#8b5cf6', label: 'Urlaub' };
     case 'sick':       return { bg: '#ec4899', label: 'Krank' };
-    case 'overbooked': return { bg: '#ef4444', label: `${pct}% – Überbuchung` };
+    case 'overbooked': return { bg: '#ef4444', label: `${pct}% � �berbuchung` };
     case 'extern':     return { bg: pct >= 100 ? '#f97316' : pct >= 60 ? '#fb923c' : '#fed7aa', label: `${pct}% Ext.` };
     case 'intern':     return { bg: pct >= 100 ? '#6366f1' : pct >= 60 ? '#818cf8' : '#c7d2fe', label: `${pct}% Int.` };
     default:           return { bg: 'transparent', label: 'Kein Status' };
@@ -120,7 +120,7 @@ export default function UtilizationPage() {
     totalIntDays: memberData.reduce((s, m) => s + m.intDays, 0),
   }), [memberData, members.length]);
 
-  // ── RBAC Guard (nach allen Hooks) ─────────────────
+  // -- RBAC Guard (nach allen Hooks) -----------------
   if (!hasMinRole('department_lead')) {
     return (
       <div className="p-6 w-full flex items-center justify-center min-h-[60vh]">
@@ -130,10 +130,10 @@ export default function UtilizationPage() {
           </div>
           <h2 className="text-xl font-bold dark:text-white text-gray-900">Kein Zugriff</h2>
           <p className="text-sm dark:text-white/40 text-gray-500 max-w-xs">
-            Die Auslastungsübersicht ist nur für Abteilungsleiter, CIOs und Admins sichtbar.
+            Die Auslastungs�bersicht ist nur f�r Abteilungsleiter, CIOs und Admins sichtbar.
           </p>
-          <Link href="/" className="inline-block mt-4 px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-sm font-semibold no-underline hover:opacity-90">
-            Zurück zum Dashboard
+          <Link href="/" className="inline-block mt-4 px-4 py-2 rounded-xl bg-(--primary) text-white text-sm font-semibold no-underline hover:opacity-90">
+            Zur�ck zum Dashboard
           </Link>
         </div>
       </div>
@@ -146,21 +146,21 @@ export default function UtilizationPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
-              <BarChart3 size={20} className="text-[var(--primary)]" />
+            <div className="w-10 h-10 rounded-xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
+              <BarChart3 size={20} className="text-(--primary)" />
             </div>
             Auslastung
           </h1>
-          <p className="text-sm dark:text-white/40 text-gray-500 mt-1">Jahresübersicht der Berater-Auslastung {year}</p>
+          <p className="text-sm dark:text-white/40 text-gray-500 mt-1">Jahres�bersicht der Berater-Auslastung {year}</p>
         </div>
         <div className="flex items-center gap-2">
           <button title="Vorheriges Jahr" onClick={() => setYear((y) => y - 1)}
-            className="p-2 rounded-lg border dark:border-white/[0.06] border-black/[0.06] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+            className="p-2 rounded-lg border dark:border-white/6 border-black/6 hover:bg-black/4 dark:hover:bg-white/4 transition-colors">
             <ChevronLeft size={16} className="dark:text-white/50 text-gray-600" />
           </button>
           <span className="text-xl font-black dark:text-white text-gray-900 min-w-[70px] text-center">{year}</span>
-          <button title="Nächstes Jahr" onClick={() => setYear((y) => y + 1)}
-            className="p-2 rounded-lg border dark:border-white/[0.06] border-black/[0.06] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
+          <button title="N�chstes Jahr" onClick={() => setYear((y) => y + 1)}
+            className="p-2 rounded-lg border dark:border-white/6 border-black/6 hover:bg-black/4 dark:hover:bg-white/4 transition-colors">
             <ChevronRight size={16} className="dark:text-white/50 text-gray-600" />
           </button>
         </div>
@@ -170,7 +170,7 @@ export default function UtilizationPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: 'Berater',               value: teamKPIs.totalMembers,  color: '#6366f1', icon: Users },
-          { label: 'Ø Team-Auslastung',     value: `${teamKPIs.avgUtil}%`, color: teamKPIs.avgUtil > 80 ? '#f59e0b' : '#6366f1', icon: TrendingUp },
+          { label: '� Team-Auslastung',     value: `${teamKPIs.avgUtil}%`, color: teamKPIs.avgUtil > 80 ? '#f59e0b' : '#6366f1', icon: TrendingUp },
           { label: 'Ext. Projekttage ges.', value: teamKPIs.totalExtDays,  color: '#f97316', icon: Briefcase },
           { label: 'Int. Projekttage ges.', value: teamKPIs.totalIntDays,  color: '#6366f1', icon: Briefcase },
         ].map((kpi) => (
@@ -191,10 +191,10 @@ export default function UtilizationPage() {
         {[
           { label: 'Kein Status',       bg: 'rgba(107,114,128,0.08)', border: 'rgba(107,114,128,0.2)' },
           { label: 'Int. <60%',         bg: '#c7d2fe', border: 'transparent' },
-          { label: 'Int. 60–100%',      bg: '#6366f1', border: 'transparent' },
+          { label: 'Int. 60�100%',      bg: '#6366f1', border: 'transparent' },
           { label: 'Ext. <60%',         bg: '#fed7aa', border: 'transparent' },
-          { label: 'Ext. 60–100%',      bg: '#f97316', border: 'transparent' },
-          { label: '>100% Überbuchung', bg: '#ef4444', border: 'transparent' },
+          { label: 'Ext. 60�100%',      bg: '#f97316', border: 'transparent' },
+          { label: '>100% �berbuchung', bg: '#ef4444', border: 'transparent' },
           { label: 'Urlaub',            bg: '#8b5cf6', border: 'transparent' },
           { label: 'Krank',             bg: '#ec4899', border: 'transparent' },
         ].map((l) => (
@@ -214,13 +214,13 @@ export default function UtilizationPage() {
           <div className="flex gap-1.5">
             <button
               onClick={() => setCollapsedMembers(new Set())}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/40 text-gray-400 transition-all bg-transparent cursor-pointer"
+              className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-(--primary-light) hover:text-(--primary) dark:text-white/40 text-gray-400 transition-all bg-transparent cursor-pointer"
             >
               Alle aufklappen
             </button>
             <button
               onClick={() => setCollapsedMembers(new Set(memberData.map(m => m.member.id)))}
-              className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/40 text-gray-400 transition-all bg-transparent cursor-pointer"
+              className="px-2.5 py-1 rounded-lg text-[10px] font-semibold border dark:border-white/10 border-black/10 hover:bg-(--primary-light) hover:text-(--primary) dark:text-white/40 text-gray-400 transition-all bg-transparent cursor-pointer"
             >
               Alle einklappen
             </button>
@@ -233,15 +233,15 @@ export default function UtilizationPage() {
         {memberData.map(({ member, monthGrids, avgUtil, extDays, intDays, vacDays, sickDays }) => {
           const isCollapsed = collapsedMembers.has(member.id);
           return (
-          <div key={member.id} className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+          <div key={member.id} className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
 
-            {/* Member Header – klickbar zum Ein-/Ausklappen */}
+            {/* Member Header � klickbar zum Ein-/Ausklappen */}
             <button
               onClick={() => toggleMember(member.id)}
-              className={`w-full px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors text-left ${!isCollapsed ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+              className={`w-full px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors text-left ${!isCollapsed ? 'border-b dark:border-white/6 border-black/4' : ''}`}
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] font-black text-sm shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-(--primary-light) flex items-center justify-center text-(--primary) font-black text-sm shrink-0">
                   {member.name.charAt(0)}
                 </div>
                 <div>
@@ -252,7 +252,7 @@ export default function UtilizationPage() {
               <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold">
                 <span className="px-2 py-0.5 rounded-full"
                   style={{ background: avgUtil > 100 ? 'rgba(239,68,68,0.1)' : 'rgba(99,102,241,0.1)', color: avgUtil > 100 ? '#ef4444' : '#6366f1' }}>
-                  Ø {avgUtil}% Auslastung
+                  � {avgUtil}% Auslastung
                 </span>
                 {extDays  > 0 && <span className="px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-500">{extDays}d ext.</span>}
                 {intDays  > 0 && <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500">{intDays}d int.</span>}
@@ -264,9 +264,9 @@ export default function UtilizationPage() {
               </div>
             </button>
 
-            {/* 12-Monate Raster – volle Breite */}
+            {/* 12-Monate Raster � volle Breite */}
             {!isCollapsed && <div className="w-full">
-              <div className="flex w-full border-b dark:border-white/[0.04] border-black/[0.03]">
+              <div className="flex w-full border-b dark:border-white/4 border-black/3">
                 {monthGrids.map(({ month, days }) => {
                   const workdayCount = days.filter((d) => !d.isWeekend).length;
                   let s = 0; let c = 0;
@@ -277,16 +277,16 @@ export default function UtilizationPage() {
                   return (
                     <div key={month} className="flex flex-col flex-1 min-w-0">
                       {/* Monatstitel + %-Balken */}
-                      <div className={`px-1 pt-2 pb-1 text-center border-r dark:border-white/[0.04] border-black/[0.03] ${isCurMonth ? 'bg-[var(--primary-light)]' : ''}`}>
-                        <div className={`text-[9px] font-black ${isCurMonth ? 'text-[var(--primary)]' : 'dark:text-white/50 text-gray-500'}`}>
+                      <div className={`px-1 pt-2 pb-1 text-center border-r dark:border-white/4 border-black/3 ${isCurMonth ? 'bg-(--primary-light)' : ''}`}>
+                        <div className={`text-[9px] font-black ${isCurMonth ? 'text-(--primary)' : 'dark:text-white/50 text-gray-500'}`}>
                           {MONTH_NAMES_SHORT[month]}
                         </div>
                         <div className={`text-[8px] font-semibold mt-0.5 ${monthUtil === 0 ? 'opacity-0' : ''}`}
                           style={{ color: monthUtil > 100 ? '#ef4444' : monthUtil >= 80 ? '#f97316' : '#6366f1' }}>
-                          Ø {monthUtil}%
+                          � {monthUtil}%
                         </div>
                         {/* Mini-Fortschrittsbalken */}
-                        <div className="mt-1 h-1 rounded-full bg-black/[0.06] dark:bg-white/[0.06] mx-1 overflow-hidden">
+                        <div className="mt-1 h-1 rounded-full bg-black/6 dark:bg-white/6 mx-1 overflow-hidden">
                           <div className="h-full rounded-full transition-all"
                             style={{ width: `${Math.min(100, monthUtil)}%`, background: monthUtil > 100 ? '#ef4444' : monthUtil >= 80 ? '#f97316' : '#6366f1' }} />
                         </div>
@@ -294,7 +294,7 @@ export default function UtilizationPage() {
                       </div>
 
                       {/* Tage-Spalte */}
-                      <div className="flex flex-col gap-px p-px border-r dark:border-white/[0.04] border-black/[0.03]">
+                      <div className="flex flex-col gap-px p-px border-r dark:border-white/4 border-black/3">
                         {days.map((d) => {
                           const isToday = d.dateStr === today;
                           if (d.isWeekend) {
@@ -308,12 +308,12 @@ export default function UtilizationPage() {
                           const isEmpty = d.kind === 'empty';
                           return (
                             <div key={d.d}
-                              className={`h-[13px] rounded-sm flex items-center justify-center transition-transform hover:scale-y-110 cursor-default relative ${isToday ? 'ring-1 ring-inset ring-[var(--primary)]' : ''}`}
+                              className={`h-[13px] rounded-sm flex items-center justify-center transition-transform hover:scale-y-110 cursor-default relative ${isToday ? 'ring-1 ring-inset ring-(--primary)' : ''}`}
                               style={{
                                 background: isEmpty ? 'rgba(107,114,128,0.07)' : bg,
                                 boxShadow: isEmpty ? 'inset 0 0 0 1px rgba(0,0,0,0.05)' : 'inset 0 0 0 1px rgba(0,0,0,0.10)',
                               }}
-                              title={`${d.d}. ${MONTH_NAMES_LONG[month]} (${d.weekday}) – ${label}`}
+                              title={`${d.d}. ${MONTH_NAMES_LONG[month]} (${d.weekday}) � ${label}`}
                             >
                               {!isEmpty && d.pct > 0 && d.kind !== 'vacation' && d.kind !== 'sick' && (
                                 <span className="text-[5px] font-black text-white leading-none select-none pointer-events-none">

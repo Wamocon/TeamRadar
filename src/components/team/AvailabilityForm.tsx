@@ -112,7 +112,7 @@ export function AvailabilityForm({ memberId, date, onClose }: Props) {
               className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border transition-all ${
                 status === opt.value
                   ? 'scale-[1.03]'
-                  : 'border-black/[0.06] dark:border-white/[0.06] hover:scale-[1.02]'
+                  : 'border-black/6 dark:border-white/6 hover:scale-[1.02]'
               }`}
               style={
                 status === opt.value
@@ -176,7 +176,7 @@ export function AvailabilityForm({ memberId, date, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-black/10 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600 hover:bg-black/[0.03] dark:hover:bg-white/[0.03] transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-black/10 dark:border-white/10 text-sm font-medium dark:text-white/60 text-gray-600 hover:bg-black/3 dark:hover:bg-white/3 transition-colors"
           >
             <X size={14} />
             Abbrechen

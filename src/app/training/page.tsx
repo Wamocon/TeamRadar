@@ -37,7 +37,7 @@ function formatDateDE(dateStr?: string) {
   return new Date(dateStr).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-const INPUT_CLS = 'w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2 text-xs dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]';
+const INPUT_CLS = 'w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-lg p-2 text-xs dark:text-white text-gray-900 outline-none focus:border-(--primary)';
 const LABEL_CLS = 'text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500';
 
 const TRAINING_STATUS_CONFIG: Record<TrainingStatus, { label: string; color: string }> = {
@@ -62,14 +62,14 @@ function TrainingCard({ course, onOpen }: { course: TrainingCourse; onOpen: (c: 
 
   return (
     <button onClick={() => onOpen(course)}
-      className="w-full text-left p-4 rounded-xl border dark:border-white/[0.06] border-black/[0.06] hover:border-[rgba(99,102,241,0.3)] hover:bg-[var(--primary-light)] transition-all cursor-pointer bg-transparent group relative overflow-hidden">
+      className="w-full text-left p-4 rounded-xl border dark:border-white/6 border-black/6 hover:border-[rgba(99,102,241,0.3)] hover:bg-(--primary-light) transition-all cursor-pointer bg-transparent group relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: typeConf.color }} />
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center" style={{ background: `${typeConf.color}20` }}>
             <Icon size={13} style={{ color: typeConf.color }} />
           </div>
-          <span className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-[var(--primary)] transition-colors">{course.name}</span>
+          <span className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-(--primary) transition-colors">{course.name}</span>
         </div>
         <span className="px-1.5 py-0.5 rounded-md text-[8px] font-bold border ml-2 shrink-0" style={{ color: statusConf.color, borderColor: `${statusConf.color}40` }}>
           {statusConf.label}
@@ -179,15 +179,15 @@ function TrainingDetailPopup({
                 </div>
                 <div className="min-w-0 flex-1">
                   {editMode ? (
-                    <input value={editName} onChange={e => setEditName(e.target.value)}
-                      className="text-sm font-black dark:text-white text-gray-900 bg-transparent border-b dark:border-white/20 border-gray-300 outline-none focus:border-[var(--primary)] pb-0.5 w-full" />
+                    <input value={editName} onChange={e => setEditName(e.target.value)} title="Name"
+                      className="text-sm font-black dark:text-white text-gray-900 bg-transparent border-b dark:border-white/20 border-gray-300 outline-none focus:border-(--primary) pb-0.5 w-full" />
                   ) : (
                     <h2 className="text-sm font-black dark:text-white text-gray-900 truncate">{course.name}</h2>
                   )}
                   <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                     {editMode ? (
                       <>
-                        <select value={editType} onChange={e => setEditType(e.target.value as TrainingType)}
+                        <select value={editType} onChange={e => setEditType(e.target.value as TrainingType)} title="Typ"
                           className="text-[9px] font-bold bg-transparent border dark:border-white/10 border-gray-200 rounded px-1 py-0.5 dark:text-white text-gray-900 outline-none">
                           <option value="university">Universität</option>
                           <option value="vocational_school">Berufsschule</option>
@@ -195,7 +195,7 @@ function TrainingDetailPopup({
                           <option value="certification">Zertifizierung</option>
                           <option value="workshop">Workshop</option>
                         </select>
-                        <select value={editStatus} onChange={e => setEditStatus(e.target.value as TrainingStatus)}
+                        <select value={editStatus} onChange={e => setEditStatus(e.target.value as TrainingStatus)} title="Status"
                           className="text-[9px] font-bold bg-transparent border dark:border-white/10 border-gray-200 rounded px-1 py-0.5 dark:text-white text-gray-900 outline-none">
                           <option value="planned">Geplant</option>
                           <option value="active">Laufend</option>
@@ -214,14 +214,14 @@ function TrainingDetailPopup({
               <div className="flex items-center gap-1 shrink-0 ml-2">
                 {(['S', 'M', 'L'] as const).map(s => (
                   <button key={s} onClick={() => setPopupSize(s)} title={`Größe ${s}`}
-                    className={`w-6 h-6 rounded text-[9px] font-black transition-all border-none cursor-pointer ${popupSize === s ? 'bg-[var(--primary)] text-white' : 'dark:bg-white/5 bg-black/5 dark:text-white/40 text-gray-400'}`}>
+                    className={`w-6 h-6 rounded text-[9px] font-black transition-all border-none cursor-pointer ${popupSize === s ? 'bg-(--primary) text-white' : 'dark:bg-white/5 bg-black/5 dark:text-white/40 text-gray-400'}`}>
                     {s}
                   </button>
                 ))}
               </div>
               <div className="flex items-center gap-0.5 ml-1 shrink-0">
                 {canManage && !editMode && (
-                  <button onClick={() => setEditMode(true)} title="Bearbeiten" className="p-1.5 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] border-none bg-transparent cursor-pointer">
+                  <button onClick={() => setEditMode(true)} title="Bearbeiten" className="p-1.5 rounded-lg hover:bg-(--primary-light) text-(--primary) border-none bg-transparent cursor-pointer">
                     <Edit3 size={14} />
                   </button>
                 )}
@@ -238,7 +238,7 @@ function TrainingDetailPopup({
             <div className="flex gap-0.5">
               {tabs.map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all border-none cursor-pointer ${activeTab === tab.id ? 'bg-[var(--primary)] text-white' : 'dark:text-white/40 text-gray-500 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] bg-transparent'}`}>
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all border-none cursor-pointer ${activeTab === tab.id ? 'bg-(--primary) text-white' : 'dark:text-white/40 text-gray-500 hover:bg-black/4 dark:hover:bg-white/4 bg-transparent'}`}>
                   <tab.icon size={11} />{tab.label}
                 </button>
               ))}
@@ -257,11 +257,11 @@ function TrainingDetailPopup({
                     <div><label className={LABEL_CLS}>Lernziele</label><textarea value={editObjectives} onChange={e => setEditObjectives(e.target.value)} rows={2} className={`${INPUT_CLS} mt-1 resize-none`} placeholder="Was soll gelernt werden?" /></div>
                     <div className="grid grid-cols-2 gap-3">
                       <div><label className={LABEL_CLS}>Anbieter</label><input value={editProvider} onChange={e => setEditProvider(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="IHK, TU München..." /></div>
-                      <div><label className={LABEL_CLS}>Anbieter-Kontakt</label><input value={editProviderContact} onChange={e => setEditProviderContact(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
+                      <div><label className={LABEL_CLS}>Anbieter-Kontakt</label><input value={editProviderContact} onChange={e => setEditProviderContact(e.target.value)} title="Anbieter-Kontakt" className={`${INPUT_CLS} mt-1`} /></div>
                       <div><label className={LABEL_CLS}>Standort</label><input value={editLocation} onChange={e => setEditLocation(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="München, Online..." /></div>
-                      <div><label className={LABEL_CLS}>Remote-Anteil (%)</label><input type="number" min={0} max={100} value={editRemotePercentage} onChange={e => setEditRemotePercentage(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
-                      <div><label className={LABEL_CLS}>Start</label><input type="date" value={editStartDate} onChange={e => setEditStartDate(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
-                      <div><label className={LABEL_CLS}>Ende</label><input type="date" value={editEndDate} onChange={e => setEditEndDate(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
+                      <div><label className={LABEL_CLS}>Remote-Anteil (%)</label><input type="number" min={0} max={100} value={editRemotePercentage} onChange={e => setEditRemotePercentage(e.target.value)} title="Remote-Anteil" className={`${INPUT_CLS} mt-1`} /></div>
+                      <div><label className={LABEL_CLS}>Start</label><input type="date" value={editStartDate} onChange={e => setEditStartDate(e.target.value)} title="Startdatum" className={`${INPUT_CLS} mt-1`} /></div>
+                      <div><label className={LABEL_CLS}>Ende</label><input type="date" value={editEndDate} onChange={e => setEditEndDate(e.target.value)} title="Enddatum" className={`${INPUT_CLS} mt-1`} /></div>
                       <div><label className={LABEL_CLS}>Stunden / Woche</label><input type="number" min={0} value={editHoursPerWeek} onChange={e => setEditHoursPerWeek(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="z.B. 8" /></div>
                       <div><label className={LABEL_CLS}>Zertifikat / Abschluss</label><input value={editCertificationEarned} onChange={e => setEditCertificationEarned(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="z.B. IHK-Zeugnis" /></div>
                     </div>
@@ -270,27 +270,27 @@ function TrainingDetailPopup({
                 ) : (
                   <div className="space-y-3">
                     {course.description && (
-                      <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02]">
+                      <div className="p-3 rounded-xl bg-black/2 dark:bg-white/2">
                         <div className={LABEL_CLS}>Beschreibung</div>
                         <p className="text-xs dark:text-white/70 text-gray-700 mt-1 leading-relaxed">{course.description}</p>
                       </div>
                     )}
                     {course.objectives && (
-                      <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02]">
+                      <div className="p-3 rounded-xl bg-black/2 dark:bg-white/2">
                         <div className={LABEL_CLS}>Lernziele</div>
                         <p className="text-xs dark:text-white/70 text-gray-700 mt-1 leading-relaxed">{course.objectives}</p>
                       </div>
                     )}
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      {course.provider && <div className="p-2.5 rounded-lg border dark:border-white/[0.06] border-black/[0.06]"><div className={LABEL_CLS}>Anbieter</div><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{course.provider}</div></div>}
-                      <div className="p-2.5 rounded-lg border dark:border-white/[0.06] border-black/[0.06]"><div className={LABEL_CLS}>Laufzeit</div><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{formatDateDE(course.startDate)} – {formatDateDE(course.endDate)}</div></div>
-                      {course.location && <div className="p-2.5 rounded-lg border dark:border-white/[0.06] border-black/[0.06]"><div className={LABEL_CLS}>Standort</div><div className="font-semibold dark:text-white text-gray-900 mt-0.5 flex items-center gap-1"><MapPin size={10} />{course.location}</div></div>}
-                      {course.hoursPerWeek != null && <div className="p-2.5 rounded-lg border dark:border-white/[0.06] border-black/[0.06]"><div className={LABEL_CLS}>Std. / Woche</div><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{course.hoursPerWeek} h</div></div>}
-                      {course.certificationEarned && <div className="p-2.5 rounded-lg border dark:border-white/[0.06] border-black/[0.06] col-span-2"><div className={LABEL_CLS}>Abschluss / Zertifikat</div><div className="font-semibold dark:text-white text-gray-900 mt-0.5 flex items-center gap-1"><Award size={10} className="text-amber-500" />{course.certificationEarned}</div></div>}
+                      {course.provider && <div className="p-2.5 rounded-lg border dark:border-white/6 border-black/6"><div className={LABEL_CLS}>Anbieter</div><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{course.provider}</div></div>}
+                      <div className="p-2.5 rounded-lg border dark:border-white/6 border-black/6"><div className={LABEL_CLS}>Laufzeit</div><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{formatDateDE(course.startDate)} – {formatDateDE(course.endDate)}</div></div>
+                      {course.location && <div className="p-2.5 rounded-lg border dark:border-white/6 border-black/6"><div className={LABEL_CLS}>Standort</div><div className="font-semibold dark:text-white text-gray-900 mt-0.5 flex items-center gap-1"><MapPin size={10} />{course.location}</div></div>}
+                      {course.hoursPerWeek != null && <div className="p-2.5 rounded-lg border dark:border-white/6 border-black/6"><div className={LABEL_CLS}>Std. / Woche</div><div className="font-semibold dark:text-white text-gray-900 mt-0.5">{course.hoursPerWeek} h</div></div>}
+                      {course.certificationEarned && <div className="p-2.5 rounded-lg border dark:border-white/6 border-black/6 col-span-2"><div className={LABEL_CLS}>Abschluss / Zertifikat</div><div className="font-semibold dark:text-white text-gray-900 mt-0.5 flex items-center gap-1"><Award size={10} className="text-amber-500" />{course.certificationEarned}</div></div>}
                     </div>
                     {(course.tags?.length ?? 0) > 0 && (
                       <div className="flex flex-wrap gap-1">
-                        {course.tags!.map(tag => <span key={tag} className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-[var(--primary-light)] text-[var(--primary)] border border-[rgba(99,102,241,0.2)]">{tag}</span>)}
+                        {course.tags!.map(tag => <span key={tag} className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-(--primary-light) text-(--primary) border border-[rgba(99,102,241,0.2)]">{tag}</span>)}
                       </div>
                     )}
                   </div>
@@ -301,16 +301,16 @@ function TrainingDetailPopup({
             {/* ── Team ── */}
             {activeTab === 'team' && (
               <div className="space-y-2">
-                <div className="text-xs dark:text-white/50 text-gray-600 p-2 rounded-lg bg-black/[0.02] dark:bg-white/[0.02]">
-                  Teilnehmer können als <strong className="text-[var(--primary)]">Operativ</strong>, <strong className="text-amber-500">Unterstützend</strong> oder <strong className="text-gray-500">Informierend</strong> markiert werden.
+                <div className="text-xs dark:text-white/50 text-gray-600 p-2 rounded-lg bg-black/2 dark:bg-white/2">
+                  Teilnehmer können als <strong className="text-(--primary)">Operativ</strong>, <strong className="text-amber-500">Unterstützend</strong> oder <strong className="text-gray-500">Informierend</strong> markiert werden.
                 </div>
                 {members.map(member => {
                   const isSelected = selectedMemberIds.has(member.id);
                   const role = memberRoles[member.id] || 'operative';
                   const roleConf = PROJECT_MEMBER_ROLE_CONFIG[role];
                   return (
-                    <div key={member.id} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${isSelected ? 'border-[rgba(99,102,241,0.3)] bg-[var(--primary-light)]' : 'dark:border-white/[0.06] border-black/[0.06]'}`}>
-                      <div className="w-7 h-7 rounded-lg bg-[var(--primary-light)] flex items-center justify-center shrink-0 text-[10px] font-black text-[var(--primary)]">
+                    <div key={member.id} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${isSelected ? 'border-[rgba(99,102,241,0.3)] bg-(--primary-light)' : 'dark:border-white/6 border-black/6'}`}>
+                      <div className="w-7 h-7 rounded-lg bg-(--primary-light) flex items-center justify-center shrink-0 text-[10px] font-black text-(--primary)">
                         {member.name.slice(0, 2).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -321,7 +321,7 @@ function TrainingDetailPopup({
                         <div className="flex items-center gap-1.5 shrink-0">
                           <input type="checkbox" checked={isSelected} title={member.name} onChange={e => {
                             setSelectedMemberIds(prev => { const n = new Set(prev); e.target.checked ? n.add(member.id) : n.delete(member.id); return n; });
-                          }} className="w-4 h-4 rounded cursor-pointer accent-[var(--primary)]" />
+                          }} className="w-4 h-4 rounded cursor-pointer accent-(--primary)" />
                           {isSelected && (
                             <select value={role} title="Rolle" onChange={e => setMemberRoles(prev => ({ ...prev, [member.id]: e.target.value as ProjectMemberRole }))}
                               className="text-[9px] rounded-md px-1 py-0.5 border dark:border-white/10 border-gray-200 bg-transparent dark:text-white text-gray-900 outline-none cursor-pointer">
@@ -350,7 +350,7 @@ function TrainingDetailPopup({
                 {editMode ? (
                   <><label className={LABEL_CLS}>Notizen</label><textarea value={editNotes} onChange={e => setEditNotes(e.target.value)} rows={10} className={`${INPUT_CLS} mt-1 resize-none`} placeholder="Interne Notizen, Hinweise, Abläufe..." /></>
                 ) : course.notes ? (
-                  <div className="p-4 rounded-xl border dark:border-white/[0.06] border-black/[0.06]">
+                  <div className="p-4 rounded-xl border dark:border-white/6 border-black/6">
                     <div className={`${LABEL_CLS} mb-2`}>Notizen</div>
                     <pre className="text-xs dark:text-white/70 text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">{course.notes}</pre>
                   </div>
@@ -366,7 +366,7 @@ function TrainingDetailPopup({
             <div className="px-4 py-3 border-t dark:border-white/10 border-gray-100 flex items-center justify-end gap-2 shrink-0">
               <button onClick={() => setEditMode(false)} className="px-3 py-1.5 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 hover:bg-gray-100 dark:hover:bg-white/5 border-none bg-transparent cursor-pointer">Abbrechen</button>
               <button onClick={handleSave} disabled={isSaving}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--primary)] text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 disabled:opacity-50">
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-(--primary) text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 disabled:opacity-50">
                 {isSaving ? <Loader size={12} className="animate-spin" /> : <Save size={12} />} Speichern
               </button>
             </div>
@@ -452,8 +452,8 @@ export default function TrainingPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
-              <GraduationCap size={20} className="text-[var(--primary)]" />
+            <div className="w-10 h-10 rounded-xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
+              <GraduationCap size={20} className="text-(--primary)" />
             </div>
             Ausbildung
           </h1>
@@ -461,7 +461,7 @@ export default function TrainingPage() {
         </div>
         {canManage && (
           <button onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none">
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-(--primary) text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none">
             <Plus size={14} /> Neuer Kurs
           </button>
         )}
@@ -489,13 +489,13 @@ export default function TrainingPage() {
         <div className="relative">
           <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
-            className="bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.08] border-black/[0.08] rounded-lg py-1.5 pl-7 pr-3 text-xs focus:border-[var(--primary)] outline-none dark:text-white text-gray-900" />
+            className="bg-black/2 dark:bg-white/2 border dark:border-white/8 border-black/8 rounded-lg py-1.5 pl-7 pr-3 text-xs focus:border-(--primary) outline-none dark:text-white text-gray-900" />
         </div>
         <button onClick={() => setFilterType('all')}
-          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold border-none cursor-pointer ${filterType === 'all' ? 'bg-[var(--primary)] text-white' : 'dark:text-white/40 text-gray-500 bg-transparent hover:bg-black/[0.04]'}`}>Alle Typen</button>
+          className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold border-none cursor-pointer ${filterType === 'all' ? 'bg-(--primary) text-white' : 'dark:text-white/40 text-gray-500 bg-transparent hover:bg-black/4'}`}>Alle Typen</button>
         {Object.entries(TRAINING_TYPE_CONFIG).map(([k, v]) => (
           <button key={k} onClick={() => setFilterType(k as TrainingType)}
-            className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold border-none cursor-pointer ${filterType === k ? 'text-white' : 'dark:text-white/40 text-gray-500 bg-transparent hover:bg-black/[0.04]'}`}
+            className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold border-none cursor-pointer ${filterType === k ? 'text-white' : 'dark:text-white/40 text-gray-500 bg-transparent hover:bg-black/4'}`}
             style={filterType === k ? { background: v.color } : {}}>
             {v.label}
           </button>
@@ -511,10 +511,10 @@ export default function TrainingPage() {
           const Icon = TYPE_ICONS[group.type];
           const isOpen = openGroups[group.type] ?? false;
           return (
-            <div key={group.type} className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+            <div key={group.type} className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
               <button
                 onClick={() => setOpenGroups(prev => ({ ...prev, [group.type]: !prev[group.type] }))}
-                className={`w-full flex items-center gap-2 px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${isOpen ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}
+                className={`w-full flex items-center gap-2 px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${isOpen ? 'border-b dark:border-white/6 border-black/4' : ''}`}
               >
                 <Icon size={14} style={{ color: typeConf.color }} />
                 <h3 className="text-sm font-black dark:text-white text-gray-900">{group.label}</h3>
@@ -528,7 +528,7 @@ export default function TrainingPage() {
                     <div className="col-span-3 text-center py-8 text-xs dark:text-white/30 text-gray-400">
                       Keine Einträge{search ? ' für diese Suche' : ''}
                       {canManage && (
-                        <button onClick={() => setShowCreateModal(true)} className="ml-2 text-[var(--primary)] hover:underline cursor-pointer bg-transparent border-none">
+                        <button onClick={() => setShowCreateModal(true)} className="ml-2 text-(--primary) hover:underline cursor-pointer bg-transparent border-none">
                           + Erstellen
                         </button>
                       )}
@@ -606,7 +606,7 @@ function TrainingCreateForm({
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2"><label className={LABEL_CLS}>Name *</label><input value={name} onChange={e => setName(e.target.value)} placeholder="z.B. Java-Zertifizierung 2025" className={`${INPUT_CLS} mt-1`} /></div>
         <div><label className={LABEL_CLS}>Typ</label>
-          <select value={type} onChange={e => setType(e.target.value as TrainingType)} className={`${INPUT_CLS} mt-1`}>
+          <select value={type} onChange={e => setType(e.target.value as TrainingType)} title="Typ" className={`${INPUT_CLS} mt-1`}>
             <option value="university">Universität</option>
             <option value="vocational_school">Berufsschule</option>
             <option value="seminar">Seminar</option>
@@ -615,7 +615,7 @@ function TrainingCreateForm({
           </select>
         </div>
         <div><label className={LABEL_CLS}>Status</label>
-          <select value={status} onChange={e => setStatus(e.target.value as TrainingStatus)} className={`${INPUT_CLS} mt-1`}>
+          <select value={status} onChange={e => setStatus(e.target.value as TrainingStatus)} title="Status" className={`${INPUT_CLS} mt-1`}>
             <option value="planned">Geplant</option>
             <option value="active">Laufend</option>
             <option value="completed">Abgeschlossen</option>
@@ -623,8 +623,8 @@ function TrainingCreateForm({
         </div>
         <div><label className={LABEL_CLS}>Anbieter</label><input value={provider} onChange={e => setProvider(e.target.value)} placeholder="IHK, TU München..." className={`${INPUT_CLS} mt-1`} /></div>
         <div><label className={LABEL_CLS}>Standort</label><input value={location} onChange={e => setLocation(e.target.value)} placeholder="München, Online..." className={`${INPUT_CLS} mt-1`} /></div>
-        <div><label className={LABEL_CLS}>Start</label><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
-        <div><label className={LABEL_CLS}>Ende</label><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
+        <div><label className={LABEL_CLS}>Start</label><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} title="Start" className={`${INPUT_CLS} mt-1`} /></div>
+        <div><label className={LABEL_CLS}>Ende</label><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} title="Ende" className={`${INPUT_CLS} mt-1`} /></div>
         <div><label className={LABEL_CLS}>Std. / Woche</label><input type="number" min={0} value={hoursPerWeek} onChange={e => setHoursPerWeek(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="z.B. 8" /></div>
         <div className="col-span-2"><label className={LABEL_CLS}>Beschreibung</label><textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} className={`${INPUT_CLS} mt-1 resize-none`} placeholder="Kurzbeschreibung..." /></div>
       </div>
@@ -638,10 +638,10 @@ function TrainingCreateForm({
               const isSelected = selectedMemberIds.has(member.id);
               const role = memberRoles[member.id] || 'operative';
               return (
-                <div key={member.id} className={`flex items-center gap-2 p-2 rounded-lg border ${isSelected ? 'border-[rgba(99,102,241,0.3)] bg-[var(--primary-light)]' : 'dark:border-white/[0.06] border-black/[0.06]'}`}>
+                <div key={member.id} className={`flex items-center gap-2 p-2 rounded-lg border ${isSelected ? 'border-[rgba(99,102,241,0.3)] bg-(--primary-light)' : 'dark:border-white/6 border-black/6'}`}>
                   <input type="checkbox" checked={isSelected} title={member.name} onChange={e => {
                     setSelectedMemberIds(prev => { const n = new Set(prev); e.target.checked ? n.add(member.id) : n.delete(member.id); return n; });
-                  }} className="w-4 h-4 accent-[var(--primary)] cursor-pointer" />
+                  }} className="w-4 h-4 accent-(--primary) cursor-pointer" />
                   <span className="flex-1 text-xs dark:text-white text-gray-900">{member.name}</span>
                   {isSelected && (
                     <select value={role} title="Rolle" onChange={e => setMemberRoles(prev => ({ ...prev, [member.id]: e.target.value as ProjectMemberRole }))}
@@ -660,7 +660,7 @@ function TrainingCreateForm({
 
       <div className="flex gap-2 justify-end pt-2 border-t dark:border-white/10 border-gray-100">
         <button onClick={onCancel} className="px-4 py-2 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 border dark:border-white/10 border-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer bg-transparent">Abbrechen</button>
-        <button onClick={handleCreate} disabled={!name.trim()} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 disabled:opacity-50">
+        <button onClick={handleCreate} disabled={!name.trim()} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-(--primary) text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 disabled:opacity-50">
           <Plus size={12} /> Erstellen
         </button>
       </div>

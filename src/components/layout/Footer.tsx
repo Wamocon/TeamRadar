@@ -3,7 +3,7 @@ import { DevelopedInGermanyBadge } from '../legal/DevelopedInGermanyBadge';
 
 export function Footer() {
   return (
-    <footer className="mt-auto py-12 px-6 border-t border-black/[0.04] dark:border-white/[0.03] bg-white dark:bg-[#0b1120]">
+    <footer className="mt-auto py-12 px-6 border-t border-black/4 dark:border-white/3 bg-white dark:bg-[#0b1120]">
       <div className="max-w-4xl mx-auto flex flex-col items-center gap-8">
         <div className="flex flex-col items-center gap-2 text-center">
           <span className="text-sm font-black tracking-tight text-gray-900 dark:text-white uppercase">

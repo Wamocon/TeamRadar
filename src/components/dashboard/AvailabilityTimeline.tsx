@@ -18,7 +18,7 @@ export function AvailabilityTimeline({ members, date }: Props) {
     <div className="overflow-x-auto">
       <div className="min-w-[700px]">
         {/* Header */}
-        <div className="flex items-center border-b border-black/[0.04] dark:border-white/[0.04] pb-2 mb-2">
+        <div className="flex items-center border-b border-black/4 dark:border-white/4 pb-2 mb-2">
           <div className="w-40 shrink-0" />
           {hours.map((h) => (
             <div key={h} className="flex-1 text-center text-[9px] font-mono dark:text-white/25 text-gray-400">
@@ -36,7 +36,7 @@ export function AvailabilityTimeline({ members, date }: Props) {
 
           return (
             <div key={member.id}
-              className={`flex items-center py-1.5 ${idx % 2 === 0 ? 'bg-black/[0.01] dark:bg-white/[0.01]' : ''}`}
+              className={`flex items-center py-1.5 ${idx % 2 === 0 ? 'bg-black/1 dark:bg-white/1' : ''}`}
               style={{ animationDelay: `${idx * 30}ms` }}>
               {/* Name */}
               <div className="w-40 shrink-0 flex items-center gap-2 px-2">

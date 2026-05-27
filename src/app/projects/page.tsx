@@ -42,7 +42,7 @@ function formatDateDE(dateStr?: string) {
   return new Date(dateStr).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-const INPUT_CLS = 'w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-lg p-2 text-xs dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]';
+const INPUT_CLS = 'w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-lg p-2 text-xs dark:text-white text-gray-900 outline-none focus:border-(--primary)';
 const LABEL_CLS = 'text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500';
 
 const PRIORITY_CONFIG = {
@@ -61,14 +61,14 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: (p: Projec
 
   return (
     <button onClick={() => onOpen(project)}
-      className="w-full text-left p-4 rounded-xl border dark:border-white/[0.06] border-black/[0.06] hover:border-[rgba(99,102,241,0.3)] hover:bg-[var(--primary-light)] transition-all cursor-pointer bg-transparent group relative overflow-hidden">
+      className="w-full text-left p-4 rounded-xl border dark:border-white/6 border-black/6 hover:border-[rgba(99,102,241,0.3)] hover:bg-(--primary-light) transition-all cursor-pointer bg-transparent group relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: typeConf.color }} />
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center" style={{ background: `${typeConf.color}20` }}>
             <Briefcase size={13} style={{ color: typeConf.color }} />
           </div>
-          <span className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-[var(--primary)] transition-colors">{project.name}</span>
+          <span className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-(--primary) transition-colors">{project.name}</span>
         </div>
         <div className="flex items-center gap-1 shrink-0 ml-2">
           {priority && <span className="w-1.5 h-1.5 rounded-full" style={{ background: priority.color }} title={priority.label} />}
@@ -82,7 +82,7 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: (p: Projec
       <div className="flex items-center gap-3 text-[9px] dark:text-white/30 text-gray-400 mt-auto">
         <span className="flex items-center gap-1"><Users size={9} />{project.memberIds.length}</span>
         {project.startDate && <span>{project.startDate.slice(0, 7)}</span>}
-        {project.type === 'external' && project.maxDays != null && <span className="ml-auto font-bold" style={{ color: '#f97316' }}>{project.maxDays}d</span>}
+        {project.type === 'external' && project.maxDays != null && <span className="ml-auto font-bold text-orange-500">{project.maxDays}d</span>}
         {isOverdue && <span className="text-red-400 font-bold flex items-center gap-0.5"><Clock size={9} /> Überfällig</span>}
       </div>
     </button>
@@ -212,23 +212,23 @@ function ProjectDetailPopup({
                 </div>
                 <div className="min-w-0 flex-1">
                   {editMode ? (
-                    <input value={editName} onChange={e => setEditName(e.target.value)}
-                      className="text-sm font-black dark:text-white text-gray-900 bg-transparent border-b dark:border-white/20 border-gray-300 outline-none focus:border-[var(--primary)] pb-0.5 w-full" />
+                    <input value={editName} onChange={e => setEditName(e.target.value)} title="Name"
+                      className="text-sm font-black dark:text-white text-gray-900 bg-transparent border-b dark:border-white/20 border-gray-300 outline-none focus:border-(--primary) pb-0.5 w-full" />
                   ) : (
                     <h2 className="text-sm font-black dark:text-white text-gray-900 truncate">{project.name}</h2>
                   )}
                   <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                     {editMode ? (
                       <>
-                        <select value={editType} onChange={e => setEditType(e.target.value as ProjectType)}
+                        <select value={editType} onChange={e => setEditType(e.target.value as ProjectType)} title="Typ"
                           className="text-[9px] font-bold bg-transparent border dark:border-white/10 border-gray-200 rounded px-1 py-0.5 dark:text-white text-gray-900 outline-none">
                           <option value="internal">Intern</option><option value="external">Extern</option>
                         </select>
-                        <select value={editStatus} onChange={e => setEditStatus(e.target.value as ProjectStatus)}
+                        <select value={editStatus} onChange={e => setEditStatus(e.target.value as ProjectStatus)} title="Status"
                           className="text-[9px] font-bold bg-transparent border dark:border-white/10 border-gray-200 rounded px-1 py-0.5 dark:text-white text-gray-900 outline-none">
                           <option value="planned">Geplant</option><option value="active">Aktiv</option><option value="completed">Abgeschlossen</option>
                         </select>
-                        <select value={editPriority} onChange={e => setEditPriority(e.target.value)}
+                        <select value={editPriority} onChange={e => setEditPriority(e.target.value)} title="Priorität"
                           className="text-[9px] font-bold bg-transparent border dark:border-white/10 border-gray-200 rounded px-1 py-0.5 dark:text-white text-gray-900 outline-none">
                           <option value="low">Niedrig</option><option value="medium">Mittel</option><option value="high">Hoch</option><option value="critical">Kritisch</option>
                         </select>
@@ -252,23 +252,23 @@ function ProjectDetailPopup({
               <div className="flex items-center gap-1 shrink-0 ml-2">
                 {(['S', 'M', 'L'] as const).map(s => (
                   <button key={s} onClick={() => setPopupSize(s)}
-                    className={`w-6 h-6 rounded text-[9px] font-black transition-all border-none cursor-pointer ${popupSize === s ? 'bg-[var(--primary)] text-white' : 'dark:bg-white/5 bg-black/5 dark:text-white/40 text-gray-400 hover:bg-[var(--primary-light)] hover:text-[var(--primary)]'}`}>
+                    className={`w-6 h-6 rounded text-[9px] font-black transition-all border-none cursor-pointer ${popupSize === s ? 'bg-(--primary) text-white' : 'dark:bg-white/5 bg-black/5 dark:text-white/40 text-gray-400 hover:bg-(--primary-light) hover:text-(--primary)'}`}>
                     {s}
                   </button>
                 ))}
               </div>
               <div className="flex items-center gap-0.5 ml-1 shrink-0">
                 {canManage && !editMode && (
-                  <button onClick={() => setEditMode(true)} className="p-1.5 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] border-none bg-transparent cursor-pointer transition-colors">
+                  <button onClick={() => setEditMode(true)} title="Bearbeiten" className="p-1.5 rounded-lg hover:bg-(--primary-light) text-(--primary) border-none bg-transparent cursor-pointer transition-colors">
                     <Edit3 size={14} />
                   </button>
                 )}
                 {canManage && !editMode && (
-                  <button onClick={() => setConfirmDelete(true)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-400 hover:text-red-500 border-none bg-transparent cursor-pointer transition-colors">
+                  <button onClick={() => setConfirmDelete(true)} title="Löschen" className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-400 hover:text-red-500 border-none bg-transparent cursor-pointer transition-colors">
                     <Trash2 size={14} />
                   </button>
                 )}
-                <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 border-none bg-transparent cursor-pointer dark:text-white/50 text-gray-500 transition-colors">
+                <button onClick={onClose} title="Schließen" className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 border-none bg-transparent cursor-pointer dark:text-white/50 text-gray-500 transition-colors">
                   <X size={16} />
                 </button>
               </div>
@@ -279,7 +279,7 @@ function ProjectDetailPopup({
               {tabs.map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all border-none cursor-pointer ${
-                    activeTab === tab.id ? 'bg-[var(--primary)] text-white' : 'dark:text-white/40 text-gray-500 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] bg-transparent'
+                    activeTab === tab.id ? 'bg-(--primary) text-white' : 'dark:text-white/40 text-gray-500 hover:bg-black/4 dark:hover:bg-white/4 bg-transparent'
                   }`}>
                   <tab.icon size={11} />{tab.label}
                 </button>
@@ -306,9 +306,9 @@ function ProjectDetailPopup({
                         className={`${INPUT_CLS} mt-1 resize-none`} placeholder="Was soll das Projekt erreichen?" />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div><label className={LABEL_CLS}>Startzeitpunkt</label><input type="date" value={editStartDate} onChange={e => setEditStartDate(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
-                      <div><label className={LABEL_CLS}>Ende (geplant)</label><input type="date" value={editPlannedEndDate} onChange={e => setEditPlannedEndDate(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
-                      <div><label className={LABEL_CLS}>Tatsächl. Ende</label><input type="date" value={editEndDate} onChange={e => setEditEndDate(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
+                      <div><label className={LABEL_CLS}>Startzeitpunkt</label><input type="date" value={editStartDate} onChange={e => setEditStartDate(e.target.value)} title="Startdatum" className={`${INPUT_CLS} mt-1`} /></div>
+                      <div><label className={LABEL_CLS}>Ende (geplant)</label><input type="date" value={editPlannedEndDate} onChange={e => setEditPlannedEndDate(e.target.value)} title="Geplantes Ende" className={`${INPUT_CLS} mt-1`} /></div>
+                      <div><label className={LABEL_CLS}>Tatsächl. Ende</label><input type="date" value={editEndDate} onChange={e => setEditEndDate(e.target.value)} title="Tatsaechliches Ende" className={`${INPUT_CLS} mt-1`} /></div>
                       <div><label className={LABEL_CLS}>Projektnummer</label><input value={editProjectNumber} onChange={e => setEditProjectNumber(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="PRJ-2024-001" /></div>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -320,36 +320,36 @@ function ProjectDetailPopup({
                 ) : (
                   <div className="space-y-3">
                     {project.description && (
-                      <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02]">
+                      <div className="p-3 rounded-xl bg-black/2 dark:bg-white/2">
                         <div className={LABEL_CLS}>Beschreibung</div>
                         <p className="text-xs dark:text-white/70 text-gray-700 mt-1 leading-relaxed">{project.description}</p>
                       </div>
                     )}
                     {project.objectives && (
-                      <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02]">
+                      <div className="p-3 rounded-xl bg-black/2 dark:bg-white/2">
                         <div className={LABEL_CLS}>Projektziele</div>
                         <p className="text-xs dark:text-white/70 text-gray-700 mt-1 leading-relaxed">{project.objectives}</p>
                       </div>
                     )}
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="p-2.5 rounded-lg border dark:border-white/[0.06] border-black/[0.06]">
+                      <div className="p-2.5 rounded-lg border dark:border-white/6 border-black/6">
                         <div className={LABEL_CLS}>Laufzeit</div>
                         <div className="font-semibold dark:text-white text-gray-900 mt-0.5">{formatDateDE(project.startDate)} – {formatDateDE(project.endDate)}</div>
                       </div>
                       {project.plannedEndDate && (
-                        <div className="p-2.5 rounded-lg border dark:border-white/[0.06] border-black/[0.06]">
+                        <div className="p-2.5 rounded-lg border dark:border-white/6 border-black/6">
                           <div className={LABEL_CLS}>Geplantes Ende</div>
                           <div className="font-semibold dark:text-white text-gray-900 mt-0.5">{formatDateDE(project.plannedEndDate)}</div>
                         </div>
                       )}
                       {project.framework && (
-                        <div className="p-2.5 rounded-lg border dark:border-white/[0.06] border-black/[0.06]">
+                        <div className="p-2.5 rounded-lg border dark:border-white/6 border-black/6">
                           <div className={LABEL_CLS}>Methodik</div>
                           <div className="font-semibold dark:text-white text-gray-900 mt-0.5">{project.framework}</div>
                         </div>
                       )}
                       {project.reportingCycle && (
-                        <div className="p-2.5 rounded-lg border dark:border-white/[0.06] border-black/[0.06]">
+                        <div className="p-2.5 rounded-lg border dark:border-white/6 border-black/6">
                           <div className={LABEL_CLS}>Berichtsrhythmus</div>
                           <div className="font-semibold dark:text-white text-gray-900 mt-0.5">{project.reportingCycle}</div>
                         </div>
@@ -358,7 +358,7 @@ function ProjectDetailPopup({
                     {(project.tags?.length ?? 0) > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {project.tags!.map(tag => (
-                          <span key={tag} className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-[var(--primary-light)] text-[var(--primary)] border border-[rgba(99,102,241,0.2)]">{tag}</span>
+                          <span key={tag} className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-(--primary-light) text-(--primary) border border-[rgba(99,102,241,0.2)]">{tag}</span>
                         ))}
                       </div>
                     )}
@@ -372,9 +372,9 @@ function ProjectDetailPopup({
               <div className="space-y-3">
                 {editMode ? (
                   <div className="space-y-3">
-                    <div className="p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06] space-y-2">
+                    <div className="p-3 rounded-xl border dark:border-white/6 border-black/6 space-y-2">
                       <div className="text-[10px] font-black dark:text-white/60 text-gray-600 flex items-center gap-1.5">
-                        <Building2 size={12} className="text-[var(--primary)]" /> Kundeninformationen
+                        <Building2 size={12} className="text-(--primary)" /> Kundeninformationen
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div><label className={LABEL_CLS}>Kundenname</label><input value={editClient} onChange={e => setEditClient(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="Kunden GmbH" /></div>
@@ -383,51 +383,51 @@ function ProjectDetailPopup({
                         <div><label className={LABEL_CLS}>Telefon</label><input value={editClientPhone} onChange={e => setEditClientPhone(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="+49 123 456789" /></div>
                       </div>
                     </div>
-                    <div className="p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06] space-y-2">
+                    <div className="p-3 rounded-xl border dark:border-white/6 border-black/6 space-y-2">
                       <div className="text-[10px] font-black dark:text-white/60 text-gray-600 flex items-center gap-1.5">
-                        <MapPin size={12} className="text-[var(--primary)]" /> Standort & Arbeitsweise
+                        <MapPin size={12} className="text-(--primary)" /> Standort & Arbeitsweise
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div><label className={LABEL_CLS}>Projektstandort</label><input value={editLocation} onChange={e => setEditLocation(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="München, Berlin..." /></div>
                         <div><label className={LABEL_CLS}>Remote-Anteil (%)</label><input type="number" min={0} max={100} value={editRemotePercentage} onChange={e => setEditRemotePercentage(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="0-100" /></div>
                       </div>
                     </div>
-                    <div className="p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06] space-y-2">
+                    <div className="p-3 rounded-xl border dark:border-white/6 border-black/6 space-y-2">
                       <div className="text-[10px] font-black dark:text-white/60 text-gray-600 flex items-center gap-1.5">
-                        <Layers size={12} className="text-[var(--primary)]" /> Technologien & Risiken
+                        <Layers size={12} className="text-(--primary)" /> Technologien & Risiken
                       </div>
                       <div><label className={LABEL_CLS}>Technologien (kommagetrennt)</label><input value={editTechnologies} onChange={e => setEditTechnologies(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="React, Node.js..." /></div>
                       <div><label className={LABEL_CLS}>Risiken</label><textarea value={editRisks} onChange={e => setEditRisks(e.target.value)} rows={2} className={`${INPUT_CLS} mt-1 resize-none`} placeholder="Bekannte Risiken, Abhängigkeiten..." /></div>
                       <div><label className={LABEL_CLS}>Liefergegenstände / Deliverables</label><textarea value={editDeliverables} onChange={e => setEditDeliverables(e.target.value)} rows={2} className={`${INPUT_CLS} mt-1 resize-none`} placeholder="Welche Ergebnisse werden erwartet?" /></div>
                       {editType === 'external' && (
-                        <div><label className={LABEL_CLS} style={{ color: '#f97316' }}>Max. Tage / Jahr</label><input type="number" min={0} value={editMaxDays} onChange={e => setEditMaxDays(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="220" /></div>
+                        <div><label className={`${LABEL_CLS} text-orange-500`}>Max. Tage / Jahr</label><input type="number" min={0} value={editMaxDays} onChange={e => setEditMaxDays(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="220" /></div>
                       )}
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-3 text-xs">
                     {(project.client || project.clientContact) && (
-                      <div className="p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06] space-y-2">
+                      <div className="p-3 rounded-xl border dark:border-white/6 border-black/6 space-y-2">
                         <div className="text-[10px] font-black dark:text-white/60 text-gray-600 flex items-center gap-1.5"><Building2 size={12} /> Kundeninformationen</div>
                         {project.client && <div className="flex items-center gap-2"><span className="dark:text-white/40 text-gray-500 w-20 shrink-0">Kunde</span><span className="font-semibold dark:text-white text-gray-900">{project.client}</span></div>}
                         {project.clientContact && <div className="flex items-center gap-2"><span className="dark:text-white/40 text-gray-500 w-20 shrink-0">Kontakt</span><span className="font-semibold dark:text-white text-gray-900">{project.clientContact}</span></div>}
-                        {project.clientEmail && <div className="flex items-center gap-2"><Mail size={10} className="dark:text-white/30 shrink-0" /><a href={`mailto:${project.clientEmail}`} className="text-[var(--primary)] hover:underline">{project.clientEmail}</a></div>}
+                        {project.clientEmail && <div className="flex items-center gap-2"><Mail size={10} className="dark:text-white/30 shrink-0" /><a href={`mailto:${project.clientEmail}`} className="text-(--primary) hover:underline">{project.clientEmail}</a></div>}
                         {project.clientPhone && <div className="flex items-center gap-2"><Phone size={10} className="dark:text-white/30 shrink-0" /><span>{project.clientPhone}</span></div>}
                       </div>
                     )}
                     {(project.location || project.remotePercentage != null) && (
-                      <div className="p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06] space-y-1">
+                      <div className="p-3 rounded-xl border dark:border-white/6 border-black/6 space-y-1">
                         <div className="text-[10px] font-black dark:text-white/60 text-gray-600 flex items-center gap-1.5"><MapPin size={12} /> Standort</div>
                         {project.location && <div className="font-semibold dark:text-white text-gray-900">{project.location}</div>}
                         {project.remotePercentage != null && <div className="dark:text-white/50 text-gray-600">{project.remotePercentage}% Remote-Anteil</div>}
                       </div>
                     )}
                     {(project.technologies?.length ?? 0) > 0 && (
-                      <div className="p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06]">
+                      <div className="p-3 rounded-xl border dark:border-white/6 border-black/6">
                         <div className="text-[10px] font-black dark:text-white/60 text-gray-600 mb-1.5 flex items-center gap-1.5"><Layers size={12} /> Technologien</div>
                         <div className="flex flex-wrap gap-1">
                           {project.technologies!.map(t => (
-                            <span key={t} className="px-1.5 py-0.5 rounded-md text-[9px] font-semibold bg-black/[0.05] dark:bg-white/[0.05] dark:text-white/70 text-gray-700">{t}</span>
+                            <span key={t} className="px-1.5 py-0.5 rounded-md text-[9px] font-semibold bg-black/5 dark:bg-white/5 dark:text-white/70 text-gray-700">{t}</span>
                           ))}
                         </div>
                       </div>
@@ -439,7 +439,7 @@ function ProjectDetailPopup({
                       </div>
                     )}
                     {project.keyDeliverables && (
-                      <div className="p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06]">
+                      <div className="p-3 rounded-xl border dark:border-white/6 border-black/6">
                         <div className="text-[10px] font-black dark:text-white/60 text-gray-600 flex items-center gap-1.5 mb-1"><Target size={12} /> Deliverables</div>
                         <p className="text-xs dark:text-white/70 text-gray-700 leading-relaxed">{project.keyDeliverables}</p>
                       </div>
@@ -458,16 +458,16 @@ function ProjectDetailPopup({
             {/* ── Tab: Team ── */}
             {activeTab === 'team' && (
               <div className="space-y-2">
-                <div className="text-xs dark:text-white/50 text-gray-600 p-2 rounded-lg bg-black/[0.02] dark:bg-white/[0.02]">
-                  Berater können als <strong className="text-[var(--primary)]">Operativ</strong>, <strong className="text-amber-500">Unterstützend</strong> oder <strong className="text-gray-500">Informierend</strong> markiert werden.
+                <div className="text-xs dark:text-white/50 text-gray-600 p-2 rounded-lg bg-black/2 dark:bg-white/2">
+                  Berater können als <strong className="text-(--primary)">Operativ</strong>, <strong className="text-amber-500">Unterstützend</strong> oder <strong className="text-gray-500">Informierend</strong> markiert werden.
                 </div>
                 {members.map(member => {
                   const isSelected = selectedMemberIds.has(member.id);
                   const role = memberRoles[member.id] || 'operative';
                   const roleConf = PROJECT_MEMBER_ROLE_CONFIG[role];
                   return (
-                    <div key={member.id} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${isSelected ? 'border-[rgba(99,102,241,0.3)] bg-[var(--primary-light)]' : 'dark:border-white/[0.06] border-black/[0.06]'}`}>
-                      <div className="w-7 h-7 rounded-lg bg-[var(--primary-light)] flex items-center justify-center shrink-0 text-[10px] font-black text-[var(--primary)]">
+                    <div key={member.id} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${isSelected ? 'border-[rgba(99,102,241,0.3)] bg-(--primary-light)' : 'dark:border-white/6 border-black/6'}`}>
+                      <div className="w-7 h-7 rounded-lg bg-(--primary-light) flex items-center justify-center shrink-0 text-[10px] font-black text-(--primary)">
                         {member.name.slice(0, 2).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -476,11 +476,11 @@ function ProjectDetailPopup({
                       </div>
                       {editMode ? (
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <input type="checkbox" checked={isSelected} onChange={e => {
+                          <input type="checkbox" title="Teilnehmer" checked={isSelected} onChange={e => {
                             setSelectedMemberIds(prev => { const n = new Set(prev); e.target.checked ? n.add(member.id) : n.delete(member.id); return n; });
-                          }} className="w-4 h-4 rounded cursor-pointer accent-[var(--primary)]" />
+                          }} className="w-4 h-4 rounded cursor-pointer accent-(--primary)" />
                           {isSelected && (
-                            <select value={role} onChange={e => setMemberRoles(prev => ({ ...prev, [member.id]: e.target.value as ProjectMemberRole }))}
+                            <select value={role} title="Rolle" onChange={e => setMemberRoles(prev => ({ ...prev, [member.id]: e.target.value as ProjectMemberRole }))}
                               className="text-[9px] rounded-md px-1 py-0.5 border dark:border-white/10 border-gray-200 bg-transparent dark:text-white text-gray-900 outline-none cursor-pointer">
                               <option value="operative">Operativ</option>
                               <option value="supporting">Unterstützend</option>
@@ -510,27 +510,27 @@ function ProjectDetailPopup({
                     <div><label className={LABEL_CLS}>Budget (€)</label><input type="number" min={0} value={editBudgetAmount} onChange={e => setEditBudgetAmount(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="50000" /></div>
                     <div><label className={LABEL_CLS}>Stunden-Budget</label><input type="number" min={0} value={editBudgetHours} onChange={e => setEditBudgetHours(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="1000" /></div>
                     {editType === 'external' && (
-                      <div className="col-span-2"><label className={LABEL_CLS} style={{ color: '#f97316' }}>Max. Beauftragungstage / Jahr</label><input type="number" min={0} value={editMaxDays} onChange={e => setEditMaxDays(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="220" /></div>
+                      <div className="col-span-2"><label className={`${LABEL_CLS} text-orange-500`}>Max. Beauftragungstage / Jahr</label><input type="number" min={0} value={editMaxDays} onChange={e => setEditMaxDays(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="220" /></div>
                     )}
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-3">
                     {project.budgetAmount != null && (
-                      <div className="p-4 rounded-xl border dark:border-white/[0.06] border-black/[0.06] text-center">
+                      <div className="p-4 rounded-xl border dark:border-white/6 border-black/6 text-center">
                         <div className={LABEL_CLS}>Budget</div>
                         <div className="text-2xl font-black dark:text-white text-gray-900 mt-1">{project.budgetAmount.toLocaleString('de-DE')} €</div>
                       </div>
                     )}
                     {project.budgetHours != null && (
-                      <div className="p-4 rounded-xl border dark:border-white/[0.06] border-black/[0.06] text-center">
+                      <div className="p-4 rounded-xl border dark:border-white/6 border-black/6 text-center">
                         <div className={LABEL_CLS}>Stunden-Budget</div>
                         <div className="text-2xl font-black dark:text-white text-gray-900 mt-1">{project.budgetHours} h</div>
                       </div>
                     )}
                     {project.type === 'external' && project.maxDays != null && (
                       <div className="p-4 rounded-xl border border-orange-200 dark:border-orange-700/30 text-center col-span-2">
-                        <div className={LABEL_CLS} style={{ color: '#f97316' }}>Max. Beauftragungstage / Jahr</div>
-                        <div className="text-2xl font-black mt-1" style={{ color: '#f97316' }}>{project.maxDays} Tage</div>
+                        <div className={`${LABEL_CLS} text-orange-500`}>Max. Beauftragungstage / Jahr</div>
+                        <div className="text-2xl font-black mt-1 text-orange-500">{project.maxDays} Tage</div>
                       </div>
                     )}
                     {!project.budgetAmount && !project.budgetHours && !project.maxDays && (
@@ -554,7 +554,7 @@ function ProjectDetailPopup({
                       placeholder="Interne Notizen, How-Tos, wichtige Ansprechpartner, Zugangsdaten-Hinweise, Abläufe..." />
                   </div>
                 ) : project.notes ? (
-                  <div className="p-4 rounded-xl border dark:border-white/[0.06] border-black/[0.06]">
+                  <div className="p-4 rounded-xl border dark:border-white/6 border-black/6">
                     <div className={`${LABEL_CLS} mb-2`}>Interne Notizen</div>
                     <pre className="text-xs dark:text-white/70 text-gray-700 whitespace-pre-wrap font-sans leading-relaxed">{project.notes}</pre>
                   </div>
@@ -574,7 +574,7 @@ function ProjectDetailPopup({
                 Abbrechen
               </button>
               <button onClick={handleSave} disabled={isSaving}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--primary)] text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 transition-opacity disabled:opacity-50">
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-(--primary) text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 transition-opacity disabled:opacity-50">
                 {isSaving ? <Loader size={12} className="animate-spin" /> : <Save size={12} />}
                 Speichern
               </button>
@@ -640,8 +640,8 @@ export default function ProjectsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
-              <Briefcase size={20} className="text-[var(--primary)]" />
+            <div className="w-10 h-10 rounded-xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
+              <Briefcase size={20} className="text-(--primary)" />
             </div>
             Projekte
           </h1>
@@ -649,7 +649,7 @@ export default function ProjectsPage() {
         </div>
         {canManage && (
           <button onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none">
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-(--primary) text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none">
             <Plus size={14} /> Neues Projekt
           </button>
         )}
@@ -658,15 +658,15 @@ export default function ProjectsPage() {
       {/* KPI Bar */}
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
         {[
-          { label: 'Gesamt',        value: kpis.total,     color: '#6366f1' },
-          { label: 'Extern',        value: kpis.external,  color: '#f97316' },
-          { label: 'Intern',        value: kpis.internal,  color: '#6366f1' },
-          { label: 'Aktiv',         value: kpis.active,    color: '#22c55e' },
-          { label: 'Abgeschlossen', value: kpis.completed, color: '#6b7280' },
-          { label: 'Geplant',       value: kpis.planned,   color: '#f59e0b' },
+          { label: 'Gesamt',        value: kpis.total,     cls: 'text-indigo-500' },
+          { label: 'Extern',        value: kpis.external,  cls: 'text-orange-500' },
+          { label: 'Intern',        value: kpis.internal,  cls: 'text-indigo-500' },
+          { label: 'Aktiv',         value: kpis.active,    cls: 'text-green-500' },
+          { label: 'Abgeschlossen', value: kpis.completed, cls: 'text-gray-500' },
+          { label: 'Geplant',       value: kpis.planned,   cls: 'text-amber-500' },
         ].map(kpi => (
           <div key={kpi.label} className="card-shimmer rounded-xl p-3 text-center">
-            <div className="text-xl font-black" style={{ color: kpi.color }}>{kpi.value}</div>
+            <div className={`text-xl font-black ${kpi.cls}`}>{kpi.value}</div>
             <div className="text-[9px] dark:text-white/40 text-gray-500 mt-0.5">{kpi.label}</div>
           </div>
         ))}
@@ -677,11 +677,11 @@ export default function ProjectsPage() {
         <div className="relative">
           <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
-            className="bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.08] border-black/[0.08] rounded-lg py-1.5 pl-7 pr-3 text-xs focus:border-[var(--primary)] outline-none dark:text-white text-gray-900" />
+            className="bg-black/2 dark:bg-white/2 border dark:border-white/8 border-black/8 rounded-lg py-1.5 pl-7 pr-3 text-xs focus:border-(--primary) outline-none dark:text-white text-gray-900" />
         </div>
         {(['all', 'active', 'planned', 'completed'] as const).map(s => (
           <button key={s} onClick={() => setFilterStatus(s as any)}
-            className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all border-none cursor-pointer ${filterStatus === s ? 'bg-[var(--primary)] text-white' : 'dark:text-white/40 text-gray-500 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] bg-transparent'}`}>
+            className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all border-none cursor-pointer ${filterStatus === s ? 'bg-(--primary) text-white' : 'dark:text-white/40 text-gray-500 hover:bg-black/4 dark:hover:bg-white/4 bg-transparent'}`}>
             {s === 'all' ? 'Alle' : PROJECT_STATUS_CONFIG[s as ProjectStatus]?.label}
           </button>
         ))}
@@ -689,12 +689,12 @@ export default function ProjectsPage() {
 
       {/* Projekte Grid */}
       <div className="grid lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+        <div className="lg:col-span-2 card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
           <button onClick={() => setOpenInternal(v => !v)}
-            className={`w-full flex items-center gap-2 px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openInternal ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}>
-            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: PROJECT_TYPE_CONFIG.internal.color }} />
+            className={`w-full flex items-center gap-2 px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${openInternal ? 'border-b dark:border-white/6 border-black/4' : ''}`}>
+            <div className="w-2.5 h-2.5 rounded-full shrink-0 bg-indigo-500" />
             <h3 className="text-sm font-black dark:text-white text-gray-900">Interne Projekte</h3>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: `${PROJECT_TYPE_CONFIG.internal.color}15`, color: PROJECT_TYPE_CONFIG.internal.color }}>{internalFiltered.length}</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/15 text-indigo-500">{internalFiltered.length}</span>
             <span className="ml-auto dark:text-white/30 text-gray-400">{openInternal ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</span>
           </button>
           {openInternal && (
@@ -704,12 +704,12 @@ export default function ProjectsPage() {
             </div>
           )}
         </div>
-        <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+        <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
           <button onClick={() => setOpenExternal(v => !v)}
-            className={`w-full flex items-center gap-2 px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openExternal ? 'border-b dark:border-white/[0.06] border-black/[0.04]' : ''}`}>
-            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: PROJECT_TYPE_CONFIG.external.color }} />
+            className={`w-full flex items-center gap-2 px-4 py-3 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${openExternal ? 'border-b dark:border-white/6 border-black/4' : ''}`}>
+            <div className="w-2.5 h-2.5 rounded-full shrink-0 bg-orange-500" />
             <h3 className="text-sm font-black dark:text-white text-gray-900">Externe Projekte</h3>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: `${PROJECT_TYPE_CONFIG.external.color}15`, color: PROJECT_TYPE_CONFIG.external.color }}>{externalFiltered.length}</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-500/15 text-orange-500">{externalFiltered.length}</span>
             <span className="ml-auto dark:text-white/30 text-gray-400">{openExternal ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</span>
           </button>
           {openExternal && (
@@ -826,7 +826,7 @@ function ProjectCreateForm({
       <div className="flex gap-1">
         {tabs.map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border-none cursor-pointer ${activeTab === tab.id ? 'bg-[var(--primary)] text-white' : 'dark:text-white/40 text-gray-500 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] bg-transparent'}`}>
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border-none cursor-pointer ${activeTab === tab.id ? 'bg-(--primary) text-white' : 'dark:text-white/40 text-gray-500 hover:bg-black/4 dark:hover:bg-white/4 bg-transparent'}`}>
             {tab.label}
           </button>
         ))}
@@ -835,14 +835,14 @@ function ProjectCreateForm({
       {activeTab === 'basic' && (
         <div className="grid grid-cols-2 gap-3">
           <div className="col-span-2"><label className={LABEL_CLS}>Projektname *</label><input value={name} onChange={e => setName(e.target.value)} placeholder="Projektname" className={`${INPUT_CLS} mt-1`} /></div>
-          <div><label className={LABEL_CLS}>Typ</label><select value={type} onChange={e => setType(e.target.value as ProjectType)} className={`${INPUT_CLS} mt-1`}><option value="internal">Intern</option><option value="external">Extern</option></select></div>
-          <div><label className={LABEL_CLS}>Status</label><select value={status} onChange={e => setStatus(e.target.value as ProjectStatus)} className={`${INPUT_CLS} mt-1`}><option value="planned">Geplant</option><option value="active">Aktiv</option><option value="completed">Abgeschlossen</option></select></div>
-          <div><label className={LABEL_CLS}>Priorität</label><select value={priority} onChange={e => setPriority(e.target.value)} className={`${INPUT_CLS} mt-1`}><option value="low">Niedrig</option><option value="medium">Mittel</option><option value="high">Hoch</option><option value="critical">Kritisch</option></select></div>
+          <div><label className={LABEL_CLS}>Typ</label><select value={type} onChange={e => setType(e.target.value as ProjectType)} title="Typ" className={`${INPUT_CLS} mt-1`}><option value="internal">Intern</option><option value="external">Extern</option></select></div>
+          <div><label className={LABEL_CLS}>Status</label><select value={status} onChange={e => setStatus(e.target.value as ProjectStatus)} title="Status" className={`${INPUT_CLS} mt-1`}><option value="planned">Geplant</option><option value="active">Aktiv</option><option value="completed">Abgeschlossen</option></select></div>
+          <div><label className={LABEL_CLS}>Priorität</label><select value={priority} onChange={e => setPriority(e.target.value)} title="Prioritaet" className={`${INPUT_CLS} mt-1`}><option value="low">Niedrig</option><option value="medium">Mittel</option><option value="high">Hoch</option><option value="critical">Kritisch</option></select></div>
           <div><label className={LABEL_CLS}>Projektnummer</label><input value={projectNumber} onChange={e => setProjectNumber(e.target.value)} placeholder="PRJ-001" className={`${INPUT_CLS} mt-1`} /></div>
           <div><label className={LABEL_CLS}>Framework</label><input value={framework} onChange={e => setFramework(e.target.value)} placeholder="Scrum, Kanban..." className={`${INPUT_CLS} mt-1`} /></div>
           <div><label className={LABEL_CLS}>Standort</label><input value={location} onChange={e => setLocation(e.target.value)} placeholder="München..." className={`${INPUT_CLS} mt-1`} /></div>
-          <div><label className={LABEL_CLS}>Start</label><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
-          <div><label className={LABEL_CLS}>Ende</label><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
+          <div><label className={LABEL_CLS}>Start</label><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} title="Start" className={`${INPUT_CLS} mt-1`} /></div>
+          <div><label className={LABEL_CLS}>Ende</label><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} title="Ende" className={`${INPUT_CLS} mt-1`} /></div>
           <div className="col-span-2"><label className={LABEL_CLS}>Beschreibung</label><textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} className={`${INPUT_CLS} mt-1 resize-none`} placeholder="Kurzbeschreibung..." /></div>
           <div className="col-span-2"><label className={LABEL_CLS}>Projektziele</label><textarea value={objectives} onChange={e => setObjectives(e.target.value)} rows={2} className={`${INPUT_CLS} mt-1 resize-none`} placeholder="Was soll erreicht werden?" /></div>
           <div className="col-span-2"><label className={LABEL_CLS}>Tags (kommagetrennt)</label><input value={tags} onChange={e => setTags(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="Tag1, Tag2" /></div>
@@ -851,10 +851,10 @@ function ProjectCreateForm({
 
       {activeTab === 'client' && (
         <div className="grid grid-cols-2 gap-3">
-          <div className="col-span-2"><label className={LABEL_CLS}>Kundenname</label><input value={client} onChange={e => setClient(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
-          <div><label className={LABEL_CLS}>Ansprechpartner</label><input value={clientContact} onChange={e => setClientContact(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
-          <div><label className={LABEL_CLS}>E-Mail</label><input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
-          <div><label className={LABEL_CLS}>Telefon</label><input value={clientPhone} onChange={e => setClientPhone(e.target.value)} className={`${INPUT_CLS} mt-1`} /></div>
+          <div className="col-span-2"><label className={LABEL_CLS}>Kundenname</label><input value={client} onChange={e => setClient(e.target.value)} title="Kundenname" className={`${INPUT_CLS} mt-1`} /></div>
+          <div><label className={LABEL_CLS}>Ansprechpartner</label><input value={clientContact} onChange={e => setClientContact(e.target.value)} title="Ansprechpartner" className={`${INPUT_CLS} mt-1`} /></div>
+          <div><label className={LABEL_CLS}>E-Mail</label><input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)} title="E-Mail" className={`${INPUT_CLS} mt-1`} /></div>
+          <div><label className={LABEL_CLS}>Telefon</label><input value={clientPhone} onChange={e => setClientPhone(e.target.value)} title="Telefon" className={`${INPUT_CLS} mt-1`} /></div>
           <div><label className={LABEL_CLS}>Remote-Anteil (%)</label><input type="number" min={0} max={100} value={remotePercentage} onChange={e => setRemotePercentage(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="0-100" /></div>
           <div className="col-span-2"><label className={LABEL_CLS}>Technologien</label><input value={technologies} onChange={e => setTechnologies(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="React, Java, SAP..." /></div>
         </div>
@@ -867,16 +867,16 @@ function ProjectCreateForm({
             const isSelected = selectedMemberIds.has(member.id);
             const role = memberRoles[member.id] || 'operative';
             return (
-              <div key={member.id} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${isSelected ? 'border-[rgba(99,102,241,0.3)] bg-[var(--primary-light)]' : 'dark:border-white/[0.06] border-black/[0.06]'}`}>
-                <input type="checkbox" checked={isSelected} onChange={e => {
+              <div key={member.id} className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all ${isSelected ? 'border-[rgba(99,102,241,0.3)] bg-(--primary-light)' : 'dark:border-white/6 border-black/6'}`}>
+                <input type="checkbox" title="Teilnehmer" checked={isSelected} onChange={e => {
                   setSelectedMemberIds(prev => { const n = new Set(prev); e.target.checked ? n.add(member.id) : n.delete(member.id); return n; });
-                }} className="w-4 h-4 accent-[var(--primary)] cursor-pointer" />
+                }} className="w-4 h-4 accent-(--primary) cursor-pointer" />
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-semibold dark:text-white text-gray-900">{member.name}</div>
                   <div className="text-[9px] dark:text-white/40 text-gray-500">{member.role}</div>
                 </div>
                 {isSelected && (
-                  <select value={role} onChange={e => setMemberRoles(prev => ({ ...prev, [member.id]: e.target.value as ProjectMemberRole }))}
+                  <select value={role} title="Rolle" onChange={e => setMemberRoles(prev => ({ ...prev, [member.id]: e.target.value as ProjectMemberRole }))}
                     className="text-[9px] rounded px-1 py-0.5 border dark:border-white/10 border-gray-200 bg-transparent dark:text-white text-gray-900 outline-none cursor-pointer">
                     <option value="operative">Operativ</option>
                     <option value="supporting">Unterstützend</option>
@@ -895,14 +895,14 @@ function ProjectCreateForm({
           <div><label className={LABEL_CLS}>Budget (€)</label><input type="number" min={0} value={budgetAmount} onChange={e => setBudgetAmount(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="50000" /></div>
           <div><label className={LABEL_CLS}>Stunden-Budget</label><input type="number" min={0} value={budgetHours} onChange={e => setBudgetHours(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="1000" /></div>
           {type === 'external' && (
-            <div className="col-span-2"><label className={LABEL_CLS} style={{ color: '#f97316' }}>Max. Beauftragungstage / Jahr</label><input type="number" min={0} value={maxDays} onChange={e => setMaxDays(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="220" /></div>
+            <div className="col-span-2"><label className={`${LABEL_CLS} text-orange-500`}>Max. Beauftragungstage / Jahr</label><input type="number" min={0} value={maxDays} onChange={e => setMaxDays(e.target.value)} className={`${INPUT_CLS} mt-1`} placeholder="220" /></div>
           )}
         </div>
       )}
 
       <div className="flex gap-2 justify-end pt-2 border-t dark:border-white/10 border-gray-100">
         <button onClick={onCancel} className="px-4 py-2 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 border dark:border-white/10 border-gray-200 hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer bg-transparent transition-colors">Abbrechen</button>
-        <button onClick={handleCreate} disabled={saving || !name.trim()} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 disabled:opacity-50 transition-opacity">
+        <button onClick={handleCreate} disabled={saving || !name.trim()} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-(--primary) text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 disabled:opacity-50 transition-opacity">
           {saving ? <Loader size={12} className="animate-spin" /> : <Plus size={12} />} Erstellen
         </button>
       </div>

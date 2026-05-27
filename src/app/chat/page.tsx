@@ -96,7 +96,6 @@ export default function ChatPage() {
   const [activeChannelId, setActiveChannelId] = useState<string>('ch-0');
   const [messages, setMessages] = useState<Record<string, ChatMessage[]>>(DEMO_MESSAGES);
   const [input, setInput] = useState('');
-  const [search, setSearch] = useState('');
   const [sidebarSearch, setSidebarSearch] = useState('');
   const [sending, setSending] = useState(false);
   const [showMembers, setShowMembers] = useState(false);

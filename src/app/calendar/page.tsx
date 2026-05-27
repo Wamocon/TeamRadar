@@ -10,6 +10,7 @@ import {
   format, addMonths, subMonths, isSameMonth, isToday, parseISO,
   isSameDay, addDays,
 } from 'date-fns';
+import { getHolidays, type Holiday, type Bundesland } from '@/lib/holidays';
 import { de } from 'date-fns/locale';
 
 // -- Types -------------------------------------------------
@@ -307,6 +308,9 @@ function EventDetailPopup({ event, onClose, onEdit, onDelete }: {
 
 // -- Main Calendar Page ------------------------------------
 export default function CalendarPage() {
+    // Feiertage für den aktuellen Monat/Jahr laden (optional: Bundesland aus Settings)
+    const bundesland: Bundesland = 'ALL';
+    const holidaysMap = useMemo(() => getHolidays(currentMonth.getFullYear(), bundesland), [currentMonth, bundesland]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -437,30 +441,64 @@ export default function CalendarPage() {
           {openCalendar && (<>
           {/* Weekday header */}
           <div className="grid grid-cols-7 border-b dark:border-white/4 border-black/4">
-            {weekdays.map((d) => (
-              <div key={d} className="text-center text-[10px] font-bold dark:text-white/30 text-gray-400 py-2 uppercase tracking-wide">{d}</div>
-            ))}
+            {days.slice(0, 7).map((day) => {
+              const dateStr = format(day, 'yyyy-MM-dd');
+              const holiday: Holiday | undefined = holidaysMap.get(dateStr);
+              const today = isToday(day);
+              return (
+                <div
+                  key={dateStr}
+                  className={`text-center text-[10px] font-bold py-2 uppercase tracking-wide
+                    ${holiday ? 'text-red-400' : today ? 'text-(--primary)' : 'dark:text-white/30 text-gray-400'}`}
+                  style={{
+                    background: holiday
+                      ? 'rgba(239,68,68,0.07)'
+                      : today
+                        ? 'rgba(99,102,241,0.13)'
+                        : undefined
+                  }}
+                  title={holiday ? `🎉 ${holiday.name}` : undefined}
+                >
+                  {weekdays[day.getDay() === 0 ? 6 : day.getDay() - 1]}
+                </div>
+              );
+            })}
           </div>
 
           {/* Day cells */}
           <div className="grid grid-cols-7">
-            {days.map((day) => {
+            {days.map((day, idx) => {
               const dateStr = format(day, 'yyyy-MM-dd');
               const dayEvents = getEventsForDay(dateStr);
               const inMonth = isSameMonth(day, currentMonth);
               const today = isToday(day);
-
+              const holiday: Holiday | undefined = holidaysMap.get(dateStr);
+              // Feiertags- und Heute-Markierung identisch wie im Dashboard
+              let cellBg: string | undefined = undefined;
+              let cellBorder: string | undefined = undefined;
+              if (holiday) {
+                cellBg = 'rgba(239,68,68,0.07)';
+                cellBorder = '1.5px solid rgba(239,68,68,0.35)';
+              } else if (today) {
+                cellBg = 'rgba(99,102,241,0.13)';
+                cellBorder = '1.5px solid rgba(99,102,241,0.35)';
+              }
               return (
                 <div
                   key={dateStr}
                   onClick={() => inMonth && handleDayClick(dateStr)}
-                  className={`min-h-[80px] p-1.5 border-b border-r dark:border-white/3 border-black/3 transition-colors
-                    ${inMonth ? 'hover:bg-(--primary-light) cursor-pointer' : 'opacity-30 cursor-default'}
-                    ${today ? 'bg-(--primary-light)' : ''}`}
+                  className={`min-h-20 p-1.5 border-b border-r dark:border-white/3 border-black/3 transition-colors
+                    ${inMonth ? 'hover:bg-(--primary-light) cursor-pointer' : 'opacity-30 cursor-default'}`}
+                  style={{
+                    background: cellBg,
+                    boxShadow: cellBorder ? `inset 0 0 0 ${cellBorder}` : undefined
+                  }}
+                  title={holiday ? `🎉 ${holiday.name}` : undefined}
                 >
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mb-1 mx-auto
-                    ${today ? 'bg-(--primary) text-white' : 'dark:text-white/50 text-gray-600'}`}>
+                    ${today ? 'bg-(--primary) text-white z-10' : holiday ? 'text-red-400' : 'dark:text-white/50 text-gray-600'}`}>
                     {format(day, 'd')}
+                    {today && <span className="sr-only">(heute)</span>}
                   </div>
                   <div className="space-y-0.5">
                     {dayEvents.slice(0, 3).map((ev) => (

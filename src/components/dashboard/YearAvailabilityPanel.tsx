@@ -47,7 +47,6 @@ interface ReadonlyDayCellProps {
 function ReadonlyDayCell({ dateStr, category, isWeekend, dayNum, holiday, today }: ReadonlyDayCellProps) {
   const conf = DAY_CATEGORY_CONFIG[category];
   const isToday = dateStr === today;
-
   if (isWeekend) {
     return (
       <td className="p-0 bg-gray-400/7">
@@ -55,21 +54,25 @@ function ReadonlyDayCell({ dateStr, category, isWeekend, dayNum, holiday, today 
       </td>
     );
   }
-
   const isHoliday = !!holiday;
-  const cellBg = isHoliday && category === 'free' ? 'rgba(239,68,68,0.09)' : conf.bg;
-  const cellShadow = isHoliday && category === 'free'
-    ? 'inset 0 0 0 1px rgba(239,68,68,0.35)'
-    : category !== 'free' ? 'inset 0 0 0 1.5px rgba(0,0,0,0.15)' : 'inset 0 0 0 1px rgba(0,0,0,0.06)';
+  // Feiertags- und aktuelle-Tag-Markierung identisch, aber für heute in Blau
+  let cellBg = conf.bg;
+  let cellShadow = category !== 'free' ? 'inset 0 0 0 1.5px rgba(0,0,0,0.15)' : 'inset 0 0 0 1px rgba(0,0,0,0.06)';
+  if (isHoliday && category === 'free') {
+    cellBg = 'rgba(239,68,68,0.09)';
+    cellShadow = 'inset 0 0 0 1px rgba(239,68,68,0.35)';
+  } else if (isToday) {
+    cellBg = 'rgba(99,102,241,0.13)'; // Primärblau, wie Feiertag nur blau
+    cellShadow = 'inset 0 0 0 1.5px rgba(99,102,241,0.35)';
+  }
   const titleText = isHoliday
     ? `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} — 🎉 ${holiday!.name}`
     : `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} — ${conf.label}`;
-
   return (
     <td className="text-center relative p-px" title={titleText}>
       <div
         className={`w-5 h-5 rounded-[3px] flex items-center justify-center text-[8px] font-black mx-auto relative ${
-          isToday ? 'ring-2 ring-(--primary) ring-offset-1' : ''
+          isToday ? 'ring-2 ring-(--primary) ring-offset-1 z-10' : ''
         }`}
         style={{
           background: cellBg,
@@ -80,6 +83,9 @@ function ReadonlyDayCell({ dateStr, category, isWeekend, dayNum, holiday, today 
         {conf.short}
         {isHoliday && (
           <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-400" />
+        )}
+        {isToday && (
+          <span className="sr-only">(heute)</span>
         )}
       </div>
     </td>
@@ -107,10 +113,11 @@ function MonthMatrixReadonly({
   monthData, year, currentMonth, currentYear, bundesland, today, isCollapsed, onToggleCollapse,
 }: MonthMatrixReadonlyProps) {
   const { month, days, memberRows } = monthData;
+  // Markiere den aktuellen Monat für Label, aber der aktuelle Tag wird immer hervorgehoben
   const isCurrent = month === currentMonth && year === currentYear;
 
   return (
-    <div className={`rounded-lg border overflow-hidden ${isCurrent ? 'border-(--primary)/40 ring-1 ring-(--primary)/30 bg-(--primary-light)/20' : 'border-black/18 dark:border-white/18 bg-black/[0.02] dark:bg-white/[0.015]'}`}>
+    <div className={`rounded-lg border overflow-hidden ${isCurrent ? 'border-(--primary)/40 ring-1 ring-(--primary)/30 bg-(--primary-light)/20' : 'border-black/18 dark:border-white/18 bg-black/2 dark:bg-white/1.5'}`}>
       <button
         onClick={onToggleCollapse}
         className={`w-full flex items-center justify-between px-2.5 py-1.5 bg-transparent border-none cursor-pointer hover:bg-black/4 dark:hover:bg-white/4 transition-colors ${isCurrent ? 'bg-(--primary-light)' : ''}`}
@@ -130,14 +137,14 @@ function MonthMatrixReadonly({
 
       {!isCollapsed && (
         <div className="overflow-x-auto w-full">
-          <table className="text-[9px] border-collapse table-fixed w-full" style={{ borderSpacing: 0 }}>
+          <table className="text-[9px] border-collapse table-fixed w-full">
             <colgroup>
-              <col style={{ minWidth: '84px', width: '84px' }} />
-              {days.map((d) => <col key={d.day} style={{ minWidth: d.isWeekend ? '8px' : '10px', width: d.isWeekend ? '8px' : '10px' }} />)}
+              <col className="min-w-21 w-21" />
+              {days.map((d) => <col key={d.day} className={d.isWeekend ? 'min-w-2 w-2' : 'min-w-2.5 w-2.5'} />)}
             </colgroup>
             <thead>
               <tr className="border-b dark:border-white/18 border-gray-300">
-                <th className="text-left px-1.5 py-0.5 font-black dark:text-white/55 text-gray-600 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/16 border-gray-300" style={{ fontSize: '7px' }}>
+                <th className="text-left px-1.5 py-0.5 font-black dark:text-white/55 text-gray-600 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/16 border-gray-300 text-[7px]">
                   Berater
                 </th>
                 {days.map((d) => (
@@ -145,10 +152,15 @@ function MonthMatrixReadonly({
                     className={`text-center font-black pb-0.5 pt-0.5 ${
                       d.isWeekend ? 'dark:text-white/15 text-gray-300' :
                       d.holiday ? 'text-red-400' :
-                      d.dateStr === today ? 'text-(--primary)' :
+                      d.dateStr === today ? 'text-(--primary) underline underline-offset-2 decoration-(--primary) decoration-2' :
                       'dark:text-white/40 text-gray-500'
                     }`}
-                    style={{ fontSize: '8px', background: d.holiday && !d.isWeekend ? 'rgba(239,68,68,0.07)' : undefined }}
+                    style={{
+                      fontSize: '8px',
+                      background: d.dateStr === today
+                        ? 'rgba(99,102,241,0.13)'
+                        : (d.holiday && !d.isWeekend ? 'rgba(239,68,68,0.07)' : undefined)
+                    }}
                     title={d.holiday ? `🎉 ${d.holiday.name}` : undefined}
                   >
                     {d.day}
@@ -162,7 +174,12 @@ function MonthMatrixReadonly({
                     className={`text-center font-medium pb-0.5 ${
                       d.isWeekend ? 'dark:text-white/15 text-gray-300' : 'dark:text-white/20 text-gray-400'
                     }`}
-                    style={{ fontSize: '7px', background: d.holiday && !d.isWeekend ? 'rgba(239,68,68,0.07)' : undefined }}
+                    style={{
+                      fontSize: '7px',
+                      background: d.dateStr === today
+                        ? 'rgba(99,102,241,0.13)'
+                        : (d.holiday && !d.isWeekend ? 'rgba(239,68,68,0.07)' : undefined)
+                    }}
                   >
                     {!d.isWeekend && d.weekday}
                     {d.holiday && !d.isWeekend && !d.holiday.nationwide && bundesland === 'ALL' && (
@@ -176,9 +193,9 @@ function MonthMatrixReadonly({
             </thead>
             <tbody>
               {memberRows.map(({ member, categories }, idx) => (
-                <tr key={member.id} className={`border-b dark:border-white/12 border-gray-200 ${idx % 2 === 0 ? 'bg-black/[0.02] dark:bg-white/[0.02]' : 'bg-transparent'}`}>
+                <tr key={member.id} className={`border-b dark:border-white/12 border-gray-200 ${idx % 2 === 0 ? 'bg-black/2 dark:bg-white/2' : 'bg-transparent'}`}>
                   <td className="px-1.5 py-0.5 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/16 border-gray-300">
-                    <div className="font-bold dark:text-white/75 text-gray-700 truncate" style={{ fontSize: '9px', maxWidth: 82 }}>
+                    <div className="font-bold dark:text-white/75 text-gray-700 truncate text-[9px] max-w-20">
                       {member.name}
                     </div>
                   </td>

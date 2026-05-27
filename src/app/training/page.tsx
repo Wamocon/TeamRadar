@@ -393,7 +393,7 @@ export default function TrainingPage() {
   const [courses, setCourses] = useState<TrainingCourse[]>([]);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<'all' | TrainingType>('all');
-  const [filterStatus, setFilterStatus] = useState<'all' | TrainingStatus>('all');
+  const [filterStatus] = useState<'all' | TrainingStatus>('all');
   const [selectedCourse, setSelectedCourse] = useState<TrainingCourse | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
 

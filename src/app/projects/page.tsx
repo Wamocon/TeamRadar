@@ -110,6 +110,8 @@ function ProjectDetailPopup({
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [popupSize, setPopupSize] = useState<'S' | 'M' | 'L'>('M');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
 
   // Edit states
   const [editName, setEditName] = useState(project.name);
@@ -147,6 +149,13 @@ function ProjectDetailPopup({
     return map;
   });
   const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(new Set(project.memberIds));
+
+  const isDirty = editMode && (editName !== project.name || editDescription !== (project.description || ''));
+
+  const handleCancelEdit = () => {
+    if (isDirty) setShowCancelConfirm(true);
+    else setEditMode(false);
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -577,8 +586,15 @@ function ProjectDetailPopup({
       {/* Delete Confirm */}
       {confirmDelete && (
         <ConfirmModal title="Projekt löschen" message={`Möchtest du "${project.name}" wirklich löschen?`} confirmLabel="Löschen" cancelLabel="Abbrechen" variant="danger"
-          onConfirm={() => { onDelete(project.id); onClose(); }}
-          onCancel={() => setConfirmDelete(false)} />
+          onConfirm={() => { setDeletingProjectId(null); onDelete(project.id); onClose(); }}
+          onCancel={() => { setConfirmDelete(false); setDeletingProjectId(null); }} />
+      )}
+
+      {/* Cancel unsaved changes confirm */}
+      {showCancelConfirm && (
+        <ConfirmModal title="Änderungen verwerfen?" message="Es gibt ungespeicherte Änderungen. Wirklich abbrechen?" confirmLabel="Verwerfen" cancelLabel="Weiter bearbeiten" variant="danger"
+          onConfirm={() => { setShowCancelConfirm(false); setEditMode(false); }}
+          onCancel={() => setShowCancelConfirm(false)} />
       )}
     </>
   );

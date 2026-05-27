@@ -1212,7 +1212,12 @@ export default function YearOverviewPage() {
           {showOnlyMine && (
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] text-[11px] font-semibold text-(--primary)">
               <Eye size={12} />
-              Nur deine Einträge werden angezeigt – alle anderen Berater ausgeblendet. Klicke &ldquo;Nur meine&rdquo; erneut, um alle anzuzeigen.
+              {hasMinRole('cio')
+                ? 'Alle Berater sichtbar (Admin/CIO-Sicht) – du siehst deine gesamte Verantwortung.'
+                : hasMinRole('department_lead')
+                  ? 'Deine Abteilung wird angezeigt – Mitglieder anderer Abteilungen ausgeblendet.'
+                  : 'Nur deine Einträge werden angezeigt – alle anderen Berater ausgeblendet.'}
+              {' '}Klicke &ldquo;Nur meine&rdquo; erneut, um alle anzuzeigen.
             </div>
           )}
           <div className="space-y-4">

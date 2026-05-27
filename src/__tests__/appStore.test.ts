@@ -297,6 +297,17 @@ describe('Store: getMemberStatus', () => {
     expect(useAppStore.getState().getMemberStatus('m1', testDate)).toBe('available');
     expect(useAppStore.getState().getMemberStatus('m2', testDate)).toBe('sick');
   });
+
+  it('normalisiert unbekannte/legacy Statuswerte defensiv auf "offline"', () => {
+    useAppStore.getState().addAvailability({
+      memberId: 'm1',
+      status: 'irgendwas-unbekannt' as any,
+      date: testDate,
+    });
+
+    const status = useAppStore.getState().getMemberStatus('m1', testDate);
+    expect(status).toBe('offline');
+  });
 });
 
 /* ═══════════════════════════════════════════════════════════════

@@ -3,9 +3,9 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import Image from 'next/image';
 import {
-  MessageSquare, Send, Search, Plus, Hash, Users, Lock, Smile, Paperclip,
-  MoreHorizontal, Phone, Video, X, ChevronDown, Check, CheckCheck,
-  Circle, Loader, Bell, BellOff,
+  MessageSquare, Send, Search, Plus, Hash, Users, Smile, Paperclip,
+  MoreHorizontal, X, Check, CheckCheck,
+  Loader, BellOff,
 } from 'lucide-react';
 
 /* ── Typen ─────────────────────────────────────────────────────────── */

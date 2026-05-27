@@ -308,6 +308,14 @@ describe('Store: getMemberStatus', () => {
     const status = useAppStore.getState().getMemberStatus('m1', testDate);
     expect(status).toBe('offline');
   });
+
+  it('normalisiert Legacy-Werte auf den aktuellen Statuskatalog', () => {
+    useAppStore.getState().addAvailability({ memberId: 'm1', status: 'homeoffice' as any, date: testDate });
+    expect(useAppStore.getState().getMemberStatus('m1', testDate)).toBe('remote');
+
+    useAppStore.getState().addAvailability({ memberId: 'm1', status: 'urlaub' as any, date: testDate });
+    expect(useAppStore.getState().getMemberStatus('m1', testDate)).toBe('vacation');
+  });
 });
 
 /* ═══════════════════════════════════════════════════════════════

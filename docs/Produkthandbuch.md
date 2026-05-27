@@ -40,6 +40,12 @@ Das Dashboard bietet eine aggregierte Sicht auf das Team:
 - **Status-Eintrag**: Nutzer können ihren Status mit Zeitangaben und Notizen versehen.
 - **Alerts**: Automatische Warnungen bei Überbuchung (>100 %) und Konflikten mit Urlaub/Krankheit.
 
+#### 3.2.1 Statistiklogik und Konsistenzregeln
+- **Urlaubstage (Jahr)** im Dashboard zählen die Anzahl der `vacation`-Einträge im aktuellen Kalenderjahr.
+- Tageskarten wie **Verfügbar**, **Im Meeting** oder **Remote** beziehen sich auf den Status am aktuellen Tag.
+- Zur Datenkonsistenz werden Legacy-Statuswerte (z. B. `urlaub`, `krank`, `homeoffice`, `vacation_day`) auf den aktuellen Statuskatalog normalisiert.
+- Für Abteilungs-Auswertungen werden leere Werte auf **Ohne Abteilung** abgebildet, damit keine Mitarbeitenden aus Aggregationen herausfallen.
+
 ### 3.3 Projekt- & Teammanagement
 - **Projekte**: Unterscheidung zwischen internen und externen Projekten mit Start- und Enddatum.
 - **Teams**: Gruppierung von Mitarbeitern für schnellere Filterung und Berichterstellung.
@@ -122,6 +128,9 @@ TeamRadar nutzt ein hierarchisches Rollenmodell:
 - **Authentifizierung**: Supabase Auth mit Einladungs-Tokens.
 - **Auth-Proxy**: `src/proxy.ts` schützt alle Routen mit session-basiertem Auth-Guard.
 - **Testabdeckung**: 100 % Zeilen-, Branch-, Funktions- und Statement-Abdeckung (Vitest + v8).
+- **Validierungs-Pipeline**:
+	- `npm run validate`: Lint + Typecheck + Coverage-Tests
+	- `npm run validate:strict`: erweitert um CI-Reporter und Artefakt-Generierung
 - **Design-System**: CSS-Token-basiertes Hell-/Dunkel-Theming mit sichtbaren Kontraststufen (`--border`, `--shadow-sm/md/lg`, `--glass-border`). Weißer Kartengrund (`--bg-surface: #ffffff`) auf grauem Basis-Layout (`--bg-base: #e8edf4`) für klare visuelle Elementtrennung.
 
 ### 5.2 Offline-Konzept

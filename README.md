@@ -108,6 +108,22 @@ src/
 - Tests für Seed-Daten, Policies und Datenkonsistenz siehe `src/__tests__/`.
 - **Testabdeckung: 100 %** auf allen Metriken (430 Tests) – geprüft mit Vitest + v8.
 
+### Statistikdefinitionen (Dashboard)
+
+- **Urlaubstage (Jahr)** zählt alle Einträge mit Status `vacation` im aktuellen Kalenderjahr (nicht nur den Tagesstatus).
+- Legacy-Werte aus Importen/Altbeständen (z. B. `urlaub`, `krank`, `homeoffice`, `vacation_day`) werden vor Aggregationen zentral normalisiert.
+- Leere oder fehlende Abteilungen werden als **Ohne Abteilung** behandelt, damit Abteilungsstatistiken vollständig bleiben.
+
+### Erweiterte Validierungschecks
+
+```bash
+# Standard-Pipeline (wird auch im Hook genutzt)
+npm run validate
+
+# Erweiterter CI-Check mit Coverage-Artefakten
+npm run validate:strict
+```
+
 ## Troubleshooting
 
 - Hydration-Fehler: Badge-Rendering wurde angepasst, tritt nicht mehr auf.

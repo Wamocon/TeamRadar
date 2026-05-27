@@ -12,6 +12,7 @@ import { STATUS_CONFIG, type AvailabilityStatus, type ProjectType } from '@/type
 import { Globe, CalendarClock, Plus, Clock, BarChart3, Users, LayoutGrid, List, LayoutDashboard } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { normalizeAvailabilityStatus } from '@/lib/status-normalization';
 
 export default function DashboardPage() {
   const members = useAppStore((s) => s.members);
@@ -31,18 +32,6 @@ export default function DashboardPage() {
     const value = (department ?? '').trim();
     return value.length > 0 ? value : 'Ohne Abteilung';
   };
-  const normalizeAvailabilityStatus = (rawStatus: string): AvailabilityStatus => {
-    const legacyMap: Record<string, AvailabilityStatus> = {
-      homeoffice: 'remote',
-      vacation_day: 'vacation',
-      krank: 'sick',
-      urlaub: 'vacation',
-      office: 'busy',
-    };
-
-    const normalized = legacyMap[rawStatus] ?? rawStatus;
-    return normalized as AvailabilityStatus;
-  };
 
   const projects = useAppStore((s) => s.projects);
 
@@ -61,7 +50,6 @@ export default function DashboardPage() {
 
   const availableNow = statusCounts.available || 0;
   const inMeetings = statusCounts.meeting || 0;
-  const onVacation = statusCounts.vacation || 0;
   const remoteCount = statusCounts.remote || 0;
   const yearlyVacationDays = useMemo(
     () => availabilities.filter((a) => a.date.startsWith(currentYear) && normalizeAvailabilityStatus(a.status) === 'vacation').length,

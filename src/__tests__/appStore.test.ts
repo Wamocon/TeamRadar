@@ -787,6 +787,57 @@ describe('Store: getMemberUtilization', () => {
   });
 });
 
+describe('Store: getMemberUtilization – ConsultantType-Filterung', () => {
+  const testDate = '2026-05-15';
+
+  beforeEach(() => {
+    useAppStore.setState({
+      members: [],
+      projects: [
+        { id: 'p-int', name: 'Intern', type: 'internal', status: 'active', memberIds: [], createdAt: '2026-01-01' },
+        { id: 'p-ext', name: 'Extern', type: 'external', status: 'active', memberIds: [], client: 'AG', createdAt: '2026-01-01' },
+      ],
+      allocations: [],
+    });
+  });
+
+  it('Auszubildender zählt nur interne Projekte', () => {
+    useAppStore.getState().addMember({ name: 'Az', email: 'az@test.de', role: 'Azubi', department: 'IT', consultantType: 'apprentice' });
+    const m = useAppStore.getState().members[0];
+    useAppStore.getState().addAllocation({ memberId: m.id, projectId: 'p-int', percentage: 60, startDate: '2026-01-01', endDate: '2026-12-31' });
+    useAppStore.getState().addAllocation({ memberId: m.id, projectId: 'p-ext', percentage: 40, startDate: '2026-01-01', endDate: '2026-12-31' });
+    // Ohne expliziten Typ-Filter: nur interne zählen (60)
+    expect(useAppStore.getState().getMemberUtilization(m.id, testDate)).toBe(60);
+    // Mit explizitem Typ-Filter: überschreibt consultant-type-Logik
+    expect(useAppStore.getState().getMemberUtilization(m.id, testDate, 'external')).toBe(40);
+    expect(useAppStore.getState().getMemberUtilization(m.id, testDate, 'internal')).toBe(60);
+  });
+
+  it('Berater zählt externe und interne Projekte', () => {
+    useAppStore.getState().addMember({ name: 'B', email: 'b@test.de', role: 'Berater', department: 'IT', consultantType: 'consultant' });
+    const m = useAppStore.getState().members[0];
+    useAppStore.getState().addAllocation({ memberId: m.id, projectId: 'p-int', percentage: 40, startDate: '2026-01-01', endDate: '2026-12-31' });
+    useAppStore.getState().addAllocation({ memberId: m.id, projectId: 'p-ext', percentage: 60, startDate: '2026-01-01', endDate: '2026-12-31' });
+    expect(useAppStore.getState().getMemberUtilization(m.id, testDate)).toBe(100);
+  });
+
+  it('Senior Berater zählt externe und interne Projekte', () => {
+    useAppStore.getState().addMember({ name: 'SB', email: 'sb@test.de', role: 'Senior', department: 'IT', consultantType: 'senior_consultant' });
+    const m = useAppStore.getState().members[0];
+    useAppStore.getState().addAllocation({ memberId: m.id, projectId: 'p-int', percentage: 40, startDate: '2026-01-01', endDate: '2026-12-31' });
+    useAppStore.getState().addAllocation({ memberId: m.id, projectId: 'p-ext', percentage: 60, startDate: '2026-01-01', endDate: '2026-12-31' });
+    expect(useAppStore.getState().getMemberUtilization(m.id, testDate)).toBe(100);
+  });
+
+  it('Mitglied ohne consultantType: alle Projekte zählen', () => {
+    useAppStore.getState().addMember({ name: 'X', email: 'x@test.de', role: 'MA', department: 'IT' });
+    const m = useAppStore.getState().members[0];
+    useAppStore.getState().addAllocation({ memberId: m.id, projectId: 'p-int', percentage: 40, startDate: '2026-01-01', endDate: '2026-12-31' });
+    useAppStore.getState().addAllocation({ memberId: m.id, projectId: 'p-ext', percentage: 60, startDate: '2026-01-01', endDate: '2026-12-31' });
+    expect(useAppStore.getState().getMemberUtilization(m.id, testDate)).toBe(100);
+  });
+});
+
 describe('Store: getMemberAllocations', () => {
   it('gibt nur aktive Zuweisungen zurück', () => {
     useAppStore.getState().addAllocation({

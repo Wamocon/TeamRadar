@@ -5,10 +5,10 @@ import { X } from 'lucide-react';
 
 type ModalSize = 'S' | 'M' | 'L';
 
-const SIZE_CONFIG: Record<ModalSize, { label: string; maxWidth: string; maxHeight: string; icon: React.ElementType }> = {
-  S: { label: 'Klein',  maxWidth: 'max-w-lg',      maxHeight: 'max-h-[55vh]',  icon: X },
-  M: { label: 'Mittel', maxWidth: 'max-w-2xl',      maxHeight: 'max-h-[75vh]',  icon: X },
-  L: { label: 'Groß',   maxWidth: 'max-w-[95vw]',  maxHeight: 'max-h-[92vh]',  icon: X },
+const SIZE_CONFIG: Record<ModalSize, { label: string; maxWidth: string; height: string; icon: React.ElementType }> = {
+  S: { label: 'Klein',  maxWidth: 'max-w-lg',      height: 'max-h-[55vh]',            icon: X },
+  M: { label: 'Mittel', maxWidth: 'max-w-2xl',      height: 'max-h-[75vh]',            icon: X },
+  L: { label: 'Groß',   maxWidth: 'max-w-[95vw]',  height: 'h-[90vh] max-h-[90vh]',  icon: X },
 };
 
 interface ModalProps {
@@ -49,7 +49,7 @@ export function Modal({
 
   if (!mounted || isOpen === false) return null;
 
-  const { maxWidth, maxHeight } = SIZE_CONFIG[size];
+  const { maxWidth, height } = SIZE_CONFIG[size];
 
   return createPortal(
     <div className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 animate-fade-in">
@@ -60,7 +60,7 @@ export function Modal({
       />
       
       {/* Container – Theme-bewusst, proportional skalierend */}
-      <div className={`relative w-full ${maxWidth} ${maxHeight} bg-white dark:bg-[#0f172a] rounded-3xl border border-black/8 dark:border-white/5 shadow-2xl overflow-hidden animate-scale-up flex flex-col transition-all duration-300`}>
+      <div className={`relative w-full ${maxWidth} ${height} bg-white dark:bg-[#0f172a] rounded-3xl border border-black/8 dark:border-white/5 shadow-2xl overflow-hidden animate-scale-up flex flex-col transition-all duration-300`}>
         {/* Header */}
         <div className="p-6 pb-4 relative flex items-start gap-3 border-b border-black/6 dark:border-white/6 shrink-0">
           <div className="flex-1 min-w-0">

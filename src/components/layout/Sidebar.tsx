@@ -26,6 +26,8 @@ import {
   X,
   BookOpen,
   User,
+  GraduationCap,
+  MessageSquare,
 } from 'lucide-react';
 
 import { AppPortal } from './AppPortal';
@@ -105,6 +107,8 @@ function SidebarContent({
     { href: '/members', icon: BookOpen, label: 'WamoBook', exact: false },
     { href: '/year', icon: CalendarRange, label: 'Jahres\u00fcbersicht', exact: true },
     { href: '/projects', icon: Briefcase, label: 'Projekte', exact: false },
+    { href: '/training', icon: GraduationCap, label: 'Ausbildung', exact: false },
+    { href: '/chat', icon: MessageSquare, label: 'Chat', exact: false },
     { href: '/calendar', icon: CalendarDays, label: 'Kalender', exact: true },
   ];
 

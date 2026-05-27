@@ -479,10 +479,20 @@ export const useAppStore = create<AppStore>()(
 
     getMemberUtilization: (memberId, date, projectType) => {
       const d = date ?? new Date().toISOString().slice(0, 10);
+      const member = get().members.find(m => m.id === memberId);
       let allocs = get().allocations.filter(
         (a) => a.memberId === memberId && a.startDate <= d && a.endDate >= d
       );
-      if (projectType) {
+      // Consultant-Type awareness: filter by allowed project types
+      if (!projectType && member?.consultantType) {
+        const components = {
+          consultant:        ['external', 'internal'],
+          senior_consultant: ['external', 'internal'],
+          apprentice:        ['internal'],
+        }[member.consultantType] as ('external' | 'internal')[];
+        const validIds = new Set(get().projects.filter(p => components.includes(p.type)).map(p => p.id));
+        allocs = allocs.filter(a => validIds.has(a.projectId));
+      } else if (projectType) {
         const projectIds = new Set(get().projects.filter((p) => p.type === projectType).map((p) => p.id));
         allocs = allocs.filter((a) => projectIds.has(a.projectId));
       }

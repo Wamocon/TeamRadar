@@ -41,6 +41,15 @@ export interface Organization {
   createdAt: string;
 }
 
+/* ── Berater-Typ (unabhängig von der App-Rolle) ─────────────── */
+export type ConsultantType = 'consultant' | 'senior_consultant' | 'apprentice';
+
+export const CONSULTANT_TYPE_CONFIG: Record<ConsultantType, { label: string; short: string; color: string; capacityComponents: string[] }> = {
+  consultant:        { label: 'Berater',          short: 'B',  color: '#6366f1', capacityComponents: ['ext_project', 'int_project', 'university'] },
+  senior_consultant: { label: 'Senior Berater',   short: 'SB', color: '#f97316', capacityComponents: ['ext_project', 'int_project'] },
+  apprentice:        { label: 'Auszubildender',   short: 'Az', color: '#22c55e', capacityComponents: ['int_project', 'vocational_school'] },
+};
+
 /* ── Team-Mitglied ──────────────────────────────────────────── */
 export interface Member {
   id: string;
@@ -53,6 +62,22 @@ export interface Member {
   avatarUrl?: string;
   phone?: string;
   skills?: Skill[];
+  consultantType?: ConsultantType;   // Berater / Senior / Auszubildender
+  // Erweiterte Profilinformationen
+  bio?: string;
+  location?: string;
+  linkedIn?: string;
+  website?: string;
+  jobTitle?: string;
+  startDate?: string;       // Eintrittsdatum
+  birthDate?: string;
+  emergencyContact?: string;
+  languages?: string[];
+  certifications?: string[];
+  education?: string;
+  travelWillingness?: 'none' | 'occasional' | 'regular' | 'frequent';
+  hoursPerWeek?: number;
+  homeOfficePercentage?: number;
   createdAt: string;
 }
 
@@ -90,18 +115,50 @@ export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, { label: string; color
   completed: { label: 'Abgeschlossen', color: '#6b7280' },
 };
 
+/* ── Projekt-Zuweisung Rolle ──────────────────────────────── */
+export type ProjectMemberRole = 'operative' | 'supporting' | 'informed';
+
+export const PROJECT_MEMBER_ROLE_CONFIG: Record<ProjectMemberRole, { label: string; short: string; color: string }> = {
+  operative:  { label: 'Operativ',     short: 'Op', color: '#6366f1' },
+  supporting: { label: 'Unterstützend', short: 'Un', color: '#f59e0b' },
+  informed:   { label: 'Informierend', short: 'In', color: '#6b7280' },
+};
+
+export interface ProjectMember {
+  memberId: string;
+  role: ProjectMemberRole;
+}
+
 export interface Project {
   id: string;
   name: string;
   type: ProjectType;
   status: ProjectStatus;
   client?: string;          // Kundenname (v.a. bei externen Projekten)
+  clientContact?: string;   // Ansprechpartner beim Kunden
+  clientEmail?: string;
+  clientPhone?: string;
   description?: string;
+  objectives?: string;      // Projektziele
+  keyDeliverables?: string; // Wichtige Liefergegenstände
+  risks?: string;           // Risikohinweise
+  notes?: string;           // Interne Notizen / How-Tos
+  tags?: string[];          // Schlagwörter
   memberIds: string[];
+  projectMembers?: ProjectMember[]; // Mitglieder mit Rollen
   startDate?: string;       // ISO-Datum YYYY-MM-DD
   endDate?: string;         // ISO-Datum YYYY-MM-DD
+  plannedEndDate?: string;  // Geplanter Abschluss
   budgetHours?: number;     // Geplantes Stundenkontingent
+  budgetAmount?: number;    // Budget in Euro
   maxDays?: number;         // Max. Beauftragungstage pro Jahr (nur externe Projekte)
+  priority?: 'low' | 'medium' | 'high' | 'critical';
+  projectNumber?: string;   // Projektnummer / Auftragsnummer
+  location?: string;        // Projektstandort
+  remotePercentage?: number; // Home-Office-Anteil in %
+  technologies?: string[];  // Eingesetzte Technologien
+  framework?: string;       // Projektrahmenwerk (Scrum, Kanban, ...)
+  reportingCycle?: string;  // Berichtsrhythmus
   createdAt: string;
 }
 
@@ -174,3 +231,62 @@ export interface UserProfile {
     notifications?: boolean;
   };
 }
+
+/* ── Ausbildungs-Kurs / Schulung ────────────────────────── */
+export type TrainingType = 'university' | 'vocational_school' | 'seminar' | 'certification' | 'workshop';
+
+export const TRAINING_TYPE_CONFIG: Record<TrainingType, { label: string; color: string; icon: string }> = {
+  university:       { label: 'Universität / FH', color: '#6366f1', icon: '🎓' },
+  vocational_school:{ label: 'Berufsschule',     color: '#f59e0b', icon: '🏫' },
+  seminar:          { label: 'Seminar',           color: '#22c55e', icon: '📚' },
+  certification:    { label: 'Zertifizierung',    color: '#f97316', icon: '🏆' },
+  workshop:         { label: 'Workshop',          color: '#06b6d4', icon: '🔧' },
+};
+
+export type TrainingStatus = 'planned' | 'active' | 'completed';
+
+export interface TrainingCourse {
+  id: string;
+  name: string;
+  type: TrainingType;
+  status: TrainingStatus;
+  provider?: string;         // Anbieter (Uni, Schule, Institut)
+  providerContact?: string;
+  description?: string;
+  objectives?: string;
+  location?: string;
+  remotePercentage?: number;
+  startDate?: string;
+  endDate?: string;
+  hoursPerWeek?: number;
+  memberIds: string[];       // Zugewiesene Berater
+  projectMembers?: ProjectMember[]; // Mit Rollen
+  notes?: string;
+  certificationEarned?: string;
+  tags?: string[];
+  createdAt: string;
+}
+
+/* ── Organisations-Einstellungen ────────────────────────── */
+export interface OrgSettings {
+  // Allgemein
+  orgName: string;
+  orgLogoUrl?: string;
+  supportEmail: string;
+  maintenanceMode: boolean;
+  // Arbeitszeiten
+  standardWorkHoursPerDay: number;     // Standard: 8
+  standardWorkDaysPerWeek: number;     // Standard: 5
+  weekStartDay: 0 | 1;                 // 0=Sonntag, 1=Montag
+  // Feiertage
+  defaultBundesland: string;           // Standard-Bundesland für Feiertage
+  additionalHolidays?: { date: string; name: string }[];
+  // Kapazitätsregeln
+  extConsultantWeeklyHours: number;    // Standard: 39 (Außen-Berater)
+  maxVacationDaysPerYear: number;
+  // Urlaubsregeln
+  vacationCarryoverMonths: number;     // Monate bis Übertrag verfällt
+  // Benachrichtigungen
+  alertOverbookingThreshold: number;   // %, ab dem Warnung erscheint (Standard: 100)
+}
+

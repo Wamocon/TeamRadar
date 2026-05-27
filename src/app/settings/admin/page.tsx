@@ -181,6 +181,16 @@ export default function AdminSettingsPage() {
   const [orgWebsite, setOrgWebsite] = useState('');
   const [orgPlan, setOrgPlan] = useState<'starter' | 'pro' | 'enterprise'>('pro');
 
+  // Arbeitszeit & Feiertage
+  const [workHoursPerDay, setWorkHoursPerDay] = useState('8');
+  const [workDaysPerWeek, setWorkDaysPerWeek] = useState('5');
+  const [weekStartDay, setWeekStartDay] = useState('1'); // 1=Mo
+  const [defaultBundesland, setDefaultBundesland] = useState('BY');
+  const [maxVacationDays, setMaxVacationDays] = useState('30');
+  const [vacationCarryoverMonths, setVacationCarryoverMonths] = useState('3');
+  const [alertOverbookingThreshold, setAlertOverbookingThreshold] = useState('100');
+  const [extConsultantWeeklyHours, setExtConsultantWeeklyHours] = useState('40');
+
   // Mitarbeiter einladen
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'employee' | 'department_lead' | 'cio'>('employee');
@@ -543,6 +553,82 @@ export default function AdminSettingsPage() {
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold border-none cursor-pointer hover:opacity-90 disabled:opacity-50 transition-opacity">
                   {isSaving ? <Loader size={14} className="animate-spin" /> : <Save size={14} />}
                   Speichern
+                </button>
+              </AdminCard>
+
+              <AdminCard title="Arbeitszeit & Arbeitswoche" icon={<Clock size={14} className="text-[var(--primary)]" />}>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Arbeitsstunden / Tag</label>
+                    <input type="number" min={1} max={24} value={workHoursPerDay} onChange={e => setWorkHoursPerDay(e.target.value)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Arbeitstage / Woche</label>
+                    <input type="number" min={1} max={7} value={workDaysPerWeek} onChange={e => setWorkDaysPerWeek(e.target.value)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Wochenbeginn</label>
+                    <select value={weekStartDay} onChange={e => setWeekStartDay(e.target.value)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]">
+                      <option value="1">Montag</option>
+                      <option value="0">Sonntag</option>
+                      <option value="6">Samstag</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Std./Woche ext. Berater</label>
+                    <input type="number" min={1} max={60} value={extConsultantWeeklyHours} onChange={e => setExtConsultantWeeklyHours(e.target.value)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+                  </div>
+                </div>
+              </AdminCard>
+
+              <AdminCard title="Feiertage & Urlaub" icon={<Settings2 size={14} className="text-[var(--primary)]" />}>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1 col-span-2">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Standard Bundesland (Feiertage)</label>
+                    <select value={defaultBundesland} onChange={e => setDefaultBundesland(e.target.value)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]">
+                      <option value="BW">Baden-Württemberg</option>
+                      <option value="BY">Bayern</option>
+                      <option value="BE">Berlin</option>
+                      <option value="BB">Brandenburg</option>
+                      <option value="HB">Bremen</option>
+                      <option value="HH">Hamburg</option>
+                      <option value="HE">Hessen</option>
+                      <option value="MV">Mecklenburg-Vorpommern</option>
+                      <option value="NI">Niedersachsen</option>
+                      <option value="NW">Nordrhein-Westfalen</option>
+                      <option value="RP">Rheinland-Pfalz</option>
+                      <option value="SL">Saarland</option>
+                      <option value="SN">Sachsen</option>
+                      <option value="ST">Sachsen-Anhalt</option>
+                      <option value="SH">Schleswig-Holstein</option>
+                      <option value="TH">Thüringen</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Max. Urlaubstage / Jahr</label>
+                    <input type="number" min={0} max={365} value={maxVacationDays} onChange={e => setMaxVacationDays(e.target.value)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Urlaub-Übertrag (Monate)</label>
+                    <input type="number" min={0} max={12} value={vacationCarryoverMonths} onChange={e => setVacationCarryoverMonths(e.target.value)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+                  </div>
+                  <div className="space-y-1 col-span-2">
+                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Auslastungs-Alert ab (%) </label>
+                    <input type="number" min={50} max={200} value={alertOverbookingThreshold} onChange={e => setAlertOverbookingThreshold(e.target.value)}
+                      className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)]" />
+                    <p className="text-[9px] dark:text-white/30 text-gray-400">Ab diesem Auslastungswert wird eine Warnung angezeigt.</p>
+                  </div>
+                </div>
+                <button onClick={() => { /* TODO: persistieren */ }}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold border-none cursor-pointer hover:opacity-90 transition-opacity">
+                  <Save size={14} /> Speichern
                 </button>
               </AdminCard>
 

@@ -74,6 +74,23 @@ export default function ProfileSettingsPage() {
   const [linkedIn, setLinkedIn] = useState('');
   const [website, setWebsite] = useState('');
 
+  // Erweiterte Profilfelder
+  const [birthDate, setBirthDate] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [emergencyContact, setEmergencyContact] = useState('');
+  const [languages, setLanguages] = useState('');
+  const [certifications, setCertifications] = useState('');
+  const [education, setEducation] = useState('');
+  const [travelWillingness, setTravelWillingness] = useState<'none' | 'low' | 'medium' | 'high'>('medium');
+  const [hoursPerWeek, setHoursPerWeek] = useState('40');
+  const [homeOfficePercentage, setHomeOfficePercentage] = useState('50');
+  const [consultantType, setConsultantType] = useState<'consultant' | 'senior_consultant' | 'apprentice'>('consultant');
+  const [skills, setSkills] = useState('');
+  const [department, setDepartment] = useState('');
+  const [xing, setXing] = useState('');
+  const [twitter, setTwitter] = useState('');
+  const [github, setGithub] = useState('');
+
   // Erscheinungsbild
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
   const [compactMode, setCompactMode] = useState(false);
@@ -317,7 +334,112 @@ export default function ProfileSettingsPage() {
                   </div>
                   <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.04] border-black/[0.04] space-y-1">
                     <div className="text-[9px] font-black uppercase tracking-wide dark:text-white/30 text-gray-400">Rolle</div>
-                    <div className="text-sm font-black text-[var(--primary)]">{userProfile?.role || 'â€”'}</div>
+                    <div className="text-sm font-black text-[var(--primary)]">{userProfile?.role || '—'}</div>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Berater-Profil" icon={Briefcase}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Berater-Typ</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {([
+                        { id: 'consultant',        label: 'Berater',         desc: 'Ext. + Int. Projekt + Uni' },
+                        { id: 'senior_consultant', label: 'Senior Berater',  desc: 'Ext. + Int. Projekt' },
+                        { id: 'apprentice',        label: 'Auszubildender',  desc: 'Int. Projekt + Berufsschule' },
+                      ] as const).map(opt => (
+                        <button key={opt.id} onClick={() => setConsultantType(opt.id)}
+                          className={`p-3 rounded-xl border-2 transition-all cursor-pointer bg-transparent text-left ${consultantType === opt.id ? 'border-[var(--primary)] bg-[var(--primary-light)]' : 'dark:border-white/10 border-gray-200 hover:border-[rgba(99,102,241,0.3)]'}`}>
+                          <div className={`text-xs font-black ${consultantType === opt.id ? 'text-[var(--primary)]' : 'dark:text-white text-gray-900'}`}>{opt.label}</div>
+                          <div className="text-[9px] dark:text-white/40 text-gray-500 mt-0.5">{opt.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Abteilung</label>
+                    <input type="text" value={department} onChange={e => setDepartment(e.target.value)} title="Abteilung" placeholder="Beratung, IT, HR..." className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Eintrittsdatum</label>
+                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} title="Eintrittsdatum" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Stunden / Woche</label>
+                    <input type="number" min={0} max={60} value={hoursPerWeek} onChange={e => setHoursPerWeek(e.target.value)} title="Stunden pro Woche" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Homeoffice-Anteil (%)</label>
+                    <input type="number" min={0} max={100} value={homeOfficePercentage} onChange={e => setHomeOfficePercentage(e.target.value)} title="Homeoffice-Anteil" className={inputCls} />
+                  </div>
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Reisebereitschaft</label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {([
+                        { id: 'none', label: 'Keine' }, { id: 'low', label: 'Gering' },
+                        { id: 'medium', label: 'Mittel' }, { id: 'high', label: 'Hoch' },
+                      ] as const).map(opt => (
+                        <button key={opt.id} onClick={() => setTravelWillingness(opt.id)}
+                          className={`py-2 rounded-xl border-2 text-[10px] font-black transition-all cursor-pointer bg-transparent ${travelWillingness === opt.id ? 'border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)]' : 'dark:border-white/10 border-gray-200 dark:text-white/50 text-gray-500'}`}>
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Qualifikationen & Kompetenzen" icon={Activity} defaultOpen={false}>
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Skills (kommagetrennt)</label>
+                    <textarea value={skills} onChange={e => setSkills(e.target.value)} rows={2} title="Skills" placeholder="Projektmanagement, Java, SAP, Scrum..." className={inputCls + ' resize-none'} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Zertifizierungen (kommagetrennt)</label>
+                    <textarea value={certifications} onChange={e => setCertifications(e.target.value)} rows={2} title="Zertifizierungen" placeholder="PMP, ITIL, AWS Solutions Architect..." className={inputCls + ' resize-none'} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Ausbildung / Studium</label>
+                    <textarea value={education} onChange={e => setEducation(e.target.value)} rows={2} title="Ausbildung" placeholder="B.Sc. Informatik, TU München, 2019..." className={inputCls + ' resize-none'} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Sprachen (kommagetrennt)</label>
+                    <input type="text" value={languages} onChange={e => setLanguages(e.target.value)} title="Sprachen" placeholder="Deutsch (C2), Englisch (C1), Spanisch (B2)" className={inputCls} />
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Persönliche Daten" icon={Shield} defaultOpen={false}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Geburtsdatum</label>
+                    <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} title="Geburtsdatum" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Notfallkontakt</label>
+                    <input type="text" value={emergencyContact} onChange={e => setEmergencyContact(e.target.value)} title="Notfallkontakt" placeholder="Name, Telefon..." className={inputCls} />
+                  </div>
+                  <div className="sm:col-span-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/30 text-[10px] text-amber-700 dark:text-amber-400">
+                    Diese Felder sind nur für die HR-Verwaltung sichtbar und werden vertraulich behandelt.
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Weitere Social-Links" icon={Globe} defaultOpen={false}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">XING</label>
+                    <input type="url" value={xing} onChange={e => setXing(e.target.value)} title="XING" placeholder="https://xing.com/profile/..." className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">GitHub</label>
+                    <input type="url" value={github} onChange={e => setGithub(e.target.value)} title="GitHub" placeholder="https://github.com/..." className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">X / Twitter</label>
+                    <input type="url" value={twitter} onChange={e => setTwitter(e.target.value)} title="Twitter" placeholder="https://x.com/..." className={inputCls} />
                   </div>
                 </div>
               </SectionCard>

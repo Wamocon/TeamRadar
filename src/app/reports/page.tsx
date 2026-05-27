@@ -3,7 +3,7 @@ import { useState, useMemo, useCallback, useRef } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { FileDown, FileSpreadsheet, Users, Briefcase, BarChart3, CalendarDays, Upload, Download, CheckCircle, AlertCircle, Printer, Lock, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
-import { PROJECT_TYPE_CONFIG, type ProjectType } from '@/types';
+import { PROJECT_TYPE_CONFIG, CONSULTANT_TYPE_CONFIG, type ProjectType } from '@/types';
 import { ProjectTypeFilter } from '@/components/ui/ProjectTypeFilter';
 import type { Member, Availability, Team, Project, Allocation } from '@/types';
 
@@ -275,6 +275,7 @@ export default function ReportsPage() {
         return members.slice(0, 8).map((m) => ({
           name: m.name,
           dept: m.department,
+          type: m.consultantType ? CONSULTANT_TYPE_CONFIG[m.consultantType].short : '—',
           util: getMemberUtilization(m.id, today, activeType),
           projects: getMemberAllocations(m.id, today, activeType).length,
         }));
@@ -471,6 +472,7 @@ export default function ReportsPage() {
                   <>
                     <th className="text-left px-4 py-2 font-semibold dark:text-white/40 text-gray-500">Name</th>
                     <th className="text-left px-4 py-2 font-semibold dark:text-white/40 text-gray-500">Abteilung</th>
+                    <th className="text-left px-4 py-2 font-semibold dark:text-white/40 text-gray-500">Typ</th>
                     <th className="text-right px-4 py-2 font-semibold dark:text-white/40 text-gray-500">Auslastung</th>
                     <th className="text-right px-4 py-2 font-semibold dark:text-white/40 text-gray-500">Projekte</th>
                   </>

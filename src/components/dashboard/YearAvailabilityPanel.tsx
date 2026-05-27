@@ -270,7 +270,7 @@ export function YearAvailabilityPanel() {
       });
       return { month, days, memberRows };
     });
-  }, [year, members, getDayCategory]);
+  }, [year, members, getDayCategory, holidays]);
 
   if (members.length === 0) return null;
 

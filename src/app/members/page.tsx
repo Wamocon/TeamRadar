@@ -2,7 +2,7 @@
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import { useAppStore } from '@/stores/appStore';
-import { STATUS_CONFIG, type UserRole } from '@/types';
+import { STATUS_CONFIG, CONSULTANT_TYPE_CONFIG, type UserRole } from '@/types';
 import {
   Users,
   BookOpen,
@@ -201,6 +201,11 @@ function WamoBookContent() {
                   {isOwn && <span className="ml-1 text-[8px] bg-[var(--primary-light)] text-[var(--primary)] px-1 py-0.5 rounded-full font-bold">Ich</span>}
                 </div>
                 <div className="text-[9px] dark:text-white/40 text-gray-500 truncate mt-0.5">{member.role || member.department || 'Mitarbeiter'}</div>
+                {member.consultantType && (
+                  <span className="inline-block mt-0.5 text-[8px] font-black px-1 py-0.5 rounded-full" style={{ background: CONSULTANT_TYPE_CONFIG[member.consultantType].color + '22', color: CONSULTANT_TYPE_CONFIG[member.consultantType].color }}>
+                    {CONSULTANT_TYPE_CONFIG[member.consultantType].short}
+                  </span>
+                )}
               </div>
             </button>
           );
@@ -237,9 +242,16 @@ function WamoBookContent() {
                   {isOwnProfile && <span className="ml-2 text-[9px] bg-[var(--primary-light)] text-[var(--primary)] px-1.5 py-0.5 rounded-full font-bold">Mein Profil</span>}
                 </h2>
                 <div className="text-sm dark:text-white/50 text-gray-600 mt-0.5">{selectedMember.role}</div>
-                <div className="flex items-center gap-1 mt-1">
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_CONFIG[getMemberStatus(selectedMember.id, today)].color }} />
-                  <span className="text-[10px] dark:text-white/40 text-gray-500">{STATUS_CONFIG[getMemberStatus(selectedMember.id, today)].label}</span>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {selectedMember.consultantType && (
+                    <span className="text-[9px] font-black px-2 py-0.5 rounded-full" style={{ background: CONSULTANT_TYPE_CONFIG[selectedMember.consultantType].color + '22', color: CONSULTANT_TYPE_CONFIG[selectedMember.consultantType].color }}>
+                      {CONSULTANT_TYPE_CONFIG[selectedMember.consultantType].label}
+                    </span>
+                  )}
+                  <div className="flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_CONFIG[getMemberStatus(selectedMember.id, today)].color }} />
+                    <span className="text-[10px] dark:text-white/40 text-gray-500">{STATUS_CONFIG[getMemberStatus(selectedMember.id, today)].label}</span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">

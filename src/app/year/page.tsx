@@ -477,6 +477,7 @@ export default function YearOverviewPage() {
   // Feiertage für aktuelles Jahr + Bundesland
   const holidays = useMemo(() => getHolidays(year, bundesland), [year, bundesland]);
   const [filterType] = useState<'all' | ProjectType>('all');
+  const [showOnlyMine, setShowOnlyMine] = useState(false);
   const [quickStatus, setQuickStatus] = useState<{ memberId: string; date: string; x: number; y: number } | null>(null);
   const [entryMonth, setEntryMonth] = useState(new Date().getMonth());
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -849,6 +850,19 @@ export default function YearOverviewPage() {
           <p className="text-sm dark:text-white/40 text-gray-500 mt-1">Auslastung, Projekte und Statuseingabe</p>
         </div>
         <div className="flex items-center gap-2">
+          {/* Nur-meine-Einträge Filter */}
+          <button
+            onClick={() => setShowOnlyMine(v => !v)}
+            title="Nur eigene Einträge anzeigen – fokussiert auf deine Zeile"
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
+              showOnlyMine
+                ? 'bg-[var(--primary)] text-white border-[var(--primary)]'
+                : 'border-black/[0.08] dark:border-white/[0.08] dark:text-white/60 text-gray-600 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] bg-transparent'
+            }`}
+          >
+            <Eye size={13} />
+            Nur meine
+          </button>
           <button onClick={() => setYear((y) => y - 1)}
             className="p-2 rounded-lg border dark:border-white/[0.06] border-black/[0.06] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors">
             <ChevronLeft size={16} className="dark:text-white/50 text-gray-600" />
@@ -1097,7 +1111,7 @@ export default function YearOverviewPage() {
           {/* 12 Monate scrollbar */}
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs font-bold dark:text-white/40 text-gray-500 uppercase tracking-wider">
-              {12 - collapsedMonths.size} / 12 Monate sichtbar
+              {showOnlyMine ? 'Fokus: Meine Einträge' : `${12 - collapsedMonths.size} / 12 Monate sichtbar`}
             </span>
             <div className="flex gap-1.5">
               <button
@@ -1126,29 +1140,40 @@ export default function YearOverviewPage() {
               </button>
             </div>
           </div>
+          {showOnlyMine && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] text-[11px] font-semibold text-[var(--primary)]">
+              <Eye size={12} />
+              Nur deine Einträge werden angezeigt – alle anderen Berater ausgeblendet. Klicke &ldquo;Nur meine&rdquo; erneut, um alle anzuzeigen.
+            </div>
+          )}
           <div className="space-y-4">
-            {yearlyMatrixData.map((monthData) => (
-              <MonthMatrix
-                key={monthData.month}
-                monthData={monthData}
-                year={year}
-                currentMonth={currentMonth}
-                currentYear={currentYear}
-                bundesland={bundesland}
-                today={today}
-                quickStatus={quickStatus}
-                setQuickStatus={setQuickStatus}
-                bulkFill={bulkFill}
-                setBulkFill={setBulkFill}
-                canEditRow={canEditRow}
-                isCollapsed={collapsedMonths.has(monthData.month)}
-                onToggleCollapse={() => toggleMonth(monthData.month)}
-                selectMode={selectMode}
-                multiSelected={multiSelected}
-                multiKey={multiKey}
-                onMultiToggle={handleMultiToggle}
-              />
-            ))}
+            {yearlyMatrixData.map((monthData) => {
+              const filteredMonthData = showOnlyMine
+                ? { ...monthData, memberRows: monthData.memberRows.filter(row => canEditRow(row.member.email, row.member.userId)) }
+                : monthData;
+              return (
+                <MonthMatrix
+                  key={monthData.month}
+                  monthData={filteredMonthData}
+                  year={year}
+                  currentMonth={currentMonth}
+                  currentYear={currentYear}
+                  bundesland={bundesland}
+                  today={today}
+                  quickStatus={quickStatus}
+                  setQuickStatus={setQuickStatus}
+                  bulkFill={bulkFill}
+                  setBulkFill={setBulkFill}
+                  canEditRow={canEditRow}
+                  isCollapsed={collapsedMonths.has(monthData.month)}
+                  onToggleCollapse={() => toggleMonth(monthData.month)}
+                  selectMode={selectMode}
+                  multiSelected={multiSelected}
+                  multiKey={multiKey}
+                  onMultiToggle={handleMultiToggle}
+                />
+              );
+            })}
           </div>
         </div>
       )}

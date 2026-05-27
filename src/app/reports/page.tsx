@@ -3,7 +3,7 @@ import { useState, useMemo, useCallback, useRef } from 'react';
 import { useAppStore } from '@/stores/appStore';
 import { FileDown, FileSpreadsheet, Users, Briefcase, BarChart3, CalendarDays, Upload, Download, CheckCircle, AlertCircle, Printer, Lock, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
-import { PROJECT_TYPE_CONFIG, type ProjectType } from '@/types';
+import { PROJECT_TYPE_CONFIG, CONSULTANT_TYPE_CONFIG, type ProjectType } from '@/types';
 import { ProjectTypeFilter } from '@/components/ui/ProjectTypeFilter';
 import type { Member, Availability, Team, Project, Allocation } from '@/types';
 
@@ -275,6 +275,7 @@ export default function ReportsPage() {
         return members.slice(0, 8).map((m) => ({
           name: m.name,
           dept: m.department,
+          type: m.consultantType ? CONSULTANT_TYPE_CONFIG[m.consultantType].short : '—',
           util: getMemberUtilization(m.id, today, activeType),
           projects: getMemberAllocations(m.id, today, activeType).length,
         }));
@@ -321,7 +322,7 @@ export default function ReportsPage() {
         <p className="text-sm dark:text-white/40 text-gray-500 max-w-xs">
           Dieser Bereich ist nur für Team-Leads, CIOs und Administratoren zugänglich.
         </p>
-        <Link href="/" className="px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity">
+        <Link href="/" className="px-4 py-2 rounded-xl bg-(--primary) text-white text-xs font-bold hover:opacity-90 transition-opacity">
           Zum Dashboard
         </Link>
       </div>
@@ -334,7 +335,7 @@ export default function ReportsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
         <div>
         <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-400/20 border border-violet-500/20 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-violet-500/20 to-pink-400/20 border border-violet-500/20 flex items-center justify-center">
             <FileDown size={20} className="text-violet-500" />
           </div>
           Reports & Export
@@ -344,7 +345,7 @@ export default function ReportsPage() {
         </p>
       </div>
       <button onClick={() => window.print()}
-        className="flex items-center gap-2 px-4 py-2 rounded-xl border dark:border-white/[0.08] border-black/[0.08] text-xs font-semibold dark:text-white/60 text-gray-600 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] hover:border-[rgba(99,102,241,0.3)] transition-all bg-transparent cursor-pointer shrink-0 print:hidden">
+        className="flex items-center gap-2 px-4 py-2 rounded-xl border dark:border-white/8 border-black/8 text-xs font-semibold dark:text-white/60 text-gray-600 hover:bg-(--primary-light) hover:text-(--primary) hover:border-[rgba(99,102,241,0.3)] transition-all bg-transparent cursor-pointer shrink-0 print:hidden">
         <Printer size={14} /> Als PDF drucken
       </button>
       </div>
@@ -363,10 +364,10 @@ export default function ReportsPage() {
       )}
 
       {/* ═══ Export & Import ═══ */}
-      <div className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] overflow-hidden">
+      <div className="card-shimmer rounded-xl border border-black/6 dark:border-white/6 overflow-hidden">
         <button
           onClick={() => setOpenExportImport(v => !v)}
-          className={`w-full flex items-center justify-between p-4 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openExportImport ? 'border-b border-black/[0.06] dark:border-white/[0.06]' : ''}`}
+          className={`w-full flex items-center justify-between p-4 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${openExportImport ? 'border-b border-black/6 dark:border-white/6' : ''}`}
         >
           <div>
             <h2 className="text-sm font-bold dark:text-white text-gray-900 flex items-center gap-2">
@@ -384,11 +385,11 @@ export default function ReportsPage() {
         <div className="p-4 space-y-3">
           <div className="flex flex-wrap gap-3">
             <button onClick={handleJsonExport} disabled={exporting}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all disabled:opacity-50 dark:bg-white/[0.03] dark:border-white/[0.06] dark:text-white border-black/[0.06] hover:border-cyan-500/30 hover:bg-cyan-500/5">
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all disabled:opacity-50 dark:bg-white/3 dark:border-white/6 dark:text-white border-black/6 hover:border-cyan-500/30 hover:bg-cyan-500/5">
               <Download size={14} />
               {exporting ? 'Exportiere...' : 'Komplett-Export (JSON)'}
             </button>
-            <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer disabled:opacity-50 dark:bg-white/[0.03] dark:border-white/[0.06] dark:text-white border-black/[0.06] hover:border-violet-500/30 hover:bg-violet-500/5">
+            <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer disabled:opacity-50 dark:bg-white/3 dark:border-white/6 dark:text-white border-black/6 hover:border-violet-500/30 hover:bg-violet-500/5">
               <Upload size={14} />
               {importing ? 'Importiere...' : 'Daten importieren'}
               <input ref={fileInputRef} type="file" accept=".json,application/json" className="hidden" onChange={handleImport} disabled={importing} />
@@ -397,7 +398,7 @@ export default function ReportsPage() {
 
           {/* Import-Ergebnis (wie AppMonitor) */}
           {importResult && (
-            <div className="rounded-xl border border-black/[0.06] dark:border-white/[0.06] p-4 space-y-2">
+            <div className="rounded-xl border border-black/6 dark:border-white/6 p-4 space-y-2">
               <div className="text-xs font-bold dark:text-white text-gray-900">Import-Ergebnis</div>
               <div className="grid grid-cols-5 gap-2 text-center">
                 {([['Members', importResult.imported.members, importResult.total.members],
@@ -450,10 +451,10 @@ export default function ReportsPage() {
       </div>
 
       {/* Preview Table */}
-      <div className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] overflow-hidden">
+      <div className="card-shimmer rounded-xl border border-black/6 dark:border-white/6 overflow-hidden">
         <button
           onClick={() => setOpenPreview(v => !v)}
-          className={`w-full flex items-center justify-between p-4 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${openPreview ? 'border-b border-black/[0.06] dark:border-white/[0.06]' : ''}`}
+          className={`w-full flex items-center justify-between p-4 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${openPreview ? 'border-b border-black/6 dark:border-white/6' : ''}`}
         >
           <h2 className="text-sm font-bold dark:text-white text-gray-900 flex items-center gap-2">
             <FileSpreadsheet size={14} /> Vorschau
@@ -466,11 +467,12 @@ export default function ReportsPage() {
         {openPreview && <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-black/[0.04] dark:border-white/[0.04]">
+              <tr className="border-b border-black/4 dark:border-white/4">
                 {selectedReport === 'utilization' && (
                   <>
                     <th className="text-left px-4 py-2 font-semibold dark:text-white/40 text-gray-500">Name</th>
                     <th className="text-left px-4 py-2 font-semibold dark:text-white/40 text-gray-500">Abteilung</th>
+                    <th className="text-left px-4 py-2 font-semibold dark:text-white/40 text-gray-500">Typ</th>
                     <th className="text-right px-4 py-2 font-semibold dark:text-white/40 text-gray-500">Auslastung</th>
                     <th className="text-right px-4 py-2 font-semibold dark:text-white/40 text-gray-500">Projekte</th>
                   </>
@@ -502,7 +504,7 @@ export default function ReportsPage() {
             </thead>
             <tbody>
               {previewData.map((row, i) => (
-                <tr key={i} className="border-b border-black/[0.03] dark:border-white/[0.03]">
+                <tr key={i} className="border-b border-black/3 dark:border-white/3">
                   {Object.values(row).map((val, j) => (
                     <td key={j} className={`px-4 py-2 dark:text-white/60 text-gray-700 ${j >= Object.keys(row).length - 1 ? 'text-right font-bold' : ''}`}>
                       {String(val)}
@@ -516,7 +518,7 @@ export default function ReportsPage() {
       </div>
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
         {/* Format-Toggle */}
-        <div className="flex gap-1 p-1 bg-black/[0.04] dark:bg-white/[0.04] rounded-xl">
+        <div className="flex gap-1 p-1 bg-black/4 dark:bg-white/4 rounded-xl">
           {(['csv', 'json'] as ExportFormat[]).map((fmt) => (
             <button key={fmt} onClick={() => setExportFormat(fmt)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
@@ -530,7 +532,7 @@ export default function ReportsPage() {
         </div>
 
         <button onClick={handleExport} disabled={exporting}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-violet-600 text-white font-bold hover:from-violet-600 hover:to-violet-700 transition-all shadow-lg shadow-violet-500/20 disabled:opacity-50">
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-linear-to-r from-violet-500 to-violet-600 text-white font-bold hover:from-violet-600 hover:to-violet-700 transition-all shadow-lg shadow-violet-500/20 disabled:opacity-50">
           <FileDown size={18} />
           {exporting
             ? 'Exportiere...'

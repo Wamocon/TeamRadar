@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/stores/appStore';
 import { Save, X, Plus, Loader } from 'lucide-react';
-import { SKILL_CATEGORIES, SKILL_LEVEL_CONFIG, type Skill, type SkillLevel, type SkillCategory } from '@/types';
+import { SKILL_CATEGORIES, SKILL_LEVEL_CONFIG, CONSULTANT_TYPE_CONFIG, type Skill, type SkillLevel, type SkillCategory, type ConsultantType } from '@/types';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 export function MemberForm({ memberId, onSuccess, onCancel }: { 
@@ -23,6 +23,7 @@ export function MemberForm({ memberId, onSuccess, onCancel }: {
   const [role, setRole] = useState(existing?.role ?? '');
   const [department, setDepartment] = useState(existing?.department ?? '');
   const [phone, setPhone] = useState(existing?.phone ?? '');
+  const [consultantType, setConsultantType] = useState<ConsultantType>(existing?.consultantType ?? 'consultant');
   const [skills, setSkills] = useState<Skill[]>(existing?.skills ?? []);
 
   // Skill form
@@ -50,6 +51,7 @@ export function MemberForm({ memberId, onSuccess, onCancel }: {
                   role !== (existing?.role ?? '') || 
                   department !== (existing?.department ?? '') || 
                   phone !== (existing?.phone ?? '') || 
+                  consultantType !== (existing?.consultantType ?? 'consultant') ||
                   JSON.stringify(skills) !== JSON.stringify(existing?.skills ?? []);
 
   const handleCancelClick = () => {
@@ -72,7 +74,7 @@ export function MemberForm({ memberId, onSuccess, onCancel }: {
     try {
       if (existing) {
         // Edit existing (local store for now, or db update)
-        updateMember(existing.id, { name, email, role, department, phone: phone || undefined, skills });
+        updateMember(existing.id, { name, email, role, department, phone: phone || undefined, consultantType, skills });
         if (onSuccess) onSuccess();
         else router.push('/members');
       } else {
@@ -91,7 +93,7 @@ export function MemberForm({ memberId, onSuccess, onCancel }: {
         } else {
           setMsg({ type: 'success', text: `Einladung an ${email} wurde gesendet!` });
           // Optional: Add to store as "pending"
-          addMember({ name, email, role, department, phone: phone || undefined, skills });
+          addMember({ name, email, role, department, phone: phone || undefined, consultantType, skills });
           setTimeout(() => {
             if (onSuccess) onSuccess();
             else router.push('/members');
@@ -168,6 +170,20 @@ export function MemberForm({ memberId, onSuccess, onCancel }: {
           className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm dark:text-white"
           placeholder="+49 151 12345678"
         />
+      </div>
+
+      {/* Berater-Typ */}
+      <div>
+        <label className="block text-xs font-semibold dark:text-white/50 text-gray-500 mb-2">Berater-Typ</label>
+        <div className="grid grid-cols-3 gap-2">
+          {(Object.entries(CONSULTANT_TYPE_CONFIG) as [ConsultantType, typeof CONSULTANT_TYPE_CONFIG[ConsultantType]][]).map(([key, cfg]) => (
+            <button key={key} type="button" onClick={() => setConsultantType(key)}
+              className={`p-2.5 rounded-lg border-2 text-left transition-all cursor-pointer bg-transparent ${consultantType === key ? 'border-(--primary) bg-(--primary-light)' : 'border-slate-200 dark:border-white/10'}`}>
+              <span className="text-[10px] font-black uppercase tracking-wide" style={{ color: cfg.color }}>{cfg.short}</span>
+              <div className={`text-[10px] font-semibold mt-0.5 ${consultantType === key ? 'text-(--primary)' : 'dark:text-white/60 text-gray-600'}`}>{cfg.label}</div>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Skills Section */}

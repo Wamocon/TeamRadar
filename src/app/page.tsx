@@ -12,10 +12,12 @@ import { STATUS_CONFIG, type AvailabilityStatus, type ProjectType } from '@/type
 import { Globe, CalendarClock, Plus, Clock, BarChart3, Users, LayoutGrid, List, LayoutDashboard } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { normalizeAvailabilityStatus } from '@/lib/status-normalization';
 
 export default function DashboardPage() {
   const members = useAppStore((s) => s.members);
   const getMemberStatus = useAppStore((s) => s.getMemberStatus);
+  const availabilities = useAppStore((s) => s.availabilities);
   const [showForm, setShowForm] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,6 +27,11 @@ export default function DashboardPage() {
   const [selectedProjectType, setSelectedProjectType] = useState<'all' | ProjectType>('all');
 
   const today = new Date().toISOString().slice(0, 10);
+  const currentYear = today.slice(0, 4);
+  const normalizeDepartment = (department?: string) => {
+    const value = (department ?? '').trim();
+    return value.length > 0 ? value : 'Ohne Abteilung';
+  };
 
   const projects = useAppStore((s) => s.projects);
 
@@ -43,17 +50,20 @@ export default function DashboardPage() {
 
   const availableNow = statusCounts.available || 0;
   const inMeetings = statusCounts.meeting || 0;
-  const onVacation = statusCounts.vacation || 0;
   const remoteCount = statusCounts.remote || 0;
+  const yearlyVacationDays = useMemo(
+    () => availabilities.filter((a) => a.date.startsWith(currentYear) && normalizeAvailabilityStatus(a.status) === 'vacation').length,
+    [availabilities, currentYear]
+  );
 
   const departments = useMemo(() =>
-    [...new Set(members.map((m) => m.department).filter(Boolean))].sort(),
+    [...new Set(members.map((m) => normalizeDepartment(m.department)))].sort(),
     [members]
   );
 
   const departmentData = useMemo(() =>
     departments.map((name) => {
-      const deptMembers = memberStatuses.filter((ms) => ms.member.department === name);
+      const deptMembers = memberStatuses.filter((ms) => normalizeDepartment(ms.member.department) === name);
       const counts: Partial<Record<AvailabilityStatus, number>> = {};
       deptMembers.forEach(({ status }) => { counts[status] = (counts[status] || 0) + 1; });
       return { name, counts, total: deptMembers.length };
@@ -64,11 +74,12 @@ export default function DashboardPage() {
   const filteredMembers = useMemo(() =>
     memberStatuses
       .filter(({ member, status }) => {
+        const memberDepartment = normalizeDepartment(member.department);
         if (searchTerm && !member.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
             !member.email.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            !member.department.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+            !memberDepartment.toLowerCase().includes(searchTerm.toLowerCase())) return false;
         if (selectedStatus !== 'all' && status !== selectedStatus) return false;
-        if (selectedDept && member.department !== selectedDept) return false;
+        if (selectedDept && memberDepartment !== selectedDept) return false;
         if (selectedProject) {
           const proj = projects.find((p) => p.id === selectedProject);
           if (proj && !proj.memberIds.includes(member.id)) return false;
@@ -90,11 +101,11 @@ export default function DashboardPage() {
 
   const groupedMembers = useMemo(() => {
     const groups = [
-      { id: 'stark_ueberlastet',   name: 'Stark überlastet (>120%)',   color: '#ef4444', members: [] as typeof filteredMembers },
-      { id: 'leicht_ueberlastet',  name: 'Leicht überlastet (101-120%)', color: '#f97316', members: [] as typeof filteredMembers },
-      { id: 'perfekte_auslastung', name: 'Perfekte Auslastung (80-100%)',  color: '#22c55e', members: [] as typeof filteredMembers },
-      { id: 'leicht_unterlastet',  name: 'Leicht unterlastet (50-79%)',  color: '#3b82f6', members: [] as typeof filteredMembers },
-      { id: 'stark_unterlastet',   name: 'Stark unterlastet (<50%)',   color: '#6b7280', members: [] as typeof filteredMembers },
+      { id: 'stark_ueberlastet',   name: 'Stark überlastet (>120%)',    colorCls: 'bg-red-500',   members: [] as typeof filteredMembers },
+      { id: 'leicht_ueberlastet',  name: 'Leicht überlastet (101-120%)', colorCls: 'bg-orange-500', members: [] as typeof filteredMembers },
+      { id: 'perfekte_auslastung', name: 'Perfekte Auslastung (80-100%)', colorCls: 'bg-green-500', members: [] as typeof filteredMembers },
+      { id: 'leicht_unterlastet',  name: 'Leicht unterlastet (50-79%)',  colorCls: 'bg-blue-500',  members: [] as typeof filteredMembers },
+      { id: 'stark_unterlastet',   name: 'Stark unterlastet (<50%)',     colorCls: 'bg-gray-500',  members: [] as typeof filteredMembers },
     ];
 
     filteredMembers.forEach((m) => {
@@ -136,7 +147,7 @@ export default function DashboardPage() {
         </div>
         <div className="flex gap-2">
           <button onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-md shadow-blue-500/20">
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-linear-to-r from-blue-500 to-blue-600 text-white text-xs font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-md shadow-blue-500/20">
             <CalendarClock size={14} />
             Status eintragen
           </button>
@@ -166,19 +177,19 @@ export default function DashboardPage() {
       {members.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fade-in-delay-1">
           {[
-            { label: 'Verfügbar', value: availableNow, color: '#22c55e', icon: Users, gradient: 'from-green-500/10 to-green-500/5' },
-            { label: 'Im Meeting', value: inMeetings, color: '#f59e0b', icon: Clock, gradient: 'from-amber-500/10 to-amber-500/5' },
-            { label: 'Remote', value: remoteCount, color: '#3b82f6', icon: Globe, gradient: 'from-blue-500/10 to-blue-500/5' },
-            { label: 'Urlaub / Krank', value: onVacation + (statusCounts.sick || 0), color: '#8b5cf6', icon: CalendarClock, gradient: 'from-violet-500/10 to-violet-500/5' },
+            { label: 'Verfügbar', value: availableNow, iconCls: 'text-green-500', numCls: 'text-green-500', barCls: 'bg-green-500', gradient: 'from-green-500/10 to-green-500/5', icon: Users },
+            { label: 'Im Meeting', value: inMeetings, iconCls: 'text-amber-500', numCls: 'text-amber-500', barCls: 'bg-amber-500', gradient: 'from-amber-500/10 to-amber-500/5', icon: Clock },
+            { label: 'Remote', value: remoteCount, iconCls: 'text-blue-500', numCls: 'text-blue-500', barCls: 'bg-blue-500', gradient: 'from-blue-500/10 to-blue-500/5', icon: Globe },
+            { label: `Urlaubstage (${currentYear})`, value: yearlyVacationDays, iconCls: 'text-violet-500', numCls: 'text-violet-500', barCls: 'bg-violet-500', gradient: 'from-violet-500/10 to-violet-500/5', icon: CalendarClock },
           ].map((stat) => (
-            <div key={stat.label} className={`stat-card card-shimmer rounded-xl p-4 bg-gradient-to-br ${stat.gradient}`}>
+            <div key={stat.label} className={`stat-card card-shimmer rounded-xl p-4 bg-linear-to-br ${stat.gradient}`}>
               <div className="flex items-center justify-between mb-2">
-                <stat.icon size={16} style={{ color: stat.color }} className="opacity-70" />
+                <stat.icon size={16} className={`opacity-70 ${stat.iconCls}`} />
                 <span className="text-[10px] dark:text-white/30 text-gray-400 font-medium">{stat.label}</span>
               </div>
-              <div className="text-3xl font-black" style={{ color: stat.color }}>{stat.value}</div>
+              <div className={`text-3xl font-black ${stat.numCls}`}>{stat.value}</div>
               <div className="mt-1 h-1 rounded-full bg-slate-200 dark:bg-white/10">
-                <div className="progress-bar h-full rounded-full" style={{ width: `${members.length > 0 ? (stat.value / members.length) * 100 : 0}%`, background: stat.color }} />
+                <div className={`progress-bar h-full rounded-full ${stat.barCls}`} style={{ width: `${members.length > 0 ? Math.min((stat.value / members.length) * 100, 100) : 0}%` }} />
               </div>
             </div>
           ))}
@@ -187,10 +198,10 @@ export default function DashboardPage() {
 
       {/* ── Analytics Row ──────────────────────── */}
       {members.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-delay-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 animate-fade-in-delay-2 items-start">
           {/* Status Distribution */}
-          <div className="card-shimmer rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="card-shimmer rounded-xl p-3.5">
+            <div className="flex items-center gap-2 mb-2.5">
               <BarChart3 size={14} className="dark:text-white/40 text-gray-400" />
               <h2 className="text-xs font-bold dark:text-white/60 text-gray-600 uppercase tracking-wider">Statusverteilung</h2>
             </div>
@@ -198,8 +209,8 @@ export default function DashboardPage() {
           </div>
 
           {/* Department bars */}
-          <div className="card-shimmer rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="card-shimmer rounded-xl p-3.5">
+            <div className="flex items-center gap-2 mb-2.5">
               <LayoutGrid size={14} className="dark:text-white/40 text-gray-400" />
               <h2 className="text-xs font-bold dark:text-white/60 text-gray-600 uppercase tracking-wider">Nach Abteilung</h2>
             </div>
@@ -222,11 +233,11 @@ export default function DashboardPage() {
           />
         </div>
         <div className="flex gap-1 p-1 rounded-lg bg-slate-100 dark:bg-white/5">
-          <button onClick={() => setViewMode('grid')}
+          <button title="Kachel-Ansicht" onClick={() => setViewMode('grid')}
             className={`p-1.5 rounded-md transition-colors border-none cursor-pointer ${viewMode === 'grid' ? 'bg-blue-500 text-white shadow-sm' : 'bg-transparent dark:text-white/40 text-gray-400 hover:text-blue-500'}`}>
             <LayoutGrid size={14} />
           </button>
-          <button onClick={() => setViewMode('timeline')}
+          <button title="Listen-Ansicht" onClick={() => setViewMode('timeline')}
             className={`p-1.5 rounded-md transition-colors border-none cursor-pointer ${viewMode === 'timeline' ? 'bg-blue-500 text-white shadow-sm' : 'bg-transparent dark:text-white/40 text-gray-400 hover:text-blue-500'}`}>
             <List size={14} />
           </button>
@@ -266,7 +277,7 @@ export default function DashboardPage() {
                 className="w-full flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors border-none cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full" style={{ background: group.color }} />
+                  <div className={`w-2 h-2 rounded-full ${group.colorCls ?? 'bg-gray-400'}`} />
                   <span className="text-xs font-bold dark:text-white/70 text-gray-700 uppercase tracking-widest">
                     {group.name} ({group.members.length})
                   </span>

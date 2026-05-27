@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -13,11 +13,11 @@ import { useAppStore } from '@/stores/appStore';
 import { updateUserProfileAction } from '@/lib/actions/settingsActions';
 import { useTheme } from '@/components/ui/ThemeProvider';
 
-// ── Helfer-Komponenten außerhalb der Seite definieren,
-// damit React sie bei State-Änderungen NICHT unmountet ──────────────
+// -- Helfer-Komponenten au�erhalb der Seite definieren,
+// damit React sie bei State-�nderungen NICHT unmountet --------------
 const Toggle = ({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) => (
   <button onClick={() => onChange(!value)}
-    className={`w-11 h-6 rounded-full transition-all relative shrink-0 border-none cursor-pointer ${value ? 'bg-[var(--primary)]' : 'bg-gray-200 dark:bg-white/10'}`}>
+    className={`w-11 h-6 rounded-full transition-all relative shrink-0 border-none cursor-pointer ${value ? 'bg-(--primary)' : 'bg-gray-200 dark:bg-white/10'}`}>
     <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${value ? 'right-0.5' : 'left-0.5'}`} />
   </button>
 );
@@ -25,17 +25,17 @@ const Toggle = ({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
 const SectionCard = ({ title, icon: Icon, children, defaultOpen = true }: { title: string; icon: React.ElementType; children: React.ReactNode; defaultOpen?: boolean }) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="card-shimmer rounded-xl border dark:border-white/[0.06] border-black/[0.06] overflow-hidden">
+    <div className="card-shimmer rounded-xl border dark:border-white/6 border-black/6 overflow-hidden">
       <button
         onClick={() => setOpen(v => !v)}
-        className={`w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${open ? 'border-b dark:border-white/[0.06] border-black/[0.06]' : ''}`}
-        aria-expanded={open}
+        className={`w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${open ? 'border-b dark:border-white/6 border-black/6' : ''}`}
+        aria-expanded={open ? 'true' : 'false'}
       >
         <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 pointer-events-none">
-          <Icon size={14} className="text-[var(--primary)]" />
+          <Icon size={14} className="text-(--primary)" />
           {title}
         </h3>
-        <span className="dark:text-white/30 text-gray-400 shrink-0 transition-transform duration-200" style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
+        <span className={`dark:text-white/30 text-gray-400 shrink-0 transition-transform duration-200 ${open ? 'rotate-0' : '-rotate-90'}`}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </span>
       </button>
@@ -45,7 +45,7 @@ const SectionCard = ({ title, icon: Icon, children, defaultOpen = true }: { titl
 };
 
 const ToggleRow = ({ label, desc, value, onChange }: { label: string; desc?: string; value: boolean; onChange: (v: boolean) => void }) => (
-  <div className="flex items-center justify-between py-3 border-b dark:border-white/[0.04] border-black/[0.04] last:border-0">
+  <div className="flex items-center justify-between py-3 border-b dark:border-white/4 border-black/4 last:border-0">
     <div>
       <div className="text-sm font-semibold dark:text-white text-gray-900">{label}</div>
       {desc && <div className="text-[10px] dark:text-white/30 text-gray-400 mt-0.5">{desc}</div>}
@@ -73,6 +73,52 @@ export default function ProfileSettingsPage() {
   const [bio, setBio] = useState('');
   const [linkedIn, setLinkedIn] = useState('');
   const [website, setWebsite] = useState('');
+
+  // Erweiterte Profilfelder
+  const [birthDate, setBirthDate] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [emergencyContact, setEmergencyContact] = useState('');
+  const [languages, setLanguages] = useState('');
+  const [certifications, setCertifications] = useState('');
+  const [education, setEducation] = useState('');
+  const [travelWillingness, setTravelWillingness] = useState<'none' | 'low' | 'medium' | 'high'>('medium');
+  const [hoursPerWeek, setHoursPerWeek] = useState('40');
+  const [homeOfficePercentage, setHomeOfficePercentage] = useState('50');
+  const [consultantType, setConsultantType] = useState<'consultant' | 'senior_consultant' | 'apprentice'>('consultant');
+  const [skills, setSkills] = useState('');
+  const [department, setDepartment] = useState('');
+  const [xing, setXing] = useState('');
+  const [twitter, setTwitter] = useState('');
+  const [github, setGithub] = useState('');
+
+  // HR / Vertragsdaten
+  const [employeeNumber, setEmployeeNumber] = useState('');
+  const [costCenter, setCostCenter] = useState('');
+  const [contractType, setContractType] = useState<'fulltime' | 'parttime' | 'freelance' | 'apprentice'>('fulltime');
+  const [probationEndDate, setProbationEndDate] = useState('');
+  const [vacationDaysPerYear, setVacationDaysPerYear] = useState('30');
+  const [remainingVacation, setRemainingVacation] = useState('');
+  const [exitDate, setExitDate] = useState('');
+
+  // Erweiterte Notfallkontakt-Felder
+  const [emergencyName, setEmergencyName] = useState('');
+  const [emergencyPhone, setEmergencyPhone] = useState('');
+  const [emergencyRelation, setEmergencyRelation] = useState('');
+
+  // Heimatadresse
+  const [street, setStreet] = useState('');
+  const [zip, setZip] = useState('');
+  const [city, setCity] = useState('');
+  const [nationality, setNationality] = useState('');
+  const [maritalStatus, setMaritalStatus] = useState('');
+
+  // Kommunikation & Team
+  const [slackHandle, setSlackHandle] = useState('');
+  const [teamsHandle, setTeamsHandle] = useState('');
+  const [preferredProjectTypes, setPreferredProjectTypes] = useState('');
+  const [shiftWillingness, setShiftWillingness] = useState(false);
+  const [mentorName, setMentorName] = useState('');
+  const [internalPhone, setInternalPhone] = useState('');
 
   // Erscheinungsbild
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
@@ -150,14 +196,14 @@ export default function ProfileSettingsPage() {
   };
 
   const handleChangePassword = () => {
-    if (!currentPassword || !newPassword) return showMsg('error', 'Bitte alle Felder ausfÃ¼llen.');
-    if (newPassword !== confirmPassword) return showMsg('error', 'PasswÃ¶rter stimmen nicht Ã¼berein.');
-    if (newPassword.length < 8) return showMsg('error', 'MindestlÃ¤nge: 8 Zeichen.');
-    showMsg('success', 'Passwort erfolgreich geÃ¤ndert.');
+    if (!currentPassword || !newPassword) return showMsg('error', 'Bitte alle Felder ausfüllen.');
+    if (newPassword !== confirmPassword) return showMsg('error', 'Passwörter stimmen nicht überein.');
+    if (newPassword.length < 8) return showMsg('error', 'Mindestlänge: 8 Zeichen.');
+    showMsg('success', 'Passwort erfolgreich geändert.');
     setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
   };
 
-  const inputCls = 'w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.1] border-black/[0.1] rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-[var(--primary)] transition-all';
+  const inputCls = 'w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all';
 
   const TABS = [
     { id: 'profil' as const, label: 'Profil', icon: User },
@@ -165,7 +211,7 @@ export default function ProfileSettingsPage() {
     { id: 'sicherheit' as const, label: 'Sicherheit', icon: Lock },
     { id: 'benachrichtigungen' as const, label: 'Benachrichtigungen', icon: Bell },
     { id: 'datenschutz' as const, label: 'Datenschutz', icon: Shield },
-    { id: 'aktivitaet' as const, label: 'AktivitÃ¤t', icon: Activity },
+    { id: 'aktivitaet' as const, label: 'Aktivität', icon: Activity },
   ];
 
   return (
@@ -173,11 +219,11 @@ export default function ProfileSettingsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] flex items-center justify-center shrink-0 overflow-hidden">
+          <div className="w-14 h-14 rounded-2xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] flex items-center justify-center shrink-0 overflow-hidden">
             {avatarUrl ? (
               <Image src={avatarUrl} alt="Avatar" width={56} height={56} className="object-cover w-full h-full" />
             ) : (
-              <span className="text-xl font-black text-[var(--primary)]">
+              <span className="text-xl font-black text-(--primary)">
                 {(displayName || userProfile?.email || '?').charAt(0).toUpperCase()}
               </span>
             )}
@@ -185,13 +231,13 @@ export default function ProfileSettingsPage() {
           <div>
             <h1 className="text-2xl font-black dark:text-white text-gray-900">{displayName || 'Mein Profil'}</h1>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[var(--primary-light)] text-[var(--primary)]">{userProfile?.role || 'employee'}</span>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-(--primary-light) text-(--primary)">{userProfile?.role || 'employee'}</span>
               {userProfile?.email && <span className="text-xs dark:text-white/40 text-gray-500">{userProfile.email}</span>}
             </div>
           </div>
         </div>
         <button onClick={handleSave} disabled={isSaving}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold border-none cursor-pointer hover:opacity-90 disabled:opacity-50 transition-opacity shadow-lg">
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-(--primary) text-white text-sm font-bold border-none cursor-pointer hover:opacity-90 disabled:opacity-50 transition-opacity shadow-lg">
           {isSaving ? <Loader size={14} className="animate-spin" /> : <Save size={14} />}
           Speichern
         </button>
@@ -209,40 +255,40 @@ export default function ProfileSettingsPage() {
         <nav className="shrink-0 w-44 space-y-0.5">
           {TABS.map((tab) => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left text-xs font-semibold transition-all border-none cursor-pointer ${activeTab === tab.id ? 'bg-[var(--primary-light)] text-[var(--primary)] border border-[rgba(99,102,241,0.2)]' : 'dark:text-white/50 text-gray-600 hover:bg-black/[0.03] dark:hover:bg-white/[0.03] bg-transparent'}`}>
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left text-xs font-semibold transition-all border-none cursor-pointer ${activeTab === tab.id ? 'bg-(--primary-light) text-(--primary) border border-[rgba(99,102,241,0.2)]' : 'dark:text-white/50 text-gray-600 hover:bg-black/3 dark:hover:bg-white/3 bg-transparent'}`}>
               <tab.icon size={14} />
               {tab.label}
-              {activeTab === tab.id && <div className="w-1.5 h-1.5 rounded-full bg-[var(--primary)] ml-auto shrink-0" />}
+              {activeTab === tab.id && <div className="w-1.5 h-1.5 rounded-full bg-(--primary) ml-auto shrink-0" />}
             </button>
           ))}
           {/* Konto-Badge */}
-          <div className="mt-4 p-3 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[#8b5cf6] text-white space-y-1">
+          <div className="mt-4 p-3 rounded-xl bg-linear-to-br from-(--primary) to-[#8b5cf6] text-white space-y-1">
             <div className="text-[8px] font-black uppercase tracking-widest opacity-60">Konto-ID</div>
-            <div className="text-[9px] font-mono opacity-70 break-all">{userProfile?.id?.slice(0, 16) || 'â€”'}â€¦</div>
-            <div className="text-[8px] font-semibold opacity-60">Seit {userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString('de') : 'â€”'}</div>
+            <div className="text-[9px] font-mono opacity-70 break-all">{userProfile?.id?.slice(0, 16) || '—'}…</div>
+            <div className="text-[8px] font-semibold opacity-60">Seit {userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString('de') : '—'}</div>
           </div>
         </nav>
 
         {/* Content */}
         <div className="flex-1 space-y-5 min-w-0">
 
-          {/* â•â• PROFIL â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+          {/* ══ PROFIL ══════════════════════════════════ */}
           {activeTab === 'profil' && (
             <>
-              <SectionCard title="PersÃ¶nliche Daten" icon={User}>
+              <SectionCard title="Persönliche Daten" icon={User}>
                 <div className="flex flex-col sm:flex-row gap-6 items-start">
                   <div className="relative shrink-0">
-                    <div className="w-24 h-24 rounded-2xl bg-[var(--primary-light)] border-2 dark:border-white/10 border-gray-200 overflow-hidden flex items-center justify-center">
+                    <div className="w-24 h-24 rounded-2xl bg-(--primary-light) border-2 dark:border-white/10 border-gray-200 overflow-hidden flex items-center justify-center">
                       {avatarUrl ? (
                         <Image src={avatarUrl} alt="Avatar" width={96} height={96} className="object-cover w-full h-full" />
                       ) : (
-                        <span className="text-3xl font-black text-[var(--primary)]">{(displayName || '?').charAt(0)}</span>
+                        <span className="text-3xl font-black text-(--primary)">{(displayName || '?').charAt(0)}</span>
                       )}
                     </div>
                     <div className="mt-2 w-24">
                       <input type="text" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)}
                         title="Avatar-URL" placeholder="Bild-URL..."
-                        className="w-full text-[9px] px-2 py-1.5 rounded-lg bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/10 border-gray-200 outline-none focus:border-[var(--primary)] dark:text-white/60 text-gray-500" />
+                        className="w-full text-[9px] px-2 py-1.5 rounded-lg bg-black/2 dark:bg-white/2 border dark:border-white/10 border-gray-200 outline-none focus:border-(--primary) dark:text-white/60 text-gray-500" />
                     </div>
                   </div>
                   <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
@@ -266,9 +312,9 @@ export default function ProfileSettingsPage() {
                     </div>
                     <div className="space-y-1">
                       <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">E-Mail</label>
-                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.06] border-black/[0.06] opacity-60">
+                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-black/2 dark:bg-white/2 border dark:border-white/6 border-black/6 opacity-60">
                         <Mail size={14} className="dark:text-white/40 text-gray-400 shrink-0" />
-                        <span className="text-sm dark:text-white/70 text-gray-700 truncate">{userProfile?.email || 'â€”'}</span>
+                        <span className="text-sm dark:text-white/70 text-gray-700 truncate">{userProfile?.email || '—'}</span>
                       </div>
                     </div>
                   </div>
@@ -282,8 +328,8 @@ export default function ProfileSettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Ãœber mich</label>
-                  <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} title="Ãœber mich"
+                  <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Über mich</label>
+                  <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} title="Über mich"
                     placeholder="Kurze Beschreibung deiner Rolle und Expertise..."
                     className={inputCls + ' resize-none'} />
                 </div>
@@ -315,16 +361,252 @@ export default function ProfileSettingsPage() {
                         title="Website" placeholder="https://..." className={inputCls + ' pl-9'} />
                     </div>
                   </div>
-                  <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.04] border-black/[0.04] space-y-1">
+                  <div className="p-3 rounded-xl bg-black/2 dark:bg-white/2 border dark:border-white/4 border-black/4 space-y-1">
                     <div className="text-[9px] font-black uppercase tracking-wide dark:text-white/30 text-gray-400">Rolle</div>
-                    <div className="text-sm font-black text-[var(--primary)]">{userProfile?.role || 'â€”'}</div>
+                    <div className="text-sm font-black text-(--primary)">{userProfile?.role || '�'}</div>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Berater-Profil" icon={Briefcase}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Berater-Typ</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {([
+                        { id: 'consultant',        label: 'Berater',         desc: 'Ext. + Int. Projekt + Uni' },
+                        { id: 'senior_consultant', label: 'Senior Berater',  desc: 'Ext. + Int. Projekt' },
+                        { id: 'apprentice',        label: 'Auszubildender',  desc: 'Int. Projekt + Berufsschule' },
+                      ] as const).map(opt => (
+                        <button key={opt.id} onClick={() => setConsultantType(opt.id)}
+                          className={`p-3 rounded-xl border-2 transition-all cursor-pointer bg-transparent text-left ${consultantType === opt.id ? 'border-(--primary) bg-(--primary-light)' : 'dark:border-white/10 border-gray-200 hover:border-[rgba(99,102,241,0.3)]'}`}>
+                          <div className={`text-xs font-black ${consultantType === opt.id ? 'text-(--primary)' : 'dark:text-white text-gray-900'}`}>{opt.label}</div>
+                          <div className="text-[9px] dark:text-white/40 text-gray-500 mt-0.5">{opt.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Abteilung</label>
+                    <input type="text" value={department} onChange={e => setDepartment(e.target.value)} title="Abteilung" placeholder="Beratung, IT, HR..." className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Eintrittsdatum</label>
+                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} title="Eintrittsdatum" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Stunden / Woche</label>
+                    <input type="number" min={0} max={60} value={hoursPerWeek} onChange={e => setHoursPerWeek(e.target.value)} title="Stunden pro Woche" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Homeoffice-Anteil (%)</label>
+                    <input type="number" min={0} max={100} value={homeOfficePercentage} onChange={e => setHomeOfficePercentage(e.target.value)} title="Homeoffice-Anteil" className={inputCls} />
+                  </div>
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Reisebereitschaft</label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {([
+                        { id: 'none', label: 'Keine' }, { id: 'low', label: 'Gering' },
+                        { id: 'medium', label: 'Mittel' }, { id: 'high', label: 'Hoch' },
+                      ] as const).map(opt => (
+                        <button key={opt.id} onClick={() => setTravelWillingness(opt.id)}
+                          className={`py-2 rounded-xl border-2 text-[10px] font-black transition-all cursor-pointer bg-transparent ${travelWillingness === opt.id ? 'border-(--primary) bg-(--primary-light) text-(--primary)' : 'dark:border-white/10 border-gray-200 dark:text-white/50 text-gray-500'}`}>
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Qualifikationen & Kompetenzen" icon={Activity} defaultOpen={false}>
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Skills (kommagetrennt)</label>
+                    <textarea value={skills} onChange={e => setSkills(e.target.value)} rows={2} title="Skills" placeholder="Projektmanagement, Java, SAP, Scrum..." className={inputCls + ' resize-none'} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Zertifizierungen (kommagetrennt)</label>
+                    <textarea value={certifications} onChange={e => setCertifications(e.target.value)} rows={2} title="Zertifizierungen" placeholder="PMP, ITIL, AWS Solutions Architect..." className={inputCls + ' resize-none'} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Ausbildung / Studium</label>
+                    <textarea value={education} onChange={e => setEducation(e.target.value)} rows={2} title="Ausbildung" placeholder="B.Sc. Informatik, TU M�nchen, 2019..." className={inputCls + ' resize-none'} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Sprachen (kommagetrennt)</label>
+                    <input type="text" value={languages} onChange={e => setLanguages(e.target.value)} title="Sprachen" placeholder="Deutsch (C2), Englisch (C1), Spanisch (B2)" className={inputCls} />
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Pers�nliche Daten" icon={Shield} defaultOpen={false}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Geburtsdatum</label>
+                    <input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} title="Geburtsdatum" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Notfallkontakt</label>
+                    <input type="text" value={emergencyContact} onChange={e => setEmergencyContact(e.target.value)} title="Notfallkontakt" placeholder="Name, Telefon..." className={inputCls} />
+                  </div>
+                  <div className="sm:col-span-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/30 text-[10px] text-amber-700 dark:text-amber-400">
+                    Diese Felder sind nur f�r die HR-Verwaltung sichtbar und werden vertraulich behandelt.
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Weitere Social-Links" icon={Globe} defaultOpen={false}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">XING</label>
+                    <input type="url" value={xing} onChange={e => setXing(e.target.value)} title="XING" placeholder="https://xing.com/profile/..." className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">GitHub</label>
+                    <input type="url" value={github} onChange={e => setGithub(e.target.value)} title="GitHub" placeholder="https://github.com/..." className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">X / Twitter</label>
+                    <input type="url" value={twitter} onChange={e => setTwitter(e.target.value)} title="Twitter" placeholder="https://x.com/..." className={inputCls} />
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="HR &amp; Vertragsdaten" icon={Building2} defaultOpen={false}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Mitarbeiternummer</label>
+                    <input type="text" value={employeeNumber} onChange={e => setEmployeeNumber(e.target.value)} title="Mitarbeiternummer" placeholder="EMP-001" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Kostenstelle</label>
+                    <input type="text" value={costCenter} onChange={e => setCostCenter(e.target.value)} title="Kostenstelle" placeholder="KST-4200" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Vertragsart</label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {([
+                        { id: 'fulltime', label: 'Vollzeit' }, { id: 'parttime', label: 'Teilzeit' },
+                        { id: 'freelance', label: 'Freelance' }, { id: 'apprentice', label: 'Ausbildung' },
+                      ] as const).map(opt => (
+                        <button key={opt.id} onClick={() => setContractType(opt.id)}
+                          className={`py-1.5 rounded-lg border text-[10px] font-bold transition-all cursor-pointer bg-transparent ${contractType === opt.id ? 'border-(--primary) bg-(--primary-light) text-(--primary)' : 'dark:border-white/10 border-gray-200 dark:text-white/50 text-gray-500'}`}>
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Probezeit bis</label>
+                    <input type="date" value={probationEndDate} onChange={e => setProbationEndDate(e.target.value)} title="Probezeit bis" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Urlaubstage / Jahr</label>
+                    <input type="number" min={0} max={365} value={vacationDaysPerYear} onChange={e => setVacationDaysPerYear(e.target.value)} title="Urlaubstage pro Jahr" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Resturlaub (Tage)</label>
+                    <input type="number" min={0} max={365} value={remainingVacation} onChange={e => setRemainingVacation(e.target.value)} title="Resturlaub" placeholder="0" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Austrittsdatum (optional)</label>
+                    <input type="date" value={exitDate} onChange={e => setExitDate(e.target.value)} title="Austrittsdatum" className={inputCls} />
+                  </div>
+                  <div className="sm:col-span-2 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-700/30 text-[10px] text-blue-700 dark:text-blue-400">
+                    HR-Daten sind nur f&uuml;r Administratoren und die betroffene Person sichtbar.
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Notfallkontakt" icon={Shield} defaultOpen={false}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Name</label>
+                    <input type="text" value={emergencyName} onChange={e => setEmergencyName(e.target.value)} title="Name Notfallkontakt" placeholder="Maria Mustermann" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Beziehung</label>
+                    <input type="text" value={emergencyRelation} onChange={e => setEmergencyRelation(e.target.value)} title="Beziehung" placeholder="Ehefrau, Vater, Freund..." className={inputCls} />
+                  </div>
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Telefon</label>
+                    <div className="relative">
+                      <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
+                      <input type="tel" value={emergencyPhone} onChange={e => setEmergencyPhone(e.target.value)} title="Notfalltelefon" placeholder="+49 123 456789" className={inputCls + ' pl-9'} />
+                    </div>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Heimatadresse" icon={MapPin} defaultOpen={false}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Stra&szlig;e &amp; Hausnummer</label>
+                    <input type="text" value={street} onChange={e => setStreet(e.target.value)} title="Straße" placeholder="Musterstr. 42" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">PLZ</label>
+                    <input type="text" value={zip} onChange={e => setZip(e.target.value)} title="PLZ" placeholder="80331" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Ort</label>
+                    <input type="text" value={city} onChange={e => setCity(e.target.value)} title="Ort" placeholder="M&uuml;nchen" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Staatsangeh&ouml;rigkeit</label>
+                    <input type="text" value={nationality} onChange={e => setNationality(e.target.value)} title="Staatsangehörigkeit" placeholder="Deutsch" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Familienstand</label>
+                    <select value={maritalStatus} onChange={e => setMaritalStatus(e.target.value)} title="Familienstand"
+                      className={inputCls}>
+                      <option value="">Keine Angabe</option>
+                      <option value="single">Ledig</option>
+                      <option value="married">Verheiratet</option>
+                      <option value="divorced">Geschieden</option>
+                      <option value="widowed">Verwitwet</option>
+                      <option value="partnership">Eingetragene Partnerschaft</option>
+                    </select>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Kommunikation &amp; Team" icon={MessageSquare} defaultOpen={false}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Slack-Handle</label>
+                    <input type="text" value={slackHandle} onChange={e => setSlackHandle(e.target.value)} title="Slack" placeholder="@maxmustermann" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">MS Teams-Handle</label>
+                    <input type="text" value={teamsHandle} onChange={e => setTeamsHandle(e.target.value)} title="Teams" placeholder="max.mustermann@firma.de" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Internes Telefon / Durchwahl</label>
+                    <input type="text" value={internalPhone} onChange={e => setInternalPhone(e.target.value)} title="Durchwahl" placeholder="-42" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Mentor / Buddy</label>
+                    <input type="text" value={mentorName} onChange={e => setMentorName(e.target.value)} title="Mentor" placeholder="Name des Mentors" className={inputCls} />
+                  </div>
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Bevorzugte Projekttypen</label>
+                    <input type="text" value={preferredProjectTypes} onChange={e => setPreferredProjectTypes(e.target.value)} title="Bevorzugte Projekttypen" placeholder="IT-Beratung, Strategie, Change-Management..." className={inputCls} />
+                  </div>
+                  <div className="sm:col-span-2 flex items-center justify-between py-3 border-t dark:border-white/4 border-black/4">
+                    <div>
+                      <div className="text-sm font-semibold dark:text-white text-gray-900">Schichtbereitschaft</div>
+                      <div className="text-[10px] dark:text-white/30 text-gray-400 mt-0.5">Bereit f&uuml;r fr&uuml;he/sp&auml;te Schichten bei Kundenprojekten</div>
+                    </div>
+                    <Toggle value={shiftWillingness} onChange={setShiftWillingness} />
                   </div>
                 </div>
               </SectionCard>
             </>
           )}
 
-          {/* â•â• ERSCHEINUNGSBILD â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+          {/* ══ ERSCHEINUNGSBILD ════════════════════════ */}
           {activeTab === 'erscheinungsbild' && (
             <>
               <SectionCard title="Farbschema" icon={Monitor}>
@@ -332,27 +614,27 @@ export default function ProfileSettingsPage() {
                   {[
                     { id: 'light' as const, label: 'Hell', icon: Sun, preview: 'bg-white border-gray-200' },
                     { id: 'dark' as const, label: 'Dunkel', icon: Moon, preview: 'bg-gray-900 border-gray-700' },
-                    { id: 'system' as const, label: 'System', icon: Laptop, preview: 'bg-gradient-to-br from-white to-gray-900 border-gray-400' },
+                    { id: 'system' as const, label: 'System', icon: Laptop, preview: 'bg-linear-to-br from-white to-gray-900 border-gray-400' },
                   ].map((opt) => (
                     <button key={opt.id} onClick={() => { setTheme(opt.id); setGlobalTheme(opt.id); }}
-                      className={`p-4 rounded-xl border-2 transition-all cursor-pointer bg-transparent flex flex-col items-center gap-2 ${theme === opt.id ? 'border-[var(--primary)] bg-[var(--primary-light)]' : 'dark:border-white/10 border-gray-200 hover:border-[rgba(99,102,241,0.3)]'}`}>
+                      className={`p-4 rounded-xl border-2 transition-all cursor-pointer bg-transparent flex flex-col items-center gap-2 ${theme === opt.id ? 'border-(--primary) bg-(--primary-light)' : 'dark:border-white/10 border-gray-200 hover:border-[rgba(99,102,241,0.3)]'}`}>
                       <div className={`w-full h-10 rounded-lg border ${opt.preview}`} />
-                      <opt.icon size={14} className={theme === opt.id ? 'text-[var(--primary)]' : 'dark:text-white/50 text-gray-500'} />
-                      <span className={`text-[10px] font-black uppercase tracking-wide ${theme === opt.id ? 'text-[var(--primary)]' : 'dark:text-white/50 text-gray-500'}`}>{opt.label}</span>
+                      <opt.icon size={14} className={theme === opt.id ? 'text-(--primary)' : 'dark:text-white/50 text-gray-500'} />
+                      <span className={`text-[10px] font-black uppercase tracking-wide ${theme === opt.id ? 'text-(--primary)' : 'dark:text-white/50 text-gray-500'}`}>{opt.label}</span>
                     </button>
                   ))}
                 </div>
               </SectionCard>
 
               <SectionCard title="Darstellungsoptionen" icon={Settings2}>
-                <ToggleRow label="Kompakt-Modus" desc="Engere AbstÃ¤nde, mehr Inhalte auf einer Seite" value={compactMode} onChange={setCompactMode} />
-                <ToggleRow label="Avatare anzeigen" desc="Profilbilder in Listen und Ãœbersichten" value={showAvatars} onChange={setShowAvatars} />
-                <ToggleRow label="Animationen" desc="ÃœbergÃ¤nge und Effekte beim Navigieren" value={animationsEnabled} onChange={setAnimationsEnabled} />
+                <ToggleRow label="Kompakt-Modus" desc="Engere Abstände, mehr Inhalte auf einer Seite" value={compactMode} onChange={setCompactMode} />
+                <ToggleRow label="Avatare anzeigen" desc="Profilbilder in Listen und Übersichten" value={showAvatars} onChange={setShowAvatars} />
+                <ToggleRow label="Animationen" desc="Übergänge und Effekte beim Navigieren" value={animationsEnabled} onChange={setAnimationsEnabled} />
                 <div className="pt-2 space-y-1">
                   <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Startseite nach Login</label>
                   <select value={startPage} onChange={(e) => setStartPage(e.target.value)} title="Startseite" className={inputCls}>
                     <option value="/dashboard">Dashboard</option>
-                    <option value="/year">JahresÃ¼bersicht</option>
+                    <option value="/year">Jahresübersicht</option>
                     <option value="/members">WamoBook</option>
                     <option value="/projects">Projekte</option>
                   </select>
@@ -382,41 +664,41 @@ export default function ProfileSettingsPage() {
                     </label>
                     <select value={bundesland} onChange={(e) => handleBundeslandChange(e.target.value)} title="Standard-Bundesland" className={inputCls}>
                       <option value="ALL">Deutschlandweit</option>
-                      <option value="BW">BW – Baden-Württemberg</option>
-                      <option value="BY">BY – Bayern</option>
-                      <option value="BE">BE – Berlin</option>
-                      <option value="BB">BB – Brandenburg</option>
-                      <option value="HB">HB – Bremen</option>
-                      <option value="HH">HH – Hamburg</option>
-                      <option value="HE">HE – Hessen</option>
-                      <option value="MV">MV – Mecklenburg-Vorpommern</option>
-                      <option value="NI">NI – Niedersachsen</option>
-                      <option value="NW">NW – Nordrhein-Westfalen</option>
-                      <option value="RP">RP – Rheinland-Pfalz</option>
-                      <option value="SL">SL – Saarland</option>
-                      <option value="SN">SN – Sachsen</option>
-                      <option value="ST">ST – Sachsen-Anhalt</option>
-                      <option value="SH">SH – Schleswig-Holstein</option>
-                      <option value="TH">TH – Thüringen</option>
+                      <option value="BW">BW � Baden-W�rttemberg</option>
+                      <option value="BY">BY � Bayern</option>
+                      <option value="BE">BE � Berlin</option>
+                      <option value="BB">BB � Brandenburg</option>
+                      <option value="HB">HB � Bremen</option>
+                      <option value="HH">HH � Hamburg</option>
+                      <option value="HE">HE � Hessen</option>
+                      <option value="MV">MV � Mecklenburg-Vorpommern</option>
+                      <option value="NI">NI � Niedersachsen</option>
+                      <option value="NW">NW � Nordrhein-Westfalen</option>
+                      <option value="RP">RP � Rheinland-Pfalz</option>
+                      <option value="SL">SL � Saarland</option>
+                      <option value="SN">SN � Sachsen</option>
+                      <option value="ST">ST � Sachsen-Anhalt</option>
+                      <option value="SH">SH � Schleswig-Holstein</option>
+                      <option value="TH">TH � Th�ringen</option>
                     </select>
-                    <p className="text-[9px] dark:text-white/30 text-gray-400">Wird als Standard in der Jahresübersicht und Auslastung verwendet.</p>
+                    <p className="text-[9px] dark:text-white/30 text-gray-400">Wird als Standard in der Jahres�bersicht und Auslastung verwendet.</p>
                   </div>
                 </div>
               </SectionCard>
             </>
           )}
 
-          {/* â•â• SICHERHEIT â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+          {/* ══ SICHERHEIT ══════════════════════════════ */}
           {activeTab === 'sicherheit' && (
             <>
-              <SectionCard title="Passwort Ã¤ndern" icon={Key}>
+              <SectionCard title="Passwort ändern" icon={Key}>
                 <div className="space-y-3 max-w-md">
                   <div className="space-y-1">
                     <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Aktuelles Passwort</label>
                     <div className="relative">
                       <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
                       <input type={showCurrentPw ? 'text' : 'password'} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)}
-                        title="Aktuelles Passwort" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" className={inputCls + ' pl-9 pr-10'} />
+                        title="Aktuelles Passwort" placeholder="••••••••" className={inputCls + ' pl-9 pr-10'} />
                       <button onClick={() => setShowCurrentPw(!showCurrentPw)} className="absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent cursor-pointer dark:text-white/30 text-gray-400">
                         {showCurrentPw ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
@@ -427,7 +709,7 @@ export default function ProfileSettingsPage() {
                     <div className="relative">
                       <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
                       <input type={showNewPw ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
-                        title="Neues Passwort" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" className={inputCls + ' pl-9 pr-10'} />
+                        title="Neues Passwort" placeholder="••••••••" className={inputCls + ' pl-9 pr-10'} />
                       <button onClick={() => setShowNewPw(!showNewPw)} className="absolute right-3 top-1/2 -translate-y-1/2 border-none bg-transparent cursor-pointer dark:text-white/30 text-gray-400">
                         {showNewPw ? <EyeOff size={14} /> : <Eye size={14} />}
                       </button>
@@ -435,22 +717,22 @@ export default function ProfileSettingsPage() {
                     {newPassword && (
                       <div className="flex items-center gap-1 mt-1">
                         {[8, 12, 16].map((len) => (
-                          <div key={len} className={`flex-1 h-1 rounded-full transition-all ${newPassword.length >= len ? 'bg-[var(--primary)]' : 'bg-gray-200 dark:bg-white/10'}`} />
+                          <div key={len} className={`flex-1 h-1 rounded-full transition-all ${newPassword.length >= len ? 'bg-(--primary)' : 'bg-gray-200 dark:bg-white/10'}`} />
                         ))}
                         <span className="text-[9px] dark:text-white/30 text-gray-400 ml-1 shrink-0">{newPassword.length < 8 ? 'Schwach' : newPassword.length < 12 ? 'Mittel' : 'Stark'}</span>
                       </div>
                     )}
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">BestÃ¤tigen</label>
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Bestätigen</label>
                     <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                      title="Passwort bestÃ¤tigen" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" className={inputCls + (confirmPassword && newPassword !== confirmPassword ? ' border-red-400' : '')} />
+                      title="Passwort bestätigen" placeholder="••••••••" className={inputCls + (confirmPassword && newPassword !== confirmPassword ? ' border-red-400' : '')} />
                     {confirmPassword && newPassword !== confirmPassword && (
-                      <p className="text-[10px] text-red-400 font-semibold mt-0.5">PasswÃ¶rter stimmen nicht Ã¼berein</p>
+                      <p className="text-[10px] text-red-400 font-semibold mt-0.5">Passwörter stimmen nicht überein</p>
                     )}
                   </div>
                   <button onClick={handleChangePassword}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-sm font-bold border-none cursor-pointer hover:opacity-90 transition-opacity">
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-(--primary) text-white text-sm font-bold border-none cursor-pointer hover:opacity-90 transition-opacity">
                     <Key size={14} /> Passwort aktualisieren
                   </button>
                 </div>
@@ -460,13 +742,13 @@ export default function ProfileSettingsPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-sm dark:text-white/70 text-gray-700 font-medium">Sichere dein Konto mit einem zweiten Faktor ab.</p>
-                    <p className="text-[10px] dark:text-white/30 text-gray-400 mt-1">UnterstÃ¼tzt: Google Authenticator, Authy, 1Password</p>
+                    <p className="text-[10px] dark:text-white/30 text-gray-400 mt-1">Unterstützt: Google Authenticator, Authy, 1Password</p>
                   </div>
                   <Toggle value={mfaEnabled} onChange={setMfaEnabled} />
                 </div>
                 {mfaEnabled && (
-                  <div className="p-4 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] text-sm dark:text-white/70 text-gray-700 flex items-start gap-2">
-                    <Info size={14} className="text-[var(--primary)] shrink-0 mt-0.5" />
+                  <div className="p-4 rounded-xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] text-sm dark:text-white/70 text-gray-700 flex items-start gap-2">
+                    <Info size={14} className="text-(--primary) shrink-0 mt-0.5" />
                     Scanne den QR-Code in deiner Authenticator-App. (Feature in Vorbereitung)
                   </div>
                 )}
@@ -475,17 +757,17 @@ export default function ProfileSettingsPage() {
               <SectionCard title="Aktive Sitzungen" icon={Chrome}>
                 <div className="space-y-2">
                   {[
-                    { device: 'Chrome Â· Windows 11', location: 'Berlin, DE', time: 'Gerade jetzt', current: true },
-                    { device: 'Safari Â· macOS', location: 'Hamburg, DE', time: 'Vor 2 Tagen', current: false },
+                    { device: 'Chrome · Windows 11', location: 'Berlin, DE', time: 'Gerade jetzt', current: true },
+                    { device: 'Safari · macOS', location: 'Hamburg, DE', time: 'Vor 2 Tagen', current: false },
                   ].map((s, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-xl border dark:border-white/[0.06] border-black/[0.06]">
+                    <div key={i} className="flex items-center justify-between p-3 rounded-xl border dark:border-white/6 border-black/6">
                       <div className="flex items-center gap-3">
-                        <Chrome size={16} className={s.current ? 'text-[var(--primary)]' : 'dark:text-white/30 text-gray-400'} />
+                        <Chrome size={16} className={s.current ? 'text-(--primary)' : 'dark:text-white/30 text-gray-400'} />
                         <div>
                           <div className="text-xs font-bold dark:text-white text-gray-900 flex items-center gap-1.5">
                             {s.device} {s.current && <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-500">AKTIV</span>}
                           </div>
-                          <div className="text-[10px] dark:text-white/30 text-gray-400">{s.location} Â· {s.time}</div>
+                          <div className="text-[10px] dark:text-white/30 text-gray-400">{s.location} · {s.time}</div>
                         </div>
                       </div>
                       {!s.current && (
@@ -498,19 +780,19 @@ export default function ProfileSettingsPage() {
             </>
           )}
 
-          {/* â•â• BENACHRICHTIGUNGEN â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+          {/* ══ BENACHRICHTIGUNGEN ══════════════════════ */}
           {activeTab === 'benachrichtigungen' && (
             <>
-              <SectionCard title="KanÃ¤le" icon={Bell}>
+              <SectionCard title="Kanäle" icon={Bell}>
                 <ToggleRow label="E-Mail-Benachrichtigungen" desc="Wichtige Updates per E-Mail erhalten" value={notifEmail} onChange={setNotifEmail} />
                 <ToggleRow label="Browser-Benachrichtigungen" desc="Push-Notifications im Browser" value={notifBrowser} onChange={setNotifBrowser} />
               </SectionCard>
               <SectionCard title="Ereignisse" icon={BellRing}>
-                <ToggleRow label="VerfÃ¼gbarkeitsÃ¤nderungen" desc="Wenn jemand deinen Status Ã¤ndert" value={notifAvailChange} onChange={setNotifAvailChange} />
+                <ToggleRow label="Verfügbarkeitsänderungen" desc="Wenn jemand deinen Status ändert" value={notifAvailChange} onChange={setNotifAvailChange} />
                 <ToggleRow label="Projekt-Zuweisungen" desc="Wenn du einem Projekt zugewiesen wirst" value={notifProjectAssign} onChange={setNotifProjectAssign} />
-                <ToggleRow label="ErwÃ¤hnungen" desc="Wenn du in Kommentaren erwÃ¤hnt wirst" value={notifMentions} onChange={setNotifMentions} />
+                <ToggleRow label="Erwähnungen" desc="Wenn du in Kommentaren erwähnt wirst" value={notifMentions} onChange={setNotifMentions} />
                 <ToggleRow label="Admin-Nachrichten" desc="Wichtige Mitteilungen des Admins" value={notifAdminMsg} onChange={setNotifAdminMsg} />
-                <ToggleRow label="WÃ¶chentliche Reports" desc="Jeden Montag eine Zusammenfassung" value={notifWeeklyReport} onChange={setNotifWeeklyReport} />
+                <ToggleRow label="Wöchentliche Reports" desc="Jeden Montag eine Zusammenfassung" value={notifWeeklyReport} onChange={setNotifWeeklyReport} />
               </SectionCard>
               <SectionCard title="Ruhemodus" icon={BellOff}>
                 <ToggleRow label="Ruhemodus aktivieren" desc="In diesem Zeitraum keine Benachrichtigungen" value={quietHoursEnabled} onChange={setQuietHoursEnabled} />
@@ -530,57 +812,57 @@ export default function ProfileSettingsPage() {
             </>
           )}
 
-          {/* â•â• DATENSCHUTZ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+          {/* ══ DATENSCHUTZ ═════════════════════════════ */}
           {activeTab === 'datenschutz' && (
             <>
               <SectionCard title="Sichtbarkeit" icon={Shield}>
-                <ToggleRow label="Profil Ã¶ffentlich (im Team)" desc="Andere Teammitglieder kÃ¶nnen dein Profil sehen" value={true} onChange={() => {}} />
-                <ToggleRow label="Status-Nachricht anzeigen" desc="Deine Status-Nachricht ist fÃ¼r alle sichtbar" value={true} onChange={() => {}} />
+                <ToggleRow label="Profil öffentlich (im Team)" desc="Andere Teammitglieder können dein Profil sehen" value={true} onChange={() => {}} />
+                <ToggleRow label="Status-Nachricht anzeigen" desc="Deine Status-Nachricht ist für alle sichtbar" value={true} onChange={() => {}} />
                 <ToggleRow label="Online-Indikator" desc="Zeige an, wenn du aktiv bist" value={true} onChange={() => {}} />
-                <ToggleRow label="VerfÃ¼gbarkeit automatisch teilen" desc="Projektstatus automatisch synchronisieren" value={false} onChange={() => {}} />
+                <ToggleRow label="Verfügbarkeit automatisch teilen" desc="Projektstatus automatisch synchronisieren" value={false} onChange={() => {}} />
               </SectionCard>
               <SectionCard title="Daten exportieren (DSGVO)" icon={Download}>
                 <p className="text-sm dark:text-white/60 text-gray-600">Lade eine Kopie aller deiner Daten herunter.</p>
                 <div className="flex flex-wrap gap-2">
-                  {['Profildaten (JSON)', 'VerfÃ¼gbarkeiten (CSV)', 'AktivitÃ¤tslog (PDF)'].map((label) => (
+                  {['Profildaten (JSON)', 'Verfügbarkeiten (CSV)', 'Aktivitätslog (PDF)'].map((label) => (
                     <button key={label}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border dark:border-white/10 border-gray-200 hover:bg-[var(--primary-light)] hover:text-[var(--primary)] dark:text-white/70 text-gray-700 transition-all bg-transparent cursor-pointer">
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border dark:border-white/10 border-gray-200 hover:bg-(--primary-light) hover:text-(--primary) dark:text-white/70 text-gray-700 transition-all bg-transparent cursor-pointer">
                       <Download size={14} /> {label}
                     </button>
                   ))}
                 </div>
               </SectionCard>
-              <SectionCard title="Konto lÃ¶schen" icon={Trash2}>
+              <SectionCard title="Konto löschen" icon={Trash2}>
                 <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/20 space-y-3">
                   <p className="text-sm text-red-400 font-semibold">
-                    Dein Konto und alle zugehÃ¶rigen Daten werden <strong>unwiderruflich gelÃ¶scht</strong>.
+                    Dein Konto und alle zugehörigen Daten werden <strong>unwiderruflich gelöscht</strong>.
                   </p>
                   <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-red-500/10 text-red-500 hover:bg-red-500/20 border-none cursor-pointer transition-colors">
-                    <Trash2 size={14} /> Konto lÃ¶schen
+                    <Trash2 size={14} /> Konto löschen
                   </button>
                 </div>
               </SectionCard>
             </>
           )}
 
-          {/* â•â• AKTIVITÃ„T â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+          {/* ══ AKTIVITÄT ═══════════════════════════════ */}
           {activeTab === 'aktivitaet' && (
             <>
-              <SectionCard title="Letzte AktivitÃ¤ten" icon={Activity}>
+              <SectionCard title="Letzte Aktivitäten" icon={Activity}>
                 <div className="space-y-0">
                   {[
-                    { action: 'VerfÃ¼gbarkeit gesetzt', detail: 'BeP fÃ¼r 15.â€“20. April', time: 'Vor 2 Std.', color: '#f97316' },
-                    { action: 'Projekt beigetreten', detail: 'TeamRadar v2 Weiterentwicklung', time: 'Gestern', color: '#6366f1' },
-                    { action: 'Profil aktualisiert', detail: 'Anzeigename geÃ¤ndert', time: 'Vor 3 Tagen', color: '#06b6d4' },
-                    { action: 'Anmeldung', detail: 'Chrome Â· Windows 11', time: 'Vor 5 Tagen', color: '#22c55e' },
-                    { action: 'Passwort geÃ¤ndert', detail: 'â€”', time: 'Vor 2 Wochen', color: '#8b5cf6' },
-                    { action: 'Konto erstellt', detail: 'Einladung akzeptiert', time: userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString('de') : 'â€”', color: '#ec4899' },
+                    { action: 'Verfügbarkeit gesetzt', detail: 'BeP für 15.–20. April', time: 'Vor 2 Std.', dotCls: 'bg-orange-500' },
+                    { action: 'Projekt beigetreten', detail: 'TeamRadar v2 Weiterentwicklung', time: 'Gestern', dotCls: 'bg-indigo-500' },
+                    { action: 'Profil aktualisiert', detail: 'Anzeigename geändert', time: 'Vor 3 Tagen', dotCls: 'bg-cyan-500' },
+                    { action: 'Anmeldung', detail: 'Chrome · Windows 11', time: 'Vor 5 Tagen', dotCls: 'bg-green-500' },
+                    { action: 'Passwort geändert', detail: '—', time: 'Vor 2 Wochen', dotCls: 'bg-violet-500' },
+                    { action: 'Konto erstellt', detail: 'Einladung akzeptiert', time: userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString('de') : '—', dotCls: 'bg-pink-500' },
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 py-3 border-b dark:border-white/[0.04] border-black/[0.04] last:border-0">
-                      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: item.color }} />
+                    <div key={i} className="flex items-center gap-3 py-3 border-b dark:border-white/4 border-black/4 last:border-0">
+                      <div className={`w-2 h-2 rounded-full shrink-0 ${item.dotCls}`} />
                       <div className="flex-1">
                         <div className="text-xs font-bold dark:text-white text-gray-900">{item.action}</div>
-                        {item.detail !== 'â€”' && <div className="text-[10px] dark:text-white/30 text-gray-400">{item.detail}</div>}
+                        {item.detail !== '—' && <div className="text-[10px] dark:text-white/30 text-gray-400">{item.detail}</div>}
                       </div>
                       <div className="text-[10px] dark:text-white/30 text-gray-400 shrink-0">{item.time}</div>
                     </div>
@@ -590,13 +872,13 @@ export default function ProfileSettingsPage() {
               <SectionCard title="Nutzungsstatistik" icon={Hash}>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[
-                    { label: 'Tage eingetragen', value: '127', color: '#6366f1' },
-                    { label: 'Projekte', value: '8', color: '#f97316' },
-                    { label: 'Logins (Monat)', value: '43', color: '#22c55e' },
-                    { label: 'Berichte', value: '5', color: '#8b5cf6' },
+                    { label: 'Tage eingetragen', value: '127', textCls: 'text-indigo-500' },
+                    { label: 'Projekte', value: '8', textCls: 'text-orange-500' },
+                    { label: 'Logins (Monat)', value: '43', textCls: 'text-green-500' },
+                    { label: 'Berichte', value: '5', textCls: 'text-violet-500' },
                   ].map((s) => (
-                    <div key={s.label} className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.04] border-black/[0.04] text-center">
-                      <div className="text-2xl font-black" style={{ color: s.color }}>{s.value}</div>
+                    <div key={s.label} className="p-3 rounded-xl bg-black/2 dark:bg-white/2 border dark:border-white/4 border-black/4 text-center">
+                      <div className={`text-2xl font-black ${s.textCls}`}>{s.value}</div>
                       <div className="text-[9px] dark:text-white/30 text-gray-400 font-semibold mt-0.5">{s.label}</div>
                     </div>
                   ))}

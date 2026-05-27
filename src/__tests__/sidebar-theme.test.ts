@@ -7,16 +7,16 @@ describe('Sidebar Theme-Awareness Check', () => {
   const sidebarContent = fs.readFileSync(sidebarPath, 'utf-8');
 
   it('should use CSS variables for theme-aware backgrounds', () => {
-    expect(sidebarContent).toContain('var(--sidebar-bg)');
+    expect(sidebarContent).toContain('bg-(--sidebar-bg)');
   });
 
   it('should use CSS variables for theme-aware text colors', () => {
-    expect(sidebarContent).toContain('var(--sidebar-text)');
-    expect(sidebarContent).toContain('var(--sidebar-text-muted)');
+    expect(sidebarContent).toContain('text-(--sidebar-text)');
+    expect(sidebarContent).toContain('text-(--sidebar-text-muted)');
   });
 
   it('should use CSS variables for theme-aware borders', () => {
-    expect(sidebarContent).toContain('var(--sidebar-border)');
+    expect(sidebarContent).toContain('border-(--sidebar-border)');
   });
 
   it('should use theme-adaptive active item classes', () => {
@@ -25,7 +25,7 @@ describe('Sidebar Theme-Awareness Check', () => {
   });
 
   it('should use theme-adaptive hover item classes', () => {
-    expect(sidebarContent).toContain('hover:bg-[var(--sidebar-item-hover)]');
+    expect(sidebarContent).toContain('hover:bg-(--sidebar-item-hover)');
   });
 
   it('should have alt prop for user avatar for accessibility (lint-fix check)', () => {

@@ -65,7 +65,7 @@ export default function ProjectDetailPage() {
       </Link>
 
       {/* Header */}
-      <div className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] p-6">
+      <div className="card-shimmer rounded-xl border border-black/6 dark:border-white/6 p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -110,8 +110,8 @@ export default function ProjectDetailPage() {
                 {endDate.toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' })}
               </span>
             </div>
-            <div className="h-2.5 rounded-full bg-black/[0.06] dark:bg-white/[0.06]">
-              <div className="h-full rounded-full transition-all bg-gradient-to-r from-blue-500 to-blue-400"
+            <div className="h-2.5 rounded-full bg-black/6 dark:bg-white/6">
+              <div className="h-full rounded-full transition-all bg-linear-to-r from-blue-500 to-blue-400"
                 style={{ width: `${Math.min(progressPercent, 100)}%` }} />
             </div>
             <div className="flex items-center justify-between mt-1">
@@ -155,7 +155,7 @@ export default function ProjectDetailPage() {
             const initials = member.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 
             return (
-              <div key={member.id} className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] p-4">
+              <div key={member.id} className="card-shimmer rounded-xl border border-black/6 dark:border-white/6 p-4">
                 <div className="flex items-center gap-3">
                   <div className="relative shrink-0">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold"
@@ -216,7 +216,7 @@ export default function ProjectDetailPage() {
           <h2 className="text-sm font-bold dark:text-white text-gray-900 mb-3 flex items-center gap-2">
             <BarChart3 size={14} /> Zuweisungs-Timeline
           </h2>
-          <div className="card-shimmer rounded-xl border border-black/[0.06] dark:border-white/[0.06] p-4 overflow-x-auto">
+          <div className="card-shimmer rounded-xl border border-black/6 dark:border-white/6 p-4 overflow-x-auto">
             <div className="min-w-[500px] space-y-2">
               {allocations.map((alloc) => {
                 const member = members.find((m) => m.id === alloc.memberId);
@@ -232,7 +232,7 @@ export default function ProjectDetailPage() {
                     <div className="w-28 text-[10px] dark:text-white/50 text-gray-600 truncate font-medium shrink-0">
                       {member.name}
                     </div>
-                    <div className="flex-1 h-6 rounded bg-black/[0.04] dark:bg-white/[0.04] relative">
+                    <div className="flex-1 h-6 rounded bg-black/4 dark:bg-white/4 relative">
                       <div className="absolute h-full rounded flex items-center justify-center text-[9px] font-bold text-white"
                         style={{ left: `${leftPercent}%`, width: `${widthPercent}%`, background: barColor, minWidth: 20 }}>
                         {alloc.percentage}%

@@ -1,8 +1,8 @@
-﻿'use client';
+'use client';
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import { useAppStore } from '@/stores/appStore';
-import { STATUS_CONFIG, type UserRole } from '@/types';
+import { STATUS_CONFIG, CONSULTANT_TYPE_CONFIG, type UserRole } from '@/types';
 import {
   Users,
   BookOpen,
@@ -122,12 +122,12 @@ function WamoBookContent() {
 
   return (
     <div className="p-4 sm:p-6 w-full space-y-6 animate-fade-in">
-      {/* ── Header ─────────────────────────────────────── */}
+      {/* -- Header --------------------------------------- */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--primary-light)] border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
-              <BookOpen size={20} className="text-[var(--primary)]" />
+            <div className="w-10 h-10 rounded-xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] flex items-center justify-center">
+              <BookOpen size={20} className="text-(--primary)" />
             </div>
             WamoBook
           </h1>
@@ -135,17 +135,17 @@ function WamoBookContent() {
         </div>
         {canManage && (
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowImport(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl border dark:border-white/[0.08] border-gray-200 text-xs font-semibold dark:text-white/60 text-gray-600 hover:border-[var(--primary)]/30 hover:text-[var(--primary)] transition-all bg-transparent cursor-pointer">
+            <button onClick={() => setShowImport(true)} className="flex items-center gap-2 px-3 py-2 rounded-xl border dark:border-white/8 border-gray-200 text-xs font-semibold dark:text-white/60 text-gray-600 hover:border-(--primary)/30 hover:text-(--primary) transition-all bg-transparent cursor-pointer">
               <TrendingUp size={14} /> Import
             </button>
-            <button onClick={() => { setEditingMemberId(null); setShowMemberModal(true); }} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none">
+            <button onClick={() => { setEditingMemberId(null); setShowMemberModal(true); }} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-(--primary) text-white text-xs font-bold hover:opacity-90 transition-opacity cursor-pointer border-none">
               <UserPlus size={14} /> Mitarbeiter einladen
             </button>
           </div>
         )}
       </div>
 
-      {/* ── HR KPI Bar ──────────────────────────────────── */}
+      {/* -- HR KPI Bar ------------------------------------ */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: 'Mitarbeiter gesamt', value: hrKPIs.total, color: '#6366f1', icon: Users },
@@ -165,14 +165,14 @@ function WamoBookContent() {
         ))}
       </div>
 
-      {/* ── Suche ───────────────────────────────────────── */}
+      {/* -- Suche ----------------------------------------- */}
       <div className="relative max-w-md">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Nach Name, E-Mail oder Abteilung suchen..."
-          className="w-full bg-black/[0.02] dark:bg-white/[0.02] border dark:border-white/[0.08] border-black/[0.08] rounded-xl py-2.5 pl-9 pr-4 text-sm focus:border-[var(--primary)] outline-none transition-all dark:text-white text-gray-900" />
+          className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/8 border-black/8 rounded-xl py-2.5 pl-9 pr-4 text-sm focus:border-(--primary) outline-none transition-all dark:text-white text-gray-900" />
       </div>
 
-      {/* ── Member Grid ─────────────────────────────────── */}
+      {/* -- Member Grid ----------------------------------- */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
         {filteredMembers.map((member) => {
           const status = getMemberStatus(member.id, today);
@@ -181,13 +181,13 @@ function WamoBookContent() {
 
           return (
             <button key={member.id} onClick={() => setSelectedMemberId(member.id)}
-              className="card-shimmer rounded-xl p-4 flex flex-col items-center gap-2.5 text-center cursor-pointer hover:border-[var(--primary)]/30 hover:ring-1 hover:ring-[var(--primary)]/10 transition-all group border-transparent border bg-transparent w-full">
+              className="card-shimmer rounded-xl p-4 flex flex-col items-center gap-2.5 text-center cursor-pointer hover:border-(--primary)/30 hover:ring-1 hover:ring-(--primary)/10 transition-all group border-transparent border bg-transparent w-full">
               {/* Avatar */}
               <div className="relative w-14 h-14 rounded-2xl overflow-hidden shrink-0">
                 {member.avatarUrl ? (
                   <Image src={member.avatarUrl} alt={member.name} fill className="object-cover" sizes="56px" />
                 ) : (
-                  <div className="w-full h-full bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] font-black text-lg">
+                  <div className="w-full h-full bg-(--primary-light) flex items-center justify-center text-(--primary) font-black text-lg">
                     {member.name.charAt(0)}
                   </div>
                 )}
@@ -196,11 +196,16 @@ function WamoBookContent() {
                   style={{ background: statusConf.color }} title={statusConf.label} />
               </div>
               <div className="w-full min-w-0">
-                <div className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-[var(--primary)] transition-colors">
+                <div className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-(--primary) transition-colors">
                   {member.name}
-                  {isOwn && <span className="ml-1 text-[8px] bg-[var(--primary-light)] text-[var(--primary)] px-1 py-0.5 rounded-full font-bold">Ich</span>}
+                  {isOwn && <span className="ml-1 text-[8px] bg-(--primary-light) text-(--primary) px-1 py-0.5 rounded-full font-bold">Ich</span>}
                 </div>
                 <div className="text-[9px] dark:text-white/40 text-gray-500 truncate mt-0.5">{member.role || member.department || 'Mitarbeiter'}</div>
+                {member.consultantType && (
+                  <span className="inline-block mt-0.5 text-[8px] font-black px-1 py-0.5 rounded-full" style={{ background: CONSULTANT_TYPE_CONFIG[member.consultantType].color + '22', color: CONSULTANT_TYPE_CONFIG[member.consultantType].color }}>
+                    {CONSULTANT_TYPE_CONFIG[member.consultantType].short}
+                  </span>
+                )}
               </div>
             </button>
           );
@@ -213,7 +218,7 @@ function WamoBookContent() {
         )}
       </div>
 
-      {/* ── Member Detail Popup ──────────────────────────── */}
+      {/* -- Member Detail Popup ---------------------------- */}
       {selectedMember && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setSelectedMemberId(null)}>
           <div className="relative w-full max-w-lg mx-4 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border dark:border-white/10 border-gray-200 overflow-hidden animate-scale-up max-h-[90vh] overflow-y-auto"
@@ -224,7 +229,7 @@ function WamoBookContent() {
                 {selectedMember.avatarUrl ? (
                   <Image src={selectedMember.avatarUrl} alt={selectedMember.name} fill className="object-cover" sizes="64px" />
                 ) : (
-                  <div className="w-full h-full bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] font-black text-2xl">
+                  <div className="w-full h-full bg-(--primary-light) flex items-center justify-center text-(--primary) font-black text-2xl">
                     {selectedMember.name.charAt(0)}
                   </div>
                 )}
@@ -234,18 +239,25 @@ function WamoBookContent() {
               <div className="flex-1 min-w-0">
                 <h2 className="text-lg font-black dark:text-white text-gray-900">
                   {selectedMember.name}
-                  {isOwnProfile && <span className="ml-2 text-[9px] bg-[var(--primary-light)] text-[var(--primary)] px-1.5 py-0.5 rounded-full font-bold">Mein Profil</span>}
+                  {isOwnProfile && <span className="ml-2 text-[9px] bg-(--primary-light) text-(--primary) px-1.5 py-0.5 rounded-full font-bold">Mein Profil</span>}
                 </h2>
                 <div className="text-sm dark:text-white/50 text-gray-600 mt-0.5">{selectedMember.role}</div>
-                <div className="flex items-center gap-1 mt-1">
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_CONFIG[getMemberStatus(selectedMember.id, today)].color }} />
-                  <span className="text-[10px] dark:text-white/40 text-gray-500">{STATUS_CONFIG[getMemberStatus(selectedMember.id, today)].label}</span>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {selectedMember.consultantType && (
+                    <span className="text-[9px] font-black px-2 py-0.5 rounded-full" style={{ background: CONSULTANT_TYPE_CONFIG[selectedMember.consultantType].color + '22', color: CONSULTANT_TYPE_CONFIG[selectedMember.consultantType].color }}>
+                      {CONSULTANT_TYPE_CONFIG[selectedMember.consultantType].label}
+                    </span>
+                  )}
+                  <div className="flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: STATUS_CONFIG[getMemberStatus(selectedMember.id, today)].color }} />
+                    <span className="text-[10px] dark:text-white/40 text-gray-500">{STATUS_CONFIG[getMemberStatus(selectedMember.id, today)].label}</span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 {/* Kontakt aufnehmen */}
                 <a href={`mailto:${encodeURIComponent(selectedMember.email)}`}
-                  className="p-2 rounded-lg hover:bg-[var(--primary-light)] text-[var(--primary)] transition-all" title="E-Mail senden">
+                  className="p-2 rounded-lg hover:bg-(--primary-light) text-(--primary) transition-all" title="E-Mail senden">
                   <Mail size={16} />
                 </a>
                 <button onClick={() => setSelectedMemberId(null)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-all border-none bg-transparent cursor-pointer dark:text-white/50 text-gray-500">
@@ -286,7 +298,7 @@ function WamoBookContent() {
               {canEdit && (
                 <div className="pt-3 border-t dark:border-white/10 border-gray-100 flex items-center gap-2">
                   <button onClick={() => { setEditingMemberId(selectedMember.id); setShowMemberModal(true); setSelectedMemberId(null); }}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--primary)] text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 transition-opacity">
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-(--primary) text-white text-xs font-semibold cursor-pointer border-none hover:opacity-90 transition-opacity">
                     <Shield size={12} /> Profil bearbeiten
                   </button>
                   {canManage && selectedMember.email !== userProfile?.email && (
@@ -302,7 +314,7 @@ function WamoBookContent() {
               {isOwnProfile && (
                 <div className="pt-3 border-t dark:border-white/10 border-gray-100 space-y-3">
                   <div className="flex items-center gap-2">
-                    <AlertCircle size={13} className="text-[var(--primary)] shrink-0" />
+                    <AlertCircle size={13} className="text-(--primary) shrink-0" />
                     <span className="text-[10px] font-semibold dark:text-white/50 text-gray-600">
                       DSGVO-Datenschutz: Wähle was in WamoBook öffentlich sichtbar ist.
                     </span>
@@ -311,7 +323,7 @@ function WamoBookContent() {
                     {PRIVACY_FIELDS.map((field) => {
                       const isPublic = privacySettings[field.key] ?? false;
                       return (
-                        <div key={field.key} className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-black/[0.02] dark:bg-white/[0.02]">
+                        <div key={field.key} className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-black/2 dark:bg-white/2">
                           <span className="text-xs dark:text-white/70 text-gray-700">{field.label}</span>
                           <button onClick={() => handlePrivacyToggle(field.key, !isPublic)} disabled={privacyLoading}
                             className={`flex items-center gap-1.5 text-[9px] font-bold px-2.5 py-1 rounded-full border-none cursor-pointer transition-all ${isPublic ? 'bg-green-500/15 text-green-500' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/30'}`}>
@@ -352,7 +364,7 @@ function WamoBookContent() {
 
 export default function WamoBookPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader className="animate-spin text-[var(--primary)]" size={24} /></div>}>
+    <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader className="animate-spin text-(--primary)" size={24} /></div>}>
       <WamoBookContent />
     </Suspense>
   );

@@ -71,7 +71,7 @@ export function ExcelImportDialog({ onClose }: { onClose: () => void }) {
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-400/20 border border-green-500/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-green-500/20 to-emerald-400/20 border border-green-500/20 flex items-center justify-center">
               <FileSpreadsheet size={20} className="text-green-400" />
             </div>
             <div>
@@ -93,7 +93,7 @@ export function ExcelImportDialog({ onClose }: { onClose: () => void }) {
 
         <div className="p-6 space-y-4">
           {/* Schritt 1: Template herunterladen */}
-          <div className="rounded-xl border dark:border-white/[0.06] border-gray-100 p-4 space-y-2">
+          <div className="rounded-xl border dark:border-white/6 border-gray-100 p-4 space-y-2">
             <h3 className="text-sm font-semibold dark:text-white/70 text-gray-700">
               1. Vorlage herunterladen
             </h3>
@@ -111,7 +111,7 @@ export function ExcelImportDialog({ onClose }: { onClose: () => void }) {
 
           {/* Schritt 2: Datei hochladen */}
           {!imported && (
-            <div className="rounded-xl border dark:border-white/[0.06] border-gray-100 p-4 space-y-2">
+            <div className="rounded-xl border dark:border-white/6 border-gray-100 p-4 space-y-2">
               <h3 className="text-sm font-semibold dark:text-white/70 text-gray-700">
                 2. Ausgefüllte Datei hochladen
               </h3>
@@ -148,7 +148,7 @@ export function ExcelImportDialog({ onClose }: { onClose: () => void }) {
 
           {/* Ergebnis-Vorschau */}
           {result && !imported && (
-            <div className="rounded-xl border dark:border-white/[0.06] border-gray-100 p-4 space-y-3">
+            <div className="rounded-xl border dark:border-white/6 border-gray-100 p-4 space-y-3">
               <h3 className="text-sm font-semibold dark:text-white/70 text-gray-700">
                 3. Vorschau & Import
               </h3>
@@ -184,10 +184,10 @@ export function ExcelImportDialog({ onClose }: { onClose: () => void }) {
 
               {/* Vorschau-Tabelle */}
               {result.members.length > 0 && (
-                <div className="overflow-auto max-h-48 rounded-lg border dark:border-white/[0.06] border-gray-100">
+                <div className="overflow-auto max-h-48 rounded-lg border dark:border-white/6 border-gray-100">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="dark:bg-white/[0.03] bg-gray-50">
+                      <tr className="dark:bg-white/3 bg-gray-50">
                         <th className="text-left p-2 font-semibold dark:text-white/50 text-gray-500">Name</th>
                         <th className="text-left p-2 font-semibold dark:text-white/50 text-gray-500">E-Mail</th>
                         <th className="text-left p-2 font-semibold dark:text-white/50 text-gray-500">Position</th>
@@ -196,7 +196,7 @@ export function ExcelImportDialog({ onClose }: { onClose: () => void }) {
                     </thead>
                     <tbody>
                       {result.members.slice(0, 10).map((m, i) => (
-                        <tr key={i} className="border-t dark:border-white/[0.04] border-gray-100">
+                        <tr key={i} className="border-t dark:border-white/4 border-gray-100">
                           <td className="p-2 dark:text-white/70 text-gray-700">{m.name}</td>
                           <td className="p-2 dark:text-white/50 text-gray-500">{m.email}</td>
                           <td className="p-2 dark:text-white/50 text-gray-500">{m.role}</td>

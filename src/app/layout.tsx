@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { AppShell } from '@/components/layout/AppShell';
 import { Footer } from '@/components/layout/Footer';
 import { ThemeProvider } from '@/components/ui/ThemeProvider';
+import { FloatingChat } from '@/components/ui/FloatingChat';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="h-screen overflow-hidden flex flex-col">
         <ThemeProvider>
           <AppShell>{children}</AppShell>
+          <FloatingChat />
         </ThemeProvider>
       </body>
     </html>

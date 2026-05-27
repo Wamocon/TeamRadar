@@ -111,7 +111,7 @@ function ProjectDetailPopup({
   const [popupSize, setPopupSize] = useState<'S' | 'M' | 'L'>('M');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
+  const [, setDeletingProjectId] = useState<string | null>(null);
 
   // Edit states
   const [editName, setEditName] = useState(project.name);

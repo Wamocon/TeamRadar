@@ -516,6 +516,16 @@ export default function YearOverviewPage() {
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
+  const ownMemberId = useMemo(() => {
+    if (!userProfile) return null;
+    const byEmail = members.find((m) =>
+      userProfile.email && m.email.toLowerCase() === userProfile.email.toLowerCase()
+    );
+    if (byEmail) return byEmail.id;
+    const byUserId = members.find((m) => m.userId && userProfile.id === m.userId);
+    return byUserId?.id ?? null;
+  }, [members, userProfile]);
+
   // Close quick picker on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -581,13 +591,13 @@ export default function YearOverviewPage() {
     return false;
   }, [userProfile, hasMinRole]);
 
-  // -- filterRowForMine -- "Nur meine" zeigt eigene + Team-Einträge je nach Rolle
+  // -- filterRowForMine -- "Nur meine" zeigt immer nur die eigene Zeile
   const filterRowForMine = useCallback((row: { member: { id: string; email: string; userId?: string } }) => {
-    // "Nur meine" zeigt immer nur die eigene Zeile – unabhängig von der Rolle
+    if (ownMemberId) return row.member.id === ownMemberId;
     if (userProfile?.email && row.member.email.toLowerCase() === userProfile.email.toLowerCase()) return true;
     if (userProfile?.id && row.member.userId && userProfile.id === row.member.userId) return true;
     return false;
-  }, [userProfile]);
+  }, [ownMemberId, userProfile]);
 
   // -- Yearly matrix data (all 12 months) ---------------
   const yearlyMatrixData = useMemo(() => {
@@ -664,6 +674,11 @@ export default function YearOverviewPage() {
     });
   }, [yearlyMatrixData, members, projects]);
 
+  const visibleMemberYearKPIs = useMemo(() => {
+    if (!showOnlyMine) return memberYearKPIs;
+    return memberYearKPIs.filter((kpi) => filterRowForMine({ member: kpi.member }));
+  }, [showOnlyMine, memberYearKPIs, filterRowForMine]);
+
   // -- Entry month data ----------------------------------
   const entryData = useMemo(() => {
     const daysInMonth = getDaysInMonth(year, entryMonth);
@@ -688,13 +703,34 @@ export default function YearOverviewPage() {
     return { days, memberRows, totalSummary, daysInMonth };
   }, [year, entryMonth, members, getDayCategory, holidays]);
 
+  const visibleEntryMemberRows = useMemo(() => {
+    if (!showOnlyMine) return entryData.memberRows;
+    return entryData.memberRows.filter((row) => filterRowForMine({ member: row.member }));
+  }, [showOnlyMine, entryData.memberRows, filterRowForMine]);
+
+  const visibleEntryTotalSummary = useMemo(() => {
+    if (!showOnlyMine) return entryData.totalSummary;
+    const totalSummary: Partial<Record<DayCategory, number>> = {};
+    visibleEntryMemberRows.forEach(({ summary }) => {
+      Object.entries(summary).forEach(([c, n]) => {
+        totalSummary[c as DayCategory] = (totalSummary[c as DayCategory] || 0) + n;
+      });
+    });
+    return totalSummary;
+  }, [showOnlyMine, entryData.totalSummary, visibleEntryMemberRows]);
+
+  const visibleProjects = useMemo(() => {
+    if (!showOnlyMine || !ownMemberId) return projects;
+    return projects.filter((p) => p.memberIds.includes(ownMemberId));
+  }, [showOnlyMine, ownMemberId, projects]);
+
   // -- Project Gantt -------------------------------------
   const yearStart = new Date(year, 0, 1).getTime();
   const yearEnd = new Date(year, 11, 31).getTime();
   const totalMs = yearEnd - yearStart;
 
   const projectGantt = useMemo(() => {
-    return projects
+    return visibleProjects
       .filter((p) => filterType === 'all' || p.type === filterType)
       .filter((p) => {
         if (!p.startDate && !p.endDate) return false;
@@ -708,10 +744,10 @@ export default function YearOverviewPage() {
         return { project: p, leftPercent: ((ps - yearStart) / totalMs) * 100, widthPercent: Math.max(1, ((pe - ps) / totalMs) * 100) };
       })
       .sort((a, b) => a.leftPercent - b.leftPercent);
-  }, [projects, filterType, year, yearStart, yearEnd, totalMs]);
+  }, [visibleProjects, filterType, year, yearStart, yearEnd, totalMs]);
 
-  const internalProjects = projects.filter((p) => p.type === 'internal');
-  const externalProjects = projects.filter((p) => p.type === 'external');
+  const internalProjects = visibleProjects.filter((p) => p.type === 'internal');
+  const externalProjects = visibleProjects.filter((p) => p.type === 'external');
 
   // -- Status Picker & Bulk Fill -------------------------
   const handleSetStatus = (memberId: string, date: string, status: AvailabilityStatus) => {
@@ -946,7 +982,7 @@ export default function YearOverviewPage() {
 
           {/* -- 39h-Effektiv-Bilanz pro ext. Berater --------------- */}
           {(() => {
-            const extConsultants = memberYearKPIs.filter((k) => k.extBudget != null);
+            const extConsultants = visibleMemberYearKPIs.filter((k) => k.extBudget != null);
             if (extConsultants.length === 0) return null;
             return (
               <div className="space-y-2">
@@ -1028,7 +1064,7 @@ export default function YearOverviewPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {memberYearKPIs.map(({ member, extDays, intDays, sickDays, vacationDays, extBudget, fullExtWeeks, hourLoss, extraDaysNeeded, effectiveDays }) => (
+                  {visibleMemberYearKPIs.map(({ member, extDays, intDays, sickDays, vacationDays, extBudget, fullExtWeeks, hourLoss, extraDaysNeeded, effectiveDays }) => (
                     <tr key={member.id} className="border-b dark:border-white/3 border-black/2 hover:bg-black/1 dark:hover:bg-white/1">
                       <td className="px-4 py-2 font-semibold dark:text-white/80 text-gray-800">{member.name}</td>
                       <td className="text-center px-3 py-2">
@@ -1233,10 +1269,10 @@ export default function YearOverviewPage() {
           {/* KPI Header */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Projekte gesamt', value: projects.length, textCls: 'text-indigo-500', bgLightCls: 'bg-indigo-500/8', icon: Briefcase },
+              { label: 'Projekte gesamt', value: visibleProjects.length, textCls: 'text-indigo-500', bgLightCls: 'bg-indigo-500/8', icon: Briefcase },
               { label: 'Extern', value: externalProjects.length, textCls: 'text-orange-500', bgLightCls: 'bg-orange-500/8', icon: TrendingUp },
               { label: 'Intern', value: internalProjects.length, textCls: 'text-indigo-500', bgLightCls: 'bg-indigo-500/8', icon: Users },
-              { label: 'Aktiv', value: projects.filter(p => p.status === 'active').length, textCls: 'text-green-500', bgLightCls: 'bg-green-500/8', icon: CheckCircle2 },
+              { label: 'Aktiv', value: visibleProjects.filter(p => p.status === 'active').length, textCls: 'text-green-500', bgLightCls: 'bg-green-500/8', icon: CheckCircle2 },
             ].map((stat) => (
               <div key={stat.label} className="card-shimmer rounded-xl p-4 flex items-center gap-3">
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${stat.bgLightCls}`}>
@@ -1413,7 +1449,7 @@ export default function YearOverviewPage() {
                 </tr>
               </thead>
               <tbody>
-                {entryData.memberRows.map(({ member, categories, summary }) => {
+                {visibleEntryMemberRows.map(({ member, categories, summary }) => {
                   const workDays = categories.filter((c) => c !== 'weekend' && c !== 'free').length;
                   const editable = canEditRow(member.email);
                   return (
@@ -1455,7 +1491,7 @@ export default function YearOverviewPage() {
               {(Object.entries(DAY_CATEGORY_CONFIG) as [DayCategory, typeof DAY_CATEGORY_CONFIG[DayCategory]][])
                 .filter(([cat]) => cat !== 'weekend' && cat !== 'free')
                 .map(([cat, conf]) => {
-                  const count = entryData.totalSummary[cat] || 0;
+                  const count = visibleEntryTotalSummary[cat] || 0;
                   if (count === 0) return null;
                   return (
                     <div key={cat} className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold ${conf.badgeCls}`}>

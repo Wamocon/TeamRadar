@@ -150,8 +150,6 @@ function ProjectDetailPopup({
   });
   const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(new Set(project.memberIds));
 
-  const isDirty = editMode && (editName !== project.name || editDescription !== (project.description || ''));
-
   const handleSave = async () => {
     setIsSaving(true);
     const memberIdsArr = Array.from(selectedMemberIds);

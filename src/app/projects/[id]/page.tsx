@@ -111,7 +111,7 @@ export default function ProjectDetailPage() {
               </span>
             </div>
             <div className="h-2.5 rounded-full bg-black/6 dark:bg-white/6">
-              <div className="h-full rounded-full transition-all bg-gradient-to-r from-blue-500 to-blue-400"
+              <div className="h-full rounded-full transition-all bg-linear-to-r from-blue-500 to-blue-400"
                 style={{ width: `${Math.min(progressPercent, 100)}%` }} />
             </div>
             <div className="flex items-center justify-between mt-1">

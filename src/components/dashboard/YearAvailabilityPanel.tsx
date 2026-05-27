@@ -50,7 +50,7 @@ function ReadonlyDayCell({ dateStr, category, isWeekend, dayNum, holiday, today 
 
   if (isWeekend) {
     return (
-      <td className="p-0" style={{ background: 'rgba(156,163,175,0.07)' }}>
+      <td className="p-0 bg-gray-400/7">
         <div className="w-full h-6" />
       </td>
     );
@@ -299,7 +299,7 @@ export function YearAvailabilityPanel() {
           >
             Bearbeiten →
           </Link>
-          <span className="dark:text-white/30 text-gray-400 transition-transform duration-200" style={{ transform: panelOpen ? 'none' : 'rotate(-90deg)' }}>
+          <span className={`dark:text-white/30 text-gray-400 transition-transform duration-200 ${panelOpen ? '' : '-rotate-90'}`}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </span>
         </div>

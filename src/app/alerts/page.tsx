@@ -52,7 +52,7 @@ export default function AlertsPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-amber-400/20 border border-red-500/20 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-red-500/20 to-amber-400/20 border border-red-500/20 flex items-center justify-center">
             <AlertTriangle size={20} className="text-red-500" />
           </div>
           Alerts & Warnungen

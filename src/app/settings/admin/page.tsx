@@ -96,13 +96,13 @@ function AdminCard({ title, icon, children, defaultOpen = true, className = '' }
       <button
         onClick={() => setOpen(v => !v)}
         className={`w-full flex items-center justify-between px-5 py-3.5 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${open ? 'border-b dark:border-white/6 border-black/6' : ''}`}
-        aria-expanded={open}
+        aria-expanded={open ? 'true' : 'false'}
       >
         <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 pointer-events-none">
           {icon}
           {title}
         </h3>
-        <span className="dark:text-white/30 text-gray-400 shrink-0" style={{ transform: open ? 'none' : 'rotate(-90deg)', transition: 'transform 0.2s' }}>
+        <span className={`dark:text-white/30 text-gray-400 shrink-0 transition-transform duration-200 ${open ? '' : '-rotate-90'}`}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </span>
       </button>
@@ -406,17 +406,17 @@ export default function AdminSettingsPage() {
               {/* System Health */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { label: 'Mitglieder', value: members.length, icon: Users, color: '#6366f1' },
-                  { label: 'Projekte', value: projects.length, icon: Layers, color: '#8b5cf6' },
+                  { label: 'Mitglieder', value: members.length, icon: Users, textCls: 'text-indigo-500', iconCls: 'text-indigo-500' },
+                  { label: 'Projekte', value: projects.length, icon: Layers, textCls: 'text-violet-500', iconCls: 'text-violet-500' },
                   { label: 'K�rzel', value: categories.length, icon: Tag, color: '#f97316' },
-                  { label: 'Status', value: 'OK', icon: Activity, color: '#22c55e' },
+                  { label: 'Status', value: 'OK', icon: Activity, textCls: 'text-green-500', iconCls: 'text-green-500' },
                 ].map((s) => (
                   <div key={s.label} className="card-shimmer rounded-xl p-4 border dark:border-white/6 border-black/6">
                     <div className="flex items-center gap-2 mb-2">
-                      <s.icon size={14} style={{ color: s.color }} />
+                      <s.icon size={14} className={s.iconCls} />
                       <span className="text-[10px] dark:text-white/40 text-gray-500">{s.label}</span>
                     </div>
-                    <div className="text-2xl font-black" style={{ color: s.color }}>{s.value}</div>
+                    <div className={`text-2xl font-black ${s.textCls}`}>{s.value}</div>
                   </div>
                 ))}
               </div>
@@ -440,7 +440,9 @@ export default function AdminSettingsPage() {
                         <div className="text-[10px] dark:text-white/30 text-gray-400">{s.detail}</div>
                       </div>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black" style={{ background: `${(s as any).statusColor || '#22c55e'}15`, color: (s as any).statusColor || '#22c55e' }}>{s.status}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${
+                      (s as any).statusColor === '#f59e0b' ? 'bg-amber-500/8 text-amber-500' : 'bg-green-500/8 text-green-500'
+                    }`}>{s.status}</span>
                   </div>
                 ))}
               </div>
@@ -448,17 +450,17 @@ export default function AdminSettingsPage() {
               {/* Quick links */}
               <div className="grid sm:grid-cols-3 gap-3">
                 {[
-                  { href: '/admin/organisation', label: 'Organisation verwalten', icon: Building, color: '#6366f1' },
-                  { href: '/members', label: 'Mitglieder & Rollen', icon: Users, color: '#8b5cf6' },
-                  { href: '/reports', label: 'System-Reports', icon: BarChart3, color: '#06b6d4' },
-                  { href: '/utilization', label: 'Auslastungsanalyse', icon: Activity, color: '#f97316' },
-                  { href: '/members?action=invite', label: 'Nutzer einladen', icon: PlusCircle, color: '#22c55e' },
-                  { href: '/year', label: 'Jahres�bersicht', icon: Layers, color: '#f59e0b' },
+                  { href: '/admin/organisation', label: 'Organisation verwalten', icon: Building, bgCls: 'bg-indigo-500/8', textCls: 'text-indigo-500' },
+                  { href: '/members', label: 'Mitglieder & Rollen', icon: Users, bgCls: 'bg-violet-500/8', textCls: 'text-violet-500' },
+                  { href: '/reports', label: 'System-Reports', icon: BarChart3, bgCls: 'bg-cyan-500/8', textCls: 'text-cyan-500' },
+                  { href: '/utilization', label: 'Auslastungsanalyse', icon: Activity, bgCls: 'bg-orange-500/8', textCls: 'text-orange-500' },
+                  { href: '/members?action=invite', label: 'Nutzer einladen', icon: PlusCircle, bgCls: 'bg-green-500/8', textCls: 'text-green-500' },
+                  { href: '/year', label: 'Jahresübersicht', icon: Layers, bgCls: 'bg-amber-500/8', textCls: 'text-amber-500' },
                 ].map((q) => (
                   <Link key={q.href} href={q.href}
                     className="flex items-center gap-3 p-3 rounded-xl border dark:border-white/6 border-black/6 hover:border-[rgba(99,102,241,0.3)] hover:bg-(--primary-light) transition-all no-underline group">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${q.color}15` }}>
-                      <q.icon size={14} style={{ color: q.color }} />
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${q.bgCls}`}>
+                      <q.icon size={14} className={q.textCls} />
                     </div>
                     <span className="text-xs font-semibold dark:text-white text-gray-900 group-hover:text-(--primary) transition-colors">{q.label}</span>
                     <ChevronRight size={12} className="ml-auto dark:text-white/20 text-gray-300 group-hover:text-(--primary) transition-colors" />
@@ -491,7 +493,7 @@ export default function AdminSettingsPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Rolle</label>
-                    <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as typeof inviteRole)}
+                    <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as typeof inviteRole)} aria-label="Rolle des eingeladenen Mitarbeiters"
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all">
                       <option value="employee">Mitarbeiter</option>
                       <option value="department_lead">Abteilungsleiter</option>
@@ -560,17 +562,17 @@ export default function AdminSettingsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Arbeitsstunden / Tag</label>
-                    <input type="number" min={1} max={24} value={workHoursPerDay} onChange={e => setWorkHoursPerDay(e.target.value)}
+                    <input type="number" min={1} max={24} value={workHoursPerDay} onChange={e => setWorkHoursPerDay(e.target.value)} aria-label="Arbeitsstunden pro Tag"
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Arbeitstage / Woche</label>
-                    <input type="number" min={1} max={7} value={workDaysPerWeek} onChange={e => setWorkDaysPerWeek(e.target.value)}
+                    <input type="number" min={1} max={7} value={workDaysPerWeek} onChange={e => setWorkDaysPerWeek(e.target.value)} aria-label="Arbeitstage pro Woche"
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Wochenbeginn</label>
-                    <select value={weekStartDay} onChange={e => setWeekStartDay(e.target.value)}
+                    <select value={weekStartDay} onChange={e => setWeekStartDay(e.target.value)} aria-label="Wochenbeginn"
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)">
                       <option value="1">Montag</option>
                       <option value="0">Sonntag</option>
@@ -579,7 +581,7 @@ export default function AdminSettingsPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Std./Woche ext. Berater</label>
-                    <input type="number" min={1} max={60} value={extConsultantWeeklyHours} onChange={e => setExtConsultantWeeklyHours(e.target.value)}
+                    <input type="number" min={1} max={60} value={extConsultantWeeklyHours} onChange={e => setExtConsultantWeeklyHours(e.target.value)} aria-label="Stunden pro Woche externer Berater"
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
                   </div>
                 </div>
@@ -589,7 +591,7 @@ export default function AdminSettingsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1 col-span-2">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Standard Bundesland (Feiertage)</label>
-                    <select value={defaultBundesland} onChange={e => setDefaultBundesland(e.target.value)}
+                    <select value={defaultBundesland} onChange={e => setDefaultBundesland(e.target.value)} aria-label="Bundesland fuer Feiertage"
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)">
                       <option value="BW">Baden-W�rttemberg</option>
                       <option value="BY">Bayern</option>
@@ -611,12 +613,12 @@ export default function AdminSettingsPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Max. Urlaubstage / Jahr</label>
-                    <input type="number" min={0} max={365} value={maxVacationDays} onChange={e => setMaxVacationDays(e.target.value)}
+                    <input type="number" min={0} max={365} value={maxVacationDays} onChange={e => setMaxVacationDays(e.target.value)} aria-label="Maximale Urlaubstage pro Jahr"
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
                   </div>
                   <div className="space-y-1 col-span-2">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Auslastungs-Alert ab (%) </label>
-                    <input type="number" min={50} max={200} value={alertOverbookingThreshold} onChange={e => setAlertOverbookingThreshold(e.target.value)}
+                    <input type="number" min={50} max={200} value={alertOverbookingThreshold} onChange={e => setAlertOverbookingThreshold(e.target.value)} aria-label="Auslastungs-Alert Schwellwert in Prozent"
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
                     <p className="text-[9px] dark:text-white/30 text-gray-400">Ab diesem Auslastungswert wird eine Warnung angezeigt.</p>
                   </div>
@@ -630,14 +632,14 @@ export default function AdminSettingsPage() {
               <AdminCard title="Plan & Abrechnung" icon={<CreditCard size={14} className="text-(--primary)" />}>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
-                    { id: 'starter' as const, name: 'Starter', price: 'Kostenlos', features: ['Bis 5 Nutzer', 'Basis-Features'], color: '#6b7280' },
-                    { id: 'pro' as const, name: 'Pro', price: '�29 / Monat', features: ['Bis 50 Nutzer', 'Alle Features', 'Support'], color: '#6366f1', recommended: true },
-                    { id: 'enterprise' as const, name: 'Enterprise', price: 'Auf Anfrage', features: ['Unbegrenzte Nutzer', 'SLA', 'Dedicated Support'], color: '#8b5cf6' },
+                    { id: 'starter' as const, name: 'Starter', price: 'Kostenlos', features: ['Bis 5 Nutzer', 'Basis-Features'], iconCls: 'text-gray-500' },
+                    { id: 'pro' as const, name: 'Pro', price: '�29 / Monat', features: ['Bis 50 Nutzer', 'Alle Features', 'Support'], iconCls: 'text-indigo-500', recommended: true },
+                    { id: 'enterprise' as const, name: 'Enterprise', price: 'Auf Anfrage', features: ['Unbegrenzte Nutzer', 'SLA', 'Dedicated Support'], iconCls: 'text-violet-500' },
                   ].map((plan) => (
                     <button key={plan.id} onClick={() => setOrgPlan(plan.id)}
                       className={`relative p-4 rounded-xl border-2 text-left transition-all cursor-pointer bg-transparent ${orgPlan === plan.id ? 'border-(--primary) bg-(--primary-light)' : 'dark:border-white/10 border-gray-200 hover:border-[rgba(99,102,241,0.3)]'}`}>
                       {plan.recommended && <span className="absolute top-2 right-2 text-[8px] font-black px-1.5 py-0.5 rounded-full bg-(--primary) text-white">EMPFOHLEN</span>}
-                      <Crown size={16} style={{ color: plan.color }} className="mb-2" />
+                      <Crown size={16} className={`mb-2 ${plan.iconCls}`} />
                       <div className="font-black dark:text-white text-gray-900 text-sm">{plan.name}</div>
                       <div className="font-bold text-(--primary) text-xs mt-0.5">{plan.price}</div>
                       <ul className="mt-2 space-y-0.5">
@@ -709,22 +711,22 @@ export default function AdminSettingsPage() {
                 <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Min. Passwort-L�nge</label>
-                  <input type="number" value={passwordMinLength} onChange={(e) => setPasswordMinLength(parseInt(e.target.value) || 8)} min={6} max={32}
+                  <input type="number" value={passwordMinLength} onChange={(e) => setPasswordMinLength(parseInt(e.target.value) || 8)} min={6} max={32} aria-label="Minimale Passwortlaenge"
                     className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Session-Timeout (Minuten)</label>
-                  <input type="number" value={sessionTimeout} onChange={(e) => setSessionTimeout(parseInt(e.target.value) || 60)} min={5} max={1440}
+                  <input type="number" value={sessionTimeout} onChange={(e) => setSessionTimeout(parseInt(e.target.value) || 60)} min={5} max={1440} aria-label="Session-Timeout in Minuten"
                     className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                 </div>
                 <div className="col-span-2 space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Erlaubte E-Mail-Domains</label>
-                  <input value={allowedDomains} onChange={(e) => setAllowedDomains(e.target.value)} placeholder="firma.de, partner.com"
+                  <input value={allowedDomains} onChange={(e) => setAllowedDomains(e.target.value)} placeholder="firma.de, partner.com" aria-label="Erlaubte E-Mail-Domains"
                     className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                 </div>
                 <div className="col-span-2 space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">IP-Whitelist (optional, kommagetrennt)</label>
-                  <input value={ipWhitelist} onChange={(e) => setIpWhitelist(e.target.value)} placeholder="192.168.1.0/24, 10.0.0.0/8"
+                  <input value={ipWhitelist} onChange={(e) => setIpWhitelist(e.target.value)} placeholder="192.168.1.0/24, 10.0.0.0/8" aria-label="IP-Whitelist"
                     className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                 </div>
                 </div>
@@ -787,21 +789,21 @@ export default function AdminSettingsPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Schriftart</label>
-                    <select value={companyFont} onChange={(e) => setCompanyFont(e.target.value)}
+                    <select value={companyFont} onChange={(e) => setCompanyFont(e.target.value)} aria-label="Schriftart"
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all">
                       {['Inter', 'Roboto', 'Open Sans', 'Poppins', 'Nunito', 'IBM Plex Sans'].map((f) => <option key={f}>{f}</option>)}
                     </select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Datumsformat</label>
-                    <select value={dateFormat} onChange={(e) => setDateFormat(e.target.value)}
+                    <select value={dateFormat} onChange={(e) => setDateFormat(e.target.value)} aria-label="Datumsformat"
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all">
                       {['DD.MM.YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'].map((f) => <option key={f}>{f}</option>)}
                     </select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Sprache</label>
-                    <select value={language} onChange={(e) => setLanguage(e.target.value)}
+                    <select value={language} onChange={(e) => setLanguage(e.target.value)} aria-label="Sprache"
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all">
                       <option value="de">Deutsch</option>
                       <option value="en">English</option>
@@ -809,7 +811,7 @@ export default function AdminSettingsPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Zeitzone</label>
-                    <select value={timezone} onChange={(e) => setTimezone(e.target.value)}
+                    <select value={timezone} onChange={(e) => setTimezone(e.target.value)} aria-label="Zeitzone"
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all">
                       {['Europe/Berlin', 'Europe/Vienna', 'Europe/Zurich', 'UTC', 'America/New_York', 'America/Los_Angeles'].map((tz) => <option key={tz}>{tz}</option>)}
                     </select>
@@ -890,8 +892,8 @@ export default function AdminSettingsPage() {
                               className={`text-[9px] font-bold px-2 py-0.5 rounded-full border-none cursor-pointer ${cat.is_active ? 'bg-green-500/10 text-green-500' : 'bg-gray-100 dark:bg-white/5 text-gray-400'}`}>
                               {cat.is_active ? 'Aktiv' : 'Inaktiv'}
                             </button>
-                            <button onClick={() => setEditingCat({ ...cat })} className="p-1.5 rounded-lg hover:bg-(--primary-light) text-(--primary) border-none bg-transparent cursor-pointer transition-all"><Edit3 size={13} /></button>
-                            <button onClick={() => handleDeleteCategory(cat.id)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-400 hover:text-red-500 border-none bg-transparent cursor-pointer transition-all"><Trash2 size={13} /></button>
+                            <button title="Bearbeiten" onClick={() => setEditingCat({ ...cat })} className="p-1.5 rounded-lg hover:bg-(--primary-light) text-(--primary) border-none bg-transparent cursor-pointer transition-all"><Edit3 size={13} /></button>
+                            <button title="Löschen" onClick={() => handleDeleteCategory(cat.id)} className="p-1.5 rounded-lg hover:bg-red-500/10 text-red-400 hover:text-red-500 border-none bg-transparent cursor-pointer transition-all"><Trash2 size={13} /></button>
                           </div>
                         </div>
                       )}
@@ -904,10 +906,10 @@ export default function AdminSettingsPage() {
                   <h4 className="text-xs font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Neues K�rzel</h4>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="space-y-1"><label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">K�rzel (max. 4)</label>
-                      <input value={newKuerzel} onChange={(e) => setNewKuerzel(e.target.value.slice(0, 4))} placeholder="z.B. eP"
+                      <input value={newKuerzel} onChange={(e) => setNewKuerzel(e.target.value.slice(0, 4))} placeholder="z.B. eP" aria-label="Neues Kuerzel"
                         className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-lg py-2 px-3 text-sm font-bold focus:border-(--primary) outline-none dark:text-white text-gray-900" /></div>
                     <div className="space-y-1"><label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">Bezeichnung</label>
-                      <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="z.B. Ext. Projekt"
+                      <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="z.B. Ext. Projekt" aria-label="Bezeichnung des neuen Kuerzels"
                         className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-lg py-2 px-3 text-sm focus:border-(--primary) outline-none dark:text-white text-gray-900" /></div>
                     <div className="space-y-1"><label className="text-[9px] font-bold uppercase dark:text-white/40 text-gray-500">Hintergrund</label>
                       <div className="flex items-center gap-2">
@@ -955,10 +957,10 @@ export default function AdminSettingsPage() {
                   <div className="flex items-center gap-2">
                     <input type={apiKeyVisible ? 'text' : 'password'} value={apiKey} readOnly
                       className="flex-1 bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm font-mono dark:text-white text-gray-900 outline-none" />
-                    <button onClick={() => setApiKeyVisible(!apiKeyVisible)} className="p-2 rounded-xl border dark:border-white/10 border-gray-200 dark:text-white/50 text-gray-500 hover:bg-black/3 dark:hover:bg-white/3 cursor-pointer bg-transparent border-solid transition-colors">
+                    <button title="API-Schlüssel anzeigen" onClick={() => setApiKeyVisible(!apiKeyVisible)} className="p-2 rounded-xl border dark:border-white/10 border-gray-200 dark:text-white/50 text-gray-500 hover:bg-black/3 dark:hover:bg-white/3 cursor-pointer bg-transparent border-solid transition-colors">
                       {apiKeyVisible ? <EyeOff size={14} /> : <Eye size={14} />}
                     </button>
-                    <button onClick={() => navigator.clipboard.writeText(apiKey)}
+                    <button title="API-Schlüssel kopieren" onClick={() => navigator.clipboard.writeText(apiKey)}
                       className="p-2 rounded-xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] text-(--primary) hover:opacity-80 cursor-pointer border-solid transition-opacity">
                       <Download size={14} />
                     </button>
@@ -983,7 +985,7 @@ export default function AdminSettingsPage() {
               <AdminCard title="Datenaufbewahrung" icon={<HardDrive size={14} className="text-(--primary)" />}>
                 <div className="space-y-1">
                   <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Aufbewahrungszeitraum (Tage)</label>
-                  <input type="number" value={dataRetentionDays} onChange={(e) => setDataRetentionDays(parseInt(e.target.value) || 365)} min={30} max={3650}
+                  <input type="number" value={dataRetentionDays} aria-label="Datenhaltefrist in Tagen" onChange={(e) => setDataRetentionDays(parseInt(e.target.value) || 365)} min={30} max={3650}
                     className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary) transition-all" />
                   <p className="text-[10px] dark:text-white/30 text-gray-400">Nach diesem Zeitraum werden inaktive Logs automatisch gel�scht.</p>
                 </div>

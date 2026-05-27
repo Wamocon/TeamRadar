@@ -335,7 +335,7 @@ export default function ReportsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
         <div>
         <h1 className="text-2xl font-black dark:text-white text-gray-900 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-400/20 border border-violet-500/20 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-violet-500/20 to-pink-400/20 border border-violet-500/20 flex items-center justify-center">
             <FileDown size={20} className="text-violet-500" />
           </div>
           Reports & Export
@@ -532,7 +532,7 @@ export default function ReportsPage() {
         </div>
 
         <button onClick={handleExport} disabled={exporting}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-violet-600 text-white font-bold hover:from-violet-600 hover:to-violet-700 transition-all shadow-lg shadow-violet-500/20 disabled:opacity-50">
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-linear-to-r from-violet-500 to-violet-600 text-white font-bold hover:from-violet-600 hover:to-violet-700 transition-all shadow-lg shadow-violet-500/20 disabled:opacity-50">
           <FileDown size={18} />
           {exporting
             ? 'Exportiere...'

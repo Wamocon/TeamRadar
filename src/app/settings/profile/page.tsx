@@ -29,7 +29,7 @@ const SectionCard = ({ title, icon: Icon, children, defaultOpen = true }: { titl
       <button
         onClick={() => setOpen(v => !v)}
         className={`w-full flex items-center justify-between px-5 py-4 bg-transparent border-none cursor-pointer hover:bg-black/2 dark:hover:bg-white/2 transition-colors ${open ? 'border-b dark:border-white/6 border-black/6' : ''}`}
-        aria-expanded={open}
+        aria-expanded={open ? 'true' : 'false'}
       >
         <h3 className="text-sm font-black dark:text-white text-gray-900 flex items-center gap-2 pointer-events-none">
           <Icon size={14} className="text-(--primary)" />

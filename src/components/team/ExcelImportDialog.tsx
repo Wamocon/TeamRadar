@@ -71,7 +71,7 @@ export function ExcelImportDialog({ onClose }: { onClose: () => void }) {
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-400/20 border border-green-500/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-green-500/20 to-emerald-400/20 border border-green-500/20 flex items-center justify-center">
               <FileSpreadsheet size={20} className="text-green-400" />
             </div>
             <div>

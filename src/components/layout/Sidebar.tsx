@@ -38,7 +38,7 @@ interface NavItem {
   label: string;
   exact?: boolean;
   badge?: number;
-  activeColor?: string; // Override für aktive Farbe
+  activeColor?: string; // Override fÃ¼r aktive Farbe
 }
 
 function SidebarContent({
@@ -173,11 +173,11 @@ function SidebarContent({
             <div className="text-sm font-black tracking-tight text-[var(--sidebar-text)]">
               <span className="text-(--primary)">Team</span>Radar
             </div>
-            <div className="text-[9px] uppercase tracking-widest text-[var(--sidebar-text-muted)] opacity-60">Verfügbarkeit</div>
+            <div className="text-[9px] uppercase tracking-widest text-[var(--sidebar-text-muted)] opacity-60">VerfÃ¼gbarkeit</div>
           </div>
         </div>
         {isMobile && (
-          <button onClick={onNavigate} className="p-1.5 rounded-lg hover:bg-[var(--sidebar-item-hover)] text-[var(--sidebar-text-muted)] transition-all border-none bg-transparent cursor-pointer" aria-label="Menü schließen">
+          <button onClick={onNavigate} className="p-1.5 rounded-lg hover:bg-[var(--sidebar-item-hover)] text-[var(--sidebar-text-muted)] transition-all border-none bg-transparent cursor-pointer" aria-label="MenÃ¼ schlieÃŸen">
             <X size={16} />
           </button>
         )}
@@ -200,7 +200,7 @@ function SidebarContent({
         </div>
       </div>
 
-      {/* Dual-Role-Switcher: nur für privilegierte User (department_lead+) */}
+      {/* Dual-Role-Switcher: nur fÃ¼r privilegierte User (department_lead+) */}
       {mounted && hasMinRole('department_lead') && (
         <div className="shrink-0 mx-3 mt-2">
           <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--sidebar-item-hover)' }}>
@@ -245,7 +245,7 @@ function SidebarContent({
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 sidebar-scroll space-y-4">
         <div>
-          <SectionLabel label="Hauptmenü" />
+          <SectionLabel label="HauptmenÃ¼" />
           <div className="flex flex-col gap-0.5">
             {mainNav.map((item) => <NavLink key={item.href} item={item} />)}
           </div>

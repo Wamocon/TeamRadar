@@ -150,7 +150,7 @@ function WamoBookContent() {
         {[
           { label: 'Mitarbeiter gesamt', value: hrKPIs.total, color: '#6366f1', icon: Users },
           { label: 'Neu diesen Monat', value: hrKPIs.newThisMonth, color: '#22c55e', icon: UserPlus },
-          { label: 'Verfügbar heute', value: members.filter(m => getMemberStatus(m.id, today) === 'available').length, color: '#22c55e', icon: BadgeCheck },
+          { label: 'VerfÃ¼gbar heute', value: members.filter(m => getMemberStatus(m.id, today) === 'available').length, color: '#22c55e', icon: BadgeCheck },
           { label: 'Im Urlaub/Krank', value: members.filter(m => ['vacation','sick'].includes(getMemberStatus(m.id, today))).length, color: '#f59e0b', icon: Clock },
         ].map((kpi) => (
           <div key={kpi.label} className="card-shimmer rounded-xl p-4 flex items-center gap-3">
@@ -294,7 +294,7 @@ function WamoBookContent() {
                 )}
               </div>
 
-              {/* Edit Actions (nur für berechtigte) */}
+              {/* Edit Actions (nur fÃ¼r berechtigte) */}
               {canEdit && (
                 <div className="pt-3 border-t dark:border-white/10 border-gray-100 flex items-center gap-2">
                   <button onClick={() => { setEditingMemberId(selectedMember.id); setShowMemberModal(true); setSelectedMemberId(null); }}
@@ -316,7 +316,7 @@ function WamoBookContent() {
                   <div className="flex items-center gap-2">
                     <AlertCircle size={13} className="text-(--primary) shrink-0" />
                     <span className="text-[10px] font-semibold dark:text-white/50 text-gray-600">
-                      DSGVO-Datenschutz: Wähle was in WamoBook öffentlich sichtbar ist.
+                      DSGVO-Datenschutz: WÃ¤hle was in WamoBook Ã¶ffentlich sichtbar ist.
                     </span>
                   </div>
                   <div className="space-y-2">
@@ -328,14 +328,14 @@ function WamoBookContent() {
                           <button onClick={() => handlePrivacyToggle(field.key, !isPublic)} disabled={privacyLoading}
                             className={`flex items-center gap-1.5 text-[9px] font-bold px-2.5 py-1 rounded-full border-none cursor-pointer transition-all ${isPublic ? 'bg-green-500/15 text-green-500' : 'bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/30'}`}>
                             {isPublic ? <Eye size={9} /> : <EyeOff size={9} />}
-                            {isPublic ? 'Öffentlich' : 'Privat'}
+                            {isPublic ? 'Ã–ffentlich' : 'Privat'}
                           </button>
                         </div>
                       );
                     })}
                   </div>
                   <p className="text-[9px] dark:text-white/30 text-gray-400">
-                    Ihre Daten werden gemäß DSGVO verarbeitet. Änderungen sind jederzeit möglich.
+                    Ihre Daten werden gemÃ¤ÃŸ DSGVO verarbeitet. Ã„nderungen sind jederzeit mÃ¶glich.
                   </p>
                 </div>
               )}
@@ -352,7 +352,7 @@ function WamoBookContent() {
       )}
       {deletingMemberId && (
         <ConfirmModal isOpen={!!deletingMemberId} title="Mitarbeiter entfernen"
-          message="Möchtest du diesen Mitarbeiter wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden."
+          message="MÃ¶chtest du diesen Mitarbeiter wirklich entfernen? Diese Aktion kann nicht rÃ¼ckgÃ¤ngig gemacht werden."
           confirmLabel="Ja, entfernen" cancelLabel="Abbrechen" variant="danger"
           onConfirm={() => { deleteMember(deletingMemberId); setDeletingMemberId(null); }}
           onCancel={() => setDeletingMemberId(null)} />

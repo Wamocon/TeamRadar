@@ -310,8 +310,8 @@ function EventDetailPopup({ event, onClose, onEdit, onDelete }: {
 export default function CalendarPage() {
     // Feiertage für den aktuellen Monat/Jahr laden (optional: Bundesland aus Settings)
     const bundesland: Bundesland = 'ALL';
-    const holidaysMap = useMemo(() => getHolidays(currentMonth.getFullYear(), bundesland), [currentMonth, bundesland]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const holidaysMap = useMemo(() => getHolidays(currentMonth.getFullYear(), bundesland), [currentMonth, bundesland]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showForm, setShowForm] = useState(false);

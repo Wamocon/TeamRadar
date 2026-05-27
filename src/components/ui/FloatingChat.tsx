@@ -77,8 +77,13 @@ export function FloatingChat() {
               </div>
             </div>
 
-            <div className="h-[calc(100%-44px)]">
-              <ChatWorkspace embedded />
+            <div className="h-[calc(100%-44px)] overflow-hidden">
+              <div
+                className={size === 's' ? 'origin-top-left h-full' : 'h-full'}
+                style={size === 's' ? { transform: 'scale(0.92)', width: '108.7%', height: '108.7%' } : undefined}
+              >
+                <ChatWorkspace embedded compact={size === 's'} />
+              </div>
             </div>
           </div>
         </div>

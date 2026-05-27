@@ -334,6 +334,38 @@ export const useAppStore = create<AppStore>()(
     },
 
     getMemberStatus: (memberId, date) => {
+      const normalizeStatus = (rawStatus: string): AvailabilityStatus => {
+        const legacyMap: Record<string, AvailabilityStatus> = {
+          homeoffice: 'remote',
+          vacation_day: 'vacation',
+          krank: 'sick',
+          urlaub: 'vacation',
+          office: 'busy',
+        };
+
+        const normalized = legacyMap[rawStatus] ?? rawStatus;
+        const valid: AvailabilityStatus[] = [
+          'available',
+          'busy',
+          'meeting',
+          'vacation',
+          'sick',
+          'remote',
+          'offline',
+          'extern-onsite',
+          'extern-remote',
+          'home-extern',
+          'berufsschule',
+          'buero-berufsschule',
+          'buero-uni',
+          'uni',
+        ];
+
+        return valid.includes(normalized as AvailabilityStatus)
+          ? (normalized as AvailabilityStatus)
+          : 'offline';
+      };
+
       const today = date ?? new Date().toISOString().slice(0, 10);
       const entries = get().availabilities.filter(
         (a) => a.memberId === memberId && a.date === today
@@ -345,7 +377,7 @@ export const useAppStore = create<AppStore>()(
       const current = entries.find(
         (a) => (!a.startTime || a.startTime <= now) && (!a.endTime || a.endTime >= now)
       );
-      return current?.status ?? entries[entries.length - 1].status;
+      return normalizeStatus(current?.status ?? entries[entries.length - 1].status);
     },
 
     /* ── Teams ───────────────────────────────── */

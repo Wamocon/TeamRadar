@@ -5,7 +5,7 @@ import Image from 'next/image';
 import {
   MessageSquare, Send, Search, Plus, Hash, Users, Smile, Paperclip,
   MoreHorizontal, X, Check, CheckCheck,
-  Loader, BellOff,
+  Loader, BellOff, PanelLeft,
 } from 'lucide-react';
 
 /* ── Typen ─────────────────────────────────────────────────────────── */
@@ -78,7 +78,7 @@ function groupByDate(messages: ChatMessage[]) {
 }
 
 /* ── Haupt-Komponente ──────────────────────────────────────────────── */
-export function ChatWorkspace({ embedded = false }: { embedded?: boolean }) {
+export function ChatWorkspace({ embedded = false, compact = false }: { embedded?: boolean; compact?: boolean }) {
   const members = useAppStore((s) => s.members);
   const userProfile = useAppStore((s) => s.userProfile);
 
@@ -99,8 +99,13 @@ export function ChatWorkspace({ embedded = false }: { embedded?: boolean }) {
   const [sidebarSearch, setSidebarSearch] = useState('');
   const [sending, setSending] = useState(false);
   const [showMembers, setShowMembers] = useState(false);
+  const [compactSidebarOpen, setCompactSidebarOpen] = useState(!compact);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    setCompactSidebarOpen(!compact);
+  }, [compact]);
 
   const activeChannel = channels.find((c) => c.id === activeChannelId);
   const activeMessages = messages[activeChannel?.name ?? ''] ?? [];
@@ -157,10 +162,19 @@ export function ChatWorkspace({ embedded = false }: { embedded?: boolean }) {
 
   const totalUnread = channels.reduce((s, c) => s + (c.unread ?? 0), 0);
 
+  const selectChannel = (id: string) => {
+    setActiveChannelId(id);
+    if (compact) setCompactSidebarOpen(false);
+  };
+
   return (
-    <div className={`flex ${embedded ? 'h-full' : 'h-[calc(100vh-56px)]'} overflow-hidden bg-white dark:bg-gray-950`}>
+    <div className={`relative flex ${embedded ? 'h-full' : 'h-[calc(100vh-56px)]'} overflow-hidden bg-white dark:bg-gray-950`}>
+      {compact && compactSidebarOpen && (
+        <div className="absolute inset-0 z-20 bg-black/20" onClick={() => setCompactSidebarOpen(false)} />
+      )}
+
       {/* ── Sidebar ─────────────────────────────────── */}
-      <aside className="w-64 shrink-0 flex flex-col border-r dark:border-white/6 border-gray-200 bg-gray-50 dark:bg-gray-900/50">
+      <aside className={`${compact ? 'absolute inset-y-0 left-0 z-30 w-56 shadow-2xl transition-transform duration-200' : 'w-64 shrink-0'} ${compact && !compactSidebarOpen ? '-translate-x-full' : 'translate-x-0'} flex flex-col border-r dark:border-white/6 border-gray-200 bg-gray-50 dark:bg-gray-900/50`}>
         {/* Header */}
         <div className="px-4 py-3 border-b dark:border-white/6 border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -193,7 +207,7 @@ export function ChatWorkspace({ embedded = false }: { embedded?: boolean }) {
               <Plus size={10} className="dark:text-white/30 text-gray-400 cursor-pointer" />
             </div>
             {channelList.map((ch) => (
-              <button key={ch.id} onClick={() => setActiveChannelId(ch.id)}
+              <button key={ch.id} onClick={() => selectChannel(ch.id)}
                 className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-all border-none cursor-pointer ${activeChannelId === ch.id ? 'bg-(--primary-light) text-(--primary)' : 'bg-transparent dark:text-white/60 text-gray-600 hover:bg-black/4 dark:hover:bg-white/4'}`}>
                 <Hash size={13} className="shrink-0" />
                 <span className="text-xs font-semibold truncate flex-1">{ch.name}</span>
@@ -214,7 +228,7 @@ export function ChatWorkspace({ embedded = false }: { embedded?: boolean }) {
             {dmList.map((dm) => {
               const member = dm.memberId ? getMemberById(dm.memberId) : null;
               return (
-                <button key={dm.id} onClick={() => setActiveChannelId(dm.id)}
+                <button key={dm.id} onClick={() => selectChannel(dm.id)}
                   className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-all border-none cursor-pointer ${activeChannelId === dm.id ? 'bg-(--primary-light) text-(--primary)' : 'bg-transparent dark:text-white/60 text-gray-600 hover:bg-black/4 dark:hover:bg-white/4'}`}>
                   <div className="relative w-5 h-5 rounded-full bg-(--primary-light) flex items-center justify-center shrink-0 overflow-hidden">
                     {member?.avatarUrl ? (
@@ -258,6 +272,15 @@ export function ChatWorkspace({ embedded = false }: { embedded?: boolean }) {
         {/* Chat Header */}
         <header className="flex items-center justify-between px-5 py-3 border-b dark:border-white/6 border-gray-200 bg-white dark:bg-gray-950 shrink-0">
           <div className="flex items-center gap-3">
+            {compact && (
+              <button
+                onClick={() => setCompactSidebarOpen((v) => !v)}
+                title="Kanäle ein-/ausblenden"
+                className="p-1.5 rounded-lg border-none cursor-pointer transition-colors bg-transparent dark:text-white/40 text-gray-500 hover:bg-black/4 dark:hover:bg-white/4"
+              >
+                <PanelLeft size={16} />
+              </button>
+            )}
             {activeChannel?.type === 'channel' ? (
               <Hash size={18} className="text-(--primary)" />
             ) : (

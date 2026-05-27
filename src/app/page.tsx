@@ -16,6 +16,7 @@ import Link from 'next/link';
 export default function DashboardPage() {
   const members = useAppStore((s) => s.members);
   const getMemberStatus = useAppStore((s) => s.getMemberStatus);
+  const availabilities = useAppStore((s) => s.availabilities);
   const [showForm, setShowForm] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,6 +26,23 @@ export default function DashboardPage() {
   const [selectedProjectType, setSelectedProjectType] = useState<'all' | ProjectType>('all');
 
   const today = new Date().toISOString().slice(0, 10);
+  const currentYear = today.slice(0, 4);
+  const normalizeDepartment = (department?: string) => {
+    const value = (department ?? '').trim();
+    return value.length > 0 ? value : 'Ohne Abteilung';
+  };
+  const normalizeAvailabilityStatus = (rawStatus: string): AvailabilityStatus => {
+    const legacyMap: Record<string, AvailabilityStatus> = {
+      homeoffice: 'remote',
+      vacation_day: 'vacation',
+      krank: 'sick',
+      urlaub: 'vacation',
+      office: 'busy',
+    };
+
+    const normalized = legacyMap[rawStatus] ?? rawStatus;
+    return normalized as AvailabilityStatus;
+  };
 
   const projects = useAppStore((s) => s.projects);
 
@@ -45,15 +63,19 @@ export default function DashboardPage() {
   const inMeetings = statusCounts.meeting || 0;
   const onVacation = statusCounts.vacation || 0;
   const remoteCount = statusCounts.remote || 0;
+  const yearlyVacationDays = useMemo(
+    () => availabilities.filter((a) => a.date.startsWith(currentYear) && normalizeAvailabilityStatus(a.status) === 'vacation').length,
+    [availabilities, currentYear]
+  );
 
   const departments = useMemo(() =>
-    [...new Set(members.map((m) => m.department).filter(Boolean))].sort(),
+    [...new Set(members.map((m) => normalizeDepartment(m.department)))].sort(),
     [members]
   );
 
   const departmentData = useMemo(() =>
     departments.map((name) => {
-      const deptMembers = memberStatuses.filter((ms) => ms.member.department === name);
+      const deptMembers = memberStatuses.filter((ms) => normalizeDepartment(ms.member.department) === name);
       const counts: Partial<Record<AvailabilityStatus, number>> = {};
       deptMembers.forEach(({ status }) => { counts[status] = (counts[status] || 0) + 1; });
       return { name, counts, total: deptMembers.length };
@@ -64,11 +86,12 @@ export default function DashboardPage() {
   const filteredMembers = useMemo(() =>
     memberStatuses
       .filter(({ member, status }) => {
+        const memberDepartment = normalizeDepartment(member.department);
         if (searchTerm && !member.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
             !member.email.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            !member.department.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+            !memberDepartment.toLowerCase().includes(searchTerm.toLowerCase())) return false;
         if (selectedStatus !== 'all' && status !== selectedStatus) return false;
-        if (selectedDept && member.department !== selectedDept) return false;
+        if (selectedDept && memberDepartment !== selectedDept) return false;
         if (selectedProject) {
           const proj = projects.find((p) => p.id === selectedProject);
           if (proj && !proj.memberIds.includes(member.id)) return false;
@@ -169,7 +192,7 @@ export default function DashboardPage() {
             { label: 'Verfügbar', value: availableNow, iconCls: 'text-green-500', numCls: 'text-green-500', barCls: 'bg-green-500', gradient: 'from-green-500/10 to-green-500/5', icon: Users },
             { label: 'Im Meeting', value: inMeetings, iconCls: 'text-amber-500', numCls: 'text-amber-500', barCls: 'bg-amber-500', gradient: 'from-amber-500/10 to-amber-500/5', icon: Clock },
             { label: 'Remote', value: remoteCount, iconCls: 'text-blue-500', numCls: 'text-blue-500', barCls: 'bg-blue-500', gradient: 'from-blue-500/10 to-blue-500/5', icon: Globe },
-            { label: 'Urlaub / Krank', value: onVacation + (statusCounts.sick || 0), iconCls: 'text-violet-500', numCls: 'text-violet-500', barCls: 'bg-violet-500', gradient: 'from-violet-500/10 to-violet-500/5', icon: CalendarClock },
+            { label: `Urlaubstage (${currentYear})`, value: yearlyVacationDays, iconCls: 'text-violet-500', numCls: 'text-violet-500', barCls: 'bg-violet-500', gradient: 'from-violet-500/10 to-violet-500/5', icon: CalendarClock },
           ].map((stat) => (
             <div key={stat.label} className={`stat-card card-shimmer rounded-xl p-4 bg-linear-to-br ${stat.gradient}`}>
               <div className="flex items-center justify-between mb-2">
@@ -178,7 +201,7 @@ export default function DashboardPage() {
               </div>
               <div className={`text-3xl font-black ${stat.numCls}`}>{stat.value}</div>
               <div className="mt-1 h-1 rounded-full bg-slate-200 dark:bg-white/10">
-                <div className={`progress-bar h-full rounded-full ${stat.barCls}`} style={{ width: `${members.length > 0 ? (stat.value / members.length) * 100 : 0}%` }} />
+                <div className={`progress-bar h-full rounded-full ${stat.barCls}`} style={{ width: `${members.length > 0 ? Math.min((stat.value / members.length) * 100, 100) : 0}%` }} />
               </div>
             </div>
           ))}
@@ -187,10 +210,10 @@ export default function DashboardPage() {
 
       {/* ── Analytics Row ──────────────────────── */}
       {members.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-delay-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 animate-fade-in-delay-2 items-start">
           {/* Status Distribution */}
-          <div className="card-shimmer rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="card-shimmer rounded-xl p-3.5">
+            <div className="flex items-center gap-2 mb-2.5">
               <BarChart3 size={14} className="dark:text-white/40 text-gray-400" />
               <h2 className="text-xs font-bold dark:text-white/60 text-gray-600 uppercase tracking-wider">Statusverteilung</h2>
             </div>
@@ -198,8 +221,8 @@ export default function DashboardPage() {
           </div>
 
           {/* Department bars */}
-          <div className="card-shimmer rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-4">
+          <div className="card-shimmer rounded-xl p-3.5">
+            <div className="flex items-center gap-2 mb-2.5">
               <LayoutGrid size={14} className="dark:text-white/40 text-gray-400" />
               <h2 className="text-xs font-bold dark:text-white/60 text-gray-600 uppercase tracking-wider">Nach Abteilung</h2>
             </div>

@@ -582,11 +582,6 @@ export default function YearOverviewPage() {
   }, [userProfile, hasMinRole]);
 
   // -- filterRowForMine -- "Nur meine" zeigt eigene + Team-Einträge je nach Rolle
-  const myMemberRecord = useMemo(() => members.find(m =>
-    (userProfile?.email && m.email.toLowerCase() === userProfile.email.toLowerCase()) ||
-    (userProfile?.id && m.userId === userProfile.id)
-  ), [members, userProfile]);
-
   const filterRowForMine = useCallback((row: { member: { id: string; email: string; userId?: string } }) => {
     // "Nur meine" zeigt immer nur die eigene Zeile – unabhängig von der Rolle
     if (userProfile?.email && row.member.email.toLowerCase() === userProfile.email.toLowerCase()) return true;

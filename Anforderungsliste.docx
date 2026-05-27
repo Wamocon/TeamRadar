@@ -1,0 +1,41 @@
+Anforderungsliste TeamRadar
+
+1. Benutzerverwaltung
+   - Authentifizierung via Supabase
+   - Rollen: Admin, Manager, Member
+2. Team- und Mitgliederverwaltung
+   - Teams anlegen, bearbeiten, löschen
+   - Mitglieder anlegen, bearbeiten, löschen
+   - Zuweisung von Mitgliedern zu Teams
+3. Verfügbarkeitsmanagement
+   - Verfügbarkeiten (Status, Zeiträume) erfassen
+   - Übersicht und Filter für Verfügbarkeiten
+4. Projektmanagement
+   - Projekte anlegen, bearbeiten, löschen
+   - Zuweisung von Mitgliedern zu Projekten
+5. Auslastungsübersicht
+   - Visualisierung der Team-Auslastung
+   - Filter nach Zeitraum, Team, Projekt
+6. Kalender- und Jahresübersicht
+   - Kalenderansicht für Verfügbarkeiten
+   - Jahresübersicht für Teams/Mitglieder
+7. Alerts & Reports
+   - Benachrichtigungen bei Konflikten
+   - Reports zu Auslastung, Verfügbarkeit
+8. Excel-Import/-Export
+   - Import von Mitgliedern/Verfügbarkeiten
+   - Export von Reports
+9. Responsive UI
+   - Optimiert für Desktop und Tablet
+10. Sicherheit & Datenschutz
+   - RLS-Policies in Supabase
+   - DSGVO-konforme Speicherung
+11. Supabase Setup & Validierung
+   - Die Anwendung nutzt Supabase als Datenbank mit den Schemas public, test und prod.
+   - Das aktive Schema wird über die Umgebungsvariable NEXT_PUBLIC_DB_SCHEMA gesteuert.
+   - Migrationen und Rechte sind dokumentiert (siehe Projekthandbuch und README_SUPABASE.md).
+   - Nach Änderungen an Migrationen oder .env muss das Projekt neu gestartet werden.
+   - Die App zeigt nur Daten an, die zum eingeloggten Supabase-User gehören (user_id).
+   - Validierung: Im UI-Debug-Bereich (oben rechts) ist das aktive Schema sichtbar.
+   - Tests und Validierungschecks sind im Code unter __tests__ dokumentiert.
+

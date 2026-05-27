@@ -1,0 +1,29 @@
+Technische Schnittstellenbeschreibung TeamRadar
+
+1. Supabase REST-API
+- Endpunkte: /rest/v1/{table}
+- Methoden: GET, POST, PATCH, DELETE
+- Authentifizierung: Bearer-Token (JWT)
+- Filter: Query-Parameter (z.B. ?user_id=...)
+- Response: JSON
+
+2. Supabase Auth
+- Endpunkte: /auth/v1/signup, /auth/v1/token, ...
+- Methoden: POST
+- Response: JWT, User-Objekt
+
+3. Excel-Import/-Export
+- Format: .xlsx
+- Import: Mitglieder, Verfügbarkeiten
+- Export: Reports
+
+4. Frontend-Backend-Kommunikation
+- Framework: fetch/axios
+- Auth: JWT im Header
+- Fehlerbehandlung: HTTP-Statuscodes
+
+5. Technische Details Supabase-Anbindung
+- Verbindung zu Supabase erfolgt über die offiziellen Client-Bibliotheken.
+- Das Schema wird dynamisch gesetzt, Migrationen und Policies werden automatisiert angewendet.
+- Fehlerquellen (z.B. falsches Schema, fehlende Rechte) werden im UI und in der Dokumentation behandelt.
+- Tests und Validierungschecks sind im Repository dokumentiert.

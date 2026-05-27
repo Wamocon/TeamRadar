@@ -1,0 +1,31 @@
+Fachliche Schnittstellenbeschreibung TeamRadar
+
+1. Benutzerverwaltung
+- Anmeldung, Registrierung, Passwort-Reset
+- Rollen: Admin, Manager, Member
+
+2. Team- und Mitgliederverwaltung
+- Teams anlegen, bearbeiten, löschen
+- Mitglieder anlegen, bearbeiten, löschen
+- Zuweisung von Mitgliedern zu Teams
+
+3. Verfügbarkeiten
+- Status: verfügbar, abwesend, Meeting, Urlaub
+- Zeiträume erfassen und bearbeiten
+- Filter nach Team, Zeitraum, Status
+
+4. Projekte
+- Projekte anlegen, bearbeiten, löschen
+- Mitglieder zu Projekten zuweisen
+- Projektstatus: aktiv, abgeschlossen, extern
+
+5. Auslastung & Reports
+- Auslastung pro Team/Mitglied
+- Reports zu Verfügbarkeit, Auslastung
+- Export als Excel
+
+6. Technische Details Supabase-Anbindung
+- Verbindung zu Supabase erfolgt über die offiziellen Client-Bibliotheken.
+- Das Schema wird dynamisch gesetzt, Migrationen und Policies werden automatisiert angewendet.
+- Fehlerquellen (z.B. falsches Schema, fehlende Rechte) werden im UI und in der Dokumentation behandelt.
+- Tests und Validierungschecks sind im Repository dokumentiert.

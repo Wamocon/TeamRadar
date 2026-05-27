@@ -152,11 +152,6 @@ function ProjectDetailPopup({
 
   const isDirty = editMode && (editName !== project.name || editDescription !== (project.description || ''));
 
-  const handleCancelEdit = () => {
-    if (isDirty) setShowCancelConfirm(true);
-    else setEditMode(false);
-  };
-
   const handleSave = async () => {
     setIsSaving(true);
     const memberIdsArr = Array.from(selectedMemberIds);

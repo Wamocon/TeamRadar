@@ -588,18 +588,11 @@ export default function YearOverviewPage() {
   ), [members, userProfile]);
 
   const filterRowForMine = useCallback((row: { member: { id: string; email: string; userId?: string } }) => {
-    // Immer eigene Zeile einschließen
+    // "Nur meine" zeigt immer nur die eigene Zeile – unabhängig von der Rolle
     if (userProfile?.email && row.member.email.toLowerCase() === userProfile.email.toLowerCase()) return true;
     if (userProfile?.id && row.member.userId && userProfile.id === row.member.userId) return true;
-    // CIO und Admin: alle Berater sehen
-    if (hasMinRole('cio')) return true;
-    // Abteilungsleiter: eigene Abteilung sehen
-    if (hasMinRole('department_lead') && myMemberRecord?.department) {
-      const fullMember = members.find(m => m.id === row.member.id);
-      return fullMember?.department === myMemberRecord.department;
-    }
     return false;
-  }, [userProfile, hasMinRole, myMemberRecord, members]);
+  }, [userProfile]);
 
   // -- Yearly matrix data (all 12 months) ---------------
   const yearlyMatrixData = useMemo(() => {
@@ -1200,11 +1193,7 @@ export default function YearOverviewPage() {
           {showOnlyMine && (
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-(--primary-light) border border-[rgba(99,102,241,0.2)] text-[11px] font-semibold text-(--primary)">
               <Eye size={12} />
-              {hasMinRole('cio')
-                ? 'Alle Berater sichtbar (Admin/CIO-Sicht) – du siehst deine gesamte Verantwortung.'
-                : hasMinRole('department_lead')
-                  ? 'Deine Abteilung wird angezeigt – Mitglieder anderer Abteilungen ausgeblendet.'
-                  : 'Nur deine Einträge werden angezeigt – alle anderen Berater ausgeblendet.'}
+              Nur deine Einträge werden angezeigt – alle anderen Berater ausgeblendet.
               {' '}Klicke &ldquo;Nur meine&rdquo; erneut, um alle anzuzeigen.
             </div>
           )}

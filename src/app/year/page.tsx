@@ -43,38 +43,38 @@ type DayCategory =
   | 'intern-onsite' | 'intern-remote' | 'available' | 'weekend' | 'free'
   | 'home-extern' | 'berufsschule' | 'buero-berufsschule' | 'buero-uni' | 'uni';
 
-const DAY_CATEGORY_CONFIG: Record<DayCategory, { label: string; short: string; color: string; bg: string }> = {
-  vacation:           { label: 'Urlaub',                   short: 'U',   color: '#fff',    bg: '#8b5cf6' },
-  sick:               { label: 'Krank',                    short: 'K',   color: '#fff',    bg: '#ec4899' },
-  'extern-onsite':    { label: 'Ext. Projekt (eP)',         short: 'eP',  color: '#fff',    bg: '#f97316' },
-  'extern-remote':    { label: 'Büro ext. Projekt (BeP)',  short: 'BeP', color: '#fff',    bg: '#fb923c' },
-  'intern-onsite':    { label: 'Büro intern (B)',          short: 'B',   color: '#fff',    bg: '#6366f1' },
-  'intern-remote':    { label: 'Homeoffice intern (H)',     short: 'H',   color: '#fff',    bg: '#06b6d4' },
-  available:          { label: 'Verfügbar',                short: 'V',   color: '#166534', bg: '#bbf7d0' },
-  weekend:            { label: 'Wochenende',               short: '',    color: '#9ca3af', bg: 'rgba(156,163,175,0.1)' },
-  free:               { label: 'Kein Status',              short: '',    color: '#d1d5db', bg: 'transparent' },
-  'home-extern':      { label: 'Homeoffice ext. Projekt (HeP)', short: 'HeP', color: '#fff', bg: '#0891b2' },
-  berufsschule:       { label: 'Berufschule (BS)',          short: 'BS',  color: '#fff',    bg: '#ca8a04' },
-  'buero-berufsschule':{ label: 'Büro Berufschule (BBS)',  short: 'BBS', color: '#fff',    bg: '#a16207' },
-  'buero-uni':        { label: 'Büro Universität (BU)',    short: 'BU',  color: '#fff',    bg: '#1d4ed8' },
-  uni:                { label: 'Universität (Uni)',          short: 'Uni', color: '#fff',    bg: '#7c3aed' },
+const DAY_CATEGORY_CONFIG: Record<DayCategory, { label: string; short: string; color: string; bg: string; bgClass: string; textClass: string; badgeCls: string }> = {
+  vacation:           { label: 'Urlaub',                   short: 'U',   color: '#fff',    bg: '#8b5cf6', bgClass: 'bg-violet-500',  textClass: 'text-white', badgeCls: 'text-violet-500 bg-violet-500/7' },
+  sick:               { label: 'Krank',                    short: 'K',   color: '#fff',    bg: '#ec4899', bgClass: 'bg-pink-500',    textClass: 'text-white', badgeCls: 'text-pink-500 bg-pink-500/7' },
+  'extern-onsite':    { label: 'Ext. Projekt (eP)',         short: 'eP',  color: '#fff',    bg: '#f97316', bgClass: 'bg-orange-500',  textClass: 'text-white', badgeCls: 'text-orange-500 bg-orange-500/7' },
+  'extern-remote':    { label: 'Büro ext. Projekt (BeP)',  short: 'BeP', color: '#fff',    bg: '#fb923c', bgClass: 'bg-orange-400',  textClass: 'text-white', badgeCls: 'text-orange-400 bg-orange-400/7' },
+  'intern-onsite':    { label: 'Büro intern (B)',          short: 'B',   color: '#fff',    bg: '#6366f1', bgClass: 'bg-indigo-500',  textClass: 'text-white', badgeCls: 'text-indigo-500 bg-indigo-500/7' },
+  'intern-remote':    { label: 'Homeoffice intern (H)',     short: 'H',   color: '#fff',    bg: '#06b6d4', bgClass: 'bg-cyan-500',    textClass: 'text-white', badgeCls: 'text-cyan-500 bg-cyan-500/7' },
+  available:          { label: 'Verfügbar',                short: 'V',   color: '#166534', bg: '#bbf7d0', bgClass: 'bg-green-200',   textClass: 'text-green-800', badgeCls: 'text-green-600 bg-green-500/7' },
+  weekend:            { label: 'Wochenende',               short: '',    color: '#9ca3af', bg: 'rgba(156,163,175,0.1)', bgClass: 'bg-gray-400/10', textClass: 'text-gray-400', badgeCls: 'text-gray-400 bg-gray-400/7' },
+  free:               { label: 'Kein Status',              short: '',    color: '#d1d5db', bg: 'transparent', bgClass: 'bg-transparent', textClass: 'text-gray-300', badgeCls: 'text-gray-400 bg-gray-400/7' },
+  'home-extern':      { label: 'Homeoffice ext. Projekt (HeP)', short: 'HeP', color: '#fff', bg: '#0891b2', bgClass: 'bg-cyan-600',  textClass: 'text-white', badgeCls: 'text-cyan-600 bg-cyan-600/7' },
+  berufsschule:       { label: 'Berufschule (BS)',          short: 'BS',  color: '#fff',    bg: '#ca8a04', bgClass: 'bg-yellow-600', textClass: 'text-white', badgeCls: 'text-yellow-600 bg-yellow-600/7' },
+  'buero-berufsschule':{ label: 'Büro Berufschule (BBS)',  short: 'BBS', color: '#fff',    bg: '#a16207', bgClass: 'bg-yellow-700', textClass: 'text-white', badgeCls: 'text-yellow-700 bg-yellow-700/7' },
+  'buero-uni':        { label: 'Büro Universität (BU)',    short: 'BU',  color: '#fff',    bg: '#1d4ed8', bgClass: 'bg-blue-700',   textClass: 'text-white', badgeCls: 'text-blue-700 bg-blue-700/7' },
+  uni:                { label: 'Universität (Uni)',          short: 'Uni', color: '#fff',    bg: '#7c3aed', bgClass: 'bg-violet-700', textClass: 'text-white', badgeCls: 'text-violet-700 bg-violet-700/7' },
 };
 
 // -- Monats-Statistikspalten ---------------------------------------------------
-interface StatCol { key: string; title: string; color: string; cat: DayCategory | null }
+interface StatCol { key: string; title: string; color: string; textClass: string; cat: DayCategory | null }
 const MONTH_STATS_COLS: StatCol[] = [
-  { key: 'S',   title: 'Arbeitstage gesamt',             color: '#374151', cat: null },
-  { key: 'eP',  title: 'Ext. Präsenz',                  color: '#f97316', cat: 'extern-onsite' },
-  { key: 'BeP', title: 'Ext. HomeOffice',               color: '#fb923c', cat: 'extern-remote' },
-  { key: 'HeP', title: 'Homeoffice ext. Projekt',        color: '#0891b2', cat: 'home-extern' },
-  { key: 'B',   title: 'Büro intern',                   color: '#6366f1', cat: 'intern-onsite' },
-  { key: 'H',   title: 'HomeOffice intern',             color: '#06b6d4', cat: 'intern-remote' },
-  { key: 'BS',  title: 'Berufschule',                   color: '#ca8a04', cat: 'berufsschule' },
-  { key: 'BBS', title: 'Büro Berufschule',              color: '#a16207', cat: 'buero-berufsschule' },
-  { key: 'BU',  title: 'Büro Universität',              color: '#1d4ed8', cat: 'buero-uni' },
-  { key: 'Uni', title: 'Universität',                   color: '#7c3aed', cat: 'uni' },
-  { key: 'K',   title: 'Krank',                         color: '#ec4899', cat: 'sick' },
-  { key: 'U',   title: 'Urlaub',                        color: '#8b5cf6', cat: 'vacation' },
+  { key: 'S',   title: 'Arbeitstage gesamt',             color: '#374151', textClass: 'text-gray-700',   cat: null },
+  { key: 'eP',  title: 'Ext. Präsenz',                  color: '#f97316', textClass: 'text-orange-500', cat: 'extern-onsite' },
+  { key: 'BeP', title: 'Ext. HomeOffice',               color: '#fb923c', textClass: 'text-orange-400', cat: 'extern-remote' },
+  { key: 'HeP', title: 'Homeoffice ext. Projekt',        color: '#0891b2', textClass: 'text-cyan-600',   cat: 'home-extern' },
+  { key: 'B',   title: 'Büro intern',                   color: '#6366f1', textClass: 'text-indigo-500', cat: 'intern-onsite' },
+  { key: 'H',   title: 'HomeOffice intern',             color: '#06b6d4', textClass: 'text-cyan-500',   cat: 'intern-remote' },
+  { key: 'BS',  title: 'Berufschule',                   color: '#ca8a04', textClass: 'text-yellow-600', cat: 'berufsschule' },
+  { key: 'BBS', title: 'Büro Berufschule',              color: '#a16207', textClass: 'text-yellow-700', cat: 'buero-berufsschule' },
+  { key: 'BU',  title: 'Büro Universität',              color: '#1d4ed8', textClass: 'text-blue-700',   cat: 'buero-uni' },
+  { key: 'Uni', title: 'Universität',                   color: '#7c3aed', textClass: 'text-violet-700', cat: 'uni' },
+  { key: 'K',   title: 'Krank',                         color: '#ec4899', textClass: 'text-pink-500',   cat: 'sick' },
+  { key: 'U',   title: 'Urlaub',                        color: '#8b5cf6', textClass: 'text-violet-500', cat: 'vacation' },
 ];
 
 // Module-level constant – not recreated on every render
@@ -134,8 +134,7 @@ function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, toda
 
   if (isWeekend) {
     return (
-      <td className="p-0 relative"
-        style={{ background: holiday ? 'rgba(239,68,68,0.07)' : 'rgba(156,163,175,0.07)' }}
+      <td className={`p-0 relative ${holiday ? 'bg-red-500/7' : 'bg-gray-400/7'}`}
         title={holiday ? `${dayNum}. ${MONTH_NAMES_LONG[new Date(dateStr).getMonth()]} – 🗓️ ${holiday.name}` : undefined}
       >
         <div className="w-full h-12" />
@@ -274,21 +273,19 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                 </th>
                 {days.map((d) => (
                   <th key={d.day}
-                    className={`text-center font-black pb-0.5 pt-1.5 ${
+                    className={`text-[11px] text-center font-black pb-0.5 pt-1.5 ${d.holiday ? 'bg-red-500/4' : ''} ${
                       d.isWeekend ? 'dark:text-white/15 text-gray-300' :
                       d.holiday ? 'text-red-400 dark:text-red-400' :
                       d.dateStr === today ? 'text-(--primary)' :
                       'dark:text-white/40 text-gray-500'
                     }`}
-                    style={{ fontSize: '11px', background: d.holiday ? 'rgba(239,68,68,0.04)' : undefined }}
                     title={d.holiday ? `🗓️ ${d.holiday.name}` : undefined}>
                     {d.day}
                   </th>
                 ))}
                 {MONTH_STATS_COLS.map((s, i) => (
                   <th key={s.key} rowSpan={2} title={s.title}
-                    className={`text-center font-black align-middle ${i === 0 ? 'border-l-2 dark:border-white/15 border-black/8' : ''}`}
-                    style={{ fontSize: '9px', color: s.color, verticalAlign: 'middle' }}>
+                    className={`text-[9px] text-center font-black align-middle ${s.textClass} ${i === 0 ? 'border-l-2 dark:border-white/15 border-black/8' : ''}`}>
                     {s.key}
                   </th>
                 ))}
@@ -297,10 +294,9 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                 <th className="sticky left-0 bg-white dark:bg-gray-900 z-10 border-r dark:border-white/10 border-gray-200" />
                 {days.map((d) => (
                   <th key={d.day}
-                    className={`text-center font-medium pb-1 ${
+                    className={`text-[9px] text-center font-medium pb-1 ${d.holiday && !d.isWeekend ? 'bg-red-500/4' : ''} ${
                       d.isWeekend ? 'dark:text-white/15 text-gray-300' : 'dark:text-white/20 text-gray-400'
-                    }`}
-                    style={{ fontSize: '9px', background: d.holiday && !d.isWeekend ? 'rgba(239,68,68,0.04)' : undefined }}>
+                    }`}>
                     {d.isWeekend ? d.weekday : (
                       <>
                         {d.weekday}
@@ -344,8 +340,7 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                       : categories.filter(c => c === s.cat).length;
                     return (
                       <td key={s.key}
-                        className={`text-center font-bold py-1 ${i === 0 ? 'border-l-2 dark:border-white/15 border-black/8' : ''}`}
-                        style={{ fontSize: '11px', color: val > 0 ? s.color : '#d1d5db' }}>
+                        className={`text-[11px] text-center font-bold py-1 ${val > 0 ? s.textClass : 'text-gray-300 dark:text-white/20'} ${i === 0 ? 'border-l-2 dark:border-white/15 border-black/8' : ''}`}>
                         {val > 0 ? val : '–'}
                       </td>
                     );
@@ -380,17 +375,16 @@ function ProjectPopup({ project, members, hasMinRole, onClose }: ProjectPopupPro
         onClick={e => e.stopPropagation()}>
         <div className="p-5 border-b dark:border-white/10 border-gray-100 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"
-              style={{ background: `linear-gradient(135deg, ${typeConf.color}, ${typeConf.color}99)` }}>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 ${typeConf.gradientClass}`}>
               <Briefcase size={18} />
             </div>
             <div>
               <h2 className="text-base font-black dark:text-white text-gray-900">{project.name}</h2>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white" style={{ background: typeConf.color }}>
+                <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white ${typeConf.bgClass}`}>
                   {typeConf.label}
                 </span>
-                <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold border" style={{ color: statusConf.color, borderColor: `${statusConf.color}40` }}>
+                <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold border ${statusConf.textClass} ${statusConf.borderLightClass}`}>
                   {statusConf.label}
                 </span>
               </div>
@@ -461,10 +455,10 @@ function ProjectCard({ project, onSelect }: ProjectCardProps) {
       className="w-full text-left p-3 rounded-xl border dark:border-white/6 border-black/6 hover:border-(--primary)/30 hover:bg-(--primary-light) transition-all cursor-pointer bg-transparent group">
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <div className="w-2 h-2 rounded-full shrink-0" style={{ background: typeConf.color }} />
+          <div className={`w-2 h-2 rounded-full shrink-0 ${typeConf.bgClass}`} />
           <span className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-(--primary) transition-colors">{project.name}</span>
         </div>
-        <span className="px-1.5 py-0.5 rounded-md text-[8px] font-bold border ml-2 shrink-0" style={{ color: statusConf.color, borderColor: `${statusConf.color}40` }}>
+        <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-bold border ml-2 shrink-0 ${statusConf.textClass} ${statusConf.borderLightClass}`}>
           {statusConf.label}
         </span>
       </div>
@@ -831,8 +825,7 @@ export default function YearOverviewPage() {
             return (
               <button key={key} onClick={() => handleSetStatus(quickStatus.memberId, quickStatus.date, key)}
                 className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[9px] font-semibold text-left hover:bg-gray-50 dark:hover:bg-white/5 border-none cursor-pointer w-full transition-colors bg-transparent dark:text-white/70 text-gray-700">
-                <div className="w-3 h-3 rounded-sm shrink-0 flex items-center justify-center text-[6px] font-bold"
-                  style={{ background: c.bg, color: c.color }}>{c.short}</div>
+                <div className={`w-3 h-3 rounded-sm shrink-0 flex items-center justify-center text-[6px] font-bold ${c.bgClass} ${c.textClass}`}>{c.short}</div>
                 {c.label.replace(/ \(.*\)/, '')}
               </button>
             );
@@ -863,8 +856,7 @@ export default function YearOverviewPage() {
             return (
               <button key={key} onClick={() => handleBulkFillMonth(bulkFill.month, bulkFill.year, key)}
                 className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[9px] font-semibold text-left hover:bg-gray-50 dark:hover:bg-white/5 border-none cursor-pointer w-full transition-colors bg-transparent dark:text-white/70 text-gray-700">
-                <div className="w-4 h-4 rounded flex items-center justify-center text-[7px] font-bold shrink-0"
-                  style={{ background: c.bg, color: c.color, boxShadow: 'inset 0 0 0 1.5px rgba(0,0,0,0.15)' }}>{c.short}</div>
+                <div className={`w-4 h-4 rounded flex items-center justify-center text-[7px] font-bold shrink-0 shadow-[inset_0_0_0_1.5px_rgba(0,0,0,0.15)] ${c.bgClass} ${c.textClass}`}>{c.short}</div>
                 {c.label.replace(/ \(.*\)/, '')}
               </button>
             );
@@ -895,8 +887,7 @@ export default function YearOverviewPage() {
             return (
               <button key={key} onClick={() => handleApplyMultiStatus(key)}
                 className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-[9px] font-semibold text-left hover:bg-gray-50 dark:hover:bg-white/5 border-none cursor-pointer w-full transition-colors bg-transparent dark:text-white/70 text-gray-700">
-                <div className="w-4 h-4 rounded flex items-center justify-center text-[7px] font-bold shrink-0"
-                  style={{ background: c.bg, color: c.color, boxShadow: 'inset 0 0 0 1.5px rgba(0,0,0,0.15)' }}>{c.short}</div>
+                <div className={`w-4 h-4 rounded flex items-center justify-center text-[7px] font-bold shrink-0 shadow-[inset_0_0_0_1.5px_rgba(0,0,0,0.15)] ${c.bgClass} ${c.textClass}`}>{c.short}</div>
                 {c.label.replace(/ \(.*\)/, '')}
               </button>
             );
@@ -983,22 +974,21 @@ export default function YearOverviewPage() {
                     const pct  = Math.min(100, Math.round((effectiveDays / plan) * 100));
                     const isOver   = diff >= 0;
                     const isWarn   = diff < 0 && diff >= -5;
-                    const barColor = isOver ? '#22c55e' : isWarn ? '#f59e0b' : '#ef4444';
-                    const bgColor  = isOver ? 'rgba(34,197,94,0.08)' : isWarn ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)';
-                    const borderColor = isOver ? 'rgba(34,197,94,0.25)' : isWarn ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.35)';
-                    const label    = isOver ? 'Im/Über Plan' : isWarn ? `${Math.abs(diff).toFixed(1)}d unter Plan` : `${Math.abs(diff).toFixed(1)}d unter Plan`;
-                    const labelColor = isOver ? '#16a34a' : isWarn ? '#d97706' : '#dc2626';
+                    const label    = isOver ? 'Im/Über Plan' : `${Math.abs(diff).toFixed(1)}d unter Plan`;
+                    const cardCls  = isOver ? 'bg-green-500/8 border-green-500/25' : isWarn ? 'bg-amber-500/8 border-amber-500/25' : 'bg-red-500/8 border-red-500/35';
+                    const barCls   = isOver ? 'bg-green-500' : isWarn ? 'bg-amber-500' : 'bg-red-500';
+                    const numCls   = isOver ? 'text-green-500' : isWarn ? 'text-amber-500' : 'text-red-500';
+                    const lblCls   = isOver ? 'text-green-600' : isWarn ? 'text-amber-600' : 'text-red-600';
                     return (
                       <div
                         key={member.id}
-                        className="rounded-xl p-4 border"
-                        style={{ background: bgColor, borderColor }}
+                        className={`rounded-xl p-4 border ${cardCls}`}
                         title={`${extDays} ext. Tage - ${hourLoss}h Verlust (${fullExtWeeks} Vollwochen × 1h) ÷ 8 = ${effectiveDays}d effektiv`}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div>
                             <div className="text-[10px] font-semibold dark:text-white/50 text-gray-500 truncate max-w-32.5">{member.name}</div>
-                            <div className="text-2xl font-black mt-0.5" style={{ color: barColor }}>
+                            <div className={`text-2xl font-black mt-0.5 ${numCls}`}>
                               {effectiveDays.toFixed(1)}<span className="text-sm font-semibold ml-0.5 opacity-60">d</span>
                             </div>
                           </div>
@@ -1009,10 +999,10 @@ export default function YearOverviewPage() {
                         </div>
                         {/* Fortschrittsbalken */}
                         <div className="w-full h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden mb-2">
-                          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: barColor }} />
+                          <div className={`h-full rounded-full transition-all ${barCls}`} style={{ width: `${pct}%` }} />
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-[9px] font-bold" style={{ color: labelColor }}>
+                          <span className={`text-[9px] font-bold ${lblCls}`}>
                             {isOver ? '↑' : '↓'} {label}
                           </span>
                           <span className="text-[9px] dark:text-white/30 text-gray-400">{pct}%</span>
@@ -1078,11 +1068,10 @@ export default function YearOverviewPage() {
                           const diff = effectiveDays - extBudget;
                           const isOver  = diff >= 0;
                           const isWarn  = diff < 0 && diff >= -5;
-                          const color   = isOver ? '#22c55e' : isWarn ? '#f59e0b' : '#ef4444';
+                          const colCls  = isOver ? 'text-green-500' : isWarn ? 'text-amber-500' : 'text-red-500';
                           return (
                             <span
-                              className="inline-flex flex-col items-center gap-0 text-[10px] font-bold"
-                              style={{ color }}
+                              className={`inline-flex flex-col items-center gap-0 text-[10px] font-bold ${colCls}`}
                               title={`Effektiv: ${effectiveDays.toFixed(2)}d von ${extBudget}d Plan (Differenz: ${diff >= 0 ? '+' : ''}${diff.toFixed(2)}d)`}
                             >
                               {!isOver && !isWarn && <AlertCircle size={9} />}
@@ -1145,8 +1134,7 @@ export default function YearOverviewPage() {
               .filter(([cat]) => cat !== 'free' && cat !== 'weekend' && cat !== 'available')
               .map(([cat, conf]) => (
                 <div key={cat} className="flex items-center gap-1.5 text-[10px] dark:text-white/50 text-gray-600">
-                  <div className="w-5 h-4 rounded-sm flex items-center justify-center text-[7px] font-bold"
-                    style={{ background: conf.bg, color: conf.color }}>{conf.short}</div>
+                  <div className={`w-5 h-4 rounded-sm flex items-center justify-center text-[7px] font-bold ${conf.bgClass} ${conf.textClass}`}>{conf.short}</div>
                   {conf.label}
                 </div>
               ))}
@@ -1261,17 +1249,17 @@ export default function YearOverviewPage() {
           {/* KPI Header */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Projekte gesamt', value: projects.length, color: '#6366f1', icon: Briefcase },
-              { label: 'Extern', value: externalProjects.length, color: '#f97316', icon: TrendingUp },
-              { label: 'Intern', value: internalProjects.length, color: '#6366f1', icon: Users },
-              { label: 'Aktiv', value: projects.filter(p => p.status === 'active').length, color: '#22c55e', icon: CheckCircle2 },
+              { label: 'Projekte gesamt', value: projects.length, textCls: 'text-indigo-500', bgLightCls: 'bg-indigo-500/8', icon: Briefcase },
+              { label: 'Extern', value: externalProjects.length, textCls: 'text-orange-500', bgLightCls: 'bg-orange-500/8', icon: TrendingUp },
+              { label: 'Intern', value: internalProjects.length, textCls: 'text-indigo-500', bgLightCls: 'bg-indigo-500/8', icon: Users },
+              { label: 'Aktiv', value: projects.filter(p => p.status === 'active').length, textCls: 'text-green-500', bgLightCls: 'bg-green-500/8', icon: CheckCircle2 },
             ].map((stat) => (
               <div key={stat.label} className="card-shimmer rounded-xl p-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${stat.color}15` }}>
-                  <stat.icon size={16} style={{ color: stat.color }} />
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${stat.bgLightCls}`}>
+                  <stat.icon size={16} className={stat.textCls} />
                 </div>
                 <div>
-                  <div className="text-xl font-black" style={{ color: stat.color }}>{stat.value}</div>
+                  <div className={`text-xl font-black ${stat.textCls}`}>{stat.value}</div>
                   <div className="text-[10px] dark:text-white/40 text-gray-500">{stat.label}</div>
                 </div>
               </div>
@@ -1303,8 +1291,8 @@ export default function YearOverviewPage() {
                         {project.name}
                       </button>
                       <div className="flex-1 h-6 rounded bg-black/3 dark:bg-white/3 relative">
-                        <button onClick={() => setSelectedProject(project)} className="absolute h-full rounded flex items-center px-2 text-[8px] font-bold text-white overflow-hidden whitespace-nowrap border-none cursor-pointer hover:opacity-90 transition-opacity"
-                          style={{ left: `${leftPercent}%`, width: `${widthPercent}%`, background: 'linear-gradient(135deg,#6366f1,#818cf8)', minWidth: 4 }}>
+                        <button onClick={() => setSelectedProject(project)} className="absolute h-full rounded flex items-center px-2 text-[8px] font-bold text-white overflow-hidden whitespace-nowrap border-none cursor-pointer hover:opacity-90 transition-opacity bg-linear-to-br from-indigo-500 to-indigo-400 min-w-1"
+                          style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}>
                           {widthPercent > 8 && project.name}
                         </button>
                         {year === currentYear && (
@@ -1386,7 +1374,7 @@ export default function YearOverviewPage() {
               .filter(([cat]) => cat !== 'free' && cat !== 'weekend' && cat !== 'available')
               .map(([cat, conf]) => (
                 <div key={cat} className="flex items-center gap-1.5 text-[10px] dark:text-white/50 text-gray-600">
-                  <div className="w-5 h-4 rounded-sm flex items-center justify-center text-[7px] font-bold" style={{ background: conf.bg, color: conf.color }}>{conf.short}</div>
+                  <div className={`w-5 h-4 rounded-sm flex items-center justify-center text-[7px] font-bold ${conf.bgClass} ${conf.textClass}`}>{conf.short}</div>
                   {conf.label}
                 </div>
               ))}
@@ -1486,8 +1474,8 @@ export default function YearOverviewPage() {
                   const count = entryData.totalSummary[cat] || 0;
                   if (count === 0) return null;
                   return (
-                    <div key={cat} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold" style={{ color: conf.bg, background: `${conf.bg}12` }}>
-                      <span className="w-3 h-3 rounded-sm flex items-center justify-center text-[6px] font-bold" style={{ background: conf.bg, color: conf.color }}>{conf.short}</span>
+                    <div key={cat} className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold ${conf.badgeCls}`}>
+                      <span className={`w-3 h-3 rounded-sm flex items-center justify-center text-[6px] font-bold ${conf.bgClass} ${conf.textClass}`}>{conf.short}</span>
                       {conf.label.replace(/ \(.*\)/, '')}: {count}
                     </div>
                   );

@@ -35,7 +35,7 @@ const SectionCard = ({ title, icon: Icon, children, defaultOpen = true }: { titl
           <Icon size={14} className="text-(--primary)" />
           {title}
         </h3>
-        <span className="dark:text-white/30 text-gray-400 shrink-0 transition-transform duration-200" style={{ transform: open ? 'rotate(0deg)' : 'rotate(-90deg)' }}>
+        <span className={`dark:text-white/30 text-gray-400 shrink-0 transition-transform duration-200 ${open ? 'rotate-0' : '-rotate-90'}`}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </span>
       </button>
@@ -262,7 +262,7 @@ export default function ProfileSettingsPage() {
             </button>
           ))}
           {/* Konto-Badge */}
-          <div className="mt-4 p-3 rounded-xl bg-gradient-to-br from-(--primary) to-[#8b5cf6] text-white space-y-1">
+          <div className="mt-4 p-3 rounded-xl bg-linear-to-br from-(--primary) to-[#8b5cf6] text-white space-y-1">
             <div className="text-[8px] font-black uppercase tracking-widest opacity-60">Konto-ID</div>
             <div className="text-[9px] font-mono opacity-70 break-all">{userProfile?.id?.slice(0, 16) || '—'}…</div>
             <div className="text-[8px] font-semibold opacity-60">Seit {userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString('de') : '—'}</div>
@@ -614,7 +614,7 @@ export default function ProfileSettingsPage() {
                   {[
                     { id: 'light' as const, label: 'Hell', icon: Sun, preview: 'bg-white border-gray-200' },
                     { id: 'dark' as const, label: 'Dunkel', icon: Moon, preview: 'bg-gray-900 border-gray-700' },
-                    { id: 'system' as const, label: 'System', icon: Laptop, preview: 'bg-gradient-to-br from-white to-gray-900 border-gray-400' },
+                    { id: 'system' as const, label: 'System', icon: Laptop, preview: 'bg-linear-to-br from-white to-gray-900 border-gray-400' },
                   ].map((opt) => (
                     <button key={opt.id} onClick={() => { setTheme(opt.id); setGlobalTheme(opt.id); }}
                       className={`p-4 rounded-xl border-2 transition-all cursor-pointer bg-transparent flex flex-col items-center gap-2 ${theme === opt.id ? 'border-(--primary) bg-(--primary-light)' : 'dark:border-white/10 border-gray-200 hover:border-[rgba(99,102,241,0.3)]'}`}>
@@ -851,15 +851,15 @@ export default function ProfileSettingsPage() {
               <SectionCard title="Letzte Aktivitäten" icon={Activity}>
                 <div className="space-y-0">
                   {[
-                    { action: 'Verfügbarkeit gesetzt', detail: 'BeP für 15.–20. April', time: 'Vor 2 Std.', color: '#f97316' },
-                    { action: 'Projekt beigetreten', detail: 'TeamRadar v2 Weiterentwicklung', time: 'Gestern', color: '#6366f1' },
-                    { action: 'Profil aktualisiert', detail: 'Anzeigename geändert', time: 'Vor 3 Tagen', color: '#06b6d4' },
-                    { action: 'Anmeldung', detail: 'Chrome · Windows 11', time: 'Vor 5 Tagen', color: '#22c55e' },
-                    { action: 'Passwort geändert', detail: '—', time: 'Vor 2 Wochen', color: '#8b5cf6' },
-                    { action: 'Konto erstellt', detail: 'Einladung akzeptiert', time: userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString('de') : '—', color: '#ec4899' },
+                    { action: 'Verfügbarkeit gesetzt', detail: 'BeP für 15.–20. April', time: 'Vor 2 Std.', dotCls: 'bg-orange-500' },
+                    { action: 'Projekt beigetreten', detail: 'TeamRadar v2 Weiterentwicklung', time: 'Gestern', dotCls: 'bg-indigo-500' },
+                    { action: 'Profil aktualisiert', detail: 'Anzeigename geändert', time: 'Vor 3 Tagen', dotCls: 'bg-cyan-500' },
+                    { action: 'Anmeldung', detail: 'Chrome · Windows 11', time: 'Vor 5 Tagen', dotCls: 'bg-green-500' },
+                    { action: 'Passwort geändert', detail: '—', time: 'Vor 2 Wochen', dotCls: 'bg-violet-500' },
+                    { action: 'Konto erstellt', detail: 'Einladung akzeptiert', time: userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString('de') : '—', dotCls: 'bg-pink-500' },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3 py-3 border-b dark:border-white/4 border-black/4 last:border-0">
-                      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: item.color }} />
+                      <div className={`w-2 h-2 rounded-full shrink-0 ${item.dotCls}`} />
                       <div className="flex-1">
                         <div className="text-xs font-bold dark:text-white text-gray-900">{item.action}</div>
                         {item.detail !== '—' && <div className="text-[10px] dark:text-white/30 text-gray-400">{item.detail}</div>}
@@ -872,13 +872,13 @@ export default function ProfileSettingsPage() {
               <SectionCard title="Nutzungsstatistik" icon={Hash}>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[
-                    { label: 'Tage eingetragen', value: '127', color: '#6366f1' },
-                    { label: 'Projekte', value: '8', color: '#f97316' },
-                    { label: 'Logins (Monat)', value: '43', color: '#22c55e' },
-                    { label: 'Berichte', value: '5', color: '#8b5cf6' },
+                    { label: 'Tage eingetragen', value: '127', textCls: 'text-indigo-500' },
+                    { label: 'Projekte', value: '8', textCls: 'text-orange-500' },
+                    { label: 'Logins (Monat)', value: '43', textCls: 'text-green-500' },
+                    { label: 'Berichte', value: '5', textCls: 'text-violet-500' },
                   ].map((s) => (
                     <div key={s.label} className="p-3 rounded-xl bg-black/2 dark:bg-white/2 border dark:border-white/4 border-black/4 text-center">
-                      <div className="text-2xl font-black" style={{ color: s.color }}>{s.value}</div>
+                      <div className={`text-2xl font-black ${s.textCls}`}>{s.value}</div>
                       <div className="text-[9px] dark:text-white/30 text-gray-400 font-semibold mt-0.5">{s.label}</div>
                     </div>
                   ))}

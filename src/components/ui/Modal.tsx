@@ -52,7 +52,7 @@ export function Modal({
   const { maxWidth, maxHeight } = SIZE_CONFIG[size];
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-fade-in">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 animate-fade-in">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-md transition-opacity"

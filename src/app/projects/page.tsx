@@ -46,10 +46,10 @@ const INPUT_CLS = 'w-full bg-black/2 dark:bg-white/2 border dark:border-white/10
 const LABEL_CLS = 'text-[9px] font-bold uppercase tracking-wide dark:text-white/40 text-gray-500';
 
 const PRIORITY_CONFIG = {
-  low:      { label: 'Niedrig',  color: '#22c55e' },
-  medium:   { label: 'Mittel',   color: '#f59e0b' },
-  high:     { label: 'Hoch',     color: '#f97316' },
-  critical: { label: 'Kritisch', color: '#ef4444' },
+  low:      { label: 'Niedrig',  color: '#22c55e', textClass: 'text-green-500',  bgLightClass: 'bg-green-500/8' },
+  medium:   { label: 'Mittel',   color: '#f59e0b', textClass: 'text-amber-500',  bgLightClass: 'bg-amber-500/8' },
+  high:     { label: 'Hoch',     color: '#f97316', textClass: 'text-orange-500', bgLightClass: 'bg-orange-500/8' },
+  critical: { label: 'Kritisch', color: '#ef4444', textClass: 'text-red-500',    bgLightClass: 'bg-red-500/8' },
 } as const;
 
 // ── ProjectCard ──────────────────────────────────────────────────────────────
@@ -62,17 +62,17 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: (p: Projec
   return (
     <button onClick={() => onOpen(project)}
       className="w-full text-left p-4 rounded-xl border dark:border-white/6 border-black/6 hover:border-[rgba(99,102,241,0.3)] hover:bg-(--primary-light) transition-all cursor-pointer bg-transparent group relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: typeConf.color }} />
+      <div className={`absolute top-0 left-0 right-0 h-0.5 ${typeConf.bgClass}`} />
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <div className="w-7 h-7 rounded-lg shrink-0 flex items-center justify-center" style={{ background: `${typeConf.color}20` }}>
-            <Briefcase size={13} style={{ color: typeConf.color }} />
+          <div className={`w-7 h-7 rounded-lg shrink-0 flex items-center justify-center ${typeConf.bgLightClass}`}>
+            <Briefcase size={13} className={typeConf.textClass} />
           </div>
           <span className="text-xs font-bold dark:text-white text-gray-900 truncate group-hover:text-(--primary) transition-colors">{project.name}</span>
         </div>
         <div className="flex items-center gap-1 shrink-0 ml-2">
-          {priority && <span className="w-1.5 h-1.5 rounded-full" style={{ background: priority.color }} title={priority.label} />}
-          <span className="px-1.5 py-0.5 rounded-md text-[8px] font-bold border" style={{ color: statusConf.color, borderColor: `${statusConf.color}40` }}>
+          {priority && <span className={`w-1.5 h-1.5 rounded-full ${priority.bgLightClass.replace('/8', '')} opacity-90`} title={priority.label} />}
+          <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-bold border ${statusConf.textClass} ${statusConf.borderLightClass}`}>
             {statusConf.label}
           </span>
         </div>
@@ -202,8 +202,7 @@ function ProjectDetailPopup({
           <div className="p-4 border-b dark:border-white/10 border-gray-100 shrink-0">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0"
-                  style={{ background: `linear-gradient(135deg, ${typeConf.color}, ${typeConf.color}99)` }}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0 ${typeConf.gradientClass}`}>
                   <Briefcase size={16} />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -231,13 +230,12 @@ function ProjectDetailPopup({
                       </>
                     ) : (
                       <>
-                        <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white" style={{ background: typeConf.color }}>{typeConf.label}</span>
-                        <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold border" style={{ color: statusConf.color, borderColor: `${statusConf.color}40` }}>{statusConf.label}</span>
-                        {project.priority && (
-                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold" style={{ color: PRIORITY_CONFIG[project.priority as keyof typeof PRIORITY_CONFIG]?.color, background: `${PRIORITY_CONFIG[project.priority as keyof typeof PRIORITY_CONFIG]?.color}15` }}>
-                            {PRIORITY_CONFIG[project.priority as keyof typeof PRIORITY_CONFIG]?.label}
-                          </span>
-                        )}
+                        <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold text-white ${typeConf.bgClass}`}>{typeConf.label}</span>
+                        <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold border ${statusConf.textClass} ${statusConf.borderLightClass}`}>{statusConf.label}</span>
+                        {project.priority && (() => {
+                          const pConf = PRIORITY_CONFIG[project.priority as keyof typeof PRIORITY_CONFIG];
+                          return pConf ? <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold ${pConf.textClass} ${pConf.bgLightClass}`}>{pConf.label}</span> : null;
+                        })()}
                         {project.projectNumber && <span className="text-[9px] font-mono dark:text-white/30 text-gray-400">#{project.projectNumber}</span>}
                       </>
                     )}
@@ -486,7 +484,7 @@ function ProjectDetailPopup({
                         </div>
                       ) : (
                         isSelected && (
-                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold border shrink-0" style={{ color: roleConf.color, borderColor: `${roleConf.color}40`, background: `${roleConf.color}10` }}>
+                          <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold border shrink-0 ${roleConf.textClass} ${roleConf.borderLightClass} ${roleConf.bgLightClass}`}>
                             {roleConf.label}
                           </span>
                         )

@@ -29,7 +29,7 @@ export default function SettingsHubPage() {
     <div className="p-4 sm:p-6 w-full space-y-12 animate-fade-in">
       {/* Header */}
       <div className="text-center space-y-2">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-xl shadow-blue-500/20 mx-auto mb-6">
+        <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-xl shadow-blue-500/20 mx-auto mb-6">
           <Settings size={32} className="text-white" />
         </div>
         <h1 className="text-4xl font-black dark:text-white text-gray-900">
@@ -80,7 +80,7 @@ export default function SettingsHubPage() {
 
       {/* About Box */}
       <div className="pt-12 text-center border-t border-slate-100 dark:border-white/5">
-          <div className="text-xl font-black bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent mb-1">TeamRadar</div>
+          <div className="text-xl font-black bg-linear-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent mb-1">TeamRadar</div>
           <div className="text-[10px] dark:text-white/20 text-gray-400">Version 1.2.0 • Powered by Supabase</div>
       </div>
     </div>

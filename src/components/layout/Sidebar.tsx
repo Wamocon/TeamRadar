@@ -161,12 +161,12 @@ function SidebarContent({
   );
 
   return (
-    <div className="flex flex-col h-full bg-[var(--sidebar-bg)] text-[var(--sidebar-text-muted)] transition-colors duration-300" style={{ borderRight: '1px solid var(--sidebar-border)' }}>
+    <div className="flex flex-col h-full bg-[var(--sidebar-bg)] text-[var(--sidebar-text-muted)] transition-colors duration-300 border-r border-[color:var(--sidebar-border)]">
 
       {/* Header */}
-      <div className="shrink-0 flex items-center justify-between px-4 py-4 border-b" style={{ borderColor: 'var(--sidebar-border)' }}>
+      <div className="shrink-0 flex items-center justify-between px-4 py-4 border-b border-[color:var(--sidebar-border)]">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-lg">
+          <div className="w-8 h-8 rounded-xl bg-linear-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-lg">
             <LayoutDashboard size={15} className="text-white" />
           </div>
           <div>
@@ -185,7 +185,7 @@ function SidebarContent({
 
       {/* Org Box */}
       <div className="shrink-0 mx-3 mt-3">
-        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border" style={{ background: 'var(--bg-elevated, rgba(255,255,255,0.03))', borderColor: 'var(--sidebar-border)' }}>
+        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border bg-[var(--bg-elevated,rgba(255,255,255,0.03))] border-[color:var(--sidebar-border)]">
           <div className="w-7 h-7 rounded-lg bg-(--primary-light) flex items-center justify-center shrink-0">
             <Building2 size={13} className="text-(--primary)" />
           </div>
@@ -203,7 +203,7 @@ function SidebarContent({
       {/* Dual-Role-Switcher: nur für privilegierte User (department_lead+) */}
       {mounted && hasMinRole('department_lead') && (
         <div className="shrink-0 mx-3 mt-2">
-          <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'var(--sidebar-item-hover)' }}>
+          <div className="flex gap-1 p-1 rounded-xl bg-[var(--sidebar-item-hover)]">
             <button
               onClick={() => { setIsElevatedMode(true); localStorage.setItem('tr-role-mode', 'elevated'); window.dispatchEvent(new CustomEvent('tr-role-mode-change', { detail: { elevated: true } })); }}
               className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-bold transition-all border-none cursor-pointer ${
@@ -235,7 +235,7 @@ function SidebarContent({
       {/* App Switcher */}
       <div className="shrink-0 grid grid-cols-2 gap-1.5 mx-3 mt-3">
         {apps.map((app) => (
-          <button key={app.id} onClick={() => setActivePortal(app)} className="flex items-center gap-2 px-2.5 py-2 rounded-xl border transition-all text-[10px] font-semibold cursor-pointer bg-transparent hover:border-[rgba(99,102,241,0.3)] hover:bg-(--primary-light)" style={{ borderColor: 'var(--sidebar-border)', color: 'var(--sidebar-text-muted)' }}>
+          <button key={app.id} onClick={() => setActivePortal(app)} className="flex items-center gap-2 px-2.5 py-2 rounded-xl border transition-all text-[10px] font-semibold cursor-pointer bg-transparent hover:border-[rgba(99,102,241,0.3)] hover:bg-(--primary-light) border-[color:var(--sidebar-border)] text-[var(--sidebar-text-muted)]">
             <app.icon size={12} className={app.color} />
             {app.label}
           </button>
@@ -269,13 +269,13 @@ function SidebarContent({
       </nav>
 
       {/* Footer */}
-      <div className="shrink-0 p-3 border-t space-y-3" style={{ borderColor: 'var(--sidebar-border)', background: 'var(--bg-elevated, rgba(255,255,255,0.02))' }}>
-        <div className="flex items-center gap-1 p-1 rounded-xl border" style={{ borderColor: 'var(--sidebar-border)' }}>
+      <div className="shrink-0 p-3 border-t space-y-3 border-[color:var(--sidebar-border)] bg-[var(--bg-elevated,rgba(255,255,255,0.02))]">
+        <div className="flex items-center gap-1 p-1 rounded-xl border border-[color:var(--sidebar-border)]">
           <button onClick={() => setTheme('light')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'light' ? 'bg-white shadow-sm text-(--primary)' : 'text-[var(--sidebar-text-muted)]'}`}><Sun size={12} /></button>
           <button onClick={() => setTheme('dark')} className={`flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all border-none cursor-pointer ${theme === 'dark' ? 'bg-[#1a2236] text-white shadow-lg' : 'text-[var(--sidebar-text-muted)]'}`}><Moon size={12} /></button>
         </div>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center overflow-hidden shrink-0 border" style={{ background: 'var(--primary-light)', borderColor: 'rgba(99,102,241,0.2)' }}>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center overflow-hidden shrink-0 border bg-[var(--primary-light)] border-[color:rgba(99,102,241,0.2)]">
             {userProfile?.avatarUrl ? (
               <div className="relative w-full h-full">
                 <Image src={userProfile.avatarUrl} alt="User Avatar" fill className="object-cover" sizes="32px" />

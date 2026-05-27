@@ -114,24 +114,24 @@ export interface Team {
 export type ProjectType = 'internal' | 'external';
 export type ProjectStatus = 'planned' | 'active' | 'completed';
 
-export const PROJECT_TYPE_CONFIG: Record<ProjectType, { label: string; color: string; bgClass: string }> = {
-  internal: { label: 'Intern',  color: '#6366f1', bgClass: 'bg-indigo-500' },
-  external: { label: 'Extern', color: '#f97316', bgClass: 'bg-orange-500' },
+export const PROJECT_TYPE_CONFIG: Record<ProjectType, { label: string; color: string; bgClass: string; textClass: string; bgLightClass: string; gradientClass: string }> = {
+  internal: { label: 'Intern',  color: '#6366f1', bgClass: 'bg-indigo-500', textClass: 'text-indigo-500', bgLightClass: 'bg-indigo-500/12', gradientClass: 'bg-linear-to-br from-indigo-500 to-indigo-500/60' },
+  external: { label: 'Extern', color: '#f97316', bgClass: 'bg-orange-500', textClass: 'text-orange-500', bgLightClass: 'bg-orange-500/12', gradientClass: 'bg-linear-to-br from-orange-500 to-orange-500/60' },
 };
 
-export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, { label: string; color: string }> = {
-  planned:   { label: 'Geplant',      color: '#a3a3a3' },
-  active:    { label: 'Aktiv',        color: '#22c55e' },
-  completed: { label: 'Abgeschlossen', color: '#6b7280' },
+export const PROJECT_STATUS_CONFIG: Record<ProjectStatus, { label: string; color: string; textClass: string; borderLightClass: string }> = {
+  planned:   { label: 'Geplant',       color: '#a3a3a3', textClass: 'text-neutral-400', borderLightClass: 'border-neutral-400/25' },
+  active:    { label: 'Aktiv',         color: '#22c55e', textClass: 'text-green-500',   borderLightClass: 'border-green-500/25' },
+  completed: { label: 'Abgeschlossen', color: '#6b7280', textClass: 'text-gray-500',    borderLightClass: 'border-gray-500/25' },
 };
 
 /* ── Projekt-Zuweisung Rolle ──────────────────────────────── */
 export type ProjectMemberRole = 'operative' | 'supporting' | 'informed';
 
-export const PROJECT_MEMBER_ROLE_CONFIG: Record<ProjectMemberRole, { label: string; short: string; color: string }> = {
-  operative:  { label: 'Operativ',     short: 'Op', color: '#6366f1' },
-  supporting: { label: 'Unterstützend', short: 'Un', color: '#f59e0b' },
-  informed:   { label: 'Informierend', short: 'In', color: '#6b7280' },
+export const PROJECT_MEMBER_ROLE_CONFIG: Record<ProjectMemberRole, { label: string; short: string; color: string; textClass: string; borderLightClass: string; bgLightClass: string }> = {
+  operative:  { label: 'Operativ',      short: 'Op', color: '#6366f1', textClass: 'text-indigo-500', borderLightClass: 'border-indigo-500/25', bgLightClass: 'bg-indigo-500/12' },
+  supporting: { label: 'Unterstützend', short: 'Un', color: '#f59e0b', textClass: 'text-amber-500',  borderLightClass: 'border-amber-500/25',  bgLightClass: 'bg-amber-500/12' },
+  informed:   { label: 'Informierend',  short: 'In', color: '#6b7280', textClass: 'text-gray-500',   borderLightClass: 'border-gray-500/25',   bgLightClass: 'bg-gray-500/12' },
 };
 
 export interface ProjectMember {

@@ -33,7 +33,7 @@ const lightBlock = extractBlock('html:not(.dark)');
 /** Extrahiert den rgba-Alpha-Wert einer CSS-Variable aus einem Block */
 function extractOpacity(varName: string, block: string): number | null {
   const pattern = new RegExp(
-    varName.replace('--', '--') +
+    varName +
     ':\\s*rgba\\([^,]+,[^,]+,[^,]+,\\s*([0-9.]+)\\)',
   );
   const match = block.match(pattern);

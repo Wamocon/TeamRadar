@@ -18,7 +18,7 @@ html::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.25); border-radius
   /* DARK (Default) */
   --bg-base:    #060810;
   --bg-surface: #111827;
-  --bg-elevated:#1a2236;
+  --bg-elevated:#1e2a40;
   --bg-input:   #0d111a;
   --bg-ghost:   rgba(255,255,255,0.03);
   
@@ -26,12 +26,18 @@ html::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.25); border-radius
   --text-muted: rgba(255,255,255,0.40);
   --text-subtle: rgba(255,255,255,0.20);
   
-  --border:     rgba(255,255,255,0.08);
-  --border-subtle: rgba(255,255,255,0.04);
+  /* Borders: mehr Opazität für sichtbare Elementtrennung */
+  --border:     rgba(255,255,255,0.12);
+  --border-subtle: rgba(255,255,255,0.07);
   
   --dot-grid:   rgba(255,255,255,0.02);
-  --glass:      rgba(17,24,39,0.4);
-  --glass-border: rgba(255,255,255,0.06);
+  --glass:      rgba(17,24,39,0.65);
+  --glass-border: rgba(255,255,255,0.10);
+
+  /* Schatten-Tokens */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
 
   /* Brand – TeamRadar Indigo (AWAY-Stil) */
   --primary:       #6366f1;
@@ -43,7 +49,7 @@ html::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.25); border-radius
 
   /* Sidebar Tokens */
   --sidebar-bg:         #060810;
-  --sidebar-border:     rgba(255,255,255,0.06);
+  --sidebar-border:     rgba(255,255,255,0.10);
   --sidebar-text:       #f1f5f9;
   --sidebar-text-muted: rgba(255,255,255,0.45);
   --sidebar-item-active: rgba(99,102,241,0.12);
@@ -51,32 +57,39 @@ html::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.25); border-radius
 }
 
 html:not(.dark) {
-  /* LIGHT (Softer Contrast) */
-  --bg-base:    #f1f5f9;
-  --bg-surface: #f8fafc;
-  --bg-elevated:#f1f5f9;
+  /* LIGHT – Klarer visueller Kontrast: weiße Karten auf grauem Grund */
+  --bg-base:    #e8edf4;
+  --bg-surface: #ffffff;
+  --bg-elevated:#f4f6fa;
   --bg-input:   #ffffff;
   --bg-ghost:   rgba(0,0,0,0.02);
   
   --text-base:  #1e293b;
   --text-muted: rgba(0,0,0,0.40);
-  --text-subtle: rgba(0,0,0,0.20);
+  --text-subtle: rgba(0,0,0,0.22);
   
-  --border:     rgba(0,0,0,0.04);
-  --border-subtle: rgba(0,0,0,0.02);
+  /* Borders: deutlich sichtbar für klare Elementtrennung */
+  --border:     rgba(0,0,0,0.10);
+  --border-subtle: rgba(0,0,0,0.06);
   
   --dot-grid:   rgba(59,130,246,0.05);
-  --glass:      rgba(255,255,255,0.85);
-  --glass-border: rgba(0,0,0,0.04);
+  --glass:      rgba(255,255,255,0.98);
+  --glass-border: rgba(0,0,0,0.10);
+
+  /* Schatten-Tokens – stärker für Tiefe im Hellmodus */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06);
+
   --ring-focus: rgba(99,102,241,0.15);
 
   /* Sidebar Tokens */
-  --sidebar-bg:         #f8fafc;
-  --sidebar-border:     rgba(0,0,0,0.04);
+  --sidebar-bg:         #f4f6fa;
+  --sidebar-border:     rgba(0,0,0,0.10);
   --sidebar-text:       #1e293b;
   --sidebar-text-muted: rgba(0,0,0,0.45);
   --sidebar-item-active: rgba(99,102,241,0.08);
-  --sidebar-item-hover:  rgba(0,0,0,0.015);
+  --sidebar-item-hover:  rgba(0,0,0,0.03);
 }
 
 body {
@@ -97,16 +110,17 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-sm);
   transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 
 html:not(.dark) .card-shimmer {
-  box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.01);
+  box-shadow: var(--shadow-md);
 }
 
 .card-shimmer:hover {
-  border-color: rgba(99,102,241,0.2);
-  box-shadow: 0 8px 32px rgba(99,102,241,0.08);
+  border-color: rgba(99,102,241,0.25);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(99,102,241,0.12);
   transform: translateY(-1px);
 }
 

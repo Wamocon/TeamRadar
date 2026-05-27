@@ -1,5 +1,5 @@
 # TeamRadar – Professionelles Produkthandbuch
-**Version 1.1 | Mai 2026 | WAMOCON GmbH**
+**Version 1.2 | Mai 2026 | WAMOCON GmbH**
 
 ---
 
@@ -51,6 +51,8 @@ Die Jahresansicht (`/year`) bietet eine komprimierte 12-Monats-Übersicht aller 
 - Farbcodierte Darstellung von Urlaub, Krankheit und anderen Statusarten je Monat.
 - Gefilterte Anzeige nach Mitarbeitern und Teams.
 - Automatische Einblendung gesetzlicher Feiertage des konfigurierten Bundeslandes.
+- **Drag-to-select**: Mehrere Zellen durch gedrücktes Halten und Ziehen gleichzeitig auswählen.
+- **Rollenbasierter Filter „Nur meine"**: Zeigt Mitarbeiter entsprechend der Rolle an (Mitarbeiter: eigene Zeile; Abteilungsleiter: eigene Abteilung; Admin/CIO: alle).
 
 ### 3.5 Feiertags-Management
 TeamRadar wertet die gesetzlichen Feiertage automatisch aus:
@@ -60,6 +62,44 @@ TeamRadar wertet die gesetzlichen Feiertage automatisch aus:
 
 ### 3.6 Reporting
 Im Report-Bereich können Daten als CSV (für Excel/BI-Tools) oder JSON (für technische Audits) exportiert werden. Reports umfassen Auslastung, Stammdaten, Projektlisten und Verfügbarkeitshistorien.
+
+### 3.7 Verfügbarkeits-Status (v1.2)
+TeamRadar unterstützt 14 Statusarten – darunter fünf neue Typen für Berater in Ausbildung und Studium:
+
+| Kürzel | Status-Schlüssel | Label | Farbe |
+| :---: | :--- | :--- | :--- |
+| ✓ | `available` | Verfügbar | Grün |
+| B | `busy` | Büro intern | Indigo |
+| M | `meeting` | Im Meeting | Amber |
+| U | `vacation` | Urlaub | Violett |
+| K | `sick` | Krank | Pink |
+| H | `remote` | **Homeoffice intern** (umbenannt) | Cyan |
+| – | `offline` | Kein Status | Grau |
+| eP | `extern-onsite` | Ext. Projekt | Orange |
+| BeP | `extern-remote` | Büro ext. Projekt | Orange-hell |
+| **HeP** | `home-extern` | **Homeoffice ext. Projekt** | Cyan-dunkel |
+| **BS** | `berufsschule` | **Berufschule** | Gelb |
+| **BBS** | `buero-berufsschule` | **Büro Berufschule** | Dunkelgelb |
+| **BU** | `buero-uni` | **Büro Universität** | Blau |
+| **U** | `uni` | **Universität** | Dunkelviolett |
+
+> Fett markierte Einträge sind in v1.2 neu. `remote` wurde von „Remote" zu „Homeoffice intern" umbenannt.
+
+### 3.8 Chat (Floating-Popup)
+Ein persistentes Chat-Fenster ist über den Knopf unten rechts auf allen Seiten erreichbar. Es lässt sich auf- und zuklappen, zeigt ungelesene Nachrichten als Badge und unterstützt vollständiges Hell-/Dunkel-Theming.
+
+### 3.9 Erweitertes Mitarbeiterprofil
+Das Mitarbeiterprofil (`/settings/profile`) wurde um vier neue Sektionen erweitert:
+- **HR & Vertragsdaten**: Mitarbeiternummer, Kostenstelle, Vertragsart, Probezeit, Urlaubsanspruch, Resturlaub, Austrittsdatum.
+- **Notfallkontakt**: Name, Telefon, Verwandtschaftsverhältnis.
+- **Heimatadresse**: Straße, PLZ, Ort, Staatsangehörigkeit, Familienstand.
+- **Kommunikation & Team**: Slack, MS Teams, Durchwahl, Mentor, bevorzugte Projektarten, Schichtbereitschaft.
+
+### 3.10 Modalgröße (S / M / L)
+Modale Dialoge passen sich proportional in Breite **und** Höhe an die gewählte Größe an:
+- **S (Klein)**: max-w-lg / max-h-[55vh]
+- **M (Mittel)**: max-w-2xl / max-h-[75vh]
+- **L (Groß)**: max-w-[95vw] / max-h-[92vh]
 
 ---
 
@@ -76,12 +116,13 @@ TeamRadar nutzt ein hierarchisches Rollenmodell:
 
 ## 5. Technische Architektur
 ### 5.1 Systemübersicht
-- **Frontend**: Next.js 16 (App Router) mit TypeScript und Tailwind CSS.
+- **Frontend**: Next.js 16 (App Router) mit TypeScript und Tailwind CSS v4.
 - **State Management**: Zustand mit Cloud-Synchronisation und lokalem Persist-Modus.
 - **Backend / DB**: Supabase (PostgreSQL) mit Row Level Security (RLS).
 - **Authentifizierung**: Supabase Auth mit Einladungs-Tokens.
 - **Auth-Proxy**: `src/proxy.ts` schützt alle Routen mit session-basiertem Auth-Guard.
 - **Testabdeckung**: 100 % Zeilen-, Branch-, Funktions- und Statement-Abdeckung (Vitest + v8).
+- **Design-System**: CSS-Token-basiertes Hell-/Dunkel-Theming mit sichtbaren Kontraststufen (`--border`, `--shadow-sm/md/lg`, `--glass-border`). Weißer Kartengrund (`--bg-surface: #ffffff`) auf grauem Basis-Layout (`--bg-base: #e8edf4`) für klare visuelle Elementtrennung.
 
 ### 5.2 Offline-Konzept
 TeamRadar nutzt einen hybriden Store-Ansatz. Daten werden im lokalen Browser-Speicher gepuffert, was eine unterbrechungsfreie Nutzung bei instabiler Internetverbindung erlaubt. Die Synchronisation erfolgt automatisch bei Wiederherstellung der Verbindung.
@@ -121,4 +162,4 @@ Frühere Dokumentationslücken wurden durch die Integration der Rechtstexte dire
 - Letzte juristische Endprüfung der spezifischen AGB-Formulierungen durch einen Fachanwalt.
 - Abschluss von AVV/DPA Verträgen mit Drittanbietern (z.B. Hosting-Provider).
 
-**Fazit**: TeamRadar ist in der vorliegenden Version 1.1 technisch und administrativ bereit für den produktiven Einsatz in compliance-sensitiven Umgebungen. Die neu eingeführte Jahresübersicht, das state-basierte Feiertags-Management und das automatische Alerting-System runden das Produkt zu einer vollständigen Kapazitätsplanungslösung ab. Die lückenlose Testabdeckung (100 % nach allen Metriken) garantiert eine hohe Softwarequalität und Wartbarkeit.
+**Fazit**: TeamRadar ist in der vorliegenden Version 1.2 technisch und administrativ bereit für den produktiven Einsatz in compliance-sensitiven Umgebungen. Die neue Jahresübersicht mit Drag-to-select und rollenbasiertem Filter, das erweiterte Berater-Statussystem (14 Statusarten), das Chat-Floating-Panel, die stark erweiterten Mitarbeiterprofile sowie das überarbeitete visuelle Kontrastsystem runden das Produkt zu einer vollständigen Kapazitätsplanungslösung ab. Die lückenlose Testabdeckung (430 Tests, 100 % nach allen Metriken) garantiert eine hohe Softwarequalität und Wartbarkeit.

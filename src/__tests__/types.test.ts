@@ -10,6 +10,7 @@ import {
   PROJECT_TYPE_CONFIG,
   PROJECT_STATUS_CONFIG,
   ALERT_TYPE_CONFIG,
+  CONSULTANT_TYPE_CONFIG,
   type AvailabilityStatus,
   type UserRole,
   type Member,
@@ -231,5 +232,89 @@ describe('PROJECT_STATUS_CONFIG', () => {
       expect(conf.label).toBeTruthy();
       expect(conf.color).toMatch(/^#[0-9a-f]{6}$/i);
     });
+  });
+});
+
+describe('Neue Status-Typen (v1.2): HeP / BS / BBS / BU / U', () => {
+  it('home-extern ist konfiguriert mit Label Homeoffice ext. Projekt', () => {
+    expect(STATUS_CONFIG['home-extern'].label).toBe('Homeoffice ext. Projekt');
+    expect(STATUS_CONFIG['home-extern'].color).toMatch(/^#[0-9a-f]{6}$/i);
+    expect(STATUS_CONFIG['home-extern'].bgClass).toContain('cyan');
+  });
+
+  it('berufsschule (BS) ist konfiguriert', () => {
+    expect(STATUS_CONFIG['berufsschule'].label).toBe('Berufschule');
+    expect(STATUS_CONFIG['berufsschule'].bgClass).toContain('yellow');
+  });
+
+  it('buero-berufsschule (BBS) ist konfiguriert', () => {
+    expect(STATUS_CONFIG['buero-berufsschule'].label).toBe('Büro Berufschule');
+    expect(STATUS_CONFIG['buero-berufsschule'].bgClass).toContain('yellow');
+  });
+
+  it('buero-uni (BU) ist konfiguriert', () => {
+    expect(STATUS_CONFIG['buero-uni'].label).toBe('Büro Universität');
+    expect(STATUS_CONFIG['buero-uni'].bgClass).toContain('blue');
+  });
+
+  it('uni (U) ist konfiguriert', () => {
+    expect(STATUS_CONFIG['uni'].label).toBe('Universität');
+    expect(STATUS_CONFIG['uni'].bgClass).toContain('violet');
+  });
+
+  it('remote ist auf Homeoffice intern umbenannt', () => {
+    expect(STATUS_CONFIG['remote'].label).toBe('Homeoffice intern');
+  });
+
+  it('alle neuen Statuses haben distinkte Farben zu ihren Nachbarn', () => {
+    const cyan500 = STATUS_CONFIG['remote'].color;
+    const cyan600 = STATUS_CONFIG['home-extern'].color;
+    expect(cyan500).not.toBe(cyan600);
+
+    const yellow600 = STATUS_CONFIG['berufsschule'].color;
+    const yellow700 = STATUS_CONFIG['buero-berufsschule'].color;
+    expect(yellow600).not.toBe(yellow700);
+
+    const blue700 = STATUS_CONFIG['buero-uni'].color;
+    const violet700 = STATUS_CONFIG['uni'].color;
+    expect(blue700).not.toBe(violet700);
+  });
+});
+
+describe('CONSULTANT_TYPE_CONFIG', () => {
+  it('enthält die 3 Berater-Typen', () => {
+    expect(Object.keys(CONSULTANT_TYPE_CONFIG)).toHaveLength(3);
+    expect(CONSULTANT_TYPE_CONFIG.consultant).toBeDefined();
+    expect(CONSULTANT_TYPE_CONFIG.senior_consultant).toBeDefined();
+    expect(CONSULTANT_TYPE_CONFIG.apprentice).toBeDefined();
+  });
+
+  it('jeder Typ hat label, short, color und capacityComponents', () => {
+    Object.values(CONSULTANT_TYPE_CONFIG).forEach((conf) => {
+      expect(conf.label).toBeTruthy();
+      expect(conf.short).toBeTruthy();
+      expect(conf.color).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(Array.isArray(conf.capacityComponents)).toBe(true);
+      expect(conf.capacityComponents.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('Kürzel sind korrekt (B, SB, Az)', () => {
+    expect(CONSULTANT_TYPE_CONFIG.consultant.short).toBe('B');
+    expect(CONSULTANT_TYPE_CONFIG.senior_consultant.short).toBe('SB');
+    expect(CONSULTANT_TYPE_CONFIG.apprentice.short).toBe('Az');
+  });
+
+  it('Auszubildender enthält vocational_school in capacityComponents', () => {
+    expect(CONSULTANT_TYPE_CONFIG.apprentice.capacityComponents).toContain('vocational_school');
+  });
+
+  it('Berater enthält university in capacityComponents', () => {
+    expect(CONSULTANT_TYPE_CONFIG.consultant.capacityComponents).toContain('university');
+  });
+
+  it('alle Farben sind unterschiedlich', () => {
+    const colors = Object.values(CONSULTANT_TYPE_CONFIG).map((c) => c.color);
+    expect(new Set(colors).size).toBe(colors.length);
   });
 });

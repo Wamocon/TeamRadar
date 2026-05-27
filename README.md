@@ -1,4 +1,4 @@
-
+﻿
 # TeamRadar
 
 Mitarbeiter-Verfügbarkeit visualisieren und verwalten.
@@ -36,18 +36,21 @@ Das Produkthandbuch liegt als statische HTML-Datei im Verzeichnis `docs/index.ht
 ## Features
 
 - **Dashboard** – Echtzeit-Übersicht der Team-Verfügbarkeit mit Status-Karten
-- **Mitarbeiter** – CRUD für Mitarbeiterprofile (Name, Rolle, Abteilung, Kontakt)
-- **Verfügbarkeit** – Status eintragen (Verfügbar, Beschäftigt, Meeting, Urlaub, Krank, Remote, Offline)
+- **Mitarbeiter** – CRUD für Mitarbeiterprofile inkl. HR-Daten, Notfallkontakt und Adresse
+- **14 Verfügbarkeits-Status** – Verfügbar, Büro intern, Meeting, Urlaub, Krank, Homeoffice intern, Offline, Ext. Projekt, Büro ext. Projekt, **HeP/BS/BBS/BU/U** (v1.2 neu)
 - **Kalender** – Monatsansicht mit farbcodierten Verfügbarkeits-Dots und Feiertagen
-- **Jahresübersicht** – 12-Monats-Kompaktansicht mit Feiertagen und Statusfärbung
+- **Jahresübersicht** – 12-Monats-Kompaktansicht mit Drag-to-select und rollenbasiertem Filter
 - **Teams** – Mitarbeiter in Teams/Gruppen organisieren
 - **Projekte & Allocations** – Projektbindung mit prozentualer Kapazitätssteuerung
 - **Auslastung** – Visualisierung der Mitarbeiterauslastung über Zeiträume
 - **Alerts** – Automatische Warnungen bei Überbuchung (>100 %) und Urlaubs-/Krankheitskonflikten
 - **Reports** – Export von Auslastungs- und Stammdatenbericht (CSV / JSON)
-- **Admin** – Compliance-Übersicht und Benutzerverwaltung
+- **Admin** – Compliance-Übersicht, Benutzerverwaltung und Organisationseinstellungen
 - **Auth** – Login/Registrierung via Supabase Auth mit AGB/Datenschutz-Zustimmung
-- **Dark/Light Mode** – Umschaltbar mit persistenter Einstellung
+- **Chat** – Floating-Popup (unten rechts) mit Ungelesen-Badge, global verfügbar
+- **Adaptive Modalgröße** – S/M/L mit proportionaler Breite und Höhe
+- **Visueller Kontrast** – Sichtbare Borders, Schatten-Tokens und klare Oberflächenhierarchie
+- **Dark/Light Mode** – Umschaltbar, alle UI-Elemente ausnahmslos themefähig
 - **Hybrid Store** – Funktioniert lokal, synchronisiert optional mit Supabase
 - **Feiertags-Management** – Gesetzliche Feiertage nach Bundesland (alle 16 Bundesländer)
 
@@ -103,7 +106,7 @@ src/
 - Die App zeigt nur Daten an, die zum eingeloggten Supabase-User gehören (user_id).
 - Nach dem Start: LocalStorage leeren, um Demo-Daten zu vermeiden.
 - Tests für Seed-Daten, Policies und Datenkonsistenz siehe `src/__tests__/`.
-- **Testabdeckung: 100 %** auf allen Metriken (Zeilen, Branches, Funktionen, Statements) – geprüft mit Vitest + v8.
+- **Testabdeckung: 100 %** auf allen Metriken (430 Tests) – geprüft mit Vitest + v8.
 
 ## Troubleshooting
 

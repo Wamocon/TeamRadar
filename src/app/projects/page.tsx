@@ -176,6 +176,9 @@ function ProjectDetailPopup({
     setIsSaving(false);
   };
 
+  const isDirty = editMode && (editName !== project.name || editDescription !== (project.description || '') ||
+    editType !== project.type || editStatus !== project.status);
+
   const typeConf = PROJECT_TYPE_CONFIG[editType];
   const statusConf = PROJECT_STATUS_CONFIG[editStatus];
   const sizeClass = popupSize === 'S' ? 'max-w-lg' : popupSize === 'M' ? 'max-w-3xl' : 'max-w-[95vw]';
@@ -563,7 +566,7 @@ function ProjectDetailPopup({
           {/* Footer */}
           {editMode && (
             <div className="px-4 py-3 border-t dark:border-white/10 border-gray-100 flex items-center justify-end gap-2 shrink-0">
-              <button onClick={() => setEditMode(false)} className="px-3 py-1.5 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 hover:bg-gray-100 dark:hover:bg-white/5 border-none bg-transparent cursor-pointer transition-colors">
+              <button onClick={() => { if (isDirty) setShowCancelConfirm(true); else setEditMode(false); }} className="px-3 py-1.5 rounded-lg text-xs font-semibold dark:text-white/50 text-gray-600 hover:bg-gray-100 dark:hover:bg-white/5 border-none bg-transparent cursor-pointer transition-colors">
                 Abbrechen
               </button>
               <button onClick={handleSave} disabled={isSaving}

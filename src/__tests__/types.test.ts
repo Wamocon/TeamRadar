@@ -26,10 +26,11 @@ describe('STATUS_CONFIG', () => {
   const ALL_STATUSES: AvailabilityStatus[] = [
     'available', 'busy', 'meeting', 'vacation', 'sick', 'remote', 'offline',
     'extern-onsite', 'extern-remote',
+    'home-extern', 'berufsschule', 'buero-berufsschule', 'buero-uni', 'uni',
   ];
 
-  it('enthält alle 9 Status-Typen', () => {
-    expect(Object.keys(STATUS_CONFIG)).toHaveLength(9);
+  it('enthält alle 14 Status-Typen', () => {
+    expect(Object.keys(STATUS_CONFIG)).toHaveLength(14);
     ALL_STATUSES.forEach((status) => {
       expect(STATUS_CONFIG[status]).toBeDefined();
     });
@@ -50,7 +51,7 @@ describe('STATUS_CONFIG', () => {
     expect(STATUS_CONFIG.meeting.label).toBe('Im Meeting');
     expect(STATUS_CONFIG.vacation.label).toBe('Urlaub');
     expect(STATUS_CONFIG.sick.label).toBe('Krank');
-    expect(STATUS_CONFIG.remote.label).toBe('Homeoffice');
+    expect(STATUS_CONFIG.remote.label).toBe('Homeoffice intern');
     expect(STATUS_CONFIG.offline.label).toBe('Kein Status');
   });
 

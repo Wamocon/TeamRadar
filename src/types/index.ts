@@ -8,18 +8,28 @@ export type AvailabilityStatus =
   | 'remote'
   | 'offline'
   | 'extern-onsite'
-  | 'extern-remote';
+  | 'extern-remote'
+  | 'home-extern'        // HeP: Homeoffice externes Projekt
+  | 'berufsschule'       // BS:  Berufschule
+  | 'buero-berufsschule' // BBS: Büro Berufschule
+  | 'buero-uni'          // BU:  Büro Universität
+  | 'uni';               // U:   Universität
 
 export const STATUS_CONFIG: Record<AvailabilityStatus, { label: string; color: string; bgClass: string }> = {
-  available:      { label: 'Verfügbar',    color: '#22c55e', bgClass: 'bg-green-500' },
-  busy:           { label: 'Büro intern',  color: '#6366f1', bgClass: 'bg-indigo-500' },
-  meeting:        { label: 'Im Meeting',   color: '#f59e0b', bgClass: 'bg-amber-500' },
-  vacation:       { label: 'Urlaub',       color: '#8b5cf6', bgClass: 'bg-violet-500' },
-  sick:           { label: 'Krank',        color: '#ec4899', bgClass: 'bg-pink-500' },
-  remote:         { label: 'Homeoffice',   color: '#06b6d4', bgClass: 'bg-cyan-500' },
-  offline:        { label: 'Kein Status',  color: '#6b7280', bgClass: 'bg-gray-500' },
-  'extern-onsite':{ label: 'Ext. Projekt', color: '#f97316', bgClass: 'bg-orange-500' },
-  'extern-remote':{ label: 'Büro ext.',    color: '#fb923c', bgClass: 'bg-orange-400' },
+  available:           { label: 'Verfügbar',              color: '#22c55e', bgClass: 'bg-green-500' },
+  busy:                { label: 'Büro intern',            color: '#6366f1', bgClass: 'bg-indigo-500' },
+  meeting:             { label: 'Im Meeting',             color: '#f59e0b', bgClass: 'bg-amber-500' },
+  vacation:            { label: 'Urlaub',                 color: '#8b5cf6', bgClass: 'bg-violet-500' },
+  sick:                { label: 'Krank',                  color: '#ec4899', bgClass: 'bg-pink-500' },
+  remote:              { label: 'Homeoffice intern',      color: '#06b6d4', bgClass: 'bg-cyan-500' },
+  offline:             { label: 'Kein Status',            color: '#6b7280', bgClass: 'bg-gray-500' },
+  'extern-onsite':     { label: 'Ext. Projekt',           color: '#f97316', bgClass: 'bg-orange-500' },
+  'extern-remote':     { label: 'Büro ext. Projekt',      color: '#fb923c', bgClass: 'bg-orange-400' },
+  'home-extern':       { label: 'Homeoffice ext. Projekt',color: '#0891b2', bgClass: 'bg-cyan-600' },
+  'berufsschule':      { label: 'Berufschule',            color: '#ca8a04', bgClass: 'bg-yellow-600' },
+  'buero-berufsschule':{ label: 'Büro Berufschule',       color: '#a16207', bgClass: 'bg-yellow-700' },
+  'buero-uni':         { label: 'Büro Universität',       color: '#1d4ed8', bgClass: 'bg-blue-700' },
+  'uni':               { label: 'Universität',            color: '#7c3aed', bgClass: 'bg-violet-700' },
 };
 
 /* ── Benutzerrollen ─────────────────────────────────────── */

@@ -40,41 +40,57 @@ type ViewMode = 'overview' | 'projects' | 'entry';
 
 type DayCategory =
   | 'vacation' | 'sick' | 'extern-onsite' | 'extern-remote'
-  | 'intern-onsite' | 'intern-remote' | 'available' | 'weekend' | 'free';
+  | 'intern-onsite' | 'intern-remote' | 'available' | 'weekend' | 'free'
+  | 'home-extern' | 'berufsschule' | 'buero-berufsschule' | 'buero-uni' | 'uni';
 
 const DAY_CATEGORY_CONFIG: Record<DayCategory, { label: string; short: string; color: string; bg: string }> = {
-  vacation:      { label: 'Urlaub',             short: 'U',   color: '#fff',    bg: '#8b5cf6' },
-  sick:          { label: 'Krank',              short: 'K',   color: '#fff',    bg: '#ec4899' },
-  'extern-onsite':{ label: 'Ext. Projekt (eP)', short: 'eP',  color: '#fff',    bg: '#f97316' },
-  'extern-remote':{ label: 'Büro ext. (BeP)',   short: 'BeP', color: '#fff',    bg: '#fb923c' },
-  'intern-onsite':{ label: 'Büro intern (B)',   short: 'B',   color: '#fff',    bg: '#6366f1' },
-  'intern-remote':{ label: 'Homeoffice (H)',    short: 'H',   color: '#fff',    bg: '#06b6d4' },
-  available:     { label: 'Verfügbar',          short: 'V',   color: '#166534', bg: '#bbf7d0' },
-  weekend:       { label: 'Wochenende',         short: '',    color: '#9ca3af', bg: 'rgba(156,163,175,0.1)' },
-  free:          { label: 'Kein Status',        short: '',    color: '#d1d5db', bg: 'transparent' },
+  vacation:           { label: 'Urlaub',                   short: 'U',   color: '#fff',    bg: '#8b5cf6' },
+  sick:               { label: 'Krank',                    short: 'K',   color: '#fff',    bg: '#ec4899' },
+  'extern-onsite':    { label: 'Ext. Projekt (eP)',         short: 'eP',  color: '#fff',    bg: '#f97316' },
+  'extern-remote':    { label: 'Büro ext. Projekt (BeP)',  short: 'BeP', color: '#fff',    bg: '#fb923c' },
+  'intern-onsite':    { label: 'Büro intern (B)',          short: 'B',   color: '#fff',    bg: '#6366f1' },
+  'intern-remote':    { label: 'Homeoffice intern (H)',     short: 'H',   color: '#fff',    bg: '#06b6d4' },
+  available:          { label: 'Verfügbar',                short: 'V',   color: '#166534', bg: '#bbf7d0' },
+  weekend:            { label: 'Wochenende',               short: '',    color: '#9ca3af', bg: 'rgba(156,163,175,0.1)' },
+  free:               { label: 'Kein Status',              short: '',    color: '#d1d5db', bg: 'transparent' },
+  'home-extern':      { label: 'Homeoffice ext. Projekt (HeP)', short: 'HeP', color: '#fff', bg: '#0891b2' },
+  berufsschule:       { label: 'Berufschule (BS)',          short: 'BS',  color: '#fff',    bg: '#ca8a04' },
+  'buero-berufsschule':{ label: 'Büro Berufschule (BBS)',  short: 'BBS', color: '#fff',    bg: '#a16207' },
+  'buero-uni':        { label: 'Büro Universität (BU)',    short: 'BU',  color: '#fff',    bg: '#1d4ed8' },
+  uni:                { label: 'Universität (Uni)',          short: 'Uni', color: '#fff',    bg: '#7c3aed' },
 };
 
 // -- Monats-Statistikspalten ---------------------------------------------------
 interface StatCol { key: string; title: string; color: string; cat: DayCategory | null }
 const MONTH_STATS_COLS: StatCol[] = [
-  { key: 'S',   title: 'Arbeitstage gesamt',       color: '#374151', cat: null },
-  { key: 'eP',  title: 'Ext. Präsenz',             color: '#f97316', cat: 'extern-onsite' },
-  { key: 'BeP', title: 'Ext. HomeOffice',          color: '#fb923c', cat: 'extern-remote' },
-  { key: 'B',   title: 'Büro intern',              color: '#6366f1', cat: 'intern-onsite' },
-  { key: 'H',   title: 'HomeOffice intern',        color: '#06b6d4', cat: 'intern-remote' },
-  { key: 'K',   title: 'Krank',                    color: '#ec4899', cat: 'sick' },
-  { key: 'U',   title: 'Urlaub',                   color: '#8b5cf6', cat: 'vacation' },
+  { key: 'S',   title: 'Arbeitstage gesamt',             color: '#374151', cat: null },
+  { key: 'eP',  title: 'Ext. Präsenz',                  color: '#f97316', cat: 'extern-onsite' },
+  { key: 'BeP', title: 'Ext. HomeOffice',               color: '#fb923c', cat: 'extern-remote' },
+  { key: 'HeP', title: 'Homeoffice ext. Projekt',        color: '#0891b2', cat: 'home-extern' },
+  { key: 'B',   title: 'Büro intern',                   color: '#6366f1', cat: 'intern-onsite' },
+  { key: 'H',   title: 'HomeOffice intern',             color: '#06b6d4', cat: 'intern-remote' },
+  { key: 'BS',  title: 'Berufschule',                   color: '#ca8a04', cat: 'berufsschule' },
+  { key: 'BBS', title: 'Büro Berufschule',              color: '#a16207', cat: 'buero-berufsschule' },
+  { key: 'BU',  title: 'Büro Universität',              color: '#1d4ed8', cat: 'buero-uni' },
+  { key: 'Uni', title: 'Universität',                   color: '#7c3aed', cat: 'uni' },
+  { key: 'K',   title: 'Krank',                         color: '#ec4899', cat: 'sick' },
+  { key: 'U',   title: 'Urlaub',                        color: '#8b5cf6', cat: 'vacation' },
 ];
 
 // Module-level constant – not recreated on every render
 const STATUS_PICKER_OPTIONS: { key: AvailabilityStatus; cat: DayCategory }[] = [
-  { key: 'vacation',      cat: 'vacation' },
-  { key: 'sick',          cat: 'sick' },
-  { key: 'extern-onsite', cat: 'extern-onsite' },
-  { key: 'extern-remote', cat: 'extern-remote' },
-  { key: 'busy',          cat: 'intern-onsite' },
-  { key: 'remote',        cat: 'intern-remote' },
-  { key: 'offline',       cat: 'free' },
+  { key: 'vacation',           cat: 'vacation' },
+  { key: 'sick',               cat: 'sick' },
+  { key: 'extern-onsite',      cat: 'extern-onsite' },
+  { key: 'extern-remote',      cat: 'extern-remote' },
+  { key: 'home-extern',        cat: 'home-extern' },
+  { key: 'busy',               cat: 'intern-onsite' },
+  { key: 'remote',             cat: 'intern-remote' },
+  { key: 'berufsschule',       cat: 'berufsschule' },
+  { key: 'buero-berufsschule', cat: 'buero-berufsschule' },
+  { key: 'buero-uni',          cat: 'buero-uni' },
+  { key: 'uni',                cat: 'uni' },
+  { key: 'offline',            cat: 'free' },
 ];
 
 function getDaysInMonth(year: number, month: number) {
@@ -93,6 +109,9 @@ function formatDateDisplay(dateStr: string) {
 // Unmount/Remount bei jedem State-Update → kein Scroll-Jump mehr
 // -----------------------------------------------------------------------------
 
+// Module-level drag state – kein re-render, kein State
+const _dragState = { active: false };
+
 interface DayCellProps {
   memberId: string; memberEmail: string; memberUserId?: string;
   dateStr: string; category: DayCategory; isWeekend: boolean;
@@ -105,9 +124,10 @@ interface DayCellProps {
   selectMode: boolean;
   isMultiSelected: boolean;
   onMultiToggle: (memberId: string, date: string) => void;
+  onDragAdd: (memberId: string, date: string) => void;
 }
 
-function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, today, quickStatus, canEdit, onSelect, onDeselect, selectMode, isMultiSelected, onMultiToggle }: DayCellProps) {
+function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, today, quickStatus, canEdit, onSelect, onDeselect, selectMode, isMultiSelected, onMultiToggle, onDragAdd }: DayCellProps) {
   const conf = DAY_CATEGORY_CONFIG[category];
   const isToday = dateStr === today;
   const isSelected = quickStatus?.memberId === memberId && quickStatus?.date === dateStr;
@@ -137,10 +157,12 @@ function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, toda
     <td className="text-center relative p-1">
       <button
         disabled={!canEdit}
-        onClick={(e) => {
+        onMouseDown={(e) => {
           if (!canEdit) return;
           e.stopPropagation();
           if (selectMode) {
+            e.preventDefault(); // Kein Textselect beim Drag
+            _dragState.active = true;
             onMultiToggle(memberId, dateStr);
             return;
           }
@@ -150,6 +172,10 @@ function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, toda
             const rect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
             onSelect(memberId, dateStr, rect.left, rect.bottom);
           }
+        }}
+        onMouseEnter={() => {
+          if (!canEdit || !selectMode || !_dragState.active) return;
+          onDragAdd(memberId, dateStr);
         }}
         className={`w-11 h-11 rounded-md flex items-center justify-center text-[11px] font-bold transition-all mx-auto relative ${
           isToday ? 'ring-2 ring-(--primary) ring-offset-1' : ''
@@ -191,9 +217,10 @@ interface MonthMatrixProps {
   multiSelected: Set<string>;
   multiKey: (mId: string, date: string) => string;
   onMultiToggle: (memberId: string, date: string) => void;
+  onDragAdd: (memberId: string, date: string) => void;
 }
 
-function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, today, quickStatus, setQuickStatus, bulkFill, setBulkFill, canEditRow, isCollapsed, onToggleCollapse, selectMode, multiSelected, multiKey, onMultiToggle }: MonthMatrixProps) {
+function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, today, quickStatus, setQuickStatus, bulkFill, setBulkFill, canEditRow, isCollapsed, onToggleCollapse, selectMode, multiSelected, multiKey, onMultiToggle, onDragAdd }: MonthMatrixProps) {
   const { month, days, memberRows } = monthData;
   const isCurrent = month === currentMonth && year === currentYear;
 
@@ -308,6 +335,7 @@ function MonthMatrix({ monthData, year, currentMonth, currentYear, bundesland, t
                       selectMode={selectMode}
                       isMultiSelected={selectMode && multiSelected.has(multiKey(member.id, d.dateStr))}
                       onMultiToggle={onMultiToggle}
+                      onDragAdd={onDragAdd}
                     />
                   ))}
                   {MONTH_STATS_COLS.map((s, i) => {
@@ -507,8 +535,13 @@ export default function YearOverviewPage() {
         setMultiPickerAnchor(null);
       }
     };
+    const stopDrag = () => { _dragState.active = false; };
     if (quickStatus || bulkFill || multiPickerAnchor) document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('mouseup', stopDrag);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('mouseup', stopDrag);
+    };
   }, [quickStatus, bulkFill, multiPickerAnchor]);
 
   // -- getDayCategory ------------------------------------
@@ -521,6 +554,11 @@ export default function YearOverviewPage() {
     if (avail?.status === 'sick') return 'sick';
     if (avail?.status === 'extern-onsite') return 'extern-onsite';
     if (avail?.status === 'extern-remote') return 'extern-remote';
+    if (avail?.status === 'home-extern') return 'home-extern';
+    if (avail?.status === 'berufsschule') return 'berufsschule';
+    if (avail?.status === 'buero-berufsschule') return 'buero-berufsschule';
+    if (avail?.status === 'buero-uni') return 'buero-uni';
+    if (avail?.status === 'uni') return 'uni';
     const isRemote = avail?.status === 'remote';
 
     const dayAllocs = allocations.filter(
@@ -529,7 +567,7 @@ export default function YearOverviewPage() {
     if (dayAllocs.length > 0) {
       const hasExt = dayAllocs.some((a) => projects.find((p) => p.id === a.projectId)?.type === 'external');
       const hasInt = dayAllocs.some((a) => projects.find((p) => p.id === a.projectId)?.type === 'internal');
-      if (hasExt) return isRemote ? 'extern-remote' : 'extern-onsite';
+      if (hasExt) return isRemote ? 'home-extern' : 'extern-onsite';
       if (hasInt) return isRemote ? 'intern-remote' : 'intern-onsite';
     }
     if (avail?.status === 'remote') return 'intern-remote';
@@ -548,6 +586,26 @@ export default function YearOverviewPage() {
     if (userProfile.id && memberUserId && userProfile.id === memberUserId) return true;
     return false;
   }, [userProfile, hasMinRole]);
+
+  // -- filterRowForMine -- "Nur meine" zeigt eigene + Team-Einträge je nach Rolle
+  const myMemberRecord = useMemo(() => members.find(m =>
+    (userProfile?.email && m.email.toLowerCase() === userProfile.email.toLowerCase()) ||
+    (userProfile?.id && m.userId === userProfile.id)
+  ), [members, userProfile]);
+
+  const filterRowForMine = useCallback((row: { member: { id: string; email: string; userId?: string } }) => {
+    // Immer eigene Zeile einschließen
+    if (userProfile?.email && row.member.email.toLowerCase() === userProfile.email.toLowerCase()) return true;
+    if (userProfile?.id && row.member.userId && userProfile.id === row.member.userId) return true;
+    // CIO und Admin: alle Berater sehen
+    if (hasMinRole('cio')) return true;
+    // Abteilungsleiter: eigene Abteilung sehen
+    if (hasMinRole('department_lead') && myMemberRecord?.department) {
+      const fullMember = members.find(m => m.id === row.member.id);
+      return fullMember?.department === myMemberRecord.department;
+    }
+    return false;
+  }, [userProfile, hasMinRole, myMemberRecord, members]);
 
   // -- Yearly matrix data (all 12 months) ---------------
   const yearlyMatrixData = useMemo(() => {
@@ -708,6 +766,17 @@ export default function YearOverviewPage() {
       const next = new Set(prev);
       const k = multiKey(mId, date);
       next.has(k) ? next.delete(k) : next.add(k);
+      return next;
+    });
+  }, []);
+
+  // Drag-to-select: immer hinzufügen (nie entfernen während Drag)
+  const handleDragAdd = useCallback((mId: string, date: string) => {
+    setMultiSelected((prev) => {
+      const k = multiKey(mId, date);
+      if (prev.has(k)) return prev;
+      const next = new Set(prev);
+      next.add(k);
       return next;
     });
   }, []);
@@ -1149,7 +1218,7 @@ export default function YearOverviewPage() {
           <div className="space-y-4">
             {yearlyMatrixData.map((monthData) => {
               const filteredMonthData = showOnlyMine
-                ? { ...monthData, memberRows: monthData.memberRows.filter(row => canEditRow(row.member.email, row.member.userId)) }
+                ? { ...monthData, memberRows: monthData.memberRows.filter(row => filterRowForMine(row)) }
                 : monthData;
               return (
                 <MonthMatrix
@@ -1171,6 +1240,7 @@ export default function YearOverviewPage() {
                   multiSelected={multiSelected}
                   multiKey={multiKey}
                   onMultiToggle={handleMultiToggle}
+                  onDragAdd={handleDragAdd}
                 />
               );
             })}
@@ -1388,6 +1458,7 @@ export default function YearOverviewPage() {
                           selectMode={selectMode}
                           isMultiSelected={selectMode && multiSelected.has(multiKey(member.id, d.dateStr))}
                           onMultiToggle={handleMultiToggle}
+                          onDragAdd={handleDragAdd}
                         />
                       ))}
                       <td className="text-center px-2 font-bold dark:text-white/50 text-gray-600 sticky right-0 bg-white dark:bg-gray-900 z-10 text-[10px]">

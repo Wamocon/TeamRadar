@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import {
@@ -187,7 +187,7 @@ export default function AdminSettingsPage() {
   const [weekStartDay, setWeekStartDay] = useState('1'); // 1=Mo
   const [defaultBundesland, setDefaultBundesland] = useState('BY');
   const [maxVacationDays, setMaxVacationDays] = useState('30');
-  const [vacationCarryoverMonths, setVacationCarryoverMonths] = useState('3');
+
   const [alertOverbookingThreshold, setAlertOverbookingThreshold] = useState('100');
   const [extConsultantWeeklyHours, setExtConsultantWeeklyHours] = useState('40');
 
@@ -612,11 +612,6 @@ export default function AdminSettingsPage() {
                   <div className="space-y-1">
                     <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Max. Urlaubstage / Jahr</label>
                     <input type="number" min={0} max={365} value={maxVacationDays} onChange={e => setMaxVacationDays(e.target.value)}
-                      className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold uppercase tracking-widest dark:text-white/40 text-gray-500">Urlaub-�bertrag (Monate)</label>
-                    <input type="number" min={0} max={12} value={vacationCarryoverMonths} onChange={e => setVacationCarryoverMonths(e.target.value)}
                       className="w-full bg-black/2 dark:bg-white/2 border dark:border-white/10 border-black/10 rounded-xl py-2.5 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-(--primary)" />
                   </div>
                   <div className="space-y-1 col-span-2">

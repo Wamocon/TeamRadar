@@ -91,6 +91,35 @@ export default function ProfileSettingsPage() {
   const [twitter, setTwitter] = useState('');
   const [github, setGithub] = useState('');
 
+  // HR / Vertragsdaten
+  const [employeeNumber, setEmployeeNumber] = useState('');
+  const [costCenter, setCostCenter] = useState('');
+  const [contractType, setContractType] = useState<'fulltime' | 'parttime' | 'freelance' | 'apprentice'>('fulltime');
+  const [probationEndDate, setProbationEndDate] = useState('');
+  const [vacationDaysPerYear, setVacationDaysPerYear] = useState('30');
+  const [remainingVacation, setRemainingVacation] = useState('');
+  const [exitDate, setExitDate] = useState('');
+
+  // Erweiterte Notfallkontakt-Felder
+  const [emergencyName, setEmergencyName] = useState('');
+  const [emergencyPhone, setEmergencyPhone] = useState('');
+  const [emergencyRelation, setEmergencyRelation] = useState('');
+
+  // Heimatadresse
+  const [street, setStreet] = useState('');
+  const [zip, setZip] = useState('');
+  const [city, setCity] = useState('');
+  const [nationality, setNationality] = useState('');
+  const [maritalStatus, setMaritalStatus] = useState('');
+
+  // Kommunikation & Team
+  const [slackHandle, setSlackHandle] = useState('');
+  const [teamsHandle, setTeamsHandle] = useState('');
+  const [preferredProjectTypes, setPreferredProjectTypes] = useState('');
+  const [shiftWillingness, setShiftWillingness] = useState(false);
+  const [mentorName, setMentorName] = useState('');
+  const [internalPhone, setInternalPhone] = useState('');
+
   // Erscheinungsbild
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
   const [compactMode, setCompactMode] = useState(false);
@@ -440,6 +469,137 @@ export default function ProfileSettingsPage() {
                   <div className="space-y-1">
                     <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">X / Twitter</label>
                     <input type="url" value={twitter} onChange={e => setTwitter(e.target.value)} title="Twitter" placeholder="https://x.com/..." className={inputCls} />
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="HR &amp; Vertragsdaten" icon={Building2} defaultOpen={false}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Mitarbeiternummer</label>
+                    <input type="text" value={employeeNumber} onChange={e => setEmployeeNumber(e.target.value)} title="Mitarbeiternummer" placeholder="EMP-001" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Kostenstelle</label>
+                    <input type="text" value={costCenter} onChange={e => setCostCenter(e.target.value)} title="Kostenstelle" placeholder="KST-4200" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Vertragsart</label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {([
+                        { id: 'fulltime', label: 'Vollzeit' }, { id: 'parttime', label: 'Teilzeit' },
+                        { id: 'freelance', label: 'Freelance' }, { id: 'apprentice', label: 'Ausbildung' },
+                      ] as const).map(opt => (
+                        <button key={opt.id} onClick={() => setContractType(opt.id)}
+                          className={`py-1.5 rounded-lg border text-[10px] font-bold transition-all cursor-pointer bg-transparent ${contractType === opt.id ? 'border-(--primary) bg-(--primary-light) text-(--primary)' : 'dark:border-white/10 border-gray-200 dark:text-white/50 text-gray-500'}`}>
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Probezeit bis</label>
+                    <input type="date" value={probationEndDate} onChange={e => setProbationEndDate(e.target.value)} title="Probezeit bis" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Urlaubstage / Jahr</label>
+                    <input type="number" min={0} max={365} value={vacationDaysPerYear} onChange={e => setVacationDaysPerYear(e.target.value)} title="Urlaubstage pro Jahr" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Resturlaub (Tage)</label>
+                    <input type="number" min={0} max={365} value={remainingVacation} onChange={e => setRemainingVacation(e.target.value)} title="Resturlaub" placeholder="0" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Austrittsdatum (optional)</label>
+                    <input type="date" value={exitDate} onChange={e => setExitDate(e.target.value)} title="Austrittsdatum" className={inputCls} />
+                  </div>
+                  <div className="sm:col-span-2 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-700/30 text-[10px] text-blue-700 dark:text-blue-400">
+                    HR-Daten sind nur f&uuml;r Administratoren und die betroffene Person sichtbar.
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Notfallkontakt" icon={Shield} defaultOpen={false}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Name</label>
+                    <input type="text" value={emergencyName} onChange={e => setEmergencyName(e.target.value)} title="Name Notfallkontakt" placeholder="Maria Mustermann" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Beziehung</label>
+                    <input type="text" value={emergencyRelation} onChange={e => setEmergencyRelation(e.target.value)} title="Beziehung" placeholder="Ehefrau, Vater, Freund..." className={inputCls} />
+                  </div>
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Telefon</label>
+                    <div className="relative">
+                      <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 dark:text-white/30 text-gray-400" />
+                      <input type="tel" value={emergencyPhone} onChange={e => setEmergencyPhone(e.target.value)} title="Notfalltelefon" placeholder="+49 123 456789" className={inputCls + ' pl-9'} />
+                    </div>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Heimatadresse" icon={MapPin} defaultOpen={false}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Stra&szlig;e &amp; Hausnummer</label>
+                    <input type="text" value={street} onChange={e => setStreet(e.target.value)} title="Straße" placeholder="Musterstr. 42" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">PLZ</label>
+                    <input type="text" value={zip} onChange={e => setZip(e.target.value)} title="PLZ" placeholder="80331" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Ort</label>
+                    <input type="text" value={city} onChange={e => setCity(e.target.value)} title="Ort" placeholder="M&uuml;nchen" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Staatsangeh&ouml;rigkeit</label>
+                    <input type="text" value={nationality} onChange={e => setNationality(e.target.value)} title="Staatsangehörigkeit" placeholder="Deutsch" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Familienstand</label>
+                    <select value={maritalStatus} onChange={e => setMaritalStatus(e.target.value)} title="Familienstand"
+                      className={inputCls}>
+                      <option value="">Keine Angabe</option>
+                      <option value="single">Ledig</option>
+                      <option value="married">Verheiratet</option>
+                      <option value="divorced">Geschieden</option>
+                      <option value="widowed">Verwitwet</option>
+                      <option value="partnership">Eingetragene Partnerschaft</option>
+                    </select>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard title="Kommunikation &amp; Team" icon={MessageSquare} defaultOpen={false}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Slack-Handle</label>
+                    <input type="text" value={slackHandle} onChange={e => setSlackHandle(e.target.value)} title="Slack" placeholder="@maxmustermann" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">MS Teams-Handle</label>
+                    <input type="text" value={teamsHandle} onChange={e => setTeamsHandle(e.target.value)} title="Teams" placeholder="max.mustermann@firma.de" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Internes Telefon / Durchwahl</label>
+                    <input type="text" value={internalPhone} onChange={e => setInternalPhone(e.target.value)} title="Durchwahl" placeholder="-42" className={inputCls} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Mentor / Buddy</label>
+                    <input type="text" value={mentorName} onChange={e => setMentorName(e.target.value)} title="Mentor" placeholder="Name des Mentors" className={inputCls} />
+                  </div>
+                  <div className="space-y-1 sm:col-span-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest dark:text-white/40 text-gray-500">Bevorzugte Projekttypen</label>
+                    <input type="text" value={preferredProjectTypes} onChange={e => setPreferredProjectTypes(e.target.value)} title="Bevorzugte Projekttypen" placeholder="IT-Beratung, Strategie, Change-Management..." className={inputCls} />
+                  </div>
+                  <div className="sm:col-span-2 flex items-center justify-between py-3 border-t dark:border-white/4 border-black/4">
+                    <div>
+                      <div className="text-sm font-semibold dark:text-white text-gray-900">Schichtbereitschaft</div>
+                      <div className="text-[10px] dark:text-white/30 text-gray-400 mt-0.5">Bereit f&uuml;r fr&uuml;he/sp&auml;te Schichten bei Kundenprojekten</div>
+                    </div>
+                    <Toggle value={shiftWillingness} onChange={setShiftWillingness} />
                   </div>
                 </div>
               </SectionCard>

@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { getHolidays, BUNDESLAENDER, type Bundesland, type Holiday, getHolidayStatesLabel } from '@/lib/holidays';
+import { normalizeAvailabilityStatus } from '@/lib/status-normalization';
 
 const MONTH_NAMES = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 const MONTH_NAMES_LONG = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -554,16 +555,17 @@ export default function YearOverviewPage() {
     if (dow === 0 || dow === 6) return 'weekend';
 
     const avail = [...availabilities].reverse().find((a) => a.memberId === memberId && a.date === dateStr);
-    if (avail?.status === 'vacation') return 'vacation';
-    if (avail?.status === 'sick') return 'sick';
-    if (avail?.status === 'extern-onsite') return 'extern-onsite';
-    if (avail?.status === 'extern-remote') return 'extern-remote';
-    if (avail?.status === 'home-extern') return 'home-extern';
-    if (avail?.status === 'berufsschule') return 'berufsschule';
-    if (avail?.status === 'buero-berufsschule') return 'buero-berufsschule';
-    if (avail?.status === 'buero-uni') return 'buero-uni';
-    if (avail?.status === 'uni') return 'uni';
-    const isRemote = avail?.status === 'remote';
+    const status = avail ? normalizeAvailabilityStatus(avail.status) : undefined;
+    if (status === 'vacation') return 'vacation';
+    if (status === 'sick') return 'sick';
+    if (status === 'extern-onsite') return 'extern-onsite';
+    if (status === 'extern-remote') return 'extern-remote';
+    if (status === 'home-extern') return 'home-extern';
+    if (status === 'berufsschule') return 'berufsschule';
+    if (status === 'buero-berufsschule') return 'buero-berufsschule';
+    if (status === 'buero-uni') return 'buero-uni';
+    if (status === 'uni') return 'uni';
+    const isRemote = status === 'remote';
 
     const dayAllocs = allocations.filter(
       (a) => a.memberId === memberId && a.startDate <= dateStr && a.endDate >= dateStr
@@ -574,9 +576,9 @@ export default function YearOverviewPage() {
       if (hasExt) return isRemote ? 'home-extern' : 'extern-onsite';
       if (hasInt) return isRemote ? 'intern-remote' : 'intern-onsite';
     }
-    if (avail?.status === 'remote') return 'intern-remote';
-    if (avail?.status === 'busy' || avail?.status === 'meeting') return 'intern-onsite';
-    if (avail?.status === 'offline') return 'free';
+    if (status === 'remote') return 'intern-remote';
+    if (status === 'busy' || status === 'meeting') return 'intern-onsite';
+    if (status === 'offline') return 'free';
     return 'free';
   }, [availabilities, allocations, projects]);
 

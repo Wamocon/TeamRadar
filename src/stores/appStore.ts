@@ -544,7 +544,7 @@ export const useAppStore = create<AppStore>()(
 
         // Urlaubs-Konflikt: Hat Allocation während Urlaub/Krank
         const absences = availabilities.filter(
-          (av) => av.memberId === member.id && ['vacation', 'sick'].includes(av.status) && av.date >= today
+          (av) => av.memberId === member.id && ['vacation', 'sick'].includes(normalizeAvailabilityStatus(av.status)) && av.date >= today
         );
         absences.forEach((absence) => {
           const conflicting = allocations.filter(

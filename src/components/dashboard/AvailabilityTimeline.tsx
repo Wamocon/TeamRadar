@@ -52,7 +52,7 @@ export function AvailabilityTimeline({ members, date }: Props) {
                   </div>
                 ) : (
                   memberAvail.map((avail) => {
-                    const config = STATUS_CONFIG[avail.status];
+                    const config = STATUS_CONFIG[avail.status] ?? STATUS_CONFIG['offline'];
                     const startH = avail.startTime
                       ? parseInt(avail.startTime.split(':')[0]) + parseInt(avail.startTime.split(':')[1]) / 60
                       : 8;

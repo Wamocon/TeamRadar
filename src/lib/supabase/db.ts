@@ -4,6 +4,7 @@
  */
 import { createClient } from '@/lib/supabase/client';
 import type { Member, Availability, Team, Project, Allocation, Organization } from '@/types';
+import { normalizeAvailabilityStatus } from '@/lib/status-normalization';
 // Statischer Import: Next.js ersetzt Server Actions im Client-Bundle durch RPC-Stubs.
 // Dynamischer Import (äawait import(...)ä) scheitert in Turbopack und verursacht Lock-Konflikte.
 import { loadAllDataAction } from '@/lib/actions/dataActions';
@@ -51,7 +52,7 @@ function rowToAvailability(row: Record<string, unknown>): Availability {
   return {
     id: row.id as string,
     memberId: row.member_id as string,
-    status: row.status as Availability['status'],
+    status: normalizeAvailabilityStatus(row.status as string),
     date: row.date as string,
     startTime: row.start_time as string | undefined,
     endTime: row.end_time as string | undefined,

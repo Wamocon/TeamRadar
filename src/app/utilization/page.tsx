@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState, useCallback } from 'react';
 import { useAppStore } from '@/stores/appStore';
+import { normalizeAvailabilityStatus } from '@/lib/status-normalization';
 import {
   BarChart3,
   ChevronLeft,
@@ -60,15 +61,16 @@ export default function UtilizationPage() {
 
   function getDayData(memberId: string, dateStr: string): { kind: CellKind; pct: number } {
     const avail = availabilities.find((a) => a.memberId === memberId && a.date === dateStr);
-    if (avail?.status === 'vacation') return { kind: 'vacation', pct: 0 };
-    if (avail?.status === 'sick')     return { kind: 'sick',     pct: 0 };
+    const status = avail ? normalizeAvailabilityStatus(avail.status) : undefined;
+    if (status === 'vacation') return { kind: 'vacation', pct: 0 };
+    if (status === 'sick')     return { kind: 'sick',     pct: 0 };
 
     const pct = getMemberUtilization(memberId, dateStr);
 
     if (pct === 0) {
-      if (avail?.status === 'extern-onsite' || avail?.status === 'extern-remote') return { kind: 'extern', pct: 100 };
-      if (avail?.status === 'busy' || avail?.status === 'meeting')                 return { kind: 'intern', pct: 80  };
-      if (avail?.status === 'remote')                                               return { kind: 'intern', pct: 70  };
+      if (status === 'extern-onsite' || status === 'extern-remote') return { kind: 'extern', pct: 100 };
+      if (status === 'busy' || status === 'meeting')                 return { kind: 'intern', pct: 80  };
+      if (status === 'remote')                                        return { kind: 'intern', pct: 70  };
       return { kind: 'empty', pct: 0 };
     }
 

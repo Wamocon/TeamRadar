@@ -4,6 +4,7 @@ import { useAppStore } from '@/stores/appStore';
 import { ChevronDown, ChevronUp, CalendarRange, MapPin } from 'lucide-react';
 import { getHolidays, BUNDESLAENDER, type Bundesland, type Holiday, getHolidayStatesLabel } from '@/lib/holidays';
 import Link from 'next/link';
+import { normalizeAvailabilityStatus } from '@/lib/status-normalization';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -250,11 +251,12 @@ export function YearAvailabilityPanel() {
     const dow = new Date(dateStr).getDay();
     if (dow === 0 || dow === 6) return 'weekend';
     const avail = [...availabilities].reverse().find((a) => a.memberId === memberId && a.date === dateStr);
-    if (avail?.status === 'vacation') return 'vacation';
-    if (avail?.status === 'sick') return 'sick';
-    if (avail?.status === 'extern-onsite') return 'extern-onsite';
-    if (avail?.status === 'extern-remote') return 'extern-remote';
-    const isRemote = avail?.status === 'remote';
+    const status = avail ? normalizeAvailabilityStatus(avail.status) : undefined;
+    if (status === 'vacation') return 'vacation';
+    if (status === 'sick') return 'sick';
+    if (status === 'extern-onsite') return 'extern-onsite';
+    if (status === 'extern-remote') return 'extern-remote';
+    const isRemote = status === 'remote';
     const dayAllocs = allocations.filter(
       (a) => a.memberId === memberId && a.startDate <= dateStr && a.endDate >= dateStr
     );
@@ -264,9 +266,9 @@ export function YearAvailabilityPanel() {
       if (hasExt) return isRemote ? 'extern-remote' : 'extern-onsite';
       if (hasInt) return isRemote ? 'intern-remote' : 'intern-onsite';
     }
-    if (avail?.status === 'remote') return 'intern-remote';
-    if (avail?.status === 'busy' || avail?.status === 'meeting') return 'intern-onsite';
-    if (avail?.status === 'offline') return 'free';
+    if (status === 'remote') return 'intern-remote';
+    if (status === 'busy' || status === 'meeting') return 'intern-onsite';
+    if (status === 'offline') return 'free';
     return 'free';
   }, [availabilities, allocations, projects]);
 

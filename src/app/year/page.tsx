@@ -173,6 +173,7 @@ function DayCell({ memberId, dateStr, category, isWeekend, dayNum, holiday, toda
             onSelect(memberId, dateStr, rect.left, rect.bottom);
           }
         }}
+        onClick={(e) => e.stopPropagation()}
         onMouseEnter={() => {
           if (!canEdit || !selectMode || !_dragState.active) return;
           onDragAdd(memberId, dateStr);
@@ -833,7 +834,7 @@ export default function YearOverviewPage() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 w-full space-y-5 animate-fade-in" onClick={() => { if (quickStatus) setQuickStatus(null); if (bulkFill) setBulkFill(null); if (multiPickerAnchor) setMultiPickerAnchor(null); }}>
+    <div className="p-4 sm:p-6 w-full space-y-5 animate-fade-in">
 
       {/* -- Quick-Status Picker (fixed, außerhalb jedes overflow-Containers) -- */}
       {quickStatus && (
